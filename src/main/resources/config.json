@@ -1,0 +1,10 @@
+{
+  "bot": {
+    "activity": {
+      "type": "COMPETING",
+      "text": "Prime League",
+      "url": null
+    },
+    "status": "ONLINE"
+  }
+}
