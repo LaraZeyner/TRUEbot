@@ -2,3 +2,5 @@
 /.jpb/
 /src/test/
 /target/
+src/main/resources/connect.json
+src/main/resources/hibernate.cfg.xml
