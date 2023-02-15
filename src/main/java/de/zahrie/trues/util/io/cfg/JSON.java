@@ -22,7 +22,7 @@ public class JSON extends JSONObject {
     }
   }
 
-  public JSON(String source) {
+  private JSON(String source) {
     super(source);
   }
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.models.coverage.match.TournamentMatch;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -51,7 +52,7 @@ public class Group implements Serializable {
 
   @OneToMany(mappedBy = "group")
   @ToString.Exclude
-  private Set<Event> coverages = new LinkedHashSet<>();
+  private Set<TournamentMatch> coverages = new LinkedHashSet<>();
 
   @OneToMany(mappedBy = "routeGroup")
   @ToString.Exclude

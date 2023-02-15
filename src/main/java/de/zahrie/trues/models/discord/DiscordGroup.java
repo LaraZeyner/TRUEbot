@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.models.discord.member.DiscordMember;
 import de.zahrie.trues.models.discord.permission.PermissionPattern;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -73,6 +74,6 @@ public class DiscordGroup implements Serializable {
 
   @OneToMany(mappedBy = "highestGroup")
   @ToString.Exclude
-  private Set<DiscordUser> members = new LinkedHashSet<>();
+  private Set<DiscordMember> members = new LinkedHashSet<>();
 
 }

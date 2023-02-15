@@ -2,7 +2,7 @@ package de.zahrie.trues.handler;
 
 import java.util.Date;
 
-import de.zahrie.trues.riot.Xayah;
+import de.zahrie.trues.api.riot.Xayah;
 import de.zahrie.trues.PrimeData;
 import de.zahrie.trues.util.Const;
 

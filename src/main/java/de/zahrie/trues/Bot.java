@@ -2,7 +2,7 @@ package de.zahrie.trues;
 
 import java.util.Date;
 
-import de.zahrie.trues.dc.Nunu;
+import de.zahrie.trues.api.discord.Nunu;
 import de.zahrie.trues.handler.LoadupManager;
 import de.zahrie.trues.util.logger.Logger;
 

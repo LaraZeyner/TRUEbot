@@ -3,8 +3,8 @@ package de.zahrie.trues.models.betting;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.models.coverage.Event;
-import de.zahrie.trues.models.discord.DiscordUser;
+import de.zahrie.trues.models.coverage.match.Match;
+import de.zahrie.trues.models.discord.member.DiscordMember;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,13 +46,13 @@ public class Bet implements Serializable {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "coverage", nullable = false)
   @ToString.Exclude
-  private Event coverage;
+  private Match coverage;
 
   @ToString.Exclude
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "discord_user", nullable = false)
-  private DiscordUser member;
+  private DiscordMember member;
 
   @Column(name = "bet_outcome", nullable = false, length = 300)
   private String outcome;

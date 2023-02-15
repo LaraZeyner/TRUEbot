@@ -15,6 +15,15 @@ import org.hibernate.Session;
  * Created by Lara on 06.04.2022 for web
  */
 public final class Util {
+
+  public static String between(String text, String start, String end) {
+    int startIndex = text.indexOf(start) + start.length() - 1;
+    int endIndex = text.indexOf(end, startIndex + 1);
+    if (endIndex <= startIndex) {
+      return "";
+    }
+    return text.substring(startIndex + 1, endIndex);
+  }
   public static String uncapitalizeFirst(String str) {
     return str.substring(0, 1).toLowerCase() + str.substring(1);
   }

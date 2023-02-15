@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 
 import de.zahrie.trues.models.community.OrgaTeam;
-import de.zahrie.trues.models.discord.DiscordUser;
+import de.zahrie.trues.models.discord.member.DiscordMember;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,7 +46,7 @@ public class OrgaMember implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "discord_user", nullable = false)
   @ToString.Exclude
-  private DiscordUser member;
+  private DiscordMember member;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "orga_team", nullable = true)

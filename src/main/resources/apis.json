@@ -1,0 +1,23 @@
+{
+  "discord": {
+    "name": "Nunu"
+  },
+  "gamesports": {
+    "name": "Heimerdinger",
+    "endpoints": {
+      "league": "https://www.primeleague.gg/leagues/prm/%s/group/%s/%s",
+      "match": "https://www.primeleague.gg/leagues/matches/%s",
+      "player": "https://www.primeleague.gg/users/%s",
+      "team": "https://www.primeleague.gg/leagues/teams/%s"
+    }
+  },
+  "html": {
+    "name": "Ashe"
+  },
+  "json": {
+    "name": "Ryze"
+  },
+  "riot": {
+    "name": "Xayah"
+  }
+}

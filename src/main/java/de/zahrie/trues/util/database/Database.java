@@ -6,41 +6,46 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import de.zahrie.trues.PrimeData;
 import de.zahrie.trues.models.betting.Bet;
 import de.zahrie.trues.models.calendar.ApplicationCalendar;
+import de.zahrie.trues.models.calendar.RepeatedSchedulingCalendar;
 import de.zahrie.trues.models.calendar.SchedulingCalendar;
 import de.zahrie.trues.models.calendar.TeamCalendar;
 import de.zahrie.trues.models.calendar.UserCalendar;
 import de.zahrie.trues.models.community.OrgaTeam;
 import de.zahrie.trues.models.community.application.OrgaMember;
-import de.zahrie.trues.models.coverage.Event;
 import de.zahrie.trues.models.coverage.Group;
 import de.zahrie.trues.models.coverage.Lineup;
 import de.zahrie.trues.models.coverage.Participator;
 import de.zahrie.trues.models.coverage.Playday;
 import de.zahrie.trues.models.coverage.Stage;
+import de.zahrie.trues.models.coverage.match.Match;
+import de.zahrie.trues.models.coverage.match.PrimeMatch;
+import de.zahrie.trues.models.coverage.match.ScheduleableMatch;
+import de.zahrie.trues.models.coverage.match.Scrimmage;
+import de.zahrie.trues.models.coverage.match.TournamentMatch;
 import de.zahrie.trues.models.coverage.season.BetSeason;
 import de.zahrie.trues.models.coverage.season.PrimeSeason;
 import de.zahrie.trues.models.coverage.season.Season;
 import de.zahrie.trues.models.discord.DiscordChannel;
 import de.zahrie.trues.models.discord.DiscordGroup;
-import de.zahrie.trues.models.discord.DiscordUser;
-import de.zahrie.trues.models.discord.DiscordUserGroup;
+import de.zahrie.trues.models.discord.member.DiscordMember;
+import de.zahrie.trues.models.discord.member.DiscordMemberGroup;
 import de.zahrie.trues.models.discord.permission.ChannelPermissionPattern;
 import de.zahrie.trues.models.discord.permission.CommandPermission;
 import de.zahrie.trues.models.discord.permission.PermissionPattern;
 import de.zahrie.trues.models.logging.OrgaLog;
+import de.zahrie.trues.models.player.Player;
 import de.zahrie.trues.models.riot.Champion;
-import de.zahrie.trues.models.riot.Player;
 import de.zahrie.trues.models.riot.matchhistory.Game;
 import de.zahrie.trues.models.riot.matchhistory.Performance;
 import de.zahrie.trues.models.riot.matchhistory.Selection;
 import de.zahrie.trues.models.riot.matchhistory.TeamPerf;
+import de.zahrie.trues.models.team.PrimeTeam;
 import de.zahrie.trues.models.team.Team;
 import de.zahrie.trues.models.voting.Voting;
 import de.zahrie.trues.models.voting.VotingEntry;
-import de.zahrie.trues.PrimeData;
-import de.zahrie.trues.models.calendar.RepeatedSchedulingCalendar;
 import de.zahrie.trues.util.logger.Logger;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.metamodel.EntityType;
@@ -60,7 +65,6 @@ public final class Database {
 
 
   private static SessionFactory buildSessionFactory() {
-    // Create the SessionFactory from hibernate.cfg.xml
     final Configuration configuration = addClasses(List.of(
         ApplicationCalendar.class,
         Bet.class,
@@ -70,12 +74,12 @@ public final class Database {
         CommandPermission.class,
         DiscordChannel.class,
         DiscordGroup.class,
-        DiscordUser.class,
-        DiscordUserGroup.class,
-        Event.class,
+        DiscordMember.class,
+        DiscordMemberGroup.class,
         Game.class,
         Group.class,
         Lineup.class,
+        Match.class,
         OrgaLog.class,
         OrgaMember.class,
         OrgaTeam.class,
@@ -84,15 +88,20 @@ public final class Database {
         PermissionPattern.class,
         Playday.class,
         Player.class,
+        PrimeMatch.class,
         PrimeSeason.class,
+        PrimeTeam.class,
         RepeatedSchedulingCalendar.class,
+        ScheduleableMatch.class,
         SchedulingCalendar.class,
+        Scrimmage.class,
         Season.class,
         Selection.class,
         Stage.class,
         Team.class,
         TeamCalendar.class,
         TeamPerf.class,
+        TournamentMatch.class,
         UserCalendar.class,
         Voting.class,
         VotingEntry.class
@@ -161,7 +170,7 @@ public final class Database {
   }
 
   public static <T> T find(Class<T> entityClass, long id) {
-    return (T) PrimeData.getInstance().getSession().get(entityClass, id);
+    return PrimeData.getInstance().getSession().get(entityClass, id);
   }
 
   public static <T> T find(Class<T> entityClass, String[] params, Object[] values) {

@@ -3,7 +3,7 @@ package de.zahrie.trues.models.calendar;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.models.discord.DiscordUser;
+import de.zahrie.trues.models.discord.member.DiscordMember;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,6 +32,6 @@ public class UserCalendar extends CalendarBase implements Serializable {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "discord_user")
   @ToString.Exclude
-  private DiscordUser discordUser;
+  private DiscordMember discordMember;
 
 }

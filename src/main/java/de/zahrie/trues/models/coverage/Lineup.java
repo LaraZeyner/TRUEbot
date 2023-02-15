@@ -1,6 +1,6 @@
 package de.zahrie.trues.models.coverage;
 
-import de.zahrie.trues.models.riot.Player;
+import de.zahrie.trues.models.player.Player;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

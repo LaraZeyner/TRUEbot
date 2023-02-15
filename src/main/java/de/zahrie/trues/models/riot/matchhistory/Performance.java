@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 import de.zahrie.trues.models.riot.Champion;
 import de.zahrie.trues.models.riot.Lane;
-import de.zahrie.trues.models.riot.Player;
+import de.zahrie.trues.models.player.Player;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

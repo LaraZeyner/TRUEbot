@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.models.coverage.match.Match;
 import de.zahrie.trues.models.team.Team;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,7 +48,7 @@ public class Participator implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "coverage", nullable = false)
   @ToString.Exclude
-  private Event coverage;
+  private Match coverage;
 
   @Column(name = "first", nullable = false)
   private boolean isFirstPick = false;

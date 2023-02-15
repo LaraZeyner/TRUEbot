@@ -45,13 +45,13 @@
             <artifactId>hibernate-core</artifactId>
             <version>6.2.0.CR2</version>
         </dependency>
-
+<!--
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.3.6.Final</version>
         </dependency>
-
+-->
         <dependency>
             <groupId>com.merakianalytics.orianna</groupId>
             <artifactId>orianna</artifactId>
@@ -62,12 +62,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220320</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.14.3</version>
         </dependency>
     </dependencies>
 

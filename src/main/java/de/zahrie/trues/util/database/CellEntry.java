@@ -1,6 +1,6 @@
 package de.zahrie.trues.util.database;
 
-import de.zahrie.trues.dc.util.cmd.annotations.Column;
+import de.zahrie.trues.api.discord.util.cmd.annotations.Column;
 
 /**
  * Created by Lara on 13.02.2023 for TRUEbot
