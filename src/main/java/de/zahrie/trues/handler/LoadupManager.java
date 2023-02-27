@@ -116,7 +116,6 @@ public class LoadupManager {
     logger.info("Tourney geladen");
 
     // Alle Games mit 3
-    // TODO Lange Ladezeit
     ScheduledGame.findMode(QueueType.CLASH).stream().filter(scheduledGame -> scheduledGame.getTeamsMap().keySet().stream()
         .anyMatch(team -> scheduledGame.getTeamsMap().get(team) > 2)).forEach(RiotGameRequester::loadClashGame);
     ScheduledGame.findMode(QueueType.OTHER).stream().filter(scheduledGame -> scheduledGame.getTeamsMap().keySet().stream()

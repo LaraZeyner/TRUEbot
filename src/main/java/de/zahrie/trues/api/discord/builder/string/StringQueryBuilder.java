@@ -13,7 +13,7 @@ public record StringQueryBuilder(StringCreator creator, DBQuery[] queries) {
 
   public StringCreator build() {
     for (DBQuery query : queries) {
-      final List<Object[]> entries = Database.getData(query.query());
+      final List<Object[]> entries = Database.Find.getData(query.query());
 
       if (!entries.isEmpty()) {
         final var dataHandler = new StringDataHandler(query, entries);

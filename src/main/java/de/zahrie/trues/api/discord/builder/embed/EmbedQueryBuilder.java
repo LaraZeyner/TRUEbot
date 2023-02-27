@@ -15,7 +15,7 @@ public record EmbedQueryBuilder(EmbedCreator creator, DBQuery[] queries) {
 
   public EmbedCreator build() {
     for (DBQuery query : queries) {
-      final List<Object[]> entries = Database.getData(query.query());
+      final List<Object[]> entries = Database.Find.getData(query.query());
 
       if (!handleNoData(query, entries)) {
         handleData(query, entries);

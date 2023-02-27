@@ -45,24 +45,52 @@
             <artifactId>hibernate-core</artifactId>
             <version>6.2.0.CR2</version>
         </dependency>
-<!--
+
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.3.6.Final</version>
-        </dependency>
--->
-        <dependency>
-            <groupId>com.merakianalytics.orianna</groupId>
-            <artifactId>orianna</artifactId>
+            <groupId>com.merakianalytics.datapipelines</groupId>
+            <artifactId>datapipelines</artifactId>
             <version>LATEST</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cache2k</groupId>
+            <artifactId>cache2k-core</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220320</version>
         </dependency>
+
+        <!-- delete later -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

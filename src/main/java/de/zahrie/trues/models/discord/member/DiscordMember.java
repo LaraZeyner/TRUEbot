@@ -9,7 +9,7 @@ import java.util.Set;
 import de.zahrie.trues.models.community.application.OrgaMember;
 import de.zahrie.trues.models.betting.Bet;
 import de.zahrie.trues.models.discord.DiscordGroup;
-import de.zahrie.trues.models.player.Player;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

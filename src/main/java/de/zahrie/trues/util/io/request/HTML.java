@@ -1,10 +1,13 @@
 package de.zahrie.trues.util.io.request;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.util.Util;
+import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Lara on 29.03.2022 for TRUES
@@ -16,67 +19,55 @@ public class HTML {
     this.html = html;
   }
 
-  /*
-  public HTML read(String tagString) {
-    final String[] tags = tagString.split("\\.");
-    String htmlToRead = html;
-    for (String tag : tags) htmlToRead = new HTML(htmlToRead).readTag(tag).toString();
-    return new HTML(htmlToRead);
-  }
-
-  public HTML readTag(String tag) {
-    if (html.contains("<" + tag + ">")) {
-      return new HTML(html.substring(html.indexOf("<" + tag + ">") + tag.length() + 2, html.indexOf("</" + tag + ">")));
-    }
-    return this;
-  }*/
-
-  public HTML findByClass(String tag, String clazz) {
-    final List<HTML> htmlFound = findAllByClass(tag, clazz);
-    return htmlFound.isEmpty() ? new HTML("") : htmlFound.get(0);
-  }
-
-  public HTML findById(String tag, String id) {
-    final List<HTML> htmlFound = findAllById(tag, id);
-    return htmlFound.isEmpty() ? new HTML("") : htmlFound.get(0);
-  }
-
-  public HTML find(String tag) {
+  public HTML find(@NonNull String tag) {
     final List<HTML> htmlFound = findAll(tag);
     return htmlFound.isEmpty() ? new HTML("") : htmlFound.get(0);
   }
 
-  public List<HTML> findAllByClass(String tag, String clazz) {
-    final List<String> split = Arrays.asList(html.split("<" + tag));
-    if (!html.startsWith("<" + tag)) {
-      split.remove(0);
-    }
+  public HTML find(@NonNull String tag, @NonNull String clazz) {
+    final List<HTML> htmlFound = findAll(tag, clazz);
+    return htmlFound.isEmpty() ? new HTML("") : htmlFound.get(0);
+  }
 
+  public HTML findId(@NonNull String tag, @NonNull String id) {
+    final List<HTML> htmlFound = findAllId(tag, id);
+    return htmlFound.isEmpty() ? new HTML("") : htmlFound.get(0);
+  }
+
+  public List<HTML> findAll(@NonNull String tag) {
+    return findTags(tag).stream()
+        .mapToInt(html::indexOf)
+        .mapToObj(index -> html.substring(index - 1 - tag.length(), findClosingIndex(tag, index)))
+        .map(HTML::new).collect(Collectors.toList());
+  }
+
+  public List<HTML> findAll(@NonNull String tag, @NonNull String clazz) {
     return Arrays.stream(html.split("<" + tag))
-        .filter(str -> str.contains("class=\"") && (clazz == null || Util.between(str, "class=\"", "\"").contains(clazz)))
+        .filter(str -> str.contains("class=\"") && Util.between(str, "class=\"", "\"").contains(clazz))
         .mapToInt(html::indexOf)
-        .mapToObj(index -> html.substring(index, findClosingIndex(tag, index))).map(HTML::new).collect(Collectors.toList());
+        .mapToObj(index -> html.substring(index - 1 - tag.length(), findClosingIndex(tag, index)))
+        .map(HTML::new).collect(Collectors.toList());
   }
 
-  public List<HTML> findAll(String tag) {
-    final List<String> split = Arrays.asList(html.split("<" + tag));
-    removeFirstAndLast(tag, split);
-
-    return split.stream()
+  private List<HTML> findAllId(@NonNull String tag, @NonNull String id) {
+    return Arrays.stream(html.split("<" + tag))
+        .filter(str -> str.contains("id=\"") && Util.between(str, "id=\"", "\"").contains(id))
         .mapToInt(html::indexOf)
-        .mapToObj(index -> html.substring(index, findClosingIndex(tag, index))).map(HTML::new).collect(Collectors.toList());
+        .mapToObj(index -> html.substring(index - 1 - tag.length(), findClosingIndex(tag, index))).map(HTML::new).collect(Collectors.toList());
   }
 
-  private void removeFirstAndLast(String tag, List<String> split) {
+
+
+  @NotNull
+  private List<String> findTags(@NonNull String tag) {
+    final List<String> split = new LinkedList<>(Arrays.asList(html.split("<" + tag)));
     if (!html.startsWith("<" + tag)) {
       split.remove(0);
     }
-    if (!html.endsWith("</" + tag + ">")) {
-      split.remove(split.size() - 1);
-    }
+    return split;
   }
 
-  private int findClosingIndex(String tag, int index) {
+  private int findClosingIndex(@NonNull String tag, int index) {
     int opened = 1;
     for (int i = index; i < html.length(); i++) {
       String s = html.substring(i);
@@ -93,23 +84,27 @@ public class HTML {
     return html.length();
   }
 
-  public List<HTML> findAllById(String tag, String id) {
-    return Arrays.stream(html.split("<" + tag))
-        .filter(str -> str.contains("id=\"") && (id == null || Util.between(str, "id=\"", "\"").contains(id)))
-        .mapToInt(html::indexOf)
-        .mapToObj(index -> html.substring(index, findClosingIndex(tag, index))).map(HTML::new).collect(Collectors.toList());
-  }
+
 
   public String text() {
     if (this.html.equals("")) {
       return null;
     }
 
-    String resultString = this.html;
-    while (resultString.contains("<") && resultString.contains("</")) {
-      resultString = Util.between(resultString, ">", "</");
+    StringBuilder output = new StringBuilder();
+    int tagsOpened = 0;
+    for (int i = 0; i < this.html.length(); i++) {
+      if (this.html.startsWith("<", i) && this.html.charAt(i+1) != ' ') {
+        tagsOpened++;
+      }
+      if (tagsOpened == 0) {
+        output.append(this.html.charAt(i));
+      }
+      if (tagsOpened > 0 && this.html.startsWith(">", i) && this.html.charAt(i-1) != ' ') {
+        tagsOpened--;
+      }
     }
-    return resultString;
+    return output.toString();
   }
 
   public List<Attribute> getAttributes() {
@@ -137,7 +132,7 @@ public class HTML {
         .map(str -> new Attribute(str.split("=\"")[0], str.split("=\"")[1].replace("\"", ""))).toList();
   }
 
-  public String getAttribute(String key) {
+  public String getAttribute(@NonNull String key) {
     return getAttributes().stream().filter(attribute -> attribute.key().equalsIgnoreCase(key))
         .map(Attribute::value).findFirst().orElse(null);
   }

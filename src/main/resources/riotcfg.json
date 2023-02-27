@@ -8,162 +8,162 @@
   "pipeline": {
     "elements": [
       {
-        "className": "com.merakianalytics.orianna.datapipeline.InMemoryCache",
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.InMemoryCache",
         "config": {
           "expirationPeriods": {
-            "com.merakianalytics.orianna.types.core.champion.ChampionRotation": {
+            "de.zahrie.trues.api.riot.xayah.types.core.champion.ChampionRotation": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.championmastery.ChampionMastery": {
+            "de.zahrie.trues.api.riot.xayah.types.core.championmastery.ChampionMastery": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.championmastery.ChampionMasteries": {
+            "de.zahrie.trues.api.riot.xayah.types.core.championmastery.ChampionMasteries": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.championmastery.ChampionMasteryScore": {
+            "de.zahrie.trues.api.riot.xayah.types.core.championmastery.ChampionMasteryScore": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Champion": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Champions": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.spectator.CurrentMatch": {
+            "de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch": {
               "period": 5,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.spectator.FeaturedMatches": {
+            "de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatches": {
               "period": 5,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Item": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Items": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Items": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.LanguageStrings": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.LanguageStrings": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Languages": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Languages": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.league.League": {
+            "de.zahrie.trues.api.riot.xayah.types.core.league.League": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.league.LeaguePositions": {
+            "de.zahrie.trues.api.riot.xayah.types.core.league.LeaguePositions": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Map": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Map": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Maps": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Maps": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Mastery": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Mastery": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Masteries": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Masteries": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.match.Match": {
+            "de.zahrie.trues.api.riot.xayah.types.core.match.Match": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Patch": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Patch": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Patches": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Patches": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.ProfileIcon": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.ProfileIcon": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.ProfileIcons": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.ProfileIcons": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Realm": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Realm": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.ReforgedRune": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRune": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.ReforgedRunes": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRunes": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Rune": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Rune": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Runes": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Runes": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.status.ShardStatus": {
+            "de.zahrie.trues.api.riot.xayah.types.core.status.ShardStatus": {
               "period": 15,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.SummonerSpell": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.SummonerSpells": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpells": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.summoner.Summoner": {
+            "de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner": {
               "period": 1,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.match.Timeline": {
+            "de.zahrie.trues.api.riot.xayah.types.core.match.Timeline": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.match.TournamentMatches": {
+            "de.zahrie.trues.api.riot.xayah.types.core.match.TournamentMatches": {
               "period": 6,
               "unit": "HOURS"
             },
-            "com.merakianalytics.orianna.types.core.thirdpartycode.VerificationString": {
+            "de.zahrie.trues.api.riot.xayah.types.core.thirdpartycode.VerificationString": {
               "period": 3,
               "unit": "MINUTES"
             },
-            "com.merakianalytics.orianna.types.core.staticdata.Versions": {
+            "de.zahrie.trues.api.riot.xayah.types.core.staticdata.Versions": {
               "period": 6,
               "unit": "HOURS"
             }
           }
         },
-        "configClassName": "com.merakianalytics.orianna.datapipeline.InMemoryCache$Configuration"
+        "configClassName": "de.zahrie.trues.api.riot.xayah.datapipeline.InMemoryCache$Configuration"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.GhostLoader"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.GhostLoader"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.MerakiAnalyticsCDN",
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.MerakiAnalyticsCDN",
         "config": {
           "host": "cdn.merakianalytics.com",
           "cacheDuration": {
@@ -180,10 +180,10 @@
             "https": true
           }
         },
-        "configClassName": "com.merakianalytics.orianna.datapipeline.MerakiAnalyticsCDN$Configuration"
+        "configClassName": "de.zahrie.trues.api.riot.xayah.datapipeline.MerakiAnalyticsCDN$Configuration"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.DataDragon",
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.DataDragon",
         "config": {
           "cacheDuration": {
             "period": 6,
@@ -199,10 +199,10 @@
             "https": true
           }
         },
-        "configClassName": "com.merakianalytics.orianna.datapipeline.DataDragon$Configuration"
+        "configClassName": "de.zahrie.trues.api.riot.xayah.datapipeline.DataDragon$Configuration"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.riotapi.RiotAPI",
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.RiotAPI",
         "config": {
           "http404Strategy": {
             "type": "RETURN_NULL"
@@ -275,49 +275,49 @@
             "https": true
           },
           "services": [
-            "com.merakianalytics.orianna.datapipeline.riotapi.ChampionAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.ChampionMasteryAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.LeagueAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.MatchAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.SpectatorAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.StatusAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.SummonerAPI",
-            "com.merakianalytics.orianna.datapipeline.riotapi.ThirdPartyCodeAPI"
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.ChampionAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.ChampionMasteryAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.LeagueAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.MatchAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.SpectatorAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.StatusAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.SummonerAPI",
+            "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.ThirdPartyCodeAPI"
           ]
         },
-        "configClassName": "com.merakianalytics.orianna.datapipeline.riotapi.RiotAPI$Configuration"
+        "configClassName": "de.zahrie.trues.api.riot.xayah.datapipeline.riotapi.RiotAPI$Configuration"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.ImageDownloader"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.ImageDownloader"
       }
     ],
     "transformers": [
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.ChampionMasteryTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.ChampionMasteryTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.ChampionTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.ChampionTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.LeagueTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.LeagueTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.MatchTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.MatchTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.SpectatorTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.SpectatorTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.StaticDataTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.StaticDataTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.StatusTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.StatusTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.SummonerTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.SummonerTransformer"
       },
       {
-        "className": "com.merakianalytics.orianna.datapipeline.transformers.dtodata.ThirdPartyCodeTransformer"
+        "className": "de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata.ThirdPartyCodeTransformer"
       }
     ]
   }

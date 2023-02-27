@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot;
 
-import com.merakianalytics.orianna.Orianna;
+import de.zahrie.trues.api.riot.xayah.Orianna;
 import de.zahrie.trues.util.io.cfg.JSON;
 
 /**

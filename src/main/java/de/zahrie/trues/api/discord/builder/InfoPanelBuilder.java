@@ -20,7 +20,7 @@ public record InfoPanelBuilder(String title, String description, DBQuery[] queri
     StringCreator currentStringCreator = null;
 
     for (DBQuery query : queries) {
-      final List<Object[]> entries = Database.getData(query.query());
+      final List<Object[]> entries = Database.Find.getData(query.query());
 
       if (entries.get(0).length > 3) {
         if (currentStringCreator == null) {

@@ -11,7 +11,7 @@ import de.zahrie.trues.api.discord.util.cmd.annotations.Msg;
 import de.zahrie.trues.api.discord.util.cmd.annotations.Option;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.util.Const;
-import de.zahrie.trues.util.Time;
+import de.zahrie.trues.util.util.Time;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Message;
@@ -97,7 +97,7 @@ public abstract class SlashCommand {
       }
     }
     String output = out.toString();
-    output += "zuletzt aktualisiert " + Time.DEFAULT.now();
+    output += "zuletzt aktualisiert " + Time.TimeFormat.DEFAULT.now();
     wrapperStrings.add(output);
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();

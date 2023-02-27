@@ -1,16 +1,13 @@
 package de.zahrie.trues;
 
-import de.zahrie.trues.models.team.Team;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.util.database.DatabaseConnector;
 import de.zahrie.trues.util.logger.Logger;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import lombok.val;
 
-/**
- * Created by Lara on 29.03.2022 for TRUES
- */
 @Getter
 @Setter
 public class PrimeData {
@@ -24,46 +21,18 @@ public class PrimeData {
     return primeData;
   }
 
-  private final Session session;
-  private final Transaction transaction;
   private Team trueTeam;
 
   public PrimeData() {
-    this.session = Database.getSessionFactory().openSession();
-    this.transaction = session.beginTransaction();
+    DatabaseConnector.connect();
   }
 
   private void init() {
     if (this.trueTeam == null) {
-      Logger logger = Logger.getLogger("Init");
-      this.trueTeam = Database.find(Team.class, 142116);
-      logger.info("Gruppe geladen");
-
-      //val season = Season.current();
-      //primeData.setCurrentSeason(season);
-      //primeData.setTrueTeam(team);
-      logger.info("Season geladen");
+      val logger = Logger.getLogger("Init");
+      this.trueTeam = Database.Find.find(Team.class, 142116);
       logger.info("Datenbank geladen");
     }
   }
-
-  public void commit() {
-    transaction.commit();
-    transaction.begin();
-  }
-
-  public void save(Object object) {
-    session.saveOrUpdate(object);
-  }
-
-  public void remove(Object object) {
-    session.remove(object);
-  }
-
-  public void flush() {
-    session.flush();
-  }
-
-  // </editor-fold>
 
 }

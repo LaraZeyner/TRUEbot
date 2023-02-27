@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.zahrie.trues.util.Time;
-import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.util.util.Util;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -55,7 +55,7 @@ public class EmbedCreator {
   }
 
   private void getBaseBuilder() {
-    final String footer = "zuletzt aktualisiert " + Time.DEFAULT.now();
+    final String footer = "zuletzt aktualisiert " + Time.TimeFormat.DEFAULT.now();
     this.currentBuilder = new EmbedBuilder().setFooter(footer);
     this.totalDataLength = footer.length();
 
