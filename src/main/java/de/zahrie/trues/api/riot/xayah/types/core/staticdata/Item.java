@@ -115,121 +115,91 @@ public class Item extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.
         return new Builder(id);
     }
 
-    private final Supplier<SearchableList<Item>> buildsFrom = Suppliers.memoize(new Supplier<SearchableList<Item>>() {
-        @Override
-        public SearchableList<Item> get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getBuildsFrom() == null) {
-                return null;
-            }
-            return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getBuildsFrom()).withPlatform(Platform.withTag(coreData.getPlatform()))
-                .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
+    private final Supplier<SearchableList<Item>> buildsFrom = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getBuildsFrom() == null) {
+            return null;
         }
+        return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getBuildsFrom()).withPlatform(Platform.withTag(coreData.getPlatform()))
+            .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
     });
 
-    private final Supplier<SearchableList<Item>> buildsInto = Suppliers.memoize(new Supplier<SearchableList<Item>>() {
-        @Override
-        public SearchableList<Item> get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getBuildsInto() == null) {
-                return null;
-            }
-            return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getBuildsInto()).withPlatform(Platform.withTag(coreData.getPlatform()))
-                .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
+    private final Supplier<SearchableList<Item>> buildsInto = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getBuildsInto() == null) {
+            return null;
         }
+        return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getBuildsInto()).withPlatform(Platform.withTag(coreData.getPlatform()))
+            .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
     });
 
-    private final Supplier<Map<String, String>> effects = Suppliers.memoize(new Supplier<Map<String, String>>() {
-        @Override
-        public Map<String, String> get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getEffects() == null) {
-                return null;
-            }
-            return Collections.unmodifiableMap(coreData.getEffects());
+    private final Supplier<Map<String, String>> effects = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getEffects() == null) {
+            return null;
         }
+        return Collections.unmodifiableMap(coreData.getEffects());
     });
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<Set<String>> keywords = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getKeywords() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getKeywords());
+    private final Supplier<Set<String>> keywords = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getKeywords() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getKeywords());
     });
 
     private final Supplier<Set<de.zahrie.trues.api.riot.xayah.types.common.Map>> maps = Suppliers.memoize(
-        new Supplier<Set<de.zahrie.trues.api.riot.xayah.types.common.Map>>() {
-            @Override
-            public Set<de.zahrie.trues.api.riot.xayah.types.common.Map> get() {
-                load(ITEM_LOAD_GROUP);
-                if(coreData.getMaps() == null) {
-                    return null;
-                }
-                final Set<de.zahrie.trues.api.riot.xayah.types.common.Map> maps = new HashSet<>();
-                for(final Integer id : coreData.getMaps()) {
-                    maps.add(de.zahrie.trues.api.riot.xayah.types.common.Map.withId(id));
-                }
-                return Collections.unmodifiableSet(maps);
+        () -> {
+            load(ITEM_LOAD_GROUP);
+            if(coreData.getMaps() == null) {
+                return null;
             }
+            final Set<de.zahrie.trues.api.riot.xayah.types.common.Map> maps = new HashSet<>();
+            for(final Integer id : coreData.getMaps()) {
+                maps.add(de.zahrie.trues.api.riot.xayah.types.common.Map.withId(id));
+            }
+            return Collections.unmodifiableSet(maps);
         });
 
-    private final Supplier<Champion> requiredChampion = Suppliers.memoize(new Supplier<Champion>() {
-        @Override
-        public Champion get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getRequiredChampionKey() == null) {
-                return null;
-            }
-            return Champion.withKey(coreData.getRequiredChampionKey()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(coreData.getVersion())
-                .withLocale(coreData.getLocale()).get();
+    private final Supplier<Champion> requiredChampion = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getRequiredChampionKey() == null) {
+            return null;
         }
+        return Champion.withKey(coreData.getRequiredChampionKey()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(coreData.getVersion())
+            .withLocale(coreData.getLocale()).get();
     });
 
-    private final Supplier<ItemStats> stats = Suppliers.memoize(new Supplier<ItemStats>() {
-        @Override
-        public ItemStats get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getStats() == null) {
-                return null;
-            }
-            return new ItemStats(coreData.getStats());
+    private final Supplier<ItemStats> stats = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getStats() == null) {
+            return null;
         }
+        return new ItemStats(coreData.getStats());
     });
 
-    private final Supplier<List<String>> tags = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(ITEM_LOAD_GROUP);
-            if(coreData.getTags() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getTags());
+    private final Supplier<List<String>> tags = Suppliers.memoize(() -> {
+        load(ITEM_LOAD_GROUP);
+        if(coreData.getTags() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getTags());
     });
 
     public Item(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item coreData) {

@@ -240,14 +240,11 @@ public class Champions extends GhostObject.ListProxy<de.zahrie.trues.api.riot.xa
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
     public Champions(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champions coreData) {
@@ -326,13 +323,10 @@ public class Champions extends GhostObject.ListProxy<de.zahrie.trues.api.riot.xa
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion, Champion>() {
-                    @Override
-                    public Champion apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data) {
-                        final Champion champion = new Champion(data);
-                        champion.markAsGhostLoaded(Champion.CHAMPION_LOAD_GROUP);
-                        return champion;
-                    }
+                loadListProxyData(data1 -> {
+                    final Champion champion = new Champion(data1);
+                    champion.markAsGhostLoaded(Champion.CHAMPION_LOAD_GROUP);
+                    return champion;
                 });
                 break;
             default:

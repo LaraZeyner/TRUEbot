@@ -50,7 +50,7 @@ public class MultiRateLimiter implements RateLimiter {
     }
 
     public MultiRateLimiter(final Map<String, ? extends RateLimiter> limiters) {
-        this.limiters = Collections.unmodifiableMap(new HashMap<>(limiters));
+        this.limiters = Map.copyOf(limiters);
     }
 
     public MultiRateLimiter(final RateLimiter... limiters) {

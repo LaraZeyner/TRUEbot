@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -93,14 +92,11 @@ public class LeaguePositions extends GhostObject.ListProxy<LeagueEntry, de.zahri
         return new ManyBuilder(Arrays.asList(summoners));
     }
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getSummonerId() == null) {
-                return null;
-            }
-            return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getSummonerId() == null) {
+            return null;
         }
+        return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public LeaguePositions(final de.zahrie.trues.api.riot.xayah.types.data.league.LeaguePositions coreData) {
@@ -152,12 +148,7 @@ public class LeaguePositions extends GhostObject.ListProxy<LeagueEntry, de.zahri
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry, LeagueEntry>() {
-                    @Override
-                    public LeagueEntry apply(final de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry data) {
-                        return new LeagueEntry(data);
-                    }
-                });
+                loadListProxyData(data1 -> new LeagueEntry(data1));
                 break;
             default:
                 break;

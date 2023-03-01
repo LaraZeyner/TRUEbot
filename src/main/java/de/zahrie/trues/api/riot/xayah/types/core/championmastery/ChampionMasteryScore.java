@@ -36,14 +36,11 @@ public class ChampionMasteryScore extends GhostObject<de.zahrie.trues.api.riot.x
         return new Builder(summoner);
     }
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getSummonerId() == null) {
-                return null;
-            }
-            return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getSummonerId() == null) {
+            return null;
         }
+        return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public ChampionMasteryScore(final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore coreData) {

@@ -10,12 +10,12 @@ import lombok.Getter;
  * Created by Lara on 16.02.2023 for TRUEbot
  */
 @Getter
-public final class PlaydayScheduler {
+public final class PlaydaySchedulerOld {
   private final Calendar start;
   private final Calendar end;
   private final Calendar alternative;
 
-  public PlaydayScheduler(Playday playday, League league) {
+  public PlaydaySchedulerOld(Playday playday, League league) {
     this.start = playday.getStart();
     if (league.getName().equals(Const.Gamesports.STARTER_NAME)) {
       start.add(Calendar.DATE, 1);

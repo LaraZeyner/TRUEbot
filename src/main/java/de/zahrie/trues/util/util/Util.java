@@ -1,6 +1,5 @@
 package de.zahrie.trues.util.util;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -8,9 +7,6 @@ import java.util.Date;
 
 import lombok.NonNull;
 
-/**
- * Created by Lara on 06.04.2022 for web
- */
 public final class Util {
 
   public static String between(String text, String start, String end) {
@@ -51,28 +47,6 @@ public final class Util {
 
   public static String uncapitalizeFirst(String str) {
     return str.substring(0, 1).toLowerCase() + str.substring(1);
-  }
-
-  public static double getDouble(BigDecimal decimal) {
-    return decimal != null ? decimal.doubleValue() : 0;
-  }
-
-  public static double div(double divident, double divisor) {
-    return div(divident, divisor, 0);
-  }
-
-  public static double div(double divident, double divisor, boolean re) {
-    if (re) {
-      return div(divident, divisor, divident);
-    }
-    return div(divident, divisor, 0);
-  }
-
-  public static double div(double divident, double divisor, double result) {
-    if (divisor == 0) {
-      return result;
-    }
-    return divident / divisor;
   }
 
   public static String strip(String text, int length) {
@@ -141,11 +115,6 @@ public final class Util {
 
   public static LocalDateTime getLocalDate(Date dateToConvert) {
     return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-  }
-
-  @SuppressWarnings({"unchecked"})
-  public static <T> T cast(Object obj) {
-    return (T) obj;
   }
 
 }

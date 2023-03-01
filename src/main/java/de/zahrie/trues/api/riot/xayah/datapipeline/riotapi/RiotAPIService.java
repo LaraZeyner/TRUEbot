@@ -765,11 +765,7 @@ public class RiotAPIService extends AbstractDataSource {
         Object lock = applicationRateLimiterLocks.get(platform);
         if(lock == null) {
             synchronized(applicationRateLimiterLocks) {
-                lock = applicationRateLimiterLocks.get(platform);
-                if(lock == null) {
-                    lock = new Object();
-                    applicationRateLimiterLocks.put(platform, lock);
-                }
+              lock = applicationRateLimiterLocks.computeIfAbsent(platform, k -> new Object());
             }
         }
         return lock;
@@ -790,11 +786,7 @@ public class RiotAPIService extends AbstractDataSource {
         Object lock = forPlatform.get(name);
         if(lock == null) {
             synchronized(forPlatform) {
-                lock = forPlatform.get(name);
-                if(lock == null) {
-                    lock = new Object();
-                    forPlatform.put(name, lock);
-                }
+              lock = forPlatform.computeIfAbsent(name, k -> new Object());
             }
         }
 

@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 
-import de.zahrie.trues.api.coverage.stage.Stage;
+import de.zahrie.trues.api.coverage.stage.model.CalibrationStage;
+import de.zahrie.trues.api.coverage.stage.model.SignupStage;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.match.log.LineupMatchLog;
@@ -19,7 +21,7 @@ import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
 import de.zahrie.trues.api.coverage.player.model.Rank;
-import de.zahrie.trues.api.coverage.season.BetSeason;
+import de.zahrie.trues.api.coverage.season.ProfessionalSeason;
 import de.zahrie.trues.api.coverage.season.PrimeSeason;
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
@@ -57,7 +59,8 @@ public class FactoryBuilder {
     final Configuration configuration = addClasses(List.of(
         ApplicationCalendar.class,
         Bet.class,
-        BetSeason.class,
+        ProfessionalSeason.class,
+        CalibrationStage.class,
         Champion.class,
         ChannelPermissionPattern.class,
         CommandPermission.class,
@@ -90,6 +93,7 @@ public class FactoryBuilder {
         Scrimmage.class,
         Season.class,
         Selection.class,
+        SignupStage.class,
         Stage.class,
         Team.class,
         TeamCalendar.class,

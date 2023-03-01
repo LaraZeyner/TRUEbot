@@ -7,7 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import de.zahrie.trues.api.coverage.stage.Stage;
+import de.zahrie.trues.api.coverage.stage.Betable;
+import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
@@ -41,9 +43,12 @@ import lombok.ToString;
                 @Index(name = "season_id", columnList = "season_id", unique = true) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "department", discriminatorType = DiscriminatorType.STRING)
-public class Season implements Serializable {
+public class Season implements Betable, Seasonable, Serializable {
   @Serial
   private static final long serialVersionUID = 3263600626506335102L;
+
+  private final CoverageDepartment coverageDepartment =
+      CoverageDepartment.Scrimmage;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,13 +69,18 @@ public class Season implements Serializable {
   private Set<Stage> stages = new LinkedHashSet<>();
 
   @NonNull
-  public Stage getStageOfId(int id) {
+  public PlayStage getStageOfId(int id) {
     for (Stage stage : this.stages) {
-      if (stage.getPrmId() != null && stage.getPrmId() == id) {
-        return Objects.requireNonNull(stage);
+      final var playStage = (PlayStage) stage;
+      if ((playStage.pageId() == id)) {
+        return Objects.requireNonNull(playStage);
       }
     }
     throw new NullPointerException("Stage cannot be null");
   }
 
+  @Override
+  public CoverageDepartment type() {
+    return null;
+  }
 }

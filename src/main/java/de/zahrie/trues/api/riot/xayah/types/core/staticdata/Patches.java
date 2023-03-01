@@ -148,13 +148,10 @@ public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.ri
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch, Patch>() {
-                    @Override
-                    public Patch apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch data) {
-                        final Patch patch = new Patch(data);
-                        patch.markAsGhostLoaded(Patch.PATCH_LOAD_GROUP);
-                        return patch;
-                    }
+                loadListProxyData(data1 -> {
+                    final Patch patch = new Patch(data1);
+                    patch.markAsGhostLoaded(Patch.PATCH_LOAD_GROUP);
+                    return patch;
                 });
                 break;
             default:

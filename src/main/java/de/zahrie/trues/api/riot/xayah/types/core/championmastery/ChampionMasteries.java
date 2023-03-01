@@ -130,14 +130,11 @@ public class ChampionMasteries extends GhostObject.ListProxy<ChampionMastery, de
         return new ManyBuilder(Arrays.asList(summoners));
     }
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getSummonerId() == null) {
-                return null;
-            }
-            return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getSummonerId() == null) {
+            return null;
         }
+        return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public ChampionMasteries(final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries coreData) {
@@ -189,13 +186,10 @@ public class ChampionMasteries extends GhostObject.ListProxy<ChampionMastery, de
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery, ChampionMastery>() {
-                    @Override
-                    public ChampionMastery apply(final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery data) {
-                        final ChampionMastery mastery = new ChampionMastery(data);
-                        mastery.markAsGhostLoaded(ChampionMastery.CHAMPION_MASTERY_LOAD_GROUP);
-                        return mastery;
-                    }
+                loadListProxyData(data1 -> {
+                    final ChampionMastery mastery = new ChampionMastery(data1);
+                    mastery.markAsGhostLoaded(ChampionMastery.CHAMPION_MASTERY_LOAD_GROUP);
+                    return mastery;
                 });
                 break;
             default:

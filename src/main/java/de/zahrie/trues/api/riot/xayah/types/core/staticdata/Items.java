@@ -226,44 +226,35 @@ public class Items extends GhostObject.ListProxy<Item, de.zahrie.trues.api.riot.
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<List<ItemGroup>> groups = Suppliers.memoize(new Supplier<List<ItemGroup>>() {
-        @Override
-        public List<ItemGroup> get() {
-            load(LIST_PROXY_LOAD_GROUP);
-            if(coreData.getGroups() == null) {
-                return null;
-            }
-            final List<ItemGroup> groups = new ArrayList<>(coreData.getGroups().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemGroup group : coreData.getGroups()) {
-                groups.add(new ItemGroup(group));
-            }
-            return Collections.unmodifiableList(groups);
+    private final Supplier<List<ItemGroup>> groups = Suppliers.memoize(() -> {
+        load(LIST_PROXY_LOAD_GROUP);
+        if(coreData.getGroups() == null) {
+            return null;
         }
+        final List<ItemGroup> groups = new ArrayList<>(coreData.getGroups().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemGroup group : coreData.getGroups()) {
+            groups.add(new ItemGroup(group));
+        }
+        return Collections.unmodifiableList(groups);
     });
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<List<ItemTree>> tree = Suppliers.memoize(new Supplier<List<ItemTree>>() {
-        @Override
-        public List<ItemTree> get() {
-            load(LIST_PROXY_LOAD_GROUP);
-            if(coreData.getTree() == null) {
-                return null;
-            }
-            final List<ItemTree> tree = new ArrayList<>(coreData.getTree().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemTree t : coreData.getTree()) {
-                tree.add(new ItemTree(t));
-            }
-            return Collections.unmodifiableList(tree);
+    private final Supplier<List<ItemTree>> tree = Suppliers.memoize(() -> {
+        load(LIST_PROXY_LOAD_GROUP);
+        if(coreData.getTree() == null) {
+            return null;
         }
+        final List<ItemTree> tree = new ArrayList<>(coreData.getTree().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemTree t : coreData.getTree()) {
+            tree.add(new ItemTree(t));
+        }
+        return Collections.unmodifiableList(tree);
     });
 
     public Items(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Items coreData) {
@@ -343,13 +334,10 @@ public class Items extends GhostObject.ListProxy<Item, de.zahrie.trues.api.riot.
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item, Item>() {
-                    @Override
-                    public Item apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item data) {
-                        final Item item = new Item(data);
-                        item.markAsGhostLoaded(Item.ITEM_LOAD_GROUP);
-                        return item;
-                    }
+                loadListProxyData(data1 -> {
+                    final Item item = new Item(data1);
+                    item.markAsGhostLoaded(Item.ITEM_LOAD_GROUP);
+                    return item;
                 });
                 break;
             default:

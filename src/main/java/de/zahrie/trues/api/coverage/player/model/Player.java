@@ -10,6 +10,7 @@ import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.models.discord.member.DiscordMember;
 import de.zahrie.trues.models.riot.matchhistory.Performance;
+import de.zahrie.trues.util.Const;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -121,7 +122,7 @@ public class Player implements Serializable {
 
   public int getMMR() {
     if (this.rank == null) {
-      return 1300;
+      return Const.PLAYER_MMR_DEFAULT_VALUE;
     }
     return this.rank.getMmr();
   }

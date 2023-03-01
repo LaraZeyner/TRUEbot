@@ -7,14 +7,11 @@ import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 public class ParticipantFrame extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.ParticipantFrame> {
     private static final long serialVersionUID = -8233781937537156206L;
 
-    private final Supplier<Position> position = Suppliers.memoize(new Supplier<Position>() {
-        @Override
-        public Position get() {
-            if(coreData.getPosition() == null) {
-                return null;
-            }
-            return new Position(coreData.getPosition());
+    private final Supplier<Position> position = Suppliers.memoize(() -> {
+        if(coreData.getPosition() == null) {
+            return null;
         }
+        return new Position(coreData.getPosition());
     });
 
     public ParticipantFrame(final de.zahrie.trues.api.riot.xayah.types.data.match.ParticipantFrame coreData) {

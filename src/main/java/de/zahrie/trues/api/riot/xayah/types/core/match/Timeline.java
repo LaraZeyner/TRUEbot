@@ -70,14 +70,11 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
     public class Event extends de.zahrie.trues.api.riot.xayah.types.core.match.Event {
         private static final long serialVersionUID = -245827734492071363L;
 
-        private final Supplier<Item> after = Suppliers.memoize(new Supplier<Item>() {
-            @Override
-            public Item get() {
-                if(coreData.getAfterId() == 0) {
-                    return null;
-                }
-                return Item.withId(coreData.getAfterId()).get();
+        private final Supplier<Item> after = Suppliers.memoize(() -> {
+            if(coreData.getAfterId() == 0) {
+                return null;
             }
+            return Item.withId(coreData.getAfterId()).get();
         });
 
         private final Supplier<SearchableList<Participant>> assistingParticipants = Suppliers.memoize(new Supplier<SearchableList<Participant>>() {
@@ -100,14 +97,11 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
             }
         });
 
-        private final Supplier<Item> before = Suppliers.memoize(new Supplier<Item>() {
-            @Override
-            public Item get() {
-                if(coreData.getBeforeId() == 0) {
-                    return null;
-                }
-                return Item.withId(coreData.getBeforeId()).get();
+        private final Supplier<Item> before = Suppliers.memoize(() -> {
+            if(coreData.getBeforeId() == 0) {
+                return null;
             }
+            return Item.withId(coreData.getBeforeId()).get();
         });
 
         private final Supplier<Participant> creator = Suppliers.memoize(new Supplier<Participant>() {
@@ -126,14 +120,11 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
             }
         });
 
-        private final Supplier<Item> item = Suppliers.memoize(new Supplier<Item>() {
-            @Override
-            public Item get() {
-                if(coreData.getItemId() == 0) {
-                    return null;
-                }
-                return Item.withId(coreData.getItemId()).get();
+        private final Supplier<Item> item = Suppliers.memoize(() -> {
+            if(coreData.getItemId() == 0) {
+                return null;
             }
+            return Item.withId(coreData.getItemId()).get();
         });
 
         private final Supplier<Participant> killer = Suppliers.memoize(new Supplier<Participant>() {
@@ -168,14 +159,11 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
             }
         });
 
-        private final Supplier<Position> position = Suppliers.memoize(new Supplier<Position>() {
-            @Override
-            public Position get() {
-                if(coreData.getPosition() == null) {
-                    return null;
-                }
-                return new Position(coreData.getPosition());
+        private final Supplier<Position> position = Suppliers.memoize(() -> {
+            if(coreData.getPosition() == null) {
+                return null;
             }
+            return new Position(coreData.getPosition());
         });
 
         private final Supplier<Team> team = Suppliers.memoize(new Supplier<Team>() {
@@ -349,12 +337,7 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
         });
 
         public Frame(final de.zahrie.trues.api.riot.xayah.types.data.match.Frame coreData) {
-            super(coreData, new Function<de.zahrie.trues.api.riot.xayah.types.data.match.Event, de.zahrie.trues.api.riot.xayah.types.core.match.Event>() {
-                @Override
-                public de.zahrie.trues.api.riot.xayah.types.core.match.Event apply(final de.zahrie.trues.api.riot.xayah.types.data.match.Event data) {
-                    return new Event(data);
-                }
-            });
+            super(coreData, data -> new Event(data));
         }
 
         @Override
@@ -374,14 +357,11 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
         return new Builder(id);
     }
 
-    private final Supplier<Match> match = Suppliers.memoize(new Supplier<Match>() {
-        @Override
-        public Match get() {
-            if(coreData.getId() == 0L) {
-                return null;
-            }
-            return Match.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Match> match = Suppliers.memoize(() -> {
+        if(coreData.getId() == 0L) {
+            return null;
         }
+        return Match.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public Timeline(final de.zahrie.trues.api.riot.xayah.types.data.match.Timeline coreData) {
@@ -439,12 +419,7 @@ public class Timeline extends GhostObject.ListProxy<Frame, de.zahrie.trues.api.r
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.match.Frame, de.zahrie.trues.api.riot.xayah.types.core.match.Frame>() {
-                    @Override
-                    public de.zahrie.trues.api.riot.xayah.types.core.match.Frame apply(final de.zahrie.trues.api.riot.xayah.types.data.match.Frame data) {
-                        return new Frame(data);
-                    }
-                });
+                loadListProxyData(data1 -> new Frame(data1));
                 break;
             default:
                 break;

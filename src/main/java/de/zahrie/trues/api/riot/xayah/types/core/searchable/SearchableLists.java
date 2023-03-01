@@ -79,23 +79,12 @@ public abstract class SearchableLists {
 
         @Override
         public void delete(final Object item) {
-            delete(new Predicate<T>() {
-                @Override
-                public boolean apply(final T element) {
-                    return contains(element, item);
-                }
-            });
+            delete(element -> contains(element, item));
         }
 
         @Override
         public void delete(final Predicate<T> predicate) {
-            final Iterator<T> iterator = list.iterator();
-            while(iterator.hasNext()) {
-                final T element = iterator.next();
-                if(predicate.apply(element)) {
-                    iterator.remove();
-                }
-            }
+          list.removeIf(predicate::apply);
         }
 
         @Override
@@ -179,12 +168,7 @@ public abstract class SearchableLists {
 
         @Override
         public T find(final Object item) {
-            return find(new Predicate<T>() {
-                @Override
-                public boolean apply(final T element) {
-                    return contains(element, item);
-                }
-            });
+            return find(element -> contains(element, item));
         }
 
         @Override
@@ -268,12 +252,7 @@ public abstract class SearchableLists {
 
         @Override
         public SearchableList<T> search(final Object item, final boolean streaming) {
-            return filter(new Predicate<T>() {
-                @Override
-                public boolean apply(final T element) {
-                    return contains(element, item);
-                }
-            }, streaming);
+            return filter(element -> contains(element, item), streaming);
         }
 
         @Override

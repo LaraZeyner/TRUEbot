@@ -14,38 +14,29 @@ import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 public class LeagueEntry extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry> implements Comparable<LeagueEntry> {
     private static final long serialVersionUID = -8320702451565649681L;
 
-    private final Supplier<League> league = Suppliers.memoize(new Supplier<League>() {
-        @Override
-        public League get() {
-            if(coreData.getLeagueId() == null) {
-                return null;
-            }
-            return League.withId(coreData.getLeagueId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<League> league = Suppliers.memoize(() -> {
+        if(coreData.getLeagueId() == null) {
+            return null;
         }
+        return League.withId(coreData.getLeagueId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
-    private final Supplier<Series> promos = Suppliers.memoize(new Supplier<Series>() {
-        @Override
-        public Series get() {
-            if(coreData.getPromos() == null) {
-                return null;
-            }
-            return new Series(coreData.getPromos());
+    private final Supplier<Series> promos = Suppliers.memoize(() -> {
+        if(coreData.getPromos() == null) {
+            return null;
         }
+        return new Series(coreData.getPromos());
     });
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getSummonerId() == null) {
-                return null;
-            }
-            final Summoner summoner = Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
-            if(summoner.getCoreData().getName() == null) {
-                summoner.getCoreData().setName(coreData.getSummonerName());
-            }
-            return summoner;
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getSummonerId() == null) {
+            return null;
         }
+        final Summoner summoner = Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+        if(summoner.getCoreData().getName() == null) {
+            summoner.getCoreData().setName(coreData.getSummonerName());
+        }
+        return summoner;
     });
 
     public LeagueEntry(final de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry coreData) {

@@ -113,47 +113,35 @@ public class Rune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.
         return new Builder(id);
     }
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(RUNE_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(RUNE_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<RuneStats> stats = Suppliers.memoize(new Supplier<RuneStats>() {
-        @Override
-        public RuneStats get() {
-            load(RUNE_LOAD_GROUP);
-            if(coreData.getStats() == null) {
-                return null;
-            }
-            return new RuneStats(coreData.getStats());
+    private final Supplier<RuneStats> stats = Suppliers.memoize(() -> {
+        load(RUNE_LOAD_GROUP);
+        if(coreData.getStats() == null) {
+            return null;
         }
+        return new RuneStats(coreData.getStats());
     });
 
-    private final Supplier<List<String>> tags = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(RUNE_LOAD_GROUP);
-            if(coreData.getTags() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getTags());
+    private final Supplier<List<String>> tags = Suppliers.memoize(() -> {
+        load(RUNE_LOAD_GROUP);
+        if(coreData.getTags() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getTags());
     });
 
     public Rune(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune coreData) {

@@ -6,6 +6,8 @@ import java.util.Calendar;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.coverage.playday.config.AbstractTimeRange;
+import de.zahrie.trues.util.util.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -24,7 +26,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @DiscriminatorValue("intern")
-public class ScheduleableMatch extends TournamentMatch implements Serializable {
+public class ScheduleableMatch extends TournamentMatch implements Serializable, AbstractTimeRange {
   @Serial
   private static final long serialVersionUID = -2453759856557325436L;
 
@@ -36,9 +38,20 @@ public class ScheduleableMatch extends TournamentMatch implements Serializable {
   @Column(name = "scheduling_end")
   private Calendar schedulingEnd;
 
+  @Override
+  public Time start() {
+    return new Time(schedulingStart);
+  }
+
+  @Override
+  public Time end() {
+    return new Time(schedulingEnd);
+  }
+
   public ScheduleableMatch(Playday matchday, Calendar start, League league, Calendar schedulingStart, Calendar schedulingEnd) {
     super(matchday, start, league);
     this.schedulingStart = schedulingStart;
     this.schedulingEnd = schedulingEnd;
   }
+
 }

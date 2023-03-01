@@ -155,12 +155,7 @@ public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zah
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatch, FeaturedMatch>() {
-                    @Override
-                    public FeaturedMatch apply(final de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatch data) {
-                        return new FeaturedMatch(data);
-                    }
-                });
+                loadListProxyData(data1 -> new FeaturedMatch(data1));
                 break;
             default:
                 break;

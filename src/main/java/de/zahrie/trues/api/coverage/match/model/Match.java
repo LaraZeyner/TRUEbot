@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
+import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.models.betting.Bet;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
@@ -45,7 +46,7 @@ import org.hibernate.annotations.DiscriminatorFormula;
 @Table(name = "coverage",
         indexes = { @Index(name = "idx_coverage", columnList = "match_id", unique = true) })
 @DiscriminatorFormula("IF(coverage_group IS NULL, 'scrimmage', IF(scheduling_start IS NULL, 'bet', IF(match_id IS NULL, 'intern', 'prm')))")
-public class Match implements Serializable {
+public class Match implements Betable, Serializable {
   @Serial
   private static final long serialVersionUID = -3826796156374823894L;
 

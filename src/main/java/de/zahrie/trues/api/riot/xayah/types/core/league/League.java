@@ -1,9 +1,8 @@
 package de.zahrie.trues.api.riot.xayah.types.core.league;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.Orianna;
 import de.zahrie.trues.api.riot.xayah.types.common.Platform;
@@ -14,7 +13,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry, de.zahrie.trues.api.riot.xayah.types.data.league.League> {
-    public static class Builder {
+    public static final class Builder {
         private final String id;
         private Platform platform;
 
@@ -47,8 +46,8 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
         }
     }
 
-    public static class SelectBuilder {
-        public class SubBuilder {
+    public static final class SelectBuilder {
+        public final class SubBuilder {
             private Platform platform;
             private final Queue queue;
 
@@ -92,7 +91,7 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
             if(!Queue.RANKED.contains(queue)) {
                 final StringBuilder sb = new StringBuilder();
                 for(final Queue q : Queue.RANKED) {
-                    sb.append(", " + q);
+                    sb.append(", ").append(q);
                 }
                 throw new IllegalArgumentException("Queue must be one of [" + sb.substring(2) + "]!");
             }
@@ -100,6 +99,7 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -4287829961173669465L;
 
     public static SelectBuilder.SubBuilder challengerInQueue(final Queue queue) {
@@ -140,9 +140,7 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     @Searchable({String.class})
@@ -178,35 +176,26 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
     @Override
     protected void loadCoreData(final String group) {
         ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getId() != null) {
-                    builder.put("leagueId", coreData.getId());
-                }
-                if(coreData.getTier() != null) {
-                    builder.put("tier", Tier.valueOf(coreData.getTier()));
-                }
-                if(coreData.getQueue() != null) {
-                    builder.put("queue", Queue.withTag(coreData.getQueue()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.league.League data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.league.League.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry, LeagueEntry>() {
-                    @Override
-                    public LeagueEntry apply(final de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry data) {
-                        return new LeagueEntry(data);
-                    }
-                });
-                break;
-            default:
-                break;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getId() != null) {
+          builder.put("leagueId", coreData.getId());
+        }
+        if (coreData.getTier() != null) {
+          builder.put("tier", Tier.valueOf(coreData.getTier()));
+        }
+        if (coreData.getQueue() != null) {
+          builder.put("queue", Queue.withTag(coreData.getQueue()));
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.league.League data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.league.League.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(LeagueEntry::new);
+      }
     }
 }

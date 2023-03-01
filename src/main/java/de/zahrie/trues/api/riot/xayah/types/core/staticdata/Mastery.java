@@ -112,59 +112,44 @@ public class Mastery extends GhostObject<de.zahrie.trues.api.riot.xayah.types.da
         return new Builder(id);
     }
 
-    private final Supplier<List<String>> descriptions = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(MASTERY_LOAD_GROUP);
-            if(coreData.getDescriptions() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getDescriptions());
+    private final Supplier<List<String>> descriptions = Suppliers.memoize(() -> {
+        load(MASTERY_LOAD_GROUP);
+        if(coreData.getDescriptions() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getDescriptions());
     });
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(MASTERY_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(MASTERY_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<Mastery> prerequisite = Suppliers.memoize(new Supplier<Mastery>() {
-        @Override
-        public Mastery get() {
-            load(MASTERY_LOAD_GROUP);
-            if(coreData.getPrerequisite() == 0) {
-                return null;
-            }
-            return Mastery.withId(coreData.getPrerequisite()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(coreData.getVersion())
-                .withLocale(coreData.getLocale()).get();
+    private final Supplier<Mastery> prerequisite = Suppliers.memoize(() -> {
+        load(MASTERY_LOAD_GROUP);
+        if(coreData.getPrerequisite() == 0) {
+            return null;
         }
+        return Mastery.withId(coreData.getPrerequisite()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(coreData.getVersion())
+            .withLocale(coreData.getLocale()).get();
     });
 
-    private final Supplier<List<String>> sanitizedDescriptions = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(MASTERY_LOAD_GROUP);
-            if(coreData.getSanitizedDescriptions() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getSanitizedDescriptions());
+    private final Supplier<List<String>> sanitizedDescriptions = Suppliers.memoize(() -> {
+        load(MASTERY_LOAD_GROUP);
+        if(coreData.getSanitizedDescriptions() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getSanitizedDescriptions());
     });
 
     public Mastery(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery coreData) {

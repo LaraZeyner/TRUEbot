@@ -281,7 +281,7 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
 
         public MapProxy(final P coreData, final Map<K, V> data) {
             super(coreData);
-            this.data = Collections.unmodifiableMap(new HashMap<>(data));
+            this.data = Map.copyOf(data);
         }
 
         @Override

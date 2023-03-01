@@ -14,25 +14,19 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Versions;
 public class RuneStats extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.RuneStats> {
     private static final long serialVersionUID = 3663530937677122757L;
 
-    private final Supplier<ReforgedRune> rune = Suppliers.memoize(new Supplier<ReforgedRune>() {
-        @Override
-        public ReforgedRune get() {
-            if(coreData.getId() == 0) {
-                return null;
-            }
-            final String version = Versions.withPlatform(Platform.withTag(coreData.getPlatform())).get().getBestMatch(coreData.getVersion());
-            return ReforgedRune.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(version).get();
+    private final Supplier<ReforgedRune> rune = Suppliers.memoize(() -> {
+        if(coreData.getId() == 0) {
+            return null;
         }
+        final String version = Versions.withPlatform(Platform.withTag(coreData.getPlatform())).get().getBestMatch(coreData.getVersion());
+        return ReforgedRune.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(version).get();
     });
 
-    private final Supplier<List<Integer>> variables = Suppliers.memoize(new Supplier<List<Integer>>() {
-        @Override
-        public List<Integer> get() {
-            if(coreData.getVariables() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getVariables());
+    private final Supplier<List<Integer>> variables = Suppliers.memoize(() -> {
+        if(coreData.getVariables() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getVariables());
     });
 
     public RuneStats(final de.zahrie.trues.api.riot.xayah.types.data.match.RuneStats coreData) {

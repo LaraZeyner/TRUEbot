@@ -227,14 +227,11 @@ public class Runes extends GhostObject.ListProxy<Rune, de.zahrie.trues.api.riot.
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
     public Runes(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Runes coreData) {
@@ -306,13 +303,10 @@ public class Runes extends GhostObject.ListProxy<Rune, de.zahrie.trues.api.riot.
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune, Rune>() {
-                    @Override
-                    public Rune apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune data) {
-                        final Rune rune = new Rune(data);
-                        rune.markAsGhostLoaded(Rune.RUNE_LOAD_GROUP);
-                        return rune;
-                    }
+                loadListProxyData(data1 -> {
+                    final Rune rune = new Rune(data1);
+                    rune.markAsGhostLoaded(Rune.RUNE_LOAD_GROUP);
+                    return rune;
                 });
                 break;
             default:

@@ -1,20 +1,45 @@
 package de.zahrie.trues.api.coverage.team.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.models.Standing;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Embeddable
 @Getter
-class TeamScore extends TeamRecord implements Serializable, Comparable<TeamScore> {
-  private int place;
+class TeamScore implements Serializable, Comparable<TeamScore> {
+  @Serial
+  private static final long serialVersionUID = -4937687342237956160L;
 
-  public TeamScore(int place, int wins, int losses) {
-    super(wins, losses);
-    this.place = place;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "division")
+  @ToString.Exclude
+  private League league;
+
+  @Column(name = "current_place")
+  private short place;
+
+  @Column(name = "current_wins")
+  private short wins;
+
+  @Column(name = "current_losses")
+  private short losses;
+
+  public Standing getStanding() {
+    return new Standing(wins, losses);
   }
 
   TeamDestination getDestination() {
@@ -32,9 +57,12 @@ class TeamScore extends TeamRecord implements Serializable, Comparable<TeamScore
     return this.place + ". (" + this.getWins() + "/" + this.getLosses() + ")";
   }
 
+  private long compareScore() {
+    return (10 - league.getTier() * 100_000L) + (1000 - this.place) * 100 + Math.round(getStanding().getWinrate().getRate() * 100);
+  }
+
   @Override
   public int compareTo(TeamScore o) {
-    return (this.place + Math.round(this.getWinrate() * 100) / 100) -
-           (o.place + Math.round(o.getWinrate() * 100) / 100);
+    return (int) (compareScore() - o.compareScore());
   }
 }

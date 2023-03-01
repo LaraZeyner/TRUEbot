@@ -62,28 +62,22 @@ public class ChampionRotation extends GhostObject<de.zahrie.trues.api.riot.xayah
         return new Builder().withRegion(region);
     }
 
-    private final Supplier<SearchableList<Champion>> freeChampions = Suppliers.memoize(new Supplier<SearchableList<Champion>>() {
-        @Override
-        public SearchableList<Champion> get() {
-            load(CHAMPION_ROTATION_LOAD_GROUP);
-            if(coreData.getFreeChampionIds() == null) {
-                return null;
-            }
-            return SearchableLists
-                .unmodifiableFrom(Champions.withIds(coreData.getFreeChampionIds()).withPlatform(Platform.withTag(coreData.getPlatform())).get());
+    private final Supplier<SearchableList<Champion>> freeChampions = Suppliers.memoize(() -> {
+        load(CHAMPION_ROTATION_LOAD_GROUP);
+        if(coreData.getFreeChampionIds() == null) {
+            return null;
         }
+        return SearchableLists
+            .unmodifiableFrom(Champions.withIds(coreData.getFreeChampionIds()).withPlatform(Platform.withTag(coreData.getPlatform())).get());
     });
 
-    private final Supplier<SearchableList<Champion>> freeChampionsForNewPlayers = Suppliers.memoize(new Supplier<SearchableList<Champion>>() {
-        @Override
-        public SearchableList<Champion> get() {
-            load(CHAMPION_ROTATION_LOAD_GROUP);
-            if(coreData.getFreeChampionIdsForNewPlayers() == null) {
-                return null;
-            }
-            return SearchableLists
-                .unmodifiableFrom(Champions.withIds(coreData.getFreeChampionIdsForNewPlayers()).withPlatform(Platform.withTag(coreData.getPlatform())).get());
+    private final Supplier<SearchableList<Champion>> freeChampionsForNewPlayers = Suppliers.memoize(() -> {
+        load(CHAMPION_ROTATION_LOAD_GROUP);
+        if(coreData.getFreeChampionIdsForNewPlayers() == null) {
+            return null;
         }
+        return SearchableLists
+            .unmodifiableFrom(Champions.withIds(coreData.getFreeChampionIdsForNewPlayers()).withPlatform(Platform.withTag(coreData.getPlatform())).get());
     });
 
     public ChampionRotation(final de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation coreData) {

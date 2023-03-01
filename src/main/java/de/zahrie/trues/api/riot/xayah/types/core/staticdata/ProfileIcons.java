@@ -225,13 +225,10 @@ public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.t
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon, ProfileIcon>() {
-                    @Override
-                    public ProfileIcon apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon data) {
-                        final ProfileIcon icon = new ProfileIcon(data);
-                        icon.markAsGhostLoaded(ProfileIcon.PROFILE_ICON_LOAD_GROUP);
-                        return icon;
-                    }
+                loadListProxyData(data1 -> {
+                    final ProfileIcon icon = new ProfileIcon(data1);
+                    icon.markAsGhostLoaded(ProfileIcon.PROFILE_ICON_LOAD_GROUP);
+                    return icon;
                 });
                 break;
             default:

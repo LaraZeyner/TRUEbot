@@ -45,9 +45,8 @@ public class EmbedCreator {
     this.color = color;
   }
 
-  public EmbedCreator add(String name, String value, boolean inline) {
+  public void add(String name, String value, boolean inline) {
     this.data.add(new EmbedColumn(name, value, inline));
-    return this;
   }
 
   public List<MessageEmbed> build() {

@@ -211,15 +211,12 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
 
     private final Object batchLoadLock = new Object();
 
-    private final Supplier<Set<Champion>> champions = Suppliers.memoize(new Supplier<Set<Champion>>() {
-        @Override
-        public Set<Champion> get() {
-            if(coreData.getChampions() == null) {
-                return null;
-            }
-            return Collections
-                .unmodifiableSet(new HashSet<>(Champions.withIds(coreData.getChampions()).withPlatform(Platform.withTag(coreData.getPlatform())).get()));
+    private final Supplier<Set<Champion>> champions = Suppliers.memoize(() -> {
+        if(coreData.getChampions() == null) {
+            return null;
         }
+        return Collections
+            .unmodifiableSet(new HashSet<>(Champions.withIds(coreData.getChampions()).withPlatform(Platform.withTag(coreData.getPlatform())).get()));
     });
 
     private boolean complete = false;
@@ -227,44 +224,35 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
     private final SearchableList<Match> matches;
     private ListIterator<MatchReference> matchIterator = coreData.listIterator();
 
-    private final Supplier<Set<Queue>> queues = Suppliers.memoize(new Supplier<Set<Queue>>() {
-        @Override
-        public Set<Queue> get() {
-            if(coreData.getQueues() == null) {
-                return null;
-            }
-            final Set<Queue> queues = new HashSet<>();
-            for(final Integer id : coreData.getQueues()) {
-                queues.add(Queue.withId(id));
-            }
-            return Collections.unmodifiableSet(queues);
+    private final Supplier<Set<Queue>> queues = Suppliers.memoize(() -> {
+        if(coreData.getQueues() == null) {
+            return null;
         }
+        final Set<Queue> queues = new HashSet<>();
+        for(final Integer id : coreData.getQueues()) {
+            queues.add(Queue.withId(id));
+        }
+        return Collections.unmodifiableSet(queues);
     });
 
-    private final Supplier<Set<Season>> seasons = Suppliers.memoize(new Supplier<Set<Season>>() {
-        @Override
-        public Set<Season> get() {
-            if(coreData.getSeasons() == null) {
-                return null;
-            }
-            final Set<Season> seasons = new HashSet<>();
-            for(final Integer id : coreData.getSeasons()) {
-                seasons.add(Season.withId(id));
-            }
-            return Collections.unmodifiableSet(seasons);
+    private final Supplier<Set<Season>> seasons = Suppliers.memoize(() -> {
+        if(coreData.getSeasons() == null) {
+            return null;
         }
+        final Set<Season> seasons = new HashSet<>();
+        for(final Integer id : coreData.getSeasons()) {
+            seasons.add(Season.withId(id));
+        }
+        return Collections.unmodifiableSet(seasons);
     });
 
     private Integer startIndex;
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getAccountId() == null) {
-                return null;
-            }
-            return Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getAccountId() == null) {
+            return null;
         }
+        return Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public MatchHistory(final MatchList coreData) {

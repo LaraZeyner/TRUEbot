@@ -22,7 +22,7 @@ public class StringCreator {
 
   private int lengthRemaining = Const.DISCORD_MESSAGE_MAX_CHARACTERS;
 
-  private List<String> builders = new ArrayList<>();
+  private final List<String> builders = new ArrayList<>();
 
   public StringCreator(boolean enumerated, String title, String description) {
     this.enumerated = enumerated;
@@ -30,22 +30,21 @@ public class StringCreator {
     this.description = description;
   }
 
-  public StringCreator add(String row) {
+  public void add(String row) {
     this.data.add(row);
-    return this;
   }
 
   public List<String> build() {
-    String builder = "**" + this.title + "**";
+    StringBuilder builder = new StringBuilder("**" + this.title + "**");
     if (this.description != null) {
-      builder += "\n__" + this.description + "__";
+      builder.append("\n__").append(this.description).append("__");
     }
-    builder += "\n\n";
+    builder.append("\n\n");
 
     if (this.data.isEmpty()) {
       return List.of("keine Daten");
     }
-    builder += data.get(0) + "\n" + data.get(1) + "\n";
+    builder.append(data.get(0)).append("\n").append(data.get(1)).append("\n");
 
     lengthRemaining -= builder.length();
     for (int i = 0; i < (enumerated ? data.size() / 5 : data.size()); i++) {
@@ -54,16 +53,16 @@ public class StringCreator {
       final String stripped = String.join("\n", data.subList(start, end));
       lengthRemaining -= stripped.length();
       if (lengthRemaining >= 0) {
-        builder += stripped;
+        builder.append(stripped);
       } else {
-        this.builders.add(builder);
-        builder = stripped;
+        this.builders.add(builder.toString());
+        builder = new StringBuilder(stripped);
       }
       if (end == data.size()) {
         break;
       }
     }
-    this.builders.add(builder);
+    this.builders.add(builder.toString());
     return this.builders;
   }
 

@@ -6,6 +6,7 @@ import java.util.Calendar;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.coverage.stage.Betable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -22,9 +23,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("prm")
 @NamedQuery(name = "PrimeMatch.fromMatchId", query = "FROM PrimeMatch WHERE matchId = :matchId")
-public class PrimeMatch extends ScheduleableMatch implements Serializable {
+public class PrimeMatch extends ScheduleableMatch implements Betable, Serializable {
   @Serial
   private static final long serialVersionUID = -6145053153275706756L;
 

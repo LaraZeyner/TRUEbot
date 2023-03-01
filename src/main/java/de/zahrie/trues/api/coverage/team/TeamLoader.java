@@ -2,11 +2,11 @@ package de.zahrie.trues.api.coverage.team;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.player.PlayerHandler;
 import de.zahrie.trues.api.coverage.player.PlayerLoader;
-import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.util.io.request.HTML;
@@ -57,7 +57,7 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   private List<PrimePlayer> getPlayers() {
-    final var players = new ArrayList<Player>();
+    final var players = new ArrayList<PrimePlayer>();
     for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
       final int primeId = Integer.parseInt(Util.between(user.find("a").getAttribute("href"), "/users/", "-"));
       final String summonerName = user.find("div", "txt-info").find("span").text();
@@ -67,8 +67,8 @@ public class TeamLoader extends GamesportsLoader {
       players.add(playerHandler.getPlayer());
     }
 
-    team.getPlayers().stream().filter(player -> !players.contains(player)).filter(player -> player instanceof PrimePlayer).forEach(player -> new PlayerLoader(((PrimePlayer) player).getPrmUserId(), player.getSummonerName()).handleLeftTeam());
-    return null;
+    team.getPlayers().stream().filter(player -> !players.contains((PrimePlayer) player)).filter(Objects::nonNull).forEach(player -> new PlayerLoader(((PrimePlayer) player).getPrmUserId(), player.getSummonerName()).handleLeftTeam());
+    return players;
   }
 
 }

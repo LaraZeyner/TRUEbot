@@ -15,10 +15,13 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("intern")
-public class InternSeason extends Season implements Serializable {
+@DiscriminatorValue("orga_cup")
+public class OrgaCupSeason extends Season implements Serializable {
   @Serial
   private static final long serialVersionUID = 3498814029985658723L;
 
-
+  @Override
+  public CoverageDepartment type() {
+    return CoverageDepartment.Orga_Cup;
+  }
 }

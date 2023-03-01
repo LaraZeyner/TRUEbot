@@ -74,15 +74,12 @@ public class ProfileIcon extends GhostObject<de.zahrie.trues.api.riot.xayah.type
         return new Builder(id);
     }
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(PROFILE_ICON_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(PROFILE_ICON_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
     public ProfileIcon(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon coreData) {

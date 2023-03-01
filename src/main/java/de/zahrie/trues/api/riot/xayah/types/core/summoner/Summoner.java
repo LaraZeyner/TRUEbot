@@ -122,15 +122,12 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
         return new Builder(puuid, Builder.KeyType.PUUID);
     }
 
-    private final Supplier<ProfileIcon> profileIcon = Suppliers.memoize(new Supplier<ProfileIcon>() {
-        @Override
-        public ProfileIcon get() {
-            load(SUMMONER_LOAD_GROUP);
-            if(coreData.getProfileIconId() == -1) {
-                return null;
-            }
-            return ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<ProfileIcon> profileIcon = Suppliers.memoize(() -> {
+        load(SUMMONER_LOAD_GROUP);
+        if(coreData.getProfileIconId() == -1) {
+            return null;
         }
+        return ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public Summoner(final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner coreData) {

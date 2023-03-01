@@ -399,11 +399,7 @@ public abstract class GhostObject<T extends CoreData> extends OriannaObject<T> {
             Object lock = groupLocks.get(group);
             if(lock == null) {
                 synchronized(groupLocks) {
-                    lock = groupLocks.get(group);
-                    if(lock == null) {
-                        lock = new Object();
-                        groupLocks.put(group, lock);
-                    }
+                  lock = groupLocks.computeIfAbsent(group, k -> new Object());
                 }
             }
 
@@ -441,11 +437,7 @@ public abstract class GhostObject<T extends CoreData> extends OriannaObject<T> {
             Object lock = groupLocks.get(group);
             if(lock == null) {
                 synchronized(groupLocks) {
-                    lock = groupLocks.get(group);
-                    if(lock == null) {
-                        lock = new Object();
-                        groupLocks.put(group, lock);
-                    }
+                  lock = groupLocks.computeIfAbsent(group, k -> new Object());
                 }
             }
 
@@ -478,12 +470,8 @@ public abstract class GhostObject<T extends CoreData> extends OriannaObject<T> {
                 if(loadHooks == null) {
                     loadHooks = new HashMap<>();
                 }
-                Set<LoadHook> hooks = loadHooks.get(group);
-                if(hooks == null) {
-                    hooks = new HashSet<>();
-                    loadHooks.put(group, hooks);
-                }
-                hooks.add(hook);
+              Set<LoadHook> hooks = loadHooks.computeIfAbsent(group, k -> new HashSet<>());
+              hooks.add(hook);
             }
         }
     }

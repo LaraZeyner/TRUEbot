@@ -10,7 +10,7 @@ import org.json.JSONObject;
 /**
  * Created by Lara on 09.02.2023 for TRUEbot
  */
-public class JSON extends JSONObject {
+public final class JSON extends JSONObject {
 
   public static JSON fromFile(String fileName) {
     try {

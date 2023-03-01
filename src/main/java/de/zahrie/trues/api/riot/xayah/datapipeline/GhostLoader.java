@@ -258,13 +258,13 @@ public class GhostLoader extends AbstractDataSource {
             } else if(!UNIQUE_TIERS.contains(tier)) {
                 final StringBuilder sb = new StringBuilder();
                 for(final Tier t : UNIQUE_TIERS) {
-                    sb.append(", " + t);
+                    sb.append(", ").append(t);
                 }
                 throw new QueryValidationException("Query contained invalid parameters! tier must be one of [" + sb.substring(2) + "]!");
             } else if(!Queue.RANKED.contains(queue)) {
                 final StringBuilder sb = new StringBuilder();
                 for(final Queue q : Queue.RANKED) {
-                    sb.append(", " + q);
+                    sb.append(", ").append(q);
                 }
                 throw new QueryValidationException("Query contained invalid parameters! queue must be one of [" + sb.substring(2) + "]!");
             }
@@ -592,7 +592,7 @@ public class GhostLoader extends AbstractDataSource {
             } else if(!UNIQUE_TIERS.contains(tier)) {
                 final StringBuilder sb = new StringBuilder();
                 for(final Tier t : UNIQUE_TIERS) {
-                    sb.append(", " + t);
+                    sb.append(", ").append(t);
                 }
                 throw new QueryValidationException("Query contained invalid parameters! tier must be one of [" + sb.substring(2) + "]!");
             }

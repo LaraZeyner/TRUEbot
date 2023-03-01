@@ -2,16 +2,11 @@ package de.zahrie.trues.api.coverage.playday;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Set;
 
-import de.zahrie.trues.api.coverage.stage.Stage;
 import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +50,7 @@ public class Playday implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "stage", nullable = false)
   @ToString.Exclude
-  private Stage stage;
+  private PlayStage stage;
 
   @Column(name = "playday_index", columnDefinition = "TINYINT UNSIGNED not null")
   private short idx;
@@ -72,23 +67,11 @@ public class Playday implements Serializable {
   @ToString.Exclude
   private Set<Match> matches;
 
-  public Playday(Stage stage, short idx) {
+  public Playday(PlayStage stage, short index, Calendar start, Calendar end) {
     this.stage = stage;
-    this.idx = idx;
-    this.start = stage.getStart();
-    if (start.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-      final LocalDate date = LocalDate.of(start.get(Calendar.YEAR), start.get(Calendar.MONTH), start.get(Calendar.DAY_OF_MONTH)).with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-      start = Calendar.getInstance();
-      start.setTime(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-    }
-    start.set(Calendar.HOUR_OF_DAY, 0);
-    start.set(Calendar.MINUTE, 0);
-    start.set(Calendar.SECOND, 0);
-    start.add(Calendar.WEEK_OF_YEAR, idx - 1);
-    this.end = Calendar.getInstance();
-    end.setTime(start.getTime());
-    end.add(Calendar.DATE, 6);
-    end.set(Calendar.HOUR_OF_DAY, 23);
-    end.set(Calendar.MINUTE, 59);
+    this.idx = index;
+    this.start = start;
+    this.end = end;
   }
+
 }

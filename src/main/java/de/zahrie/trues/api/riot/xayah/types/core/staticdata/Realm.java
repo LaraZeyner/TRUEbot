@@ -58,15 +58,12 @@ public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
         return new Builder().withRegion(region);
     }
 
-    private final Supplier<Map<String, String>> latestVersions = Suppliers.memoize(new Supplier<Map<String, String>>() {
-        @Override
-        public Map<String, String> get() {
-            load(REALM_LOAD_GROUP);
-            if(coreData.getLatestVersions() == null) {
-                return null;
-            }
-            return Collections.unmodifiableMap(coreData.getLatestVersions());
+    private final Supplier<Map<String, String>> latestVersions = Suppliers.memoize(() -> {
+        load(REALM_LOAD_GROUP);
+        if(coreData.getLatestVersions() == null) {
+            return null;
         }
+        return Collections.unmodifiableMap(coreData.getLatestVersions());
     });
 
     public Realm(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm coreData) {

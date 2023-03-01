@@ -3,6 +3,11 @@ package de.zahrie.trues.util.util;
 import java.io.Serial;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -69,7 +74,40 @@ public class Time extends GregorianCalendar {
 
   public Time(int dayOffset) {
     super();
-    add(Calendar.DATE, dayOffset);
+    add(DATE, dayOffset);
+  }
+
+  public Time clock(Clock clock) {
+    clock(clock.hour(), clock.minute());
+    return this;
+  }
+
+  public Time clock(int hour, int minute) {
+    set(HOUR, hour);
+    set(MINUTE, minute);
+    set(SECOND, 0);
+    set(MILLISECOND, 0);
+    return this;
+  }
+
+  public Time plus(int field, int amount) {
+    final Time time1 = new Time(this);
+    time1.add(field, amount);
+    return time1;
+  }
+
+  public Time next(int dayOfWeek) {
+    if (get(DAY_OF_WEEK) != dayOfWeek) {
+      dayOfWeek = (dayOfWeek + 6) % 7;
+      dayOfWeek = dayOfWeek == 0 ? 7 : dayOfWeek;
+
+      final LocalDate date = LocalDate.of(get(YEAR), get(MONTH), get(DAY_OF_MONTH))
+          .with(TemporalAdjusters.next(DayOfWeek.of(dayOfWeek)));
+      final ZonedDateTime timeZoned = date.atStartOfDay(ZoneId.systemDefault());
+      final Date from = Date.from(timeZoned.toInstant());
+      return new Time(from);
+    }
+    return new Time(getTime());
   }
 
 }

@@ -61,4 +61,5 @@ public class Lineup implements Serializable {
     this.lane = lane;
     this.player = player;
   }
+
 }

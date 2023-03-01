@@ -59,30 +59,24 @@ public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.type
         return new Builder().withRegion(region);
     }
 
-    private final Supplier<List<String>> locales = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(SHARD_STATUS_LOAD_GROUP);
-            if(coreData.getLocales() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getLocales());
+    private final Supplier<List<String>> locales = Suppliers.memoize(() -> {
+        load(SHARD_STATUS_LOAD_GROUP);
+        if(coreData.getLocales() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getLocales());
     });
 
-    private final Supplier<List<Service>> services = Suppliers.memoize(new Supplier<List<Service>>() {
-        @Override
-        public List<Service> get() {
-            load(SHARD_STATUS_LOAD_GROUP);
-            if(coreData.getServices() == null) {
-                return null;
-            }
-            final List<Service> services = new ArrayList<>(coreData.getServices().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.status.Service service : coreData.getServices()) {
-                services.add(new Service(service));
-            }
-            return Collections.unmodifiableList(services);
+    private final Supplier<List<Service>> services = Suppliers.memoize(() -> {
+        load(SHARD_STATUS_LOAD_GROUP);
+        if(coreData.getServices() == null) {
+            return null;
         }
+        final List<Service> services = new ArrayList<>(coreData.getServices().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.status.Service service : coreData.getServices()) {
+            services.add(new Service(service));
+        }
+        return Collections.unmodifiableList(services);
     });
 
     public ShardStatus(final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus coreData) {

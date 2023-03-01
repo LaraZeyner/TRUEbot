@@ -7,14 +7,11 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class Passive extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Passive> {
     private static final long serialVersionUID = -5691212908005996446L;
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
     public Passive(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Passive coreData) {

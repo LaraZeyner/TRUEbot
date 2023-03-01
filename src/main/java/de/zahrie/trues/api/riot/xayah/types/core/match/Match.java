@@ -88,149 +88,116 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     public class Participant extends de.zahrie.trues.api.riot.xayah.types.core.match.Participant {
         private static final long serialVersionUID = -4802669460954679635L;
 
-        private final Supplier<Champion> champion = Suppliers.memoize(new Supplier<Champion>() {
-            @Override
-            public Champion get() {
-                if(coreData.getChampionId() == 0) {
-                    return null;
-                }
-                Champion.Builder builder = Champion.withId(coreData.getChampionId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform()));
-                if(coreData.getVersion() != null) {
-                    final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                    builder = builder.withVersion(version);
-                }
-                return builder.get();
+        private final Supplier<Champion> champion = Suppliers.memoize(() -> {
+            if(coreData.getChampionId() == 0) {
+                return null;
             }
-        });
-
-        private final Supplier<SearchableList<Item>> items = Suppliers.memoize(new Supplier<SearchableList<Item>>() {
-            @Override
-            public SearchableList<Item> get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getItems() == null) {
-                    return null;
-                }
+            Champion.Builder builder = Champion.withId(coreData.getChampionId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform()));
+            if(coreData.getVersion() != null) {
                 final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                return SearchableLists.unmodifiableFrom(
-                    Items.withIds(coreData.getItems()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version).get());
+                builder = builder.withVersion(version);
             }
+            return builder.get();
         });
 
-        private final Supplier<Summoner> preTransferSummoner = Suppliers.memoize(new Supplier<Summoner>() {
-            @Override
-            public Summoner get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getAccountId() == null) {
-                    return null;
-                }
-                return Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+        private final Supplier<SearchableList<Item>> items = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getItems() == null) {
+                return null;
             }
+            final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
+            return SearchableLists.unmodifiableFrom(
+                Items.withIds(coreData.getItems()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version).get());
         });
 
-        private final Supplier<ProfileIcon> profileIcon = Suppliers.memoize(new Supplier<ProfileIcon>() {
-            @Override
-            public ProfileIcon get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getProfileIconId() == -1) {
-                    return null;
-                }
-                final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                return ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
-                    .get();
+        private final Supplier<Summoner> preTransferSummoner = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getAccountId() == null) {
+                return null;
             }
+            return Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
         });
 
-        private final Supplier<SearchableList<RuneStats>> runeStats = Suppliers.memoize(new Supplier<SearchableList<RuneStats>>() {
-            @Override
-            public SearchableList<RuneStats> get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getRuneStats() == null) {
-                    return null;
-                }
-                final List<RuneStats> runeStats = new ArrayList<>(coreData.getRuneStats().size());
-                for(final de.zahrie.trues.api.riot.xayah.types.data.match.RuneStats stats : coreData.getRuneStats()) {
-                    runeStats.add(new RuneStats(stats));
-                }
-                return SearchableLists.unmodifiableFrom(runeStats);
+        private final Supplier<ProfileIcon> profileIcon = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getProfileIconId() == -1) {
+                return null;
             }
+            final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
+            return ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
+                .get();
         });
 
-        private final Supplier<ParticipantStats> stats = Suppliers.memoize(new Supplier<ParticipantStats>() {
-            @Override
-            public ParticipantStats get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getStats() == null) {
-                    return null;
-                }
-                return new ParticipantStats(coreData.getStats());
+        private final Supplier<SearchableList<RuneStats>> runeStats = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getRuneStats() == null) {
+                return null;
             }
+            final List<RuneStats> runeStats = new ArrayList<>(coreData.getRuneStats().size());
+            for(final de.zahrie.trues.api.riot.xayah.types.data.match.RuneStats stats : coreData.getRuneStats()) {
+                runeStats.add(new RuneStats(stats));
+            }
+            return SearchableLists.unmodifiableFrom(runeStats);
         });
 
-        private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-            @Override
-            public Summoner get() {
-                if(coreData.getCurrentAccountId() == null) {
-                    return null;
-                }
-                final Summoner summoner =
-                    Summoner.withAccountId(coreData.getCurrentAccountId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get();
-                if(summoner.getCoreData().getName() == null && coreData.getSummonerName() != null) {
-                    summoner.getCoreData().setName(coreData.getSummonerName());
-                }
-                if(summoner.getCoreData().getId() == null && coreData.getSummonerId() != null) {
-                    summoner.getCoreData().setId(coreData.getSummonerId());
-                }
-                return summoner;
+        private final Supplier<ParticipantStats> stats = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getStats() == null) {
+                return null;
             }
+            return new ParticipantStats(coreData.getStats());
         });
 
-        private final Supplier<SummonerSpell> summonerSpellD = Suppliers.memoize(new Supplier<SummonerSpell>() {
-            @Override
-            public SummonerSpell get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getSummonerSpellDId() == 0) {
-                    return null;
-                }
-                final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                return SummonerSpell.withId(coreData.getSummonerSpellDId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
-                    .get();
+        private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+            if(coreData.getCurrentAccountId() == null) {
+                return null;
             }
+            final Summoner summoner =
+                Summoner.withAccountId(coreData.getCurrentAccountId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get();
+            if(summoner.getCoreData().getName() == null && coreData.getSummonerName() != null) {
+                summoner.getCoreData().setName(coreData.getSummonerName());
+            }
+            if(summoner.getCoreData().getId() == null && coreData.getSummonerId() != null) {
+                summoner.getCoreData().setId(coreData.getSummonerId());
+            }
+            return summoner;
         });
 
-        private final Supplier<SummonerSpell> summonerSpellF = Suppliers.memoize(new Supplier<SummonerSpell>() {
-            @Override
-            public SummonerSpell get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getSummonerSpellFId() == 0) {
-                    return null;
-                }
-                final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                return SummonerSpell.withId(coreData.getSummonerSpellFId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
-                    .get();
+        private final Supplier<SummonerSpell> summonerSpellD = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getSummonerSpellDId() == 0) {
+                return null;
             }
+            final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
+            return SummonerSpell.withId(coreData.getSummonerSpellDId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
+                .get();
+        });
+
+        private final Supplier<SummonerSpell> summonerSpellF = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getSummonerSpellFId() == 0) {
+                return null;
+            }
+            final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
+            return SummonerSpell.withId(coreData.getSummonerSpellFId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform())).withVersion(version)
+                .get();
         });
 
         private final Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team> team =
-            Suppliers.memoize(new Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team>() {
-                @Override
-                public de.zahrie.trues.api.riot.xayah.types.core.match.Team get() {
-                    load(MATCH_LOAD_GROUP);
-                    if(coreData.getTeam() == 0) {
-                        return null;
-                    }
-                    return coreData.getTeam() == Side.BLUE.getId() ? getBlueTeam() : getRedTeam();
-                }
-            });
-
-        private final Supplier<ParticipantTimeline> timeline = Suppliers.memoize(new Supplier<ParticipantTimeline>() {
-            @Override
-            public ParticipantTimeline get() {
+            Suppliers.memoize(() -> {
                 load(MATCH_LOAD_GROUP);
-                if(coreData.getTimeline() == null) {
+                if(coreData.getTeam() == 0) {
                     return null;
                 }
-                return new ParticipantTimeline(coreData.getTimeline());
+                return coreData.getTeam() == Side.BLUE.getId() ? getBlueTeam() : getRedTeam();
+            });
+
+        private final Supplier<ParticipantTimeline> timeline = Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getTimeline() == null) {
+                return null;
             }
+            return new ParticipantTimeline(coreData.getTimeline());
         });
 
         private Participant(final de.zahrie.trues.api.riot.xayah.types.data.match.Participant coreData) {
@@ -336,31 +303,25 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     public class Team extends de.zahrie.trues.api.riot.xayah.types.core.match.Team {
         private static final long serialVersionUID = -5787154563875265507L;
 
-        private final Supplier<SearchableList<Champion>> bans = Suppliers.memoize(new Supplier<SearchableList<Champion>>() {
-            @Override
-            public SearchableList<Champion> get() {
-                if(coreData.getBans() == null) {
-                    return null;
-                }
-                final String version = Versions.withPlatform(Platform.withTag(coreData.getPlatform())).get().getBestMatch(coreData.getVersion());
-                return SearchableLists.unmodifiableFrom(
-                    Champions.withIds(coreData.getBans()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(version).get());
+        private final Supplier<SearchableList<Champion>> bans = Suppliers.memoize(() -> {
+            if(coreData.getBans() == null) {
+                return null;
             }
+            final String version = Versions.withPlatform(Platform.withTag(coreData.getPlatform())).get().getBestMatch(coreData.getVersion());
+            return SearchableLists.unmodifiableFrom(
+                Champions.withIds(coreData.getBans()).withPlatform(Platform.withTag(coreData.getPlatform())).withVersion(version).get());
         });
 
         private final Supplier<SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant>> participants =
-            Suppliers.memoize(new Supplier<SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant>>() {
-                @Override
-                public SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> get() {
-                    final List<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> participants =
-                        new ArrayList<>(Match.this.getParticipants().size() / 2);
-                    for(final de.zahrie.trues.api.riot.xayah.types.core.match.Participant participant : Match.this.getParticipants()) {
-                        if(participant.getCoreData().getTeam() == coreData.getTeamId()) {
-                            participants.add(participant);
-                        }
+            Suppliers.memoize(() -> {
+                final List<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> participants =
+                    new ArrayList<>(Match.this.getParticipants().size() / 2);
+                for(final de.zahrie.trues.api.riot.xayah.types.core.match.Participant participant : Match.this.getParticipants()) {
+                    if(participant.getCoreData().getTeam() == coreData.getTeamId()) {
+                        participants.add(participant);
                     }
-                    return SearchableLists.unmodifiableFrom(participants);
                 }
+                return SearchableLists.unmodifiableFrom(participants);
             });
 
         private Team(final de.zahrie.trues.api.riot.xayah.types.data.match.Team coreData) {
@@ -512,15 +473,12 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     }
 
     private final Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team> blueTeam =
-        Suppliers.memoize(new Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team>() {
-            @Override
-            public de.zahrie.trues.api.riot.xayah.types.core.match.Team get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getBlueTeam() == null) {
-                    return null;
-                }
-                return new Team(coreData.getBlueTeam());
+        Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getBlueTeam() == null) {
+                return null;
             }
+            return new Team(coreData.getBlueTeam());
         });
 
     private final boolean fromReference;
@@ -579,25 +537,19 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
         });
 
     private final Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team> redTeam =
-        Suppliers.memoize(new Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team>() {
-            @Override
-            public de.zahrie.trues.api.riot.xayah.types.core.match.Team get() {
-                load(MATCH_LOAD_GROUP);
-                if(coreData.getRedTeam() == null) {
-                    return null;
-                }
-                return new Team(coreData.getRedTeam());
-            }
-        });
-
-    private final Supplier<Timeline> timeline = Suppliers.memoize(new Supplier<Timeline>() {
-        @Override
-        public Timeline get() {
-            if(coreData.getId() == 0L) {
+        Suppliers.memoize(() -> {
+            load(MATCH_LOAD_GROUP);
+            if(coreData.getRedTeam() == null) {
                 return null;
             }
-            return Timeline.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+            return new Team(coreData.getRedTeam());
+        });
+
+    private final Supplier<Timeline> timeline = Suppliers.memoize(() -> {
+        if(coreData.getId() == 0L) {
+            return null;
         }
+        return Timeline.withId(coreData.getId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public Match(final de.zahrie.trues.api.riot.xayah.types.data.match.Match coreData) {

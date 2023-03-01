@@ -52,24 +52,18 @@ public class ChampionMastery extends GhostObject<de.zahrie.trues.api.riot.xayah.
         return new Builder(summoner);
     }
 
-    private final Supplier<Champion> champion = Suppliers.memoize(new Supplier<Champion>() {
-        @Override
-        public Champion get() {
-            if(coreData.getChampionId() == 0) {
-                return null;
-            }
-            return Champion.withId(coreData.getChampionId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Champion> champion = Suppliers.memoize(() -> {
+        if(coreData.getChampionId() == 0) {
+            return null;
         }
+        return Champion.withId(coreData.getChampionId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
-    private final Supplier<Summoner> summoner = Suppliers.memoize(new Supplier<Summoner>() {
-        @Override
-        public Summoner get() {
-            if(coreData.getSummonerId() == null) {
-                return null;
-            }
-            return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
+        if(coreData.getSummonerId() == null) {
+            return null;
         }
+        return Summoner.withId(coreData.getSummonerId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
     });
 
     public ChampionMastery(final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery coreData) {

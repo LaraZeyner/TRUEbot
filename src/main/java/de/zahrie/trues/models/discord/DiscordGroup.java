@@ -57,8 +57,8 @@ public class DiscordGroup implements Serializable {
   @Column(name = "hierarchical", nullable = false)
   private boolean isHierarchical = false;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "grant_requirement", nullable = true)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "grant_requirement")
   @ToString.Exclude
   private DiscordGroup grantRequired;
 
@@ -69,7 +69,6 @@ public class DiscordGroup implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "server_permission")
   @ToString.Exclude
-  //TODO should be not null
   private PermissionPattern serverPattern;
 
   @OneToMany(mappedBy = "highestGroup")

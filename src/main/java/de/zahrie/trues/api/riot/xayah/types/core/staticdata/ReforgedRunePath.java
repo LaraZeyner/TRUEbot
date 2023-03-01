@@ -9,12 +9,7 @@ public class ReforgedRunePath extends OriannaObject.ListProxy<ReforgedRuneSlot, 
 
     public ReforgedRunePath(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunePath coreData,
         final java.util.Map<Integer, ReforgedRune> runes) {
-        super(coreData, new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRuneSlot, ReforgedRuneSlot>() {
-            @Override
-            public ReforgedRuneSlot apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRuneSlot data) {
-                return new ReforgedRuneSlot(data, runes);
-            }
-        });
+        super(coreData, data -> new ReforgedRuneSlot(data, runes));
     }
 
     public int getId() {

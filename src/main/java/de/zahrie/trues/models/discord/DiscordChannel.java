@@ -1,5 +1,8 @@
 package de.zahrie.trues.models.discord;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import de.zahrie.trues.models.discord.permission.ChannelPermissionPattern;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,8 +19,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -26,6 +27,7 @@ import java.io.Serializable;
 @Entity(name = "DiscordChannel")
 @Table(name = "discord_channel")
 public class DiscordChannel implements Serializable {
+  @Serial
   private static final long serialVersionUID = 3260875961946049435L;
 
   @Id

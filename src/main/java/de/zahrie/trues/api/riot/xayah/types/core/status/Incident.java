@@ -13,18 +13,15 @@ import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 public class Incident extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.status.Incident> {
     private static final long serialVersionUID = 7833049943482732990L;
 
-    private final Supplier<List<Message>> updates = Suppliers.memoize(new Supplier<List<Message>>() {
-        @Override
-        public List<Message> get() {
-            if(coreData.getUpdates() == null) {
-                return null;
-            }
-            final List<Message> updates = new ArrayList<>(coreData.getUpdates().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.status.Message update : coreData.getUpdates()) {
-                updates.add(new Message(update));
-            }
-            return Collections.unmodifiableList(updates);
+    private final Supplier<List<Message>> updates = Suppliers.memoize(() -> {
+        if(coreData.getUpdates() == null) {
+            return null;
         }
+        final List<Message> updates = new ArrayList<>(coreData.getUpdates().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.status.Message update : coreData.getUpdates()) {
+            updates.add(new Message(update));
+        }
+        return Collections.unmodifiableList(updates);
     });
 
     public Incident(final de.zahrie.trues.api.riot.xayah.types.data.status.Incident coreData) {

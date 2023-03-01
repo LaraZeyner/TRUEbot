@@ -94,27 +94,21 @@ public class Map extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.s
         return new Builder(id);
     }
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(MAP_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(MAP_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<SearchableList<Item>> unpurchasableItems = Suppliers.memoize(new Supplier<SearchableList<Item>>() {
-        @Override
-        public SearchableList<Item> get() {
-            load(MAP_LOAD_GROUP);
-            if(coreData.getUnpurchasableItems() == null) {
-                return null;
-            }
-            return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getUnpurchasableItems()).withPlatform(Platform.withTag(coreData.getPlatform()))
-                .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
+    private final Supplier<SearchableList<Item>> unpurchasableItems = Suppliers.memoize(() -> {
+        load(MAP_LOAD_GROUP);
+        if(coreData.getUnpurchasableItems() == null) {
+            return null;
         }
+        return SearchableLists.unmodifiableFrom(Items.withIds(coreData.getUnpurchasableItems()).withPlatform(Platform.withTag(coreData.getPlatform()))
+            .withVersion(coreData.getVersion()).withLocale(coreData.getLocale()).get());
     });
 
     public Map(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map coreData) {

@@ -153,12 +153,7 @@ public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zah
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<Long, Match>() {
-                    @Override
-                    public Match apply(final Long id) {
-                        return Match.withId(id).get();
-                    }
-                });
+                loadListProxyData(id -> Match.withId(id).get());
                 break;
             default:
                 break;

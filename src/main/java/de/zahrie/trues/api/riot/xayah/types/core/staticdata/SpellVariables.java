@@ -11,14 +11,11 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 public class SpellVariables extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.SpellVariables> {
     private static final long serialVersionUID = -8759913162668284032L;
 
-    private final Supplier<List<Double>> coefficients = Suppliers.memoize(new Supplier<List<Double>>() {
-        @Override
-        public List<Double> get() {
-            if(coreData.getCoefficients() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getCoefficients());
+    private final Supplier<List<Double>> coefficients = Suppliers.memoize(() -> {
+        if(coreData.getCoefficients() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getCoefficients());
     });
 
     public SpellVariables(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SpellVariables coreData) {

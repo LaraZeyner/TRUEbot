@@ -10,12 +10,12 @@ public interface RateLimiter {
         public void cancel();
     }
 
-    public static enum Type {
+    enum Type {
             BURST(FixedWindowRateLimiter.class);
 
         private final Class<? extends AbstractRateLimiter> clazz;
 
-        private Type(final Class<? extends AbstractRateLimiter> clazz) {
+        Type(final Class<? extends AbstractRateLimiter> clazz) {
             this.clazz = clazz;
         }
 

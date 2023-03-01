@@ -226,14 +226,11 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
     public SummonerSpells(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells coreData) {
@@ -305,13 +302,10 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell, SummonerSpell>() {
-                    @Override
-                    public SummonerSpell apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell data) {
-                        final SummonerSpell spell = new SummonerSpell(data);
-                        spell.markAsGhostLoaded(SummonerSpell.SUMMONER_SPELL_LOAD_GROUP);
-                        return spell;
-                    }
+                loadListProxyData(data1 -> {
+                    final SummonerSpell spell = new SummonerSpell(data1);
+                    spell.markAsGhostLoaded(SummonerSpell.SUMMONER_SPELL_LOAD_GROUP);
+                    return spell;
                 });
                 break;
             default:

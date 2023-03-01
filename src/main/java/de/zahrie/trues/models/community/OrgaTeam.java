@@ -5,11 +5,15 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.models.community.application.OrgaMember;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +36,11 @@ public class OrgaTeam implements Serializable {
   @Id
   @Column(name = "orga_team_id", columnDefinition = "TINYINT UNSIGNED not null")
   private short id;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "team")
+  @ToString.Exclude
+  private Team team;
 
   @Column(name = "discord_role", nullable = false)
   private long roleId;
@@ -57,10 +66,5 @@ public class OrgaTeam implements Serializable {
   @OneToMany(mappedBy = "orgaTeam")
   @ToString.Exclude
   private Set<OrgaMember> orgaMembers = new LinkedHashSet<>();
-/*
-  @ToString.Exclude
-  @OneToOne(mappedBy = "orgaTeam")
-  // TODO move column
-  private Team team;
-*/
+
 }

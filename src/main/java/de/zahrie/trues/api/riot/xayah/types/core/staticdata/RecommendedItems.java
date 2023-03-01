@@ -16,12 +16,7 @@ public class RecommendedItems extends OriannaObject.ListProxy<ItemSet, de.zahrie
     private static final long serialVersionUID = 7485737031964917542L;
 
     public RecommendedItems(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.RecommendedItems coreData) {
-        super(coreData, new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemSet, ItemSet>() {
-            @Override
-            public ItemSet apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemSet set) {
-                return new ItemSet(set);
-            }
-        });
+        super(coreData, set -> new ItemSet(set));
     }
 
     @Searchable(de.zahrie.trues.api.riot.xayah.types.common.Map.class)

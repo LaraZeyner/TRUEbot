@@ -26,8 +26,9 @@ import org.jetbrains.annotations.NotNull;
 public class LeagueLoader extends GamesportsLoader {
   public static League season(String url, String name) {
     int seasonId = Integer.parseInt(Util.between(url, "/prm/", "-"));
+    int stageId = Integer.parseInt(Util.between(url, "/group/", "-"));
     final PrimeSeason season = SeasonFactory.getSeason(seasonId);
-    return LeagueFactory.getGroup(season, name);
+    return LeagueFactory.getGroup(season, name, stageId);
   }
 
   public static String divisionNameFromURL(String url) {
@@ -40,13 +41,17 @@ public class LeagueLoader extends GamesportsLoader {
     return Util.capitalize(section);
   }
 
+  public static int stageIdFromUrl(String url) {
+    return Integer.parseInt(Util.between(url, "/group/", "-"));
+  }
+
   private final League league;
   private final String url;
 
   public LeagueLoader(@NotNull String url) {
     super(URLType.LEAGUE, Integer.parseInt(Util.between(url, "/prm/", "-")), Integer.parseInt(Util.between(url, "/group/", "-")), Integer.parseInt(Util.between(url, "/", "-", -1)));
     final PrimeSeason season = SeasonFactory.getSeason(Integer.parseInt(Util.between(url, "/prm/", "-")));
-    this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url));
+    this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url), stageIdFromUrl(url));
     this.url = url;
   }
 

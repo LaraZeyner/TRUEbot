@@ -48,8 +48,8 @@ public class OrgaMember implements Serializable {
   @ToString.Exclude
   private DiscordMember member;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "orga_team", nullable = true)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "orga_team")
   @ToString.Exclude
   private OrgaTeam orgaTeam;
 

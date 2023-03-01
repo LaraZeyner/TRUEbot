@@ -1,5 +1,6 @@
 package de.zahrie.trues.util.logger;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import de.zahrie.trues.util.Const;
@@ -8,6 +9,7 @@ import de.zahrie.trues.util.Const;
  * Created by Lara on 15.04.2022 for web
  */
 public class Level implements Serializable {
+  @Serial
   private static final long serialVersionUID = 4696525147809509943L;
   private final String name;
   private final int value;

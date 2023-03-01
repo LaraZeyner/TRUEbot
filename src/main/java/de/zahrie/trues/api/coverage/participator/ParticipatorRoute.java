@@ -8,20 +8,22 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
 import lombok.ToString;
 
 @Embeddable
+@Getter
 public class ParticipatorRoute {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "route_group")
   @ToString.Exclude
-  private League routeLeague;
+  private League league;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "route_type", length = 6)
-  private RouteType routeType;
+  private RouteType type;
 
   @Column(name = "route_value", columnDefinition = "TINYINT UNSIGNED")
-  private Short routeValue;
+  private Short value;
 
 }

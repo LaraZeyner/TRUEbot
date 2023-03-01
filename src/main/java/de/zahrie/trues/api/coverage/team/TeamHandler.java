@@ -26,6 +26,7 @@ public class TeamHandler extends TeamModel implements Serializable {
   @Serial
   private static final long serialVersionUID = 1292510240274127687L;
 
+  @SuppressWarnings("unused")
   @Builder
   public TeamHandler(HTML html, String url, PrimeTeam team, List<PrimePlayer> players) {
     super(html, url, team, players);
@@ -33,7 +34,6 @@ public class TeamHandler extends TeamModel implements Serializable {
 
   public void update() {
     final List<HTML> stages = html.findAll("section", "league-team-stage");
-    updateDivision(stages);
     updateResult(stages);
     updateRecordAndSeasons();
     handleStarterMatches(stages);
@@ -64,8 +64,8 @@ public class TeamHandler extends TeamModel implements Serializable {
     List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li", "wide").stream()
         .map(HTML::text).map(text -> Util.between(text, ":", null)).toList();
     if (teamInfos.size() == 4) {
-      team.setRecord(teamInfos.get(1));
-      team.setSeasons(Short.parseShort(teamInfos.get(2)));
+      final var seasons = Short.parseShort(teamInfos.get(2));
+      team.setRecord(teamInfos.get(1), seasons);
     }
 
   }
@@ -77,18 +77,17 @@ public class TeamHandler extends TeamModel implements Serializable {
     final String result = stages.get(stages.size() - 1)
         .find("ul", "content-icon-info")
         .findAll("li").get(1).text().replace("Ergebnis", "");
-    team.setScore(result);
+    team.setScore(determineDivision(stages), result);
   }
 
-  private void updateDivision(List<HTML> stages) {
+  private League determineDivision(List<HTML> stages) {
     final String divisionName = stages.get(stages.size() - 1)
         .find("ul", "content-icon-info")
         .find("li").find("a").text();
     final String divisionUrl = stages.get(stages.size() - 1)
         .find("ul", "content-icon-info")
         .find("li").find("a").getAttribute("href");
-    final League league = LeagueLoader.season(divisionUrl, divisionName);
-    team.setLeague(league);
+    return LeagueLoader.season(divisionUrl, divisionName);
   }
 
 }

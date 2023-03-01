@@ -6,19 +6,21 @@ import java.util.List;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.league.LeagueFactory;
-import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
-import de.zahrie.trues.api.coverage.team.TeamFactory;
-import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.PlaydayFactory;
-import de.zahrie.trues.api.coverage.playday.PlaydayScheduler;
+import de.zahrie.trues.api.coverage.playday.config.SchedulingRange;
+import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduleHandler;
+import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.zahrie.trues.api.coverage.season.PrimeSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
+import de.zahrie.trues.api.coverage.team.TeamFactory;
+import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.util.util.Util;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
+import de.zahrie.trues.util.util.Util;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,12 +49,15 @@ public class MatchLoader extends GamesportsLoader {
     final String pageTitle = html.find("h1").text();
     final String seasonName = Util.between(pageTitle, null, ":");
     final PrimeSeason primeSeason = SeasonFactory.getSeason(seasonName);
-    final String divisionName = html.find("ul", "breadcrumbs").findAll("li").get(2).text();
-    final League league = LeagueFactory.getGroup(primeSeason, divisionName);
+    final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
+    final String divisionName = division.text();
+    final String urlString = division.find("a").getAttribute("href");
+    final String between = Util.between(urlString, "/group/", "-");
+    final League league = LeagueFactory.getGroup(primeSeason, divisionName, Integer.parseInt(between));
     final Playday playday = getPlayday(league);
-    final PlaydayScheduler scheduler = new PlaydayScheduler(playday, league);
-
-    this.match = new PrimeMatch(playday, getMatchtime(), league, scheduler.getStart(), scheduler.getEnd(), this.id);
+    final PlaydayScheduler playdayScheduler = new PlaydayScheduleHandler(league.getStage(), playday.getIdx(), league.getTier()).create();
+    final SchedulingRange scheduling = playdayScheduler.scheduling();
+    this.match = new PrimeMatch(playday, getMatchtime(), league, scheduling.start(), scheduling.end(), this.id);
     return this;
   }
 

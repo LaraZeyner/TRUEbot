@@ -124,125 +124,95 @@ public class Champion extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
         return new Builder(key, false);
     }
 
-    private final Supplier<List<String>> allyTips = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getAllyTips() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getAllyTips());
+    private final Supplier<List<String>> allyTips = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getAllyTips() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getAllyTips());
     });
 
-    private final Supplier<List<String>> enemyTips = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getEnemyTips() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getEnemyTips());
+    private final Supplier<List<String>> enemyTips = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getEnemyTips() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getEnemyTips());
     });
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<Passive> passive = Suppliers.memoize(new Supplier<Passive>() {
-        @Override
-        public Passive get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getPassive() == null) {
-                return null;
-            }
-            return new Passive(coreData.getPassive());
+    private final Supplier<Passive> passive = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getPassive() == null) {
+            return null;
         }
+        return new Passive(coreData.getPassive());
     });
 
-    private final Supplier<SearchableList<RecommendedItems>> recommendedItems = Suppliers.memoize(new Supplier<SearchableList<RecommendedItems>>() {
-        @Override
-        public SearchableList<RecommendedItems> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getRecommendedItems() == null) {
-                return null;
-            }
-            final List<RecommendedItems> recommendedItems = new ArrayList<>(coreData.getRecommendedItems().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.RecommendedItems items : coreData.getRecommendedItems()) {
-                recommendedItems.add(new RecommendedItems(items));
-            }
-            return SearchableLists.unmodifiableFrom(recommendedItems);
+    private final Supplier<SearchableList<RecommendedItems>> recommendedItems = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getRecommendedItems() == null) {
+            return null;
         }
+        final List<RecommendedItems> recommendedItems = new ArrayList<>(coreData.getRecommendedItems().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.RecommendedItems items : coreData.getRecommendedItems()) {
+            recommendedItems.add(new RecommendedItems(items));
+        }
+        return SearchableLists.unmodifiableFrom(recommendedItems);
     });
 
-    private final Supplier<SearchableList<Skin>> skins = Suppliers.memoize(new Supplier<SearchableList<Skin>>() {
-        @Override
-        public SearchableList<Skin> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getSkins() == null) {
-                return null;
-            }
-            final List<Skin> skins = new ArrayList<>(coreData.getSkins().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Skin skin : coreData.getSkins()) {
-                skins.add(new Skin(skin));
-            }
-            return SearchableLists.unmodifiableFrom(skins);
+    private final Supplier<SearchableList<Skin>> skins = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getSkins() == null) {
+            return null;
         }
+        final List<Skin> skins = new ArrayList<>(coreData.getSkins().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Skin skin : coreData.getSkins()) {
+            skins.add(new Skin(skin));
+        }
+        return SearchableLists.unmodifiableFrom(skins);
     });
 
-    private final Supplier<SearchableList<ChampionSpell>> spells = Suppliers.memoize(new Supplier<SearchableList<ChampionSpell>>() {
-        @Override
-        public SearchableList<ChampionSpell> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getSpells() == null) {
-                return null;
-            }
-            final List<ChampionSpell> spells = new ArrayList<>(coreData.getSpells().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ChampionSpell spell : coreData.getSpells()) {
-                spells.add(new ChampionSpell(spell));
-            }
-            return SearchableLists.unmodifiableFrom(spells);
+    private final Supplier<SearchableList<ChampionSpell>> spells = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getSpells() == null) {
+            return null;
         }
+        final List<ChampionSpell> spells = new ArrayList<>(coreData.getSpells().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ChampionSpell spell : coreData.getSpells()) {
+            spells.add(new ChampionSpell(spell));
+        }
+        return SearchableLists.unmodifiableFrom(spells);
     });
 
-    private final Supplier<ChampionStats> stats = Suppliers.memoize(new Supplier<ChampionStats>() {
-        @Override
-        public ChampionStats get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getStats() == null) {
-                return null;
-            }
-            return new ChampionStats(coreData.getStats());
+    private final Supplier<ChampionStats> stats = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getStats() == null) {
+            return null;
         }
+        return new ChampionStats(coreData.getStats());
     });
 
-    private final Supplier<List<String>> tags = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            load(CHAMPION_LOAD_GROUP);
-            if(coreData.getTags() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getTags());
+    private final Supplier<List<String>> tags = Suppliers.memoize(() -> {
+        load(CHAMPION_LOAD_GROUP);
+        if(coreData.getTags() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getTags());
     });
 
     public Champion(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion coreData) {

@@ -226,25 +226,19 @@ public class Masteries extends GhostObject.ListProxy<Mastery, de.zahrie.trues.ap
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(new Supplier<Set<String>>() {
-        @Override
-        public Set<String> get() {
-            if(coreData.getIncludedData() == null) {
-                return null;
-            }
-            return Collections.unmodifiableSet(coreData.getIncludedData());
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
+        if(coreData.getIncludedData() == null) {
+            return null;
         }
+        return Collections.unmodifiableSet(coreData.getIncludedData());
     });
 
-    private final Supplier<MasteryTree> tree = Suppliers.memoize(new Supplier<MasteryTree>() {
-        @Override
-        public MasteryTree get() {
-            load(LIST_PROXY_LOAD_GROUP);
-            if(coreData.getTree() == null) {
-                return null;
-            }
-            return new MasteryTree(coreData.getTree());
+    private final Supplier<MasteryTree> tree = Suppliers.memoize(() -> {
+        load(LIST_PROXY_LOAD_GROUP);
+        if(coreData.getTree() == null) {
+            return null;
         }
+        return new MasteryTree(coreData.getTree());
     });
 
     public Masteries(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Masteries coreData) {
@@ -320,13 +314,10 @@ public class Masteries extends GhostObject.ListProxy<Mastery, de.zahrie.trues.ap
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery, Mastery>() {
-                    @Override
-                    public Mastery apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery data) {
-                        final Mastery mastery = new Mastery(data);
-                        mastery.markAsGhostLoaded(Mastery.MASTERY_LOAD_GROUP);
-                        return mastery;
-                    }
+                loadListProxyData(data1 -> {
+                    final Mastery mastery = new Mastery(data1);
+                    mastery.markAsGhostLoaded(Mastery.MASTERY_LOAD_GROUP);
+                    return mastery;
                 });
                 break;
             default:

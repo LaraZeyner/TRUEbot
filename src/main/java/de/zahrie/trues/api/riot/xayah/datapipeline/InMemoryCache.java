@@ -138,7 +138,7 @@ public class InMemoryCache extends AbstractDataStore {
         public long calculateExpiryTime(final Integer key, final Object value, final long loadTime, final CacheEntry<Integer, Object> oldEntry) {
             final Long period = expirationPeriods.get(value.getClass());
             if(period != null && period > 0L) {
-                return loadTime + period.longValue();
+                return loadTime + period;
             }
             return ExpiryTimeValues.ETERNAL;
         }
@@ -1145,12 +1145,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forChampion(champion);
 
         if(keys.length < 3) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putChampion(champion, null);
-                }
-            };
+            final LoadHook hook = () -> putChampion(champion, null);
 
             champion.registerGhostLoadHook(hook, Champion.CHAMPION_LOAD_GROUP);
         }
@@ -1166,12 +1161,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, masteries);
 
         if(masteries.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putChampionMasteries(masteries, null);
-                }
-            };
+            final LoadHook hook = () -> putChampionMasteries(masteries, null);
 
             masteries.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1203,12 +1193,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, champions);
 
         if(champions.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putChampions(champions, null);
-                }
-            };
+            final LoadHook hook = () -> putChampions(champions, null);
 
             champions.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1233,12 +1218,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forItem(item);
 
         if(keys.length < 2) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putItem(item, null);
-                }
-            };
+            final LoadHook hook = () -> putItem(item, null);
 
             item.registerGhostLoadHook(hook, Item.ITEM_LOAD_GROUP);
         }
@@ -1254,12 +1234,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, items);
 
         if(items.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putItems(items, null);
-                }
-            };
+            final LoadHook hook = () -> putItems(items, null);
 
             items.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1285,12 +1260,7 @@ public class InMemoryCache extends AbstractDataStore {
 
         if(keys.length < 2 && league.getCoreData().getTier() == null || league.getCoreData().getQueue() != null
             || Queue.RANKED.contains(league.getQueue()) && UNIQUE_TIERS.contains(league.getTier())) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putLeague(league, null);
-                }
-            };
+            final LoadHook hook = () -> putLeague(league, null);
 
             league.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         }
@@ -1486,12 +1456,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forMap(map);
 
         if(keys.length < 2) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putMap(map, null);
-                }
-            };
+            final LoadHook hook = () -> putMap(map, null);
 
             map.registerGhostLoadHook(hook, Map.MAP_LOAD_GROUP);
         }
@@ -1507,12 +1472,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, maps);
 
         if(maps.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putMaps(maps, null);
-                }
-            };
+            final LoadHook hook = () -> putMaps(maps, null);
 
             maps.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1526,12 +1486,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, masteries);
 
         if(masteries.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putMasteries(masteries, null);
-                }
-            };
+            final LoadHook hook = () -> putMasteries(masteries, null);
 
             masteries.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1544,12 +1499,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forMastery(mastery);
 
         if(keys.length < 2) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putMastery(mastery, null);
-                }
-            };
+            final LoadHook hook = () -> putMastery(mastery, null);
 
             mastery.registerGhostLoadHook(hook, Mastery.MASTERY_LOAD_GROUP);
         }
@@ -1570,12 +1520,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int key = UniqueKeys.forPatch(patch);
 
         if(patch.getCoreData().getName() == null) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putPatch(patch, null);
-                }
-            };
+            final LoadHook hook = () -> putPatch(patch, null);
 
             patch.registerGhostLoadHook(hook, Patch.PATCH_LOAD_GROUP);
         }
@@ -1589,12 +1534,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, patches);
 
         if(patches.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putPatches(patches, null);
-                }
-            };
+            final LoadHook hook = () -> putPatches(patches, null);
 
             patches.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1614,12 +1554,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, icons);
 
         if(icons.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putProfileIcons(icons, null);
-                }
-            };
+            final LoadHook hook = () -> putProfileIcons(icons, null);
 
             icons.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1638,12 +1573,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forReforgedRune(rune);
 
         if(keys.length < 3) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putReforgedRune(rune, null);
-                }
-            };
+            final LoadHook hook = () -> putReforgedRune(rune, null);
 
             rune.registerGhostLoadHook(hook, ReforgedRune.REFORGED_RUNE_LOAD_GROUP);
         }
@@ -1659,12 +1589,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, runes);
 
         if(runes.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putReforgedRunes(runes, null);
-                }
-            };
+            final LoadHook hook = () -> putReforgedRunes(runes, null);
 
             runes.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1677,12 +1602,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forRune(rune);
 
         if(keys.length < 2) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putRune(rune, null);
-                }
-            };
+            final LoadHook hook = () -> putRune(rune, null);
 
             rune.registerGhostLoadHook(hook, Rune.RUNE_LOAD_GROUP);
         }
@@ -1698,12 +1618,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, runes);
 
         if(runes.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putRunes(runes, null);
-                }
-            };
+            final LoadHook hook = () -> putRunes(runes, null);
 
             runes.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {
@@ -1722,12 +1637,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forSummoner(summoner);
 
         if(keys.length < 3) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putSummoner(summoner, null);
-                }
-            };
+            final LoadHook hook = () -> putSummoner(summoner, null);
 
             summoner.registerGhostLoadHook(hook, Summoner.SUMMONER_LOAD_GROUP);
         }
@@ -1742,12 +1652,7 @@ public class InMemoryCache extends AbstractDataStore {
         final int[] keys = UniqueKeys.forSummonerSpell(summonerSpell);
 
         if(keys.length < 2) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putSummonerSpell(summonerSpell, null);
-                }
-            };
+            final LoadHook hook = () -> putSummonerSpell(summonerSpell, null);
 
             summonerSpell.registerGhostLoadHook(hook, SummonerSpell.SUMMONER_SPELL_LOAD_GROUP);
         }
@@ -1763,12 +1668,7 @@ public class InMemoryCache extends AbstractDataStore {
         cache.put(key, spells);
 
         if(spells.getCoreData().isEmpty()) {
-            final LoadHook hook = new LoadHook() {
-                @Override
-                public void call() {
-                    putSummonerSpells(spells, null);
-                }
-            };
+            final LoadHook hook = () -> putSummonerSpells(spells, null);
 
             spells.registerGhostLoadHook(hook, ListProxy.LIST_PROXY_LOAD_GROUP);
         } else {

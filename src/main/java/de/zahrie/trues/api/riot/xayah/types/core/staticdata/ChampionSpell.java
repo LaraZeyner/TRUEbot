@@ -14,106 +14,79 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 public class ChampionSpell extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ChampionSpell> {
     private static final long serialVersionUID = 766914644995245142L;
 
-    private final Supplier<SearchableList<Image>> alternativeImages = Suppliers.memoize(new Supplier<SearchableList<Image>>() {
-        @Override
-        public SearchableList<Image> get() {
-            if(coreData.getAlternativeImages() == null) {
-                return null;
-            }
-            final List<Image> alternativeImages = new ArrayList<>(coreData.getAlternativeImages().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Image image : coreData.getAlternativeImages()) {
-                alternativeImages.add(new Image(image));
-            }
-            return SearchableLists.unmodifiableFrom(alternativeImages);
+    private final Supplier<SearchableList<Image>> alternativeImages = Suppliers.memoize(() -> {
+        if(coreData.getAlternativeImages() == null) {
+            return null;
         }
+        final List<Image> alternativeImages = new ArrayList<>(coreData.getAlternativeImages().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Image image : coreData.getAlternativeImages()) {
+            alternativeImages.add(new Image(image));
+        }
+        return SearchableLists.unmodifiableFrom(alternativeImages);
     });
 
-    private final Supplier<List<Double>> cooldowns = Suppliers.memoize(new Supplier<List<Double>>() {
-        @Override
-        public List<Double> get() {
-            if(coreData.getCooldowns() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getCooldowns());
+    private final Supplier<List<Double>> cooldowns = Suppliers.memoize(() -> {
+        if(coreData.getCooldowns() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getCooldowns());
     });
 
-    private final Supplier<List<Integer>> costs = Suppliers.memoize(new Supplier<List<Integer>>() {
-        @Override
-        public List<Integer> get() {
-            if(coreData.getCosts() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getCosts());
+    private final Supplier<List<Integer>> costs = Suppliers.memoize(() -> {
+        if(coreData.getCosts() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getCosts());
     });
 
-    private final Supplier<List<List<Double>>> effects = Suppliers.memoize(new Supplier<List<List<Double>>>() {
-        @Override
-        public List<List<Double>> get() {
-            if(coreData.getEffects() == null) {
-                return null;
-            }
-            final List<List<Double>> views = new ArrayList<>(coreData.getEffects().size());
-            for(final List<Double> effect : coreData.getEffects()) {
-                views.add(effect != null ? Collections.unmodifiableList(effect) : null);
-            }
-            return Collections.unmodifiableList(views);
+    private final Supplier<List<List<Double>>> effects = Suppliers.memoize(() -> {
+        if(coreData.getEffects() == null) {
+            return null;
         }
+        final List<List<Double>> views = new ArrayList<>(coreData.getEffects().size());
+        for(final List<Double> effect : coreData.getEffects()) {
+            views.add(effect != null ? Collections.unmodifiableList(effect) : null);
+        }
+        return Collections.unmodifiableList(views);
     });
 
-    private final Supplier<Image> image = Suppliers.memoize(new Supplier<Image>() {
-        @Override
-        public Image get() {
-            if(coreData.getImage() == null) {
-                return null;
-            }
-            return new Image(coreData.getImage());
+    private final Supplier<Image> image = Suppliers.memoize(() -> {
+        if(coreData.getImage() == null) {
+            return null;
         }
+        return new Image(coreData.getImage());
     });
 
-    private final Supplier<List<String>> levelUpEffects = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            if(coreData.getLevelUpEffects() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getLevelUpEffects());
+    private final Supplier<List<String>> levelUpEffects = Suppliers.memoize(() -> {
+        if(coreData.getLevelUpEffects() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getLevelUpEffects());
     });
 
-    private final Supplier<List<String>> levelUpKeywords = Suppliers.memoize(new Supplier<List<String>>() {
-        @Override
-        public List<String> get() {
-            if(coreData.getLevelUpKeywords() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getLevelUpKeywords());
+    private final Supplier<List<String>> levelUpKeywords = Suppliers.memoize(() -> {
+        if(coreData.getLevelUpKeywords() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getLevelUpKeywords());
     });
 
-    private final Supplier<List<Integer>> ranges = Suppliers.memoize(new Supplier<List<Integer>>() {
-        @Override
-        public List<Integer> get() {
-            if(coreData.getRanges() == null) {
-                return null;
-            }
-            return Collections.unmodifiableList(coreData.getRanges());
+    private final Supplier<List<Integer>> ranges = Suppliers.memoize(() -> {
+        if(coreData.getRanges() == null) {
+            return null;
         }
+        return Collections.unmodifiableList(coreData.getRanges());
     });
 
-    private final Supplier<SearchableList<SpellVariables>> variables = Suppliers.memoize(new Supplier<SearchableList<SpellVariables>>() {
-        @Override
-        public SearchableList<SpellVariables> get() {
-            if(coreData.getVariables() == null) {
-                return null;
-            }
-            final List<SpellVariables> variables = new ArrayList<>(coreData.getVariables().size());
-            for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SpellVariables vars : coreData.getVariables()) {
-                variables.add(new SpellVariables(vars));
-            }
-            return SearchableLists.unmodifiableFrom(variables);
+    private final Supplier<SearchableList<SpellVariables>> variables = Suppliers.memoize(() -> {
+        if(coreData.getVariables() == null) {
+            return null;
         }
+        final List<SpellVariables> variables = new ArrayList<>(coreData.getVariables().size());
+        for(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SpellVariables vars : coreData.getVariables()) {
+            variables.add(new SpellVariables(vars));
+        }
+        return SearchableLists.unmodifiableFrom(variables);
     });
 
     public ChampionSpell(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ChampionSpell coreData) {

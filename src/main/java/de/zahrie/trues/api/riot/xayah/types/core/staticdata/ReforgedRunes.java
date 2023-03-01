@@ -198,15 +198,12 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<ReforgedRuneTree> tree = Suppliers.memoize(new Supplier<ReforgedRuneTree>() {
-        @Override
-        public ReforgedRuneTree get() {
-            load(LIST_PROXY_LOAD_GROUP);
-            if(coreData.getTree() == null) {
-                return null;
-            }
-            return new ReforgedRuneTree(coreData.getTree(), ReforgedRunes.this);
+    private final Supplier<ReforgedRuneTree> tree = Suppliers.memoize(() -> {
+        load(LIST_PROXY_LOAD_GROUP);
+        if(coreData.getTree() == null) {
+            return null;
         }
+        return new ReforgedRuneTree(coreData.getTree(), ReforgedRunes.this);
     });
 
     public ReforgedRunes(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes coreData) {
@@ -268,13 +265,10 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune, ReforgedRune>() {
-                    @Override
-                    public ReforgedRune apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune data) {
-                        final ReforgedRune rune = new ReforgedRune(data);
-                        rune.markAsGhostLoaded(ReforgedRune.REFORGED_RUNE_LOAD_GROUP);
-                        return rune;
-                    }
+                loadListProxyData(data1 -> {
+                    final ReforgedRune rune = new ReforgedRune(data1);
+                    rune.markAsGhostLoaded(ReforgedRune.REFORGED_RUNE_LOAD_GROUP);
+                    return rune;
                 });
                 break;
             default:

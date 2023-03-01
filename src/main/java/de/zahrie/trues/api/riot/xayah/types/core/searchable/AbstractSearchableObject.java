@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 
 public abstract class AbstractSearchableObject implements SearchableObject {
-    private static Map<Class<?>, Object> locks = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Object> locks = new ConcurrentHashMap<>();
     private static Map<Class<?>, Multimap<Class<?>, Method>> searchable = new ConcurrentHashMap<>();
 
     @Override
@@ -61,11 +61,7 @@ public abstract class AbstractSearchableObject implements SearchableObject {
             Object lock = locks.get(clazz);
             if(lock == null) {
                 synchronized(locks) {
-                    lock = locks.get(clazz);
-                    if(lock == null) {
-                        lock = new Object();
-                        locks.put(clazz, lock);
-                    }
+                  lock = locks.computeIfAbsent(clazz, k -> new Object());
                 }
             }
 

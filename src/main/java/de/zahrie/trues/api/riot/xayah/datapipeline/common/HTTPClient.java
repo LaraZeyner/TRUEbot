@@ -274,48 +274,45 @@ public class HTTPClient {
         }
         final Request request = requestBuilder.build();
 
-        final Callable<Response> requestor = new Callable<Response>() {
-            @Override
-            public Response call() throws IOException {
-                LOGGER.info("Making GET request to " + httpURL);
-                String body = null;
-                byte[] bytes = null;
-                int statusCode;
-                Headers responseHeaders;
-                try(okhttp3.Response response = client.newCall(request).execute()) {
-                    statusCode = response.code();
-                    responseHeaders = response.headers();
-                    try(ResponseBody responseBody = response.body()) {
-                        if(responseBody.contentLength() == 0L) {
-                            body = "";
-                            bytes = new byte[0];
-                        } else if(JSON_MEDIA_TYPE.type().equals(responseBody.contentType().type())
-                            && JSON_MEDIA_TYPE.subtype().equals(responseBody.contentType().subtype())) {
-                            body = responseBody.string();
-                        } else {
-                            bytes = responseBody.bytes();
-                        }
+        final Callable<Response> requestor = () -> {
+            LOGGER.info("Making GET request to " + httpURL);
+            String body = null;
+            byte[] bytes = null;
+            int statusCode;
+            Headers responseHeaders;
+            try(okhttp3.Response response = client.newCall(request).execute()) {
+                statusCode = response.code();
+                responseHeaders = response.headers();
+                try(ResponseBody responseBody = response.body()) {
+                    if(responseBody.contentLength() == 0L) {
+                        body = "";
+                        bytes = new byte[0];
+                    } else if(JSON_MEDIA_TYPE.type().equals(responseBody.contentType().type())
+                        && JSON_MEDIA_TYPE.subtype().equals(responseBody.contentType().subtype())) {
+                        body = responseBody.string();
+                    } else {
+                        bytes = responseBody.bytes();
                     }
-                } catch(final SSLProtocolException e) {
-                    if(e.getCause() instanceof SocketTimeoutException) {
-                        // The SocketTimeoutException is wrapped in an SSLProtocolException if the timeout is during the handshake
-                        throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
-                    }
-                    throw e;
-                } catch(final SocketTimeoutException e) {
+                }
+            } catch(final SSLProtocolException e) {
+                if(e.getCause() instanceof SocketTimeoutException) {
+                    // The SocketTimeoutException is wrapped in an SSLProtocolException if the timeout is during the handshake
                     throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
                 }
+                throw e;
+            } catch(final SocketTimeoutException e) {
+                throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
+            }
 
-                ImmutableListMultimap.Builder<String, String> mapBuilder = ImmutableListMultimap.<String, String> builder();
-                for(final String key : responseHeaders.names()) {
-                    mapBuilder = mapBuilder.putAll(key, responseHeaders.get(key));
-                }
+            ImmutableListMultimap.Builder<String, String> mapBuilder = ImmutableListMultimap.<String, String> builder();
+            for(final String key : responseHeaders.names()) {
+                mapBuilder = mapBuilder.putAll(key, responseHeaders.get(key));
+            }
 
-                if(body != null) {
-                    return new Response(body, statusCode, mapBuilder.build());
-                } else {
-                    return new Response(bytes, statusCode, mapBuilder.build());
-                }
+            if(body != null) {
+                return new Response(body, statusCode, mapBuilder.build());
+            } else {
+                return new Response(bytes, statusCode, mapBuilder.build());
             }
         };
 

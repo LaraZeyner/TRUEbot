@@ -244,13 +244,10 @@ public class Maps extends GhostObject.ListProxy<Map, de.zahrie.trues.api.riot.xa
                 if(data != null) {
                     coreData = data;
                 }
-                loadListProxyData(new Function<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map, Map>() {
-                    @Override
-                    public Map apply(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map data) {
-                        final Map map = new Map(data);
-                        map.markAsGhostLoaded(Map.MAP_LOAD_GROUP);
-                        return map;
-                    }
+                loadListProxyData(data1 -> {
+                    final Map map = new Map(data1);
+                    map.markAsGhostLoaded(Map.MAP_LOAD_GROUP);
+                    return map;
                 });
                 break;
             default:

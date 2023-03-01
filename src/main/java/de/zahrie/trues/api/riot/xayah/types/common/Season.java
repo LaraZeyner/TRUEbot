@@ -32,12 +32,7 @@ public enum Season {
     }
 
     public static Comparator<Season> getComparator() {
-        return new Comparator<Season>() {
-            @Override
-            public int compare(final Season o1, final Season o2) {
-                return Integer.compare(o1.id, o2.id);
-            }
-        };
+        return (o1, o2) -> Integer.compare(o1.id, o2.id);
     }
 
     public static Season getLatest() {

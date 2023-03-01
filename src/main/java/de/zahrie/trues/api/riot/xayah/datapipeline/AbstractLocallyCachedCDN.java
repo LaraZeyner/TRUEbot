@@ -83,20 +83,17 @@ public abstract class AbstractLocallyCachedCDN<T> extends AbstractDataSource {
             synchronized(lock) {
                 supplier = cache.get(request);
                 if(supplier == null) {
-                    supplier = new Supplier<String>() {
-                        @Override
-                        public String get() {
-                            final String URL = getURL(request);
+                    supplier = () -> {
+                        final String URL = getURL(request);
 
-                            try {
-                                return client.get(URL).getBody();
-                            } catch(final TimeoutException e) {
-                                LOGGER.info("Get request timed out to " + URL + "!", e);
-                                return null;
-                            } catch(final IOException e) {
-                                LOGGER.error("Get request failed to " + URL + "!", e);
-                                throw new OriannaException("Something went wrong with a request to " + URL + "! Report this to the orianna team.", e);
-                            }
+                        try {
+                            return client.get(URL).getBody();
+                        } catch(final TimeoutException e) {
+                            LOGGER.info("Get request timed out to " + URL + "!", e);
+                            return null;
+                        } catch(final IOException e) {
+                            LOGGER.error("Get request failed to " + URL + "!", e);
+                            throw new OriannaException("Something went wrong with a request to " + URL + "! Report this to the orianna team.", e);
                         }
                     };
 

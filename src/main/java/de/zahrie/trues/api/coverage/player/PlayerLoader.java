@@ -14,6 +14,7 @@ import de.zahrie.trues.util.io.request.URLType;
  * Created by Lara on 15.02.2023 for TRUEbot
  */
 public class PlayerLoader extends GamesportsLoader implements Loader {
+  //TODO (Abgie) 27.02.2023:
   public static int idFromURL(String url) {
     return Integer.parseInt(Util.between(url, "/users/", "-"));
   }

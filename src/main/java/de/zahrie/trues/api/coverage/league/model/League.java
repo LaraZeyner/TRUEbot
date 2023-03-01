@@ -2,18 +2,19 @@ package de.zahrie.trues.api.coverage.league.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.stage.Stage;
 import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduleHandler;
+import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.zahrie.trues.api.coverage.season.PrimeSeason;
+import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.io.request.URLType;
+import de.zahrie.trues.util.util.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +56,7 @@ public class League implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "stage", nullable = false)
   @ToString.Exclude
-  private Stage stage;
+  private PlayStage stage;
 
   @Column(name = "prm_id", nullable = false)
   private int prmId;
@@ -67,40 +68,25 @@ public class League implements Serializable {
   @ToString.Exclude
   private Set<TournamentMatch> coverages = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "routeLeague")
-  @ToString.Exclude
-  private Set<Participator> participators = new LinkedHashSet<>();
-
   @OneToMany(mappedBy = "league")
   @ToString.Exclude
   private Set<PrimeTeam> teams = new LinkedHashSet<>();
 
-  public int getTier() {
-    if (name.startsWith("Division ")) {
-      return Integer.parseInt(name.replace("Division ", "").split("\\.")[0]);
-    }
-    if (name.equals(Const.Gamesports.STARTER_NAME)) {
-      return Const.Gamesports.LOWEST_DIVISION + 1;
-    }
-    return -1;
+  public LeagueTier getTier() {
+    return LeagueTier.fromName(name);
   }
 
-  public Calendar getAlternative(Playday playday) {
-    int tier = getTier();
-    if (tier == -1) {
-      return playday.getStart();
-    }
-    final Calendar matchTime = playday.getEnd();
-    matchTime.set(Calendar.MINUTE, 0);
-    matchTime.set(Calendar.HOUR_OF_DAY, tier < Const.Gamesports.ALTERNATIVE_DIVISION_BREAK ?
-        Const.Gamesports.ALTERNATIVE_HOUR_UPPER : Const.Gamesports.ALTERNATIVE_HOUR_LOWER);
-    return matchTime;
+
+  public Time getAlternative(Playday playday) {
+    final PlaydayScheduler scheduler = new PlaydayScheduleHandler((PlayStage) stage, playday.getId(), getTier()).create();
+    return scheduler.defaultTime();
   }
   public boolean isStarter() {
     return this.name.equals(Const.Gamesports.STARTER_NAME);
   }
 
   public String getUrl() {
-    return String.format(URLType.LEAGUE.getUrlName(), ((PrimeSeason) stage.getSeason()).getPrmId(), stage.getPrmId(), prmId);
+    return String.format(URLType.LEAGUE.getUrlName(), ((PrimeSeason) stage.getSeason()).getPrmId(), ((PlayStage) stage).pageId(), prmId);
   }
+
 }

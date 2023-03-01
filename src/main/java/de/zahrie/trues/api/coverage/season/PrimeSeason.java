@@ -19,15 +19,18 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("prime")
+@DiscriminatorValue("prime_league")
 @NamedQuery(name = "PrimeSeason.fromSeasonId", query = "FROM PrimeSeason WHERE prmId = :seasonId")
 @NamedQuery(name = "PrimeSeason.fromName", query = "FROM PrimeSeason WHERE fullName = :name")
 public class PrimeSeason extends Season implements Serializable {
   @Serial
   private static final long serialVersionUID = 3498814029985658723L;
 
-
   @Column(name = "season_id", columnDefinition = "SMALLINT UNSIGNED")
   private int prmId;
 
+  @Override
+  public CoverageDepartment type() {
+    return CoverageDepartment.Prime_League;
+  }
 }

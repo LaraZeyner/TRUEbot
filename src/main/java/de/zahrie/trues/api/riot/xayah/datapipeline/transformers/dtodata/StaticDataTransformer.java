@@ -3,6 +3,7 @@ package de.zahrie.trues.api.riot.xayah.datapipeline.transformers.dtodata;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -607,10 +608,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
         converted.setIncludedData(new HashSet<>(item.getIncludedData()));
         converted.setInStore(item.isInStore());
         if(item.getColloq() != null) {
-            final Set<String> keywords = new HashSet<>();
-            for(final String keyword : item.getColloq().split(";")) {
-                keywords.add(keyword);
-            }
+          final Set<String> keywords = new HashSet<>(Arrays.asList(item.getColloq().split(";")));
             converted.setKeywords(keywords);
         }
         converted.setLocale(item.getLocale());
