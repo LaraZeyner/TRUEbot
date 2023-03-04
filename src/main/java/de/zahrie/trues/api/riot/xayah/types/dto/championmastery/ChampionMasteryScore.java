@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.championmastery;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,6 +32,7 @@ public class ChampionMasteryScore extends DataObject {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -5431839360536213388L;
     private String platform, summonerId;
     private int score;
@@ -58,13 +60,8 @@ public class ChampionMasteryScore extends DataObject {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

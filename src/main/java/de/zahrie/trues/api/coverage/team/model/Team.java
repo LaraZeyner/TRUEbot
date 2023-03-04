@@ -2,14 +2,15 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.models.community.OrgaTeam;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,8 +58,9 @@ public class Team implements Serializable {
   private String abbreviation;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "refresh", nullable = false)
-  private Calendar refresh;
+  private Time refresh;
 
   @OneToOne(mappedBy = "team")
   @ToString.Exclude
@@ -88,17 +91,15 @@ public class Team implements Serializable {
     return this.id == ((Team) obj).getId();
   }
 
-  public void refresh(Calendar start) {
-    final Calendar calendar = Calendar.getInstance();
-    calendar.setTime(start.getTime());
-    calendar.add(Calendar.DATE, 70);
-    this.setRefresh(calendar);
-    Database.save(this);
+  public void refresh(Time start) {
+    final Time time = new Time(start).plus(Time.DATE, 70);
+    this.setRefresh(time);
   }
 
-  public void setRefresh(Calendar refresh) {
+  public void setRefresh(Time refresh) {
     if (refresh.after(this.refresh)) {
       this.refresh = refresh;
+      Database.save(this);
     }
   }
 

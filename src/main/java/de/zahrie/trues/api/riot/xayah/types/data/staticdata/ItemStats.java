@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ItemStats extends CoreData {
+    @Serial
     private static final long serialVersionUID = -4186822209538997366L;
     private double percentCriticalStrikeChance, percentMagicResist, percentHealthRegen, percentMovespeed, magicResist, criticalStrikeDamage, energy,
             percentBaseAttackDamage, gold, lethality, percentHealAndShieldPower, outOfCombatMovespeed,
@@ -181,10 +184,7 @@ public class ItemStats extends CoreData {
         if(Double.doubleToLongBits(percentSpellVamp) != Double.doubleToLongBits(other.percentSpellVamp)) {
             return false;
         }
-        if(Double.doubleToLongBits(percentTenacity) != Double.doubleToLongBits(other.percentTenacity)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(percentTenacity) == Double.doubleToLongBits(other.percentTenacity);
     }
 
     /**

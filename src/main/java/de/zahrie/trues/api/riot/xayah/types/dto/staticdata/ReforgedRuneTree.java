@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ReforgedRuneTree extends DataObject.ListProxy<ReforgedRunePath> {
+    @Serial
     private static final long serialVersionUID = 1612925015051819538L;
     private String platform, version, locale;
 
@@ -41,13 +44,8 @@ public class ReforgedRuneTree extends DataObject.ListProxy<ReforgedRunePath> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

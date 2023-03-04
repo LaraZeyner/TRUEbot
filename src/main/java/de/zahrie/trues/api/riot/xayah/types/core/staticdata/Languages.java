@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.base.Functions;
@@ -11,7 +11,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Region;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 
 public class Languages extends GhostObject.ListProxy<String, String, de.zahrie.trues.api.riot.xayah.types.data.staticdata.Languages> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -40,6 +40,7 @@ public class Languages extends GhostObject.ListProxy<String, String, de.zahrie.t
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 243021836752375355L;
 
     public static Languages get() {
@@ -68,9 +69,7 @@ public class Languages extends GhostObject.ListProxy<String, String, de.zahrie.t
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -83,22 +82,18 @@ public class Languages extends GhostObject.ListProxy<String, String, de.zahrie.t
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Languages data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Languages.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(Functions.<String> identity());
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Languages data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Languages.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(Functions.identity());
+      }
     }
 }

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Patch extends DataObject {
+    @Serial
     private static final long serialVersionUID = -1291485099804939411L;
     private String platform, name;
     private int season = -1;
@@ -40,10 +43,7 @@ public class Patch extends DataObject {
         if(season != other.season) {
             return false;
         }
-        if(start != other.start) {
-            return false;
-        }
-        return true;
+      return start == other.start;
     }
 
     /**

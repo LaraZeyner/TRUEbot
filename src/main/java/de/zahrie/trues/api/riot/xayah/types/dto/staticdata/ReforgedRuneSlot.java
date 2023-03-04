@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ReforgedRuneSlot extends DataObject {
+    @Serial
     private static final long serialVersionUID = -2552096507422652655L;
     private List<ReforgedRune> runes;
 
@@ -21,13 +23,8 @@ public class ReforgedRuneSlot extends DataObject {
         }
         final ReforgedRuneSlot other = (ReforgedRuneSlot)obj;
         if(runes == null) {
-            if(other.runes != null) {
-                return false;
-            }
-        } else if(!runes.equals(other.runes)) {
-            return false;
-        }
-        return true;
+          return other.runes == null;
+        } else return runes.equals(other.runes);
     }
 
     /**

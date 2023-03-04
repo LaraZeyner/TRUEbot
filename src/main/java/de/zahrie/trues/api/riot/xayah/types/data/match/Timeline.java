@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Timeline extends CoreData.ListProxy<Frame> {
+    @Serial
     private static final long serialVersionUID = -6737503541733571588L;
     private long id;
     private Duration interval;
@@ -41,13 +44,8 @@ public class Timeline extends CoreData.ListProxy<Frame> {
             return false;
         }
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

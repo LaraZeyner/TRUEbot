@@ -1,5 +1,10 @@
 package de.zahrie.trues.models.logging;
 
+import java.io.Serial;
+import java.io.Serializable;
+
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,10 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Calendar;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,8 +40,9 @@ public class OrgaLog implements Serializable {
   private int id;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "log_time", nullable = false)
-  private Calendar timestamp = Calendar.getInstance();
+  private Time timestamp = new Time();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "department", nullable = false, length = 25)

@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class ParticipantStats extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.ParticipantStats> {
+    @Serial
     private static final long serialVersionUID = -989098350329762392L;
 
     public ParticipantStats(final de.zahrie.trues.api.riot.xayah.types.data.match.ParticipantStats coreData) {

@@ -23,7 +23,6 @@ import de.zahrie.trues.api.riot.xayah.datapipeline.common.Utilities;
 import de.zahrie.trues.api.riot.xayah.datapipeline.kernel.dto.Kernel.Configuration;
 import de.zahrie.trues.api.riot.xayah.types.common.Platform;
 import de.zahrie.trues.api.riot.xayah.types.dto.match.Match;
-import de.zahrie.trues.api.riot.xayah.types.dto.match.MatchReference;
 import de.zahrie.trues.api.riot.xayah.types.dto.match.MatchTimeline;
 import de.zahrie.trues.api.riot.xayah.types.dto.match.Matchlist;
 import de.zahrie.trues.api.riot.xayah.types.dto.match.TournamentMatches;
@@ -46,36 +45,32 @@ public class MatchAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<Match>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public Match next() {
+            final Number matchId = iterator.next();
+
+            final String endpoint;
+            final Match data;
+            if (tournamentCode == null) {
+              endpoint = "lol/match/v4/matches/" + matchId;
+            } else {
+              endpoint = "lol/match/v4/matches/" + matchId + "/by-tournament-code/" + tournamentCode;
             }
+            data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
 
-            @Override
-            public Match next() {
-                final Number matchId = iterator.next();
+            return data;
+          }
 
-                String endpoint;
-                Match data;
-                if(tournamentCode == null) {
-                    endpoint = "lol/match/v4/matches/" + matchId;
-                    data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                } else {
-                    endpoint = "lol/match/v4/matches/" + matchId + "/by-tournament-code/" + tournamentCode;
-                    data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                }
-                if(data == null) {
-                    return null;
-                }
-
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -84,9 +79,9 @@ public class MatchAPI extends KernelService {
     public CloseableIterator<Matchlist> getManyMatchlist(final Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final Iterable<String> accountIds = (Iterable<String>)query.get("accountIds");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         Number beginTime = (Number)query.get("beginTime");
         Number endTime = (Number)query.get("endTime");
         Number beginIndex = (Number)query.get("beginIndex");
@@ -151,42 +146,42 @@ public class MatchAPI extends KernelService {
         final Number bIndex = beginIndex;
         final Number eIndex = endIndex;
         final Iterator<String> iterator = accountIds.iterator();
-        return CloseableIterators.from(new Iterator<Matchlist>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public Matchlist next() {
+            final String accountId = iterator.next();
+            final String endpoint = "lol/match/v4/matchlists/by-account/" + accountId;
+            final Matchlist data = get(Matchlist.class, endpoint, parameters);
+            if (data == null) {
+              final Matchlist empty = new Matchlist();
+              empty.setMatches(Collections.emptyList());
+              empty.setPlatform(platform.getTag());
+              empty.setAccountId(accountId);
+              empty.setQueues(queues);
+              empty.setSeasons(seasons);
+              empty.setChampions(champions);
+              empty.setStartTime(bTime == null ? 0L : bTime.longValue());
+              empty.setEndTime(eTime == null ? 0L : eTime.longValue());
+              empty.setStartIndex(bIndex == null ? 0 : bIndex.intValue());
+              empty.setEndIndex(eIndex == null ? 0 : eIndex.intValue());
+              empty.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
+              empty.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
+              empty.setHistoryLength(HISTORY_LENGTH);
+              return empty;
             }
 
-            @Override
-            public Matchlist next() {
-                final String accountId = iterator.next();
-                final String endpoint = "lol/match/v4/matchlists/by-account/" + accountId;
-                final Matchlist data = get(Matchlist.class, endpoint, parameters);
-                if(data == null) {
-                    final Matchlist empty = new Matchlist();
-                    empty.setMatches(Collections.<MatchReference> emptyList());
-                    empty.setPlatform(platform.getTag());
-                    empty.setAccountId(accountId);
-                    empty.setQueues(queues);
-                    empty.setSeasons(seasons);
-                    empty.setChampions(champions);
-                    empty.setStartTime(bTime == null ? 0L : bTime.longValue());
-                    empty.setEndTime(eTime == null ? 0L : eTime.longValue());
-                    empty.setStartIndex(bIndex == null ? 0 : bIndex.intValue());
-                    empty.setEndIndex(eIndex == null ? 0 : eIndex.intValue());
-                    empty.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
-                    empty.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
-                    empty.setHistoryLength(HISTORY_LENGTH);
-                    return empty;
-                }
+            return data;
+          }
 
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -198,29 +193,25 @@ public class MatchAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<MatchTimeline>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public MatchTimeline next() {
-                final Number matchId = iterator.next();
+          @Override
+          public MatchTimeline next() {
+            final Number matchId = iterator.next();
 
-                final String endpoint = "lol/match/v4/timelines/by-match/" + matchId;
-                final MatchTimeline data = get(MatchTimeline.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/match/v4/timelines/by-match/" + matchId;
 
-                return data;
-            }
+            return get(MatchTimeline.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -232,29 +223,25 @@ public class MatchAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", tournamentCodes, "tournamentCodes");
 
         final Iterator<String> iterator = tournamentCodes.iterator();
-        return CloseableIterators.from(new Iterator<TournamentMatches>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public TournamentMatches next() {
-                final String tournamentCode = iterator.next();
+          @Override
+          public TournamentMatches next() {
+            final String tournamentCode = iterator.next();
 
-                final String endpoint = "lol/match/v4/matches/by-tournament-code/" + tournamentCode + "/ids";
-                final TournamentMatches data = get(TournamentMatches.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/match/v4/matches/by-tournament-code/" + tournamentCode + "/ids";
 
-                return data;
-            }
+            return get(TournamentMatches.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -265,20 +252,16 @@ public class MatchAPI extends KernelService {
         final String tournamentCode = (String)query.get("tournamentCode");
         Utilities.checkNotNull(platform, "platform", matchId, "matchId");
 
-        String endpoint;
-        Match data;
+        final String endpoint;
+        final Match data;
         if(tournamentCode == null) {
             endpoint = "lol/match/v4/matches/" + matchId;
-            data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
         } else {
             endpoint = "lol/match/v4/matches/" + matchId + "/by-tournament-code/" + tournamentCode;
-            data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
         }
-        if(data == null) {
-            return null;
-        }
+      data = get(Match.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
 
-        return data;
+      return data;
     }
 
     @SuppressWarnings("unchecked")
@@ -286,9 +269,9 @@ public class MatchAPI extends KernelService {
     public Matchlist getMatchlist(final Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final String accountId = (String)query.get("accountId");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         Number beginTime = (Number)query.get("beginTime");
         Number endTime = (Number)query.get("endTime");
         Number beginIndex = (Number)query.get("beginIndex");
@@ -353,7 +336,7 @@ public class MatchAPI extends KernelService {
         final Matchlist data = get(Matchlist.class, endpoint, parameters);
         if(data == null) {
             final Matchlist empty = new Matchlist();
-            empty.setMatches(Collections.<MatchReference> emptyList());
+            empty.setMatches(Collections.emptyList());
             empty.setPlatform(platform.getTag());
             empty.setAccountId(accountId);
             empty.setQueues(queues);
@@ -379,12 +362,8 @@ public class MatchAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", matchId, "matchId");
 
         final String endpoint = "lol/match/v4/timelines/by-match/" + matchId;
-        final MatchTimeline data = get(MatchTimeline.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(MatchTimeline.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @Get(TournamentMatches.class)
@@ -394,11 +373,7 @@ public class MatchAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", tournamentCode, "tournamentCode");
 
         final String endpoint = "lol/match/v4/matches/by-tournament-code/" + tournamentCode + "/ids";
-        final TournamentMatches data = get(TournamentMatches.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(TournamentMatches.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 }

@@ -2,13 +2,14 @@ package de.zahrie.trues.api.coverage.match.log;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
-import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.util.database.Database;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.database.Database;
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -28,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 /**
  * Created by Lara on 16.02.2023 for TRUEbot
@@ -50,8 +52,9 @@ public class MatchLog implements Serializable {
   private int id;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "log_time", nullable = false)
-  private Calendar timestamp = Calendar.getInstance();
+  private Time timestamp = new Time();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "coverage")
@@ -73,14 +76,14 @@ public class MatchLog implements Serializable {
   @Column(name = "to_send", nullable = false)
   private boolean toSend = true;
 
-  public MatchLog(Calendar timestamp, MatchLogAction action, Match match, String details) {
+  public MatchLog(Time timestamp, MatchLogAction action, Match match, String details) {
     this.timestamp = timestamp;
     this.action = action;
     this.match = match;
     this.details = details;
   }
 
-  public MatchLog handleTeam(String content) {
+  public MatchLog handleTeam(Chain content) {
     final MatchLog log = LogFactory.handleUserWithTeam(this, content);
     if (this.participator != null) {
       Database.save(this.participator);

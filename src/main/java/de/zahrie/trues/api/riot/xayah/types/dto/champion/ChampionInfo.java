@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.champion;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ChampionInfo extends DataObject {
+    @Serial
     private static final long serialVersionUID = -2055782095631677351L;
     private List<Integer> freeChampionIds, freeChampionIdsForNewPlayers;
     private int maxNewPlayerLevel;
@@ -40,13 +42,8 @@ public class ChampionInfo extends DataObject {
             return false;
         }
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

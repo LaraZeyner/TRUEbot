@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import org.joda.time.DateTime;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class MatchReference extends CoreData {
+    @Serial
     private static final long serialVersionUID = -3037706159935738648L;
     private int championId, queue, season;
     private DateTime creationTime;
@@ -67,10 +70,7 @@ public class MatchReference extends CoreData {
         } else if(!role.equals(other.role)) {
             return false;
         }
-        if(season != other.season) {
-            return false;
-        }
-        return true;
+      return season == other.season;
     }
 
     /**

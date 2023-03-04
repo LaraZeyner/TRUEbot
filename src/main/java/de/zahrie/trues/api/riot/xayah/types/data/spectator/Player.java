@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Player extends CoreData {
+    @Serial
     private static final long serialVersionUID = -970406077124574599L;
     private boolean bot;
     private List<GameCustomizationObject> customizationObjects;
@@ -74,10 +76,7 @@ public class Player extends CoreData {
         if(summonerSpellFId != other.summonerSpellFId) {
             return false;
         }
-        if(team != other.team) {
-            return false;
-        }
-        return true;
+      return team == other.team;
     }
 
     /**

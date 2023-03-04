@@ -7,5 +7,5 @@ public enum Lane {
         MID,
         MIDDLE,
         NONE,
-        TOP;
+        TOP
 }

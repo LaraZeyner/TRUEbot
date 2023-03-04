@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Versions extends DataObject.ListProxy<String> {
+    @Serial
     private static final long serialVersionUID = -8049096668875689483L;
     private String platform;
 
@@ -27,13 +30,8 @@ public class Versions extends DataObject.ListProxy<String> {
         }
         final Versions other = (Versions)obj;
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

@@ -1,8 +1,10 @@
 package de.zahrie.trues.api.riot.xayah.types.core.searchable;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -11,9 +13,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Predicate;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.LazyList;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class SearchableLists {
     private static class SearchableListWrapper<T> implements SearchableList<T> {
+        @Serial
         private static final long serialVersionUID = 3608438788294069007L;
         protected final List<T> list;
 
@@ -32,12 +36,12 @@ public abstract class SearchableLists {
         }
 
         @Override
-        public boolean addAll(final Collection<? extends T> items) {
+        public boolean addAll(@NotNull final Collection<? extends T> items) {
             return list.addAll(items);
         }
 
         @Override
-        public boolean addAll(final int index, final Collection<? extends T> items) {
+        public boolean addAll(final int index, @NotNull final Collection<? extends T> items) {
             return list.addAll(index, items);
         }
 
@@ -59,12 +63,9 @@ public abstract class SearchableLists {
         private boolean contains(final T element, final Object item) {
             if(item == element) {
                 return true;
-            } else if(item != null && element != null && item.equals(element)) {
+            } else if(item != null && item.equals(element)) {
                 return true;
-            } else if(element instanceof SearchableObject && ((SearchableObject)element).contains(item)) {
-                return true;
-            }
-            return false;
+            } else return element instanceof SearchableObject && ((SearchableObject) element).contains(item);
         }
 
         @Override
@@ -101,13 +102,8 @@ public abstract class SearchableLists {
             @SuppressWarnings("rawtypes")
             final SearchableListWrapper other = (SearchableListWrapper)obj;
             if(list == null) {
-                if(other.list != null) {
-                    return false;
-                }
-            } else if(!list.equals(other.list)) {
-                return false;
-            }
-            return true;
+              return other.list == null;
+            } else return list.equals(other.list);
         }
 
         @Override
@@ -126,40 +122,41 @@ public abstract class SearchableLists {
                 }
                 return new SearchableListWrapper<>(results);
             } else {
-                final CloseableIterator<T> iterator = new CloseableIterator<T>() {
-                    private final Iterator<T> iterator = list.iterator();
-                    private T next = null;
+                final CloseableIterator<T> iterator = new CloseableIterator<>() {
+                  private final Iterator<T> iterator = list.iterator();
+                  private T next = null;
 
-                    @Override
-                    public void close() {}
+                  @Override
+                  public void close() {
+                  }
 
-                    @Override
-                    public boolean hasNext() {
-                        if(next != null) {
-                            return true;
-                        }
-
-                        while(iterator.hasNext()) {
-                            final T n = iterator.next();
-                            if(predicate.apply(n)) {
-                                next = n;
-                                return true;
-                            }
-                        }
-                        return false;
+                  @Override
+                  public boolean hasNext() {
+                    if (next != null) {
+                      return true;
                     }
 
-                    @Override
-                    public T next() {
-                        final T n = next;
-                        next = null;
-                        return n;
+                    while (iterator.hasNext()) {
+                      final T n = iterator.next();
+                      if (predicate.apply(n)) {
+                        next = n;
+                        return true;
+                      }
                     }
+                    return false;
+                  }
 
-                    @Override
-                    public void remove() {
-                        iterator.remove();
-                    }
+                  @Override
+                  public T next() {
+                    final T n = next;
+                    next = null;
+                    return n;
+                  }
+
+                  @Override
+                  public void remove() {
+                    iterator.remove();
+                  }
                 };
 
                 return new SearchableListWrapper<>(new LazyList<>(iterator));
@@ -236,12 +233,12 @@ public abstract class SearchableLists {
         }
 
         @Override
-        public boolean removeAll(final Collection<?> items) {
+        public boolean removeAll(@NotNull final Collection<?> items) {
             return list.removeAll(items);
         }
 
         @Override
-        public boolean retainAll(final Collection<?> items) {
+        public boolean retainAll(@NotNull final Collection<?> items) {
             return list.retainAll(items);
         }
 
@@ -275,9 +272,8 @@ public abstract class SearchableLists {
             return list.toArray();
         }
 
-        @SuppressWarnings("hiding")
         @Override
-        public <T> T[] toArray(final T[] a) {
+        public <T> T[] toArray(@NotNull final T[] a) {
             return list.toArray(a);
         }
 
@@ -287,60 +283,56 @@ public abstract class SearchableLists {
         }
     }
 
-    private static class UnmodifiableListIterator<T> implements ListIterator<T> {
-        private final ListIterator<T> iterator;
+  private record UnmodifiableListIterator<T>(ListIterator<T> iterator) implements ListIterator<T> {
 
-        private UnmodifiableListIterator(final ListIterator<T> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public void add(final T element) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public boolean hasPrevious() {
-            return iterator.hasPrevious();
-        }
-
-        @Override
-        public T next() {
-            return iterator.next();
-        }
-
-        @Override
-        public int nextIndex() {
-            return iterator.nextIndex();
-        }
-
-        @Override
-        public T previous() {
-            return iterator.previous();
-        }
-
-        @Override
-        public int previousIndex() {
-            return iterator.previousIndex();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void set(final T element) {
-            throw new UnsupportedOperationException();
-        }
+    @Override
+    public void add(final T element) {
+      throw new UnsupportedOperationException();
     }
 
-    private static class UnmodifiableSearchableListWrapper<T> extends SearchableListWrapper<T> {
+    @Override
+    public boolean hasNext() {
+      return iterator.hasNext();
+    }
+
+    @Override
+    public boolean hasPrevious() {
+      return iterator.hasPrevious();
+    }
+
+    @Override
+    public T next() {
+      return iterator.next();
+    }
+
+    @Override
+    public int nextIndex() {
+      return iterator.nextIndex();
+    }
+
+    @Override
+    public T previous() {
+      return iterator.previous();
+    }
+
+    @Override
+    public int previousIndex() {
+      return iterator.previousIndex();
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void set(final T element) {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+    private static final class UnmodifiableSearchableListWrapper<T> extends SearchableListWrapper<T> {
+        @Serial
         private static final long serialVersionUID = -8091054954955153572L;
 
         private UnmodifiableSearchableListWrapper(final List<T> list) {
@@ -358,12 +350,12 @@ public abstract class SearchableLists {
         }
 
         @Override
-        public boolean addAll(final Collection<? extends T> items) {
+        public boolean addAll(@NotNull final Collection<? extends T> items) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean addAll(final int index, final Collection<? extends T> items) {
+        public boolean addAll(final int index, @NotNull final Collection<? extends T> items) {
             throw new UnsupportedOperationException();
         }
 
@@ -382,16 +374,19 @@ public abstract class SearchableLists {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public Iterator<T> iterator() {
             return new UnmodifiableListIterator<>(list.listIterator());
         }
 
+        @NotNull
         @Override
         public ListIterator<T> listIterator() {
             return new UnmodifiableListIterator<>(list.listIterator());
         }
 
+        @NotNull
         @Override
         public ListIterator<T> listIterator(final int index) {
             return new UnmodifiableListIterator<>(list.listIterator(index));
@@ -408,12 +403,12 @@ public abstract class SearchableLists {
         }
 
         @Override
-        public boolean removeAll(final Collection<?> items) {
+        public boolean removeAll(@NotNull final Collection<?> items) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean retainAll(final Collection<?> items) {
+        public boolean retainAll(@NotNull final Collection<?> items) {
             throw new UnsupportedOperationException();
         }
 
@@ -422,179 +417,181 @@ public abstract class SearchableLists {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public List<T> subList(final int fromIndex, final int toIndex) {
             return Collections.unmodifiableList(list.subList(fromIndex, toIndex));
         }
     }
 
-    private static class UnmodifiableView<T> implements SearchableList<T> {
-        private static final long serialVersionUID = -2970557245660245211L;
-        protected final SearchableList<T> list;
+  private record UnmodifiableView<T>(SearchableList<T> list) implements SearchableList<T> {
+    @Serial
+    private static final long serialVersionUID = -2970557245660245211L;
 
-        private UnmodifiableView(final SearchableList<T> list) {
-            this.list = list;
-        }
-
-        @Override
-        public void add(final int index, final T element) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean add(final T e) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean addAll(final Collection<? extends T> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean addAll(final int index, final Collection<? extends T> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean contains(final Object item) {
-            return list.contains(item);
-        }
-
-        @Override
-        public boolean containsAll(final Collection<?> c) {
-            return list.containsAll(c);
-        }
-
-        @Override
-        public void delete(final Object query) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void delete(final Predicate<T> predicate) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public SearchableList<T> filter(final Predicate<T> predicate) {
-            return list.filter(predicate);
-        }
-
-        @Override
-        public SearchableList<T> filter(final Predicate<T> predicate, final boolean streaming) {
-            return list.filter(predicate, streaming);
-        }
-
-        @Override
-        public T find(final Object query) {
-            return list.find(query);
-        }
-
-        @Override
-        public T find(final Predicate<T> predicate) {
-            return list.find(predicate);
-        }
-
-        @Override
-        public T get(final int index) {
-            return list.get(index);
-        }
-
-        @Override
-        public int indexOf(final Object o) {
-            return list.indexOf(o);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return list.isEmpty();
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return new UnmodifiableListIterator<>(list.listIterator());
-        }
-
-        @Override
-        public int lastIndexOf(final Object o) {
-            return list.lastIndexOf(o);
-        }
-
-        @Override
-        public ListIterator<T> listIterator() {
-            return new UnmodifiableListIterator<>(list.listIterator());
-        }
-
-        @Override
-        public ListIterator<T> listIterator(final int index) {
-            return new UnmodifiableListIterator<>(list.listIterator());
-        }
-
-        @Override
-        public T remove(final int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean remove(final Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean removeAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean retainAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public SearchableList<T> search(final Object query) {
-            return list.search(query);
-        }
-
-        @Override
-        public SearchableList<T> search(final Object query, final boolean streaming) {
-            return list.search(query, streaming);
-        }
-
-        @Override
-        public T set(final int index, final T element) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int size() {
-            return list.size();
-        }
-
-        @Override
-        public List<T> subList(final int fromIndex, final int toIndex) {
-            return Collections.unmodifiableList(list.subList(fromIndex, toIndex));
-        }
-
-        @Override
-        public Object[] toArray() {
-            return list.toArray();
-        }
-
-        @SuppressWarnings("hiding")
-        @Override
-        public <T> T[] toArray(final T[] a) {
-            return list.toArray(a);
-        }
+    @Override
+    public void add(final int index, final T element) {
+      throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean add(final T e) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addAll(@NotNull final Collection<? extends T> c) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addAll(final int index, @NotNull final Collection<? extends T> c) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean contains(final Object item) {
+      return list.contains(item);
+    }
+
+    @Override
+    public boolean containsAll(@NotNull final Collection<?> c) {
+      return new HashSet<>(list).containsAll(c);
+    }
+
+    @Override
+    public void delete(final Object query) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void delete(final Predicate<T> predicate) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SearchableList<T> filter(final Predicate<T> predicate) {
+      return list.filter(predicate);
+    }
+
+    @Override
+    public SearchableList<T> filter(final Predicate<T> predicate, final boolean streaming) {
+      return list.filter(predicate, streaming);
+    }
+
+    @Override
+    public T find(final Object query) {
+      return list.find(query);
+    }
+
+    @Override
+    public T find(final Predicate<T> predicate) {
+      return list.find(predicate);
+    }
+
+    @Override
+    public T get(final int index) {
+      return list.get(index);
+    }
+
+    @Override
+    public int indexOf(final Object o) {
+      return list.indexOf(o);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return list.isEmpty();
+    }
+
+    @NotNull
+    @Override
+    public Iterator<T> iterator() {
+      return new UnmodifiableListIterator<>(list.listIterator());
+    }
+
+    @Override
+    public int lastIndexOf(final Object o) {
+      return list.lastIndexOf(o);
+    }
+
+    @NotNull
+    @Override
+    public ListIterator<T> listIterator() {
+      return new UnmodifiableListIterator<>(list.listIterator());
+    }
+
+    @NotNull
+    @Override
+    public ListIterator<T> listIterator(final int index) {
+      return new UnmodifiableListIterator<>(list.listIterator());
+    }
+
+    @Override
+    public T remove(final int index) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean remove(final Object o) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(@NotNull final Collection<?> c) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean retainAll(@NotNull final Collection<?> c) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SearchableList<T> search(final Object query) {
+      return list.search(query);
+    }
+
+    @Override
+    public SearchableList<T> search(final Object query, final boolean streaming) {
+      return list.search(query, streaming);
+    }
+
+    @Override
+    public T set(final int index, final T element) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int size() {
+      return list.size();
+    }
+
+    @NotNull
+    @Override
+    public List<T> subList(final int fromIndex, final int toIndex) {
+      return Collections.unmodifiableList(list.subList(fromIndex, toIndex));
+    }
+
+    @NotNull
+    @Override
+    public Object[] toArray() {
+      return list.toArray();
+    }
+
+    @NotNull
+    @Override
+    public <T> T[] toArray(@NotNull final T[] a) {
+      return list.toArray(a);
+    }
+  }
 
     public static <T> SearchableList<T> empty() {
-        return new SearchableListWrapper<>(Collections.<T> emptyList());
+        return new SearchableListWrapper<>(Collections.emptyList());
     }
 
     public static <T> SearchableList<T> from(final List<T> list) {

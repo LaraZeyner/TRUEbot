@@ -2,8 +2,9 @@ package de.zahrie.trues.models.calendar;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,11 +48,13 @@ public class CalendarBase implements Serializable {
   private String name;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "calendar_start", nullable = false)
-  private Calendar start;
+  private Time start;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "calendar_end", nullable = false)
-  private Calendar end;
+  private Time end;
 
 }

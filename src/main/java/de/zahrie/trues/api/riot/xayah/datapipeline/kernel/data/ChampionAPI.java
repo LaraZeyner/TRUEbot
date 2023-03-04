@@ -26,12 +26,8 @@ public class ChampionAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform");
 
         final String endpoint = "lol/platform/v3/champion-rotations";
-        final ChampionRotation data = get(ChampionRotation.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(ChampionRotation.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @SuppressWarnings("unchecked")
@@ -41,29 +37,25 @@ public class ChampionAPI extends KernelService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ChampionRotation>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionRotation next() {
-                final Platform platform = iterator.next();
+          @Override
+          public ChampionRotation next() {
+            final Platform platform = iterator.next();
 
-                final String endpoint = "lol/platform/v3/champion-rotations";
-                final ChampionRotation data = get(ChampionRotation.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/platform/v3/champion-rotations";
 
-                return data;
-            }
+            return get(ChampionRotation.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

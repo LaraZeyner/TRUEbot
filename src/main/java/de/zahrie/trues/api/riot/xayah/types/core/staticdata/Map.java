@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.base.Supplier;
@@ -15,7 +15,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class Map extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map> {
-    public static class Builder {
+    public static final class Builder {
         private Integer id;
         private String name, version, locale;
         private Platform platform;
@@ -84,6 +84,7 @@ public class Map extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.s
     }
 
     public static final String MAP_LOAD_GROUP = "map";
+    @Serial
     private static final long serialVersionUID = -3422815237683049727L;
 
     public static Builder named(final String name) {
@@ -137,9 +138,7 @@ public class Map extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.s
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            MAP_LOAD_GROUP
-        });
+        return List.of(MAP_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -179,34 +178,29 @@ public class Map extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.s
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case MAP_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getId() != 0) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getName() != null) {
-                    builder.put("name", coreData.getName());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(MAP_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getId() != 0) {
+          builder.put("id", coreData.getId());
         }
+        if (coreData.getName() != null) {
+          builder.put("name", coreData.getName());
+        }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

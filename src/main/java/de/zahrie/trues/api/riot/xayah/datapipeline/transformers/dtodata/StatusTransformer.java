@@ -19,13 +19,13 @@ import de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus;
 import de.zahrie.trues.api.riot.xayah.types.data.status.Translation;
 
 public class StatusTransformer extends AbstractDataTransformer {
-    final DateTimeFormatter FORMATTER = ISODateTimeFormat.dateTime();
+    final DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
 
     @Transform(from = de.zahrie.trues.api.riot.xayah.types.dto.status.Incident.class, to = Incident.class)
     public Incident transform(final de.zahrie.trues.api.riot.xayah.types.dto.status.Incident item, final PipelineContext context) {
         final Incident incident = new Incident();
         incident.setActive(item.isActive());
-        incident.setCreated(DateTime.parse(item.getCreated_at(), FORMATTER));
+        incident.setCreated(DateTime.parse(item.getCreated_at(), formatter));
         incident.setId(item.getId());
         final List<Message> updates = new ArrayList<>(item.getUpdates().size());
         for(final de.zahrie.trues.api.riot.xayah.types.dto.status.Message update : item.getUpdates()) {
@@ -40,7 +40,7 @@ public class StatusTransformer extends AbstractDataTransformer {
         final Message message = new Message();
         message.setAuthor(item.getAuthor());
         message.setContent(item.getContent());
-        message.setCreated(DateTime.parse(item.getCreated_at(), FORMATTER));
+        message.setCreated(DateTime.parse(item.getCreated_at(), formatter));
         message.setId(item.getId());
         message.setSeverity(item.getSeverity());
         final Map<String, Translation> translations = new HashMap<>();
@@ -48,7 +48,7 @@ public class StatusTransformer extends AbstractDataTransformer {
             translations.put(translation.getLocale(), transform(translation, context));
         }
         message.setTranslations(translations);
-        message.setUpdated(DateTime.parse(item.getUpdated_at(), FORMATTER));
+        message.setUpdated(DateTime.parse(item.getUpdated_at(), formatter));
         message.setHeading(item.getHeading());
         return message;
     }
@@ -96,7 +96,7 @@ public class StatusTransformer extends AbstractDataTransformer {
     public de.zahrie.trues.api.riot.xayah.types.dto.status.Incident transform(final Incident item, final PipelineContext context) {
         final de.zahrie.trues.api.riot.xayah.types.dto.status.Incident incident = new de.zahrie.trues.api.riot.xayah.types.dto.status.Incident();
         incident.setActive(item.isActive());
-        incident.setCreated_at(item.getCreated().toString(FORMATTER));
+        incident.setCreated_at(item.getCreated().toString(formatter));
         incident.setId(item.getId());
         final List<de.zahrie.trues.api.riot.xayah.types.dto.status.Message> updates = new ArrayList<>(item.getUpdates().size());
         for(final Message update : item.getUpdates()) {
@@ -111,7 +111,7 @@ public class StatusTransformer extends AbstractDataTransformer {
         final de.zahrie.trues.api.riot.xayah.types.dto.status.Message message = new de.zahrie.trues.api.riot.xayah.types.dto.status.Message();
         message.setAuthor(item.getAuthor());
         message.setContent(item.getContent());
-        message.setCreated_at(item.getCreated().toString(FORMATTER));
+        message.setCreated_at(item.getCreated().toString(formatter));
         message.setId(item.getId());
         message.setSeverity(item.getSeverity());
         final List<de.zahrie.trues.api.riot.xayah.types.dto.status.Translation> translations = new ArrayList<>(item.getTranslations().size());
@@ -119,7 +119,7 @@ public class StatusTransformer extends AbstractDataTransformer {
             translations.add(transform(translation, context));
         }
         message.setTranslations(translations);
-        message.setUpdated_at(item.getUpdated().toString(FORMATTER));
+        message.setUpdated_at(item.getUpdated().toString(formatter));
         message.setHeading(item.getHeading());
         return message;
     }

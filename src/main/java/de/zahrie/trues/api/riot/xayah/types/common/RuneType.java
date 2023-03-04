@@ -13,7 +13,7 @@ public enum RuneType {
 
     private static final Map<String, RuneType> BY_COLOR = getByColor();
 
-    private static final Map<String, RuneType> getByColor() {
+    private static Map<String, RuneType> getByColor() {
         final Builder<String, RuneType> builder = ImmutableMap.builder();
         for(final RuneType type : values()) {
             builder.put(type.color, type);
@@ -27,7 +27,7 @@ public enum RuneType {
 
     private final String color;
 
-    private RuneType(final String color) {
+    RuneType(final String color) {
         this.color = color;
     }
 

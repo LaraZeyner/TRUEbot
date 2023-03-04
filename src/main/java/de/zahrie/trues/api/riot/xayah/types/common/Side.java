@@ -9,7 +9,7 @@ public enum Side {
 
     private static final java.util.Map<Integer, Side> BY_ID = getById();
 
-    private static final java.util.Map<Integer, Side> getById() {
+    private static java.util.Map<Integer, Side> getById() {
         final Builder<Integer, Side> builder = ImmutableMap.builder();
         for(final Side team : values()) {
             builder.put(team.id, team);
@@ -23,7 +23,7 @@ public enum Side {
 
     private final int id;
 
-    private Side(final int id) {
+    Side(final int id) {
         this.id = id;
     }
 

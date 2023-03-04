@@ -27,7 +27,7 @@ public enum Region {
     private final String defaultLocale;
     private final String tag;
 
-    private Region(final String tag, final String defaultLocale) {
+    Region(final String tag, final String defaultLocale) {
         this.tag = tag;
         this.defaultLocale = defaultLocale;
     }

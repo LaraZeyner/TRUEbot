@@ -28,7 +28,7 @@ public enum Platform {
 
     private static final java.util.Map<String, Platform> BY_TAG = getByTag();
 
-    private static final java.util.Map<String, Platform> getByTag() {
+    private static java.util.Map<String, Platform> getByTag() {
         final Builder<String, Platform> builder = ImmutableMap.builder();
         for(final Platform platform : values()) {
             builder.put(platform.tag, platform);
@@ -43,7 +43,7 @@ public enum Platform {
     private final String defaultLocale;
     private final String tag;
 
-    private Platform(final String tag, final String defaultLocale) {
+    Platform(final String tag, final String defaultLocale) {
         this.tag = tag;
         this.defaultLocale = defaultLocale;
     }

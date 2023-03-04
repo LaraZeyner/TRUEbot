@@ -28,12 +28,8 @@ public class SpectatorAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId");
 
         final String endpoint = "lol/spectator/v4/active-games/by-summoner/" + summonerId;
-        final CurrentGameInfo data = get(CurrentGameInfo.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(CurrentGameInfo.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @Get(FeaturedGames.class)
@@ -42,12 +38,8 @@ public class SpectatorAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform");
 
         final String endpoint = "lol/spectator/v4/featured-games";
-        final FeaturedGames data = get(FeaturedGames.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(FeaturedGames.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @SuppressWarnings("unchecked")
@@ -58,29 +50,25 @@ public class SpectatorAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<CurrentGameInfo>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public CurrentGameInfo next() {
-                final String summonerId = iterator.next();
+          @Override
+          public CurrentGameInfo next() {
+            final String summonerId = iterator.next();
 
-                final String endpoint = "lol/spectator/v4/active-games/by-summoner/" + summonerId;
-                final CurrentGameInfo data = get(CurrentGameInfo.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/spectator/v4/active-games/by-summoner/" + summonerId;
 
-                return data;
-            }
+            return get(CurrentGameInfo.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -91,29 +79,25 @@ public class SpectatorAPI extends KernelService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<FeaturedGames>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public FeaturedGames next() {
-                final Platform platform = iterator.next();
+          @Override
+          public FeaturedGames next() {
+            final Platform platform = iterator.next();
 
-                final String endpoint = "lol/spectator/v4/featured-games";
-                final FeaturedGames data = get(FeaturedGames.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/spectator/v4/featured-games";
 
-                return data;
-            }
+            return get(FeaturedGames.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

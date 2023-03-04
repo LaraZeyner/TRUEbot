@@ -1,12 +1,10 @@
 package de.zahrie.trues.api.riot.xayah.types.core.spectator;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.joda.time.Duration;
-
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.CloseableIterators;
@@ -16,9 +14,10 @@ import de.zahrie.trues.api.riot.xayah.types.common.Region;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
+import org.joda.time.Duration;
 
 public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatch, de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -48,7 +47,7 @@ public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zah
         }
     }
 
-    public static class ManyBuilder {
+    public static final class ManyBuilder {
         private final Iterable<Platform> platforms;
         private boolean streaming = false;
 
@@ -69,6 +68,7 @@ public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zah
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 5550281909391512286L;
 
     public static FeaturedMatches get() {
@@ -121,9 +121,7 @@ public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zah
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -143,22 +141,18 @@ public class FeaturedMatches extends GhostObject.ListProxy<FeaturedMatch, de.zah
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(data1 -> new FeaturedMatch(data1));
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(FeaturedMatch::new);
+      }
     }
 }

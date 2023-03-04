@@ -1,16 +1,19 @@
 package de.zahrie.trues.api.riot.xayah.types.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +82,7 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
             }
         }
 
+        @Serial
         private static final long serialVersionUID = -3228932387340246571L;
         private final SearchableList<T> data;
 
@@ -114,12 +118,12 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
         }
 
         @Override
-        public boolean addAll(final Collection<? extends T> items) {
+        public boolean addAll(@NotNull final Collection<? extends T> items) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean addAll(final int index, final Collection<? extends T> items) {
+        public boolean addAll(final int index, @NotNull final Collection<? extends T> items) {
             throw new UnsupportedOperationException();
         }
 
@@ -129,8 +133,8 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
         }
 
         @Override
-        public boolean containsAll(final Collection<?> items) {
-            return data.containsAll(items);
+        public boolean containsAll(@NotNull final Collection<?> items) {
+            return new HashSet<>(data).containsAll(items);
         }
 
         @Override
@@ -209,12 +213,12 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
         }
 
         @Override
-        public boolean removeAll(final Collection<?> items) {
+        public boolean removeAll(@NotNull final Collection<?> items) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean retainAll(final Collection<?> items) {
+        public boolean retainAll(@NotNull final Collection<?> items) {
             throw new UnsupportedOperationException();
         }
 
@@ -248,14 +252,14 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
             return data.toArray();
         }
 
-        @SuppressWarnings("hiding")
         @Override
-        public <T> T[] toArray(final T[] array) {
+        public <T> T[] toArray(@NotNull final T[] array) {
             return data.toArray(array);
         }
     }
 
     public static abstract class MapProxy<K, V, CK, CV, P extends CoreData.MapProxy<CK, CV>> extends OriannaObject<P> implements Map<K, V> {
+        @Serial
         private static final long serialVersionUID = 2266943596124327746L;
         private final Map<K, V> data;
 
@@ -325,7 +329,7 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
         }
 
         @Override
-        public void putAll(final Map<? extends K, ? extends V> items) {
+        public void putAll(@NotNull final Map<? extends K, ? extends V> items) {
             throw new UnsupportedOperationException();
         }
 
@@ -349,6 +353,7 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
     private static final Logger LOGGER = LoggerFactory.getLogger(OriannaObject.class);
     private static final ObjectMapper MSGPACK_MAPPER =
         new ObjectMapper(new MessagePackFactory()).registerModule(new JodaModule()).setSerializationInclusion(Include.NON_DEFAULT);
+    @Serial
     private static final long serialVersionUID = 5467384615747172442L;
 
     @JsonValue
@@ -372,13 +377,8 @@ public abstract class OriannaObject<T extends CoreData> extends AbstractSearchab
         @SuppressWarnings("rawtypes")
         final OriannaObject other = (OriannaObject)obj;
         if(coreData == null) {
-            if(other.coreData != null) {
-                return false;
-            }
-        } else if(!coreData.equals(other.coreData)) {
-            return false;
-        }
-        return true;
+          return other.coreData == null;
+        } else return coreData.equals(other.coreData);
     }
 
     public T getCoreData() {

@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import org.joda.time.DateTime;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Patch extends CoreData {
+    @Serial
     private static final long serialVersionUID = -7009192986793480792L;
     private String platform, name;
     private int season = -1;
@@ -47,13 +50,8 @@ public class Patch extends CoreData {
             return false;
         }
         if(startTime == null) {
-            if(other.startTime != null) {
-                return false;
-            }
-        } else if(!startTime.equals(other.startTime)) {
-            return false;
-        }
-        return true;
+          return other.startTime == null;
+        } else return startTime.equals(other.startTime);
     }
 
     /**

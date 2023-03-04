@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.util.logger.Logger;
 
 /**
@@ -17,7 +18,7 @@ public record HTMLRequester(URL url) {
     if (content.contains("webmaster has already been notified")) {
       content = determineContent();
     }
-    return new HTML(content);
+    return new HTML(Chain.of(content));
   }
 
   private String determineContent() {

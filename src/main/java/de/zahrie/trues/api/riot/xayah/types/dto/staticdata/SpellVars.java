@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class SpellVars extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4827436370909705413L;
     private List<Double> coeff;
     private String ranksWith, dyn, link, key;
@@ -54,13 +56,8 @@ public class SpellVars extends DataObject {
             return false;
         }
         if(ranksWith == null) {
-            if(other.ranksWith != null) {
-                return false;
-            }
-        } else if(!ranksWith.equals(other.ranksWith)) {
-            return false;
-        }
-        return true;
+          return other.ranksWith == null;
+        } else return ranksWith.equals(other.ranksWith);
     }
 
     /**

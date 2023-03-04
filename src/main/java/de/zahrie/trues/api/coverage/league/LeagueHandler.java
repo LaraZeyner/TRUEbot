@@ -10,7 +10,7 @@ import de.zahrie.trues.api.coverage.team.TeamHandler;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -23,6 +23,7 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   private static final long serialVersionUID = -5698606611490610348L;
 
   @Builder
+      //TODO (Abgie) 01.03.2023: Never used
   LeagueHandler(String url, League league, List<PrimeTeam> teams, List<LeaguePlayday> playdays) {
     super(url, league, teams, playdays);
   }

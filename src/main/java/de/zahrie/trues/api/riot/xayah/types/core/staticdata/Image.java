@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -9,13 +10,14 @@ import de.zahrie.trues.api.riot.xayah.Orianna;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class Image extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Image> {
+    @Serial
     private static final long serialVersionUID = -6752564052626945287L;
 
     private final Supplier<BufferedImage> image = Suppliers.memoize(() -> {
         if(coreData.getVersion() == null || coreData.getGroup() == null || coreData.getFull() == null) {
             return null;
         }
-        return Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.<String, Object> of("url", getURL()));
+        return Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.of("url", getURL()));
     });
 
     private final Supplier<Sprite> sprite = Suppliers.memoize(() -> {

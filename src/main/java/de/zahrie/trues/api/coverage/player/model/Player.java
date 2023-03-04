@@ -2,15 +2,16 @@ package de.zahrie.trues.api.coverage.player.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.models.discord.member.DiscordMember;
 import de.zahrie.trues.models.riot.matchhistory.Performance;
 import de.zahrie.trues.util.Const;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,6 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -87,8 +89,9 @@ public class Player implements Serializable {
   private String elo = "Unranked";
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "updated", nullable = false)
-  private Calendar updated;
+  private Time updated;
 
   @Column(name = "played", nullable = false)
   private boolean played = false;

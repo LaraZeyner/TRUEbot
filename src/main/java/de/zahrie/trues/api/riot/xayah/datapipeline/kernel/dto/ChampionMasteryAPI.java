@@ -30,12 +30,8 @@ public class ChampionMasteryAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId", championId, "championId");
 
         final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId + "/by-champion/" + championId;
-        final ChampionMastery data = get(ChampionMastery.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(ChampionMastery.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @Get(ChampionMasteries.class)
@@ -45,12 +41,8 @@ public class ChampionMasteryAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId");
 
         final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId;
-        final ChampionMasteries data = get(ChampionMasteries.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(ChampionMasteries.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @Get(ChampionMasteryScore.class)
@@ -60,12 +52,8 @@ public class ChampionMasteryAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId");
 
         final String endpoint = "lol/champion-mastery/v4/scores/by-summoner/" + summonerId;
-        final ChampionMasteryScore data = get(ChampionMasteryScore.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(ChampionMasteryScore.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @SuppressWarnings("unchecked")
@@ -83,27 +71,27 @@ public class ChampionMasteryAPI extends KernelService {
         }
 
         final Iterator<Number> iterator = championIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMastery>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMastery next() {
-                final Number championId = iterator.next();
-                for(final ChampionMastery mastery : data) {
-                    if(mastery.getChampionId() == championId.longValue()) {
-                        return mastery;
-                    }
-                }
-                return null;
+          @Override
+          public ChampionMastery next() {
+            final Number championId = iterator.next();
+            for (final ChampionMastery mastery : data) {
+              if (mastery.getChampionId() == championId.longValue()) {
+                return mastery;
+              }
             }
+            return null;
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -115,29 +103,25 @@ public class ChampionMasteryAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteries>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMasteries next() {
-                final String summonerId = iterator.next();
+          @Override
+          public ChampionMasteries next() {
+            final String summonerId = iterator.next();
 
-                final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId;
-                final ChampionMasteries data = get(ChampionMasteries.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId;
 
-                return data;
-            }
+            return get(ChampionMasteries.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -149,29 +133,25 @@ public class ChampionMasteryAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteryScore>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMasteryScore next() {
-                final String summonerId = iterator.next();
+          @Override
+          public ChampionMasteryScore next() {
+            final String summonerId = iterator.next();
 
-                final String endpoint = "lol/champion-mastery/v4/scores/by-summoner/" + summonerId;
-                final ChampionMasteryScore data = get(ChampionMasteryScore.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/champion-mastery/v4/scores/by-summoner/" + summonerId;
 
-                return data;
-            }
+            return get(ChampionMasteryScore.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

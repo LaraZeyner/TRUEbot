@@ -4,10 +4,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public interface RateLimiter {
-    public static interface ReservedPermit {
-        public void acquire();
+    interface ReservedPermit {
+        void acquire();
 
-        public void cancel();
+        void cancel();
     }
 
     enum Type {
@@ -24,27 +24,27 @@ public interface RateLimiter {
         }
     }
 
-    public void acquire() throws InterruptedException;
+    void acquire() throws InterruptedException;
 
-    public boolean acquire(final long timeout, final TimeUnit unit) throws InterruptedException;
+    boolean acquire(final long timeout, final TimeUnit unit) throws InterruptedException;
 
-    public <T> T call(final Callable<T> callable) throws InterruptedException, Exception;
+    <T> T call(final Callable<T> callable) throws Exception;
 
-    public <T> T call(final Callable<T> callable, final long timeout, final TimeUnit unit) throws InterruptedException, Exception;
+    <T> T call(final Callable<T> callable, final long timeout, final TimeUnit unit) throws Exception;
 
-    public void call(final Runnable runnable) throws InterruptedException;
+    void call(final Runnable runnable) throws InterruptedException;
 
-    public void call(final Runnable runnable, final long timeout, final TimeUnit unit) throws InterruptedException;
+    void call(final Runnable runnable, final long timeout, final TimeUnit unit) throws InterruptedException;
 
-    public int permitsIssued();
+    int permitsIssued();
 
-    public void release();
+    void release();
 
-    public ReservedPermit reserve() throws InterruptedException;
+    ReservedPermit reserve() throws InterruptedException;
 
-    public ReservedPermit reserve(final long timeout, final TimeUnit unit) throws InterruptedException;
+    ReservedPermit reserve(final long timeout, final TimeUnit unit) throws InterruptedException;
 
-    public void restrict(long afterTime, TimeUnit afterUnit, long forTime, TimeUnit forUnit);
+    void restrict(long afterTime, TimeUnit afterUnit, long forTime, TimeUnit forUnit);
 
-    public void restrictFor(final long time, final TimeUnit unit);
+    void restrictFor(final long time, final TimeUnit unit);
 }

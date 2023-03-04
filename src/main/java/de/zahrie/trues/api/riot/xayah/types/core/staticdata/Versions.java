@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class Versions extends GhostObject.ListProxy<String, String, de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -45,7 +46,7 @@ public class Versions extends GhostObject.ListProxy<String, String, de.zahrie.tr
         }
     }
 
-    public static class ManyBuilder {
+    public static final class ManyBuilder {
         private final Iterable<Platform> platforms;
         private boolean streaming = false;
 
@@ -66,6 +67,7 @@ public class Versions extends GhostObject.ListProxy<String, String, de.zahrie.tr
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 6003302668600909723L;
 
     public static Versions get() {
@@ -153,9 +155,7 @@ public class Versions extends GhostObject.ListProxy<String, String, de.zahrie.tr
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -168,22 +168,18 @@ public class Versions extends GhostObject.ListProxy<String, String, de.zahrie.tr
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(Functions.<String> identity());
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(Functions.identity());
+      }
     }
 }

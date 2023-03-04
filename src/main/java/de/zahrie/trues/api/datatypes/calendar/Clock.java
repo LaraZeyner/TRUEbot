@@ -1,4 +1,4 @@
-package de.zahrie.trues.util.util;
+package de.zahrie.trues.api.datatypes.calendar;
 
 /**
  * Created by Lara on 27.02.2023 for TRUEbot

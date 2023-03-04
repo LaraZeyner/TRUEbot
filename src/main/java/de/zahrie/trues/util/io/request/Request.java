@@ -25,7 +25,7 @@ public final class Request {
     } catch (MalformedURLException urlException) {
       Logger.getLogger("HTML").severe("Wrong url", urlException);
     }
-    return new HTML("");
+    return new HTML();
   }
 
 }

@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.league;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.season.PrimeSeason;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 
 /**
  * Created by Lara on 15.02.2023 for TRUEbot

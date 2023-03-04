@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class Champion extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion> {
-    public static class Builder {
+    public static final class Builder {
         private Integer id;
         private Set<String> includedData;
         private String name, key, version, locale;
@@ -110,6 +110,7 @@ public class Champion extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
     }
 
     public static final String CHAMPION_LOAD_GROUP = "champion";
+    @Serial
     private static final long serialVersionUID = -2685748491353023270L;
 
     public static Builder named(final String name) {
@@ -282,9 +283,7 @@ public class Champion extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            CHAMPION_LOAD_GROUP
-        });
+        return List.of(CHAMPION_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -373,40 +372,35 @@ public class Champion extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case CHAMPION_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getId() != 0) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getName() != null) {
-                    builder.put("name", coreData.getName());
-                }
-                if(coreData.getKey() != null) {
-                    builder.put("key", coreData.getKey());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                if(coreData.getIncludedData() != null) {
-                    builder.put("includedData", coreData.getIncludedData());
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(CHAMPION_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getId() != 0) {
+          builder.put("id", coreData.getId());
         }
+        if (coreData.getName() != null) {
+          builder.put("name", coreData.getName());
+        }
+        if (coreData.getKey() != null) {
+          builder.put("key", coreData.getKey());
+        }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        if (coreData.getIncludedData() != null) {
+          builder.put("includedData", coreData.getIncludedData());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.champion;
 
+import java.io.Serial;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ChampionRotation extends CoreData {
+    @Serial
     private static final long serialVersionUID = 2890283121406577730L;
     private Set<Integer> freeChampionIds, freeChampionIdsForNewPlayers;
     private int maxNewPlayerLevel;
@@ -40,13 +42,8 @@ public class ChampionRotation extends CoreData {
             return false;
         }
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

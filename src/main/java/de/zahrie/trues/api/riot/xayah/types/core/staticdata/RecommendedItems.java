@@ -1,8 +1,8 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.types.common.GameMode;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
@@ -13,10 +13,11 @@ public class RecommendedItems extends OriannaObject.ListProxy<ItemSet, de.zahrie
         de.zahrie.trues.api.riot.xayah.types.common.Map.SUMMONERS_RIFT, "TT", de.zahrie.trues.api.riot.xayah.types.common.Map.TWISTED_TREELINE, "HA",
         de.zahrie.trues.api.riot.xayah.types.common.Map.HOWLING_ABYSS, "CS", de.zahrie.trues.api.riot.xayah.types.common.Map.THE_CRYSTAL_SCAR);
 
+    @Serial
     private static final long serialVersionUID = 7485737031964917542L;
 
     public RecommendedItems(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.RecommendedItems coreData) {
-        super(coreData, set -> new ItemSet(set));
+        super(coreData, ItemSet::new);
     }
 
     @Searchable(de.zahrie.trues.api.riot.xayah.types.common.Map.class)

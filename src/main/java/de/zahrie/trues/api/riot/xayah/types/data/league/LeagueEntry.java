@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class LeagueEntry extends CoreData {
+    @Serial
     private static final long serialVersionUID = 2972094204019879043L;
     private String division, summonerName, platform, summonerId, queue, tier, leagueId;
     private boolean onHotStreak, veteran, inactive, freshBlood;
@@ -95,10 +98,7 @@ public class LeagueEntry extends CoreData {
         if(veteran != other.veteran) {
             return false;
         }
-        if(wins != other.wins) {
-            return false;
-        }
-        return true;
+      return wins == other.wins;
     }
 
     /**

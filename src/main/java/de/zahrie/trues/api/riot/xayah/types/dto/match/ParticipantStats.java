@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ParticipantStats extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4322056616562898366L;
 
     private int altarsCaptured, altarsNeutralized, assists, champLevel, combatPlayerScore, deaths, doubleKills, goldEarned, goldSpent, inhibitorKills, item0,
@@ -354,10 +357,7 @@ public class ParticipantStats extends DataObject {
         if(wardsPlaced != other.wardsPlaced) {
             return false;
         }
-        if(win != other.win) {
-            return false;
-        }
-        return true;
+      return win == other.win;
     }
 
     /**

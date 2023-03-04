@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -8,6 +9,7 @@ import org.joda.time.Duration;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class MatchList extends CoreData.ListProxy<MatchReference> {
+    @Serial
     private static final long serialVersionUID = 4476774447235568745L;
     private Set<Integer> champions, queues, seasons;
     private Duration maxTimeRange, historyLength;
@@ -101,13 +103,8 @@ public class MatchList extends CoreData.ListProxy<MatchReference> {
             return false;
         }
         if(startTime == null) {
-            if(other.startTime != null) {
-                return false;
-            }
-        } else if(!startTime.equals(other.startTime)) {
-            return false;
-        }
-        return true;
+          return other.startTime == null;
+        } else return startTime.equals(other.startTime);
     }
 
     /**

@@ -16,8 +16,6 @@ public enum LeagueTier {
   Division_9(9),
   Swiss_Starter(10);
 
-  private final int index;
-
   private static int idFromName(String name) {
     if (name.startsWith("Division ")) {
       return Integer.parseInt(name.replace("Division ", "").split("\\.")[0]);
@@ -28,5 +26,7 @@ public enum LeagueTier {
   public static LeagueTier fromName(String name) {
     return Arrays.stream(LeagueTier.values()).filter(tier -> tier.index == idFromName(name)).findFirst().orElse(null);
   }
+
+  private final int index;
 
 }

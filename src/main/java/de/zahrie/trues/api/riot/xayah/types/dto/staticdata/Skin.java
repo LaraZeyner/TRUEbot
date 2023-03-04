@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Skin extends DataObject {
+    @Serial
     private static final long serialVersionUID = 1324299868449271270L;
     private String name;
     private int num, id;
@@ -33,10 +36,7 @@ public class Skin extends DataObject {
         } else if(!name.equals(other.name)) {
             return false;
         }
-        if(num != other.num) {
-            return false;
-        }
-        return true;
+      return num == other.num;
     }
 
     /**

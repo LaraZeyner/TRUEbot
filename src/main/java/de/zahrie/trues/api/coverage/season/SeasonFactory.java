@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.coverage.season;
 
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
 /**

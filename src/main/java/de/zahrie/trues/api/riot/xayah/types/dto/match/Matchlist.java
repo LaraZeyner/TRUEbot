@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Matchlist extends DataObject {
+    @Serial
     private static final long serialVersionUID = 1154277546012627022L;
     private List<MatchReference> matches;
     private String platform, accountId;
@@ -88,10 +90,7 @@ public class Matchlist extends DataObject {
         if(startTime != other.startTime) {
             return false;
         }
-        if(totalGames != other.totalGames) {
-            return false;
-        }
-        return true;
+      return totalGames == other.totalGames;
     }
 
     /**

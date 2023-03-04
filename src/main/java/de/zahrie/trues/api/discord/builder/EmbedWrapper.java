@@ -3,13 +3,11 @@ package de.zahrie.trues.api.discord.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.util.Const;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-/**
- * Created by Lara on 12.02.2023 for TRUEbot
- */
 @Data
 public class EmbedWrapper {
 
@@ -31,24 +29,24 @@ public class EmbedWrapper {
     return this;
   }
 
-  public List<String> merge() {
+  public List<Chain> merge() {
     if (this.content.isEmpty()) {
-      return List.of("");
+      return List.of(Chain.of());
     }
-    final List<String> data = new ArrayList<>();
-    StringBuilder out = new StringBuilder();
+    final List<Chain> data = new ArrayList<>();
+    Chain out = Chain.of();
     for (List<String> texts : this.content) {
       for (String text : texts) {
         if (out.length() + text.length() > Const.DISCORD_MESSAGE_MAX_CHARACTERS) {
-          data.add(out.toString());
-          out = new StringBuilder(text);
+          data.add(out);
+          out = Chain.of(text);
         } else {
-          out.append(text);
+          out = out.add(text);
         }
       }
-      out.append("\n\n");
+      out = out.add("\n\n");
     }
-    data.add(out.toString());
+    data.add(out);
 
     return data;
   }

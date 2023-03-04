@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MasteryTree extends DataObject {
+    @Serial
     private static final long serialVersionUID = -254598603489598202L;
     private List<MasteryTreeList> Resolve, Ferocity, Cunning;
 
@@ -35,13 +37,8 @@ public class MasteryTree extends DataObject {
             return false;
         }
         if(Resolve == null) {
-            if(other.Resolve != null) {
-                return false;
-            }
-        } else if(!Resolve.equals(other.Resolve)) {
-            return false;
-        }
-        return true;
+          return other.Resolve == null;
+        } else return Resolve.equals(other.Resolve);
     }
 
     /**

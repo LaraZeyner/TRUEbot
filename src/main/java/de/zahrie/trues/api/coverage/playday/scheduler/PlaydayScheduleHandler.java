@@ -6,10 +6,10 @@ import de.zahrie.trues.api.coverage.playday.config.PlaydayConfig;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayRange;
 import de.zahrie.trues.api.coverage.playday.config.RelativeTimeRange;
 import de.zahrie.trues.api.coverage.playday.config.SchedulingRange;
-import de.zahrie.trues.api.coverage.playday.config.TimeOffset;
-import de.zahrie.trues.api.coverage.playday.config.TimeRange;
+import de.zahrie.trues.api.datatypes.calendar.TimeOffset;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 
 public record PlaydayScheduleHandler(PlayStage stage, int index, LeagueTier tier) {
 

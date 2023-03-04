@@ -14,7 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public abstract class Leagues {
-    public static class Builder {
+    public static final class Builder {
         private final Iterable<String> ids;
         private Platform platform;
         private boolean streaming = false;
@@ -54,8 +54,8 @@ public abstract class Leagues {
         }
     }
 
-    public static class SelectBuilder {
-        public class SubBuilder {
+    public static final class SelectBuilder {
+        public final class SubBuilder {
             private Platform platform;
             private final Iterable<Queue> queues;
             private boolean streaming = false;

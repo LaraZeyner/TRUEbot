@@ -1,16 +1,19 @@
 package de.zahrie.trues.api.riot.xayah.types.data;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.OriannaException;
 public abstract class CoreData implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public static class ListProxy<T> extends CoreData implements List<T> {
+        @Serial
         private static final long serialVersionUID = 4033035619862826400L;
 
         @JsonProperty
@@ -51,12 +55,12 @@ public abstract class CoreData implements Serializable {
         }
 
         @Override
-        public boolean addAll(final Collection<? extends T> items) {
+        public boolean addAll(@NotNull final Collection<? extends T> items) {
             return data.addAll(items);
         }
 
         @Override
-        public boolean addAll(final int index, final Collection<? extends T> items) {
+        public boolean addAll(final int index, @NotNull final Collection<? extends T> items) {
             return data.addAll(index, items);
         }
 
@@ -71,8 +75,8 @@ public abstract class CoreData implements Serializable {
         }
 
         @Override
-        public boolean containsAll(final Collection<?> items) {
-            return data.containsAll(items);
+        public boolean containsAll(@NotNull final Collection<?> items) {
+            return new HashSet<>(data).containsAll(items);
         }
 
         @Override
@@ -88,14 +92,7 @@ public abstract class CoreData implements Serializable {
             }
             @SuppressWarnings("rawtypes")
             final ListProxy other = (ListProxy)obj;
-            if(data == null) {
-                if(other.data != null) {
-                    return false;
-                }
-            } else if(!data.equals(other.data)) {
-                return false;
-            }
-            return true;
+          return data.equals(other.data);
         }
 
         @Override
@@ -107,7 +104,7 @@ public abstract class CoreData implements Serializable {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (data == null ? 0 : data.hashCode());
+            result = prime * result + data.hashCode();
             return result;
         }
 
@@ -153,12 +150,12 @@ public abstract class CoreData implements Serializable {
         }
 
         @Override
-        public boolean removeAll(final Collection<?> items) {
+        public boolean removeAll(@NotNull final Collection<?> items) {
             return data.removeAll(items);
         }
 
         @Override
-        public boolean retainAll(final Collection<?> items) {
+        public boolean retainAll(@NotNull final Collection<?> items) {
             return data.retainAll(items);
         }
 
@@ -182,15 +179,15 @@ public abstract class CoreData implements Serializable {
             return data.toArray();
         }
 
-        @SuppressWarnings("hiding")
         @Override
-        public <T> T[] toArray(final T[] a) {
+        public <T> T[] toArray(@NotNull final T[] a) {
             return data.toArray(a);
         }
     }
 
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public static class MapProxy<K, V> extends CoreData implements Map<K, V> {
+        @Serial
         private static final long serialVersionUID = -5422339913625018678L;
         private final Map<K, V> data = new HashMap<>();
 
@@ -236,7 +233,7 @@ public abstract class CoreData implements Serializable {
         }
 
         @Override
-        public void putAll(final Map<? extends K, ? extends V> m) {
+        public void putAll(@NotNull final Map<? extends K, ? extends V> m) {
             data.putAll(m);
         }
 
@@ -260,6 +257,7 @@ public abstract class CoreData implements Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreData.class);
     private static final ObjectMapper MSGPACK_MAPPER =
         new ObjectMapper(new MessagePackFactory()).registerModule(new JodaModule()).setSerializationInclusion(Include.NON_DEFAULT);
+    @Serial
     private static final long serialVersionUID = 4701497355193788806L;
 
     public static <T extends CoreData> T fromBytes(final Class<T> type, final byte[] msgpack) {

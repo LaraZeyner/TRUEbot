@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class TournamentMatches extends DataObject.ListProxy<Long> {
+    @Serial
     private static final long serialVersionUID = -2898990407723565707L;
     private String platform, tournamentCode;
 
@@ -34,13 +37,8 @@ public class TournamentMatches extends DataObject.ListProxy<Long> {
             return false;
         }
         if(tournamentCode == null) {
-            if(other.tournamentCode != null) {
-                return false;
-            }
-        } else if(!tournamentCode.equals(other.tournamentCode)) {
-            return false;
-        }
-        return true;
+          return other.tournamentCode == null;
+        } else return tournamentCode.equals(other.tournamentCode);
     }
 
     /**

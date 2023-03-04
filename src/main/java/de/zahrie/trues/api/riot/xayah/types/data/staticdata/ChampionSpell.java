@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ChampionSpell extends CoreData {
+    @Serial
     private static final long serialVersionUID = 693281220201644733L;
     private List<Image> alternativeImages;
     private List<Double> cooldowns;
@@ -144,13 +146,8 @@ public class ChampionSpell extends CoreData {
             return false;
         }
         if(variables == null) {
-            if(other.variables != null) {
-                return false;
-            }
-        } else if(!variables.equals(other.variables)) {
-            return false;
-        }
-        return true;
+          return other.variables == null;
+        } else return variables.equals(other.variables);
     }
 
     /**

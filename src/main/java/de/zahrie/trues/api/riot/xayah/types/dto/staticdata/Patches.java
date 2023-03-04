@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Patches extends DataObject {
+    @Serial
     private static final long serialVersionUID = -3955844801867797013L;
     private List<Patch> patches;
     private String platform;
@@ -38,13 +40,8 @@ public class Patches extends DataObject {
             return false;
         }
         if(shifts == null) {
-            if(other.shifts != null) {
-                return false;
-            }
-        } else if(!shifts.equals(other.shifts)) {
-            return false;
-        }
-        return true;
+          return other.shifts == null;
+        } else return shifts.equals(other.shifts);
     }
 
     /**

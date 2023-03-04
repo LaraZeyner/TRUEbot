@@ -175,7 +175,7 @@ public class League extends GhostObject.ListProxy<LeagueEntry, de.zahrie.trues.a
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
+        final ImmutableMap.Builder<String, Object> builder;
       if (group.equals(LIST_PROXY_LOAD_GROUP)) {
         builder = ImmutableMap.builder();
         if (coreData.getPlatform() != null) {

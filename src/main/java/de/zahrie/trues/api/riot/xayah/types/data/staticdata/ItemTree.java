@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ItemTree extends CoreData {
+    @Serial
     private static final long serialVersionUID = 6198799968608387701L;
     private String header;
     private List<String> tags;
@@ -29,13 +31,8 @@ public class ItemTree extends CoreData {
             return false;
         }
         if(tags == null) {
-            if(other.tags != null) {
-                return false;
-            }
-        } else if(!tags.equals(other.tags)) {
-            return false;
-        }
-        return true;
+          return other.tags == null;
+        } else return tags.equals(other.tags);
     }
 
     /**

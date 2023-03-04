@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MetaData extends DataObject {
+    @Serial
     private static final long serialVersionUID = -8355230186641780544L;
     private boolean isRune;
     private String tier, type;
@@ -34,13 +37,8 @@ public class MetaData extends DataObject {
             return false;
         }
         if(type == null) {
-            if(other.type != null) {
-                return false;
-            }
-        } else if(!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+          return other.type == null;
+        } else return type.equals(other.type);
     }
 
     /**

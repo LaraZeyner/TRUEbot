@@ -5,75 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-import lombok.NonNull;
-
 public final class Util {
-
-  public static String between(String text, String start, String end) {
-    return Util.between(text, start, end, 1);
-  }
-
-  public static String between(String text, String start, String end, int occurrence) {
-    int startIndex = -1;
-    int endIndex = text.length();
-    if (start != null) {
-      startIndex = Util.ordinalIndexOf(text, start, occurrence) + start.length() - 1;
-      if (end != null) {
-        endIndex = text.indexOf(end, startIndex + 1);
-      }
-    } else if (end != null) {
-      endIndex = Util.ordinalIndexOf(text, end, occurrence);
-    }
-
-    if (endIndex <= startIndex) {
-      throw new IndexOutOfBoundsException("Index-Fehler");
-    }
-    return text.substring(startIndex + 1, endIndex);
-  }
-
-  public static int ordinalIndexOf(String text, String key, int ordinal) {
-    int pos = text.lastIndexOf(key);
-    if (ordinal < 0) {
-      ordinal = Math.abs(ordinal);
-      while (--ordinal > 0 && pos != -1)
-        pos = text.lastIndexOf(key, pos - 1);
-    } else {
-      pos = text.indexOf(key);
-      while (--ordinal > 0 && pos != -1)
-        pos = text.indexOf(key, pos + 1);
-    }
-    return pos;
-  }
-
-  public static String uncapitalizeFirst(String str) {
-    return str.substring(0, 1).toLowerCase() + str.substring(1);
-  }
-
-  public static String strip(String text, int length) {
-    return text.substring(0, Math.min(length, text.length()));
-  }
-
-  public static String capitalize(String str) {
-    str = str.toLowerCase();
-    final char[] buffer = str.toCharArray();
-    boolean capitalizeNext = true;
-    char[] charArray = str.toCharArray();
-    for (int i = 0; i < charArray.length; i++) {
-      final char ch = charArray[i];
-      if (Character.isSpaceChar(ch)) {
-        capitalizeNext = true;
-      } else if (capitalizeNext) {
-        buffer[i] = Character.toTitleCase(ch);
-        capitalizeNext = false;
-      }
-    }
-    return new String(buffer);
-  }
-
-  public static String replace(@NonNull String text, @NonNull String sequence, int index) {
-    return text.substring(0, index) + sequence + text.substring(index + sequence.length());
-  }
-
   public static int getInt(Object object) {
     return object != null ? (int) (((Long) object).longValue()) : 0;
   }
@@ -105,7 +37,6 @@ public final class Util {
     } else {
       str.append(minutes * 60 + seconds).append("s");
     }
-
     return str.toString();
   }
 
@@ -116,5 +47,4 @@ public final class Util {
   public static LocalDateTime getLocalDate(Date dateToConvert) {
     return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
   }
-
 }

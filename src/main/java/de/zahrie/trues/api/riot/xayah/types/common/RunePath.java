@@ -14,7 +14,7 @@ public enum RunePath {
 
     private static final Map<Integer, RunePath> BY_ID = getById();
 
-    private static final Map<Integer, RunePath> getById() {
+    private static Map<Integer, RunePath> getById() {
         final Builder<Integer, RunePath> builder = ImmutableMap.builder();
         for(final RunePath path : values()) {
             builder.put(path.id, path);
@@ -28,7 +28,7 @@ public enum RunePath {
 
     private final int id;
 
-    private RunePath(final int id) {
+    RunePath(final int id) {
         this.id = id;
     }
 

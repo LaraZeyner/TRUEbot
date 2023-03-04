@@ -16,7 +16,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public abstract class VerificationStrings {
-    public static class Builder {
+    public static final class Builder {
         private boolean streaming = false;
         private final Iterable<Summoner> summoners;
 
@@ -30,7 +30,7 @@ public abstract class VerificationStrings {
             Summoner summoner = iterator.next();
 
             if(summoner == null) {
-                return SearchableLists.from(Collections.<VerificationString> emptyList());
+                return SearchableLists.from(Collections.emptyList());
             }
 
             final Platform platform = summoner.getPlatform();

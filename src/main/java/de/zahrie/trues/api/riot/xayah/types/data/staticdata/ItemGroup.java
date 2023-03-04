@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ItemGroup extends CoreData {
+    @Serial
     private static final long serialVersionUID = -7065611515279604462L;
     private String key;
     private int max;
@@ -26,10 +29,7 @@ public class ItemGroup extends CoreData {
         } else if(!key.equals(other.key)) {
             return false;
         }
-        if(max != other.max) {
-            return false;
-        }
-        return true;
+      return max == other.max;
     }
 
     /**

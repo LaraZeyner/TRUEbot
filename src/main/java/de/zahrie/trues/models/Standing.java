@@ -4,14 +4,14 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import de.zahrie.trues.util.Format;
-import de.zahrie.trues.util.util.TrueNumber;
+import de.zahrie.trues.api.datatypes.number.TrueNumber;
 
 public record Standing(int wins, int losses) implements Serializable {
   @Serial
   private static final long serialVersionUID = -8830455150033695496L;
 
   public Winrate getWinrate() {
-    return new Winrate(new TrueNumber((double) this.wins).div(this.losses));
+    return new Winrate(new TrueNumber((double) this.wins).divide(this.losses));
   }
 
   @Override

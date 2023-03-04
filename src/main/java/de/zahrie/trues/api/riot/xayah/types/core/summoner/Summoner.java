@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.summoner;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -39,29 +39,21 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
                 ACCOUNT_ID,
                 ID,
                 NAME,
-                PUUID;
+                PUUID
         }
 
         private Platform platform;
         private String puuid, accountId, id, name;
 
         private Builder(final String key, final KeyType keyType) {
-            switch(keyType) {
-                case ACCOUNT_ID:
-                    accountId = key;
-                    break;
-                case ID:
-                    id = key;
-                    break;
-                case NAME:
-                    name = key;
-                    break;
-                case PUUID:
-                    puuid = key;
-                    break;
-                default:
-                    break;
+          switch (keyType) {
+            case ACCOUNT_ID -> accountId = key;
+            case ID -> id = key;
+            case NAME -> name = key;
+            case PUUID -> puuid = key;
+            default -> {
             }
+          }
         }
 
         public Summoner get() {
@@ -103,6 +95,7 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 4280855397190856618L;
     public static final String SUMMONER_LOAD_GROUP = "summoner";
 
@@ -243,9 +236,7 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            SUMMONER_LOAD_GROUP
-        });
+        return List.of(SUMMONER_LOAD_GROUP);
     }
 
     @Searchable(String.class)
@@ -293,34 +284,30 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case SUMMONER_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPuuid() != null) {
-                    builder.put("puuid", coreData.getPuuid());
-                }
-                if(coreData.getAccountId() != null) {
-                    builder.put("accountId", coreData.getAccountId());
-                }
-                if(coreData.getId() != null) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getName() != null) {
-                    builder.put("name", coreData.getName());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(SUMMONER_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPuuid() != null) {
+          builder.put("puuid", coreData.getPuuid());
         }
+        if (coreData.getAccountId() != null) {
+          builder.put("accountId", coreData.getAccountId());
+        }
+        if (coreData.getId() != null) {
+          builder.put("id", coreData.getId());
+        }
+        if (coreData.getName() != null) {
+          builder.put("name", coreData.getName());
+        }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 
     public MatchHistory.Builder matchHistory() {

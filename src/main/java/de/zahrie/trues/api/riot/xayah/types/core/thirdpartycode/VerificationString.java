@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.thirdpartycode;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +11,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class VerificationString extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString> {
-    public static class Builder {
+    public static final class Builder {
         private final Summoner summoner;
 
         private Builder(final Summoner summoner) {
@@ -26,6 +26,7 @@ public class VerificationString extends GhostObject<de.zahrie.trues.api.riot.xay
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -7674629544327997718L;
     public static final String VERIFICATION_STRING_LOAD_GROUP = "verification-string";
 
@@ -47,9 +48,7 @@ public class VerificationString extends GhostObject<de.zahrie.trues.api.riot.xay
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            VERIFICATION_STRING_LOAD_GROUP
-        });
+        return List.of(VERIFICATION_STRING_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -69,24 +68,20 @@ public class VerificationString extends GhostObject<de.zahrie.trues.api.riot.xay
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case VERIFICATION_STRING_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getSummonerId() != null) {
-                    builder.put("summonerId", coreData.getSummonerId());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(VERIFICATION_STRING_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getSummonerId() != null) {
+          builder.put("summonerId", coreData.getSummonerId());
         }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

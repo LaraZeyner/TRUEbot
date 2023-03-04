@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Mastery extends DataObject {
+    @Serial
     private static final long serialVersionUID = -8156644601240081125L;
     private int masteryId, rank;
 
@@ -25,10 +28,7 @@ public class Mastery extends DataObject {
         if(masteryId != other.masteryId) {
             return false;
         }
-        if(rank != other.rank) {
-            return false;
-        }
-        return true;
+      return rank == other.rank;
     }
 
     /**

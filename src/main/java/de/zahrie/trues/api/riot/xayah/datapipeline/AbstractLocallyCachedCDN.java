@@ -72,11 +72,7 @@ public abstract class AbstractLocallyCachedCDN<T> extends AbstractDataSource {
             Object lock = cacheLocks.get(request);
             if(lock == null) {
                 synchronized(cacheLocks) {
-                    lock = cacheLocks.get(request);
-                    if(lock == null) {
-                        lock = new Object();
-                        cacheLocks.put(request, lock);
-                    }
+                  lock = cacheLocks.computeIfAbsent(request, k -> new Object());
                 }
             }
 

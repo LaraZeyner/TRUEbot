@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.Orianna;
@@ -8,6 +9,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class Skin extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Skin> {
+    @Serial
     private static final long serialVersionUID = 3024386482761562130L;
 
     public Skin(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Skin coreData) {
@@ -20,8 +22,7 @@ public class Skin extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.dat
     }
 
     public BufferedImage getLoadingImage() {
-        final BufferedImage image = Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.<String, Object> of("url", getLoadingImageURL()));
-        return image;
+      return Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.of("url", getLoadingImageURL()));
     }
 
     public String getLoadingImageURL() {
@@ -38,8 +39,7 @@ public class Skin extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.dat
     }
 
     public BufferedImage getSpashImage() {
-        final BufferedImage image = Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.<String, Object> of("url", getSplashImageURL()));
-        return image;
+      return Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.of("url", getSplashImageURL()));
     }
 
     public String getSplashImageURL() {

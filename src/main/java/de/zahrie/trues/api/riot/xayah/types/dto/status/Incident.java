@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.status;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Incident extends DataObject {
+    @Serial
     private static final long serialVersionUID = 3197042104669649311L;
     private boolean active;
     private String created_at;
@@ -41,13 +43,8 @@ public class Incident extends DataObject {
             return false;
         }
         if(updates == null) {
-            if(other.updates != null) {
-                return false;
-            }
-        } else if(!updates.equals(other.updates)) {
-            return false;
-        }
-        return true;
+          return other.updates == null;
+        } else return updates.equals(other.updates);
     }
 
     /**

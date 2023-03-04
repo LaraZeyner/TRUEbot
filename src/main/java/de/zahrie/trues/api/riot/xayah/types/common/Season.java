@@ -23,7 +23,7 @@ public enum Season {
 
     private static final java.util.Map<Integer, Season> BY_ID = getById();
 
-    private static final java.util.Map<Integer, Season> getById() {
+    private static java.util.Map<Integer, Season> getById() {
         final Builder<Integer, Season> builder = ImmutableMap.builder();
         for(final Season season : values()) {
             builder.put(season.id, season);
@@ -32,7 +32,7 @@ public enum Season {
     }
 
     public static Comparator<Season> getComparator() {
-        return (o1, o2) -> Integer.compare(o1.id, o2.id);
+        return Comparator.comparingInt(o -> o.id);
     }
 
     public static Season getLatest() {
@@ -51,7 +51,7 @@ public enum Season {
 
     private final int id;
 
-    private Season(final int id) {
+    Season(final int id) {
         this.id = id;
     }
 

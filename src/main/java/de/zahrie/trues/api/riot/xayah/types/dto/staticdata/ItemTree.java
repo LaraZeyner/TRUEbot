@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ItemTree extends DataObject {
+    @Serial
     private static final long serialVersionUID = 210112072391299056L;
     private String header;
     private List<String> tags;
@@ -33,13 +35,8 @@ public class ItemTree extends DataObject {
             return false;
         }
         if(tags == null) {
-            if(other.tags != null) {
-                return false;
-            }
-        } else if(!tags.equals(other.tags)) {
-            return false;
-        }
-        return true;
+          return other.tags == null;
+        } else return tags.equals(other.tags);
     }
 
     /**

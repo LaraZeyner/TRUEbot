@@ -1,4 +1,4 @@
-package de.zahrie.trues.util.database;
+package de.zahrie.trues.database;
 
 import org.hibernate.SessionFactory;
 

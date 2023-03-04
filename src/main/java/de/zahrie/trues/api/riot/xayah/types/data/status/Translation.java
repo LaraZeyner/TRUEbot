@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.status;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Translation extends CoreData {
+    @Serial
     private static final long serialVersionUID = -2766073434420174632L;
     private String locale, content, heading;
 
@@ -33,13 +36,8 @@ public class Translation extends CoreData {
             return false;
         }
         if(locale == null) {
-            if(other.locale != null) {
-                return false;
-            }
-        } else if(!locale.equals(other.locale)) {
-            return false;
-        }
-        return true;
+          return other.locale == null;
+        } else return locale.equals(other.locale);
     }
 
     /**

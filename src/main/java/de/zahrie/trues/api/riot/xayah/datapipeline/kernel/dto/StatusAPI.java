@@ -27,29 +27,25 @@ public class StatusAPI extends KernelService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ShardStatus>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ShardStatus next() {
-                final Platform platform = iterator.next();
+          @Override
+          public ShardStatus next() {
+            final Platform platform = iterator.next();
 
-                final String endpoint = "lol/status/v3/shard-data";
-                final ShardStatus data = get(ShardStatus.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/status/v3/shard-data";
 
-                return data;
-            }
+            return get(ShardStatus.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -59,11 +55,7 @@ public class StatusAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform");
 
         final String endpoint = "lol/status/v3/shard-data";
-        final ShardStatus data = get(ShardStatus.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(ShardStatus.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 }

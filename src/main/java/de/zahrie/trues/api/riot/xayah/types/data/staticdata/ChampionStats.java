@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ChampionStats extends CoreData {
+    @Serial
     private static final long serialVersionUID = 8070402776138698435L;
     private double armorPerLevel, healthPerLevel, attackDamage, manaPerLevel, attackSpeedOffset, armor, health, healthRegenPerLevel, magicResist, attackRange,
             movespeed, attackDamagePerLevel, manaRegenPerLevel, mana, magicResistPerLevel, criticalStrikeChance, manaRegen, attackSpeedPerLevel, healthRegen,
@@ -77,10 +80,7 @@ public class ChampionStats extends CoreData {
         if(Double.doubleToLongBits(manaRegenPerLevel) != Double.doubleToLongBits(other.manaRegenPerLevel)) {
             return false;
         }
-        if(Double.doubleToLongBits(movespeed) != Double.doubleToLongBits(other.movespeed)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(movespeed) == Double.doubleToLongBits(other.movespeed);
     }
 
     /**

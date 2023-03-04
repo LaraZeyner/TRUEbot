@@ -6,5 +6,5 @@ public enum TurretType {
         INNER_TURRET,
         NEXUS_TURRET,
         OUTER_TURRET,
-        UNDEFINED_TURRET;
+        UNDEFINED_TURRET
 }

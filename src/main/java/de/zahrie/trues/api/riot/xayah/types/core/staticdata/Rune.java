@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +18,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class Rune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune> {
-    public static class Builder {
+    public static final class Builder {
         private Integer id;
         private Set<String> includedData;
         private String name, version, locale;
@@ -103,6 +103,7 @@ public class Rune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.
 
     public static final String RUNE_LOAD_GROUP = "rune";
 
+    @Serial
     private static final long serialVersionUID = 2420355663284372069L;
 
     public static Builder named(final String name) {
@@ -181,9 +182,7 @@ public class Rune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            RUNE_LOAD_GROUP
-        });
+        return List.of(RUNE_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -241,37 +240,32 @@ public class Rune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case RUNE_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getId() != 0) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getName() != null) {
-                    builder.put("name", coreData.getName());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                if(coreData.getIncludedData() != null) {
-                    builder.put("includedData", coreData.getIncludedData());
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(RUNE_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getId() != 0) {
+          builder.put("id", coreData.getId());
         }
+        if (coreData.getName() != null) {
+          builder.put("name", coreData.getName());
+        }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        if (coreData.getIncludedData() != null) {
+          builder.put("includedData", coreData.getIncludedData());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.common.Side;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
@@ -10,6 +12,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public abstract class Team extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.Team> {
+    @Serial
     private static final long serialVersionUID = -5161738749707752541L;
 
     public Team(final de.zahrie.trues.api.riot.xayah.types.data.match.Team coreData) {

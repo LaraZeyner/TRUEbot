@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Patches extends CoreData.ListProxy<Patch> {
+    @Serial
     private static final long serialVersionUID = 2330525115460288768L;
     private String platform;
     private java.util.Map<String, Duration> shifts;
@@ -37,13 +40,8 @@ public class Patches extends CoreData.ListProxy<Patch> {
             return false;
         }
         if(shifts == null) {
-            if(other.shifts != null) {
-                return false;
-            }
-        } else if(!shifts.equals(other.shifts)) {
-            return false;
-        }
-        return true;
+          return other.shifts == null;
+        } else return shifts.equals(other.shifts);
     }
 
     /**

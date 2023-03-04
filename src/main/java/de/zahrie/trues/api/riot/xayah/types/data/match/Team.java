@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Team extends CoreData {
+    @Serial
     private static final long serialVersionUID = 4843385559866396877L;
     private List<Integer> bans;
     private int baronKills, riftHeraldKills, vilemawKills, inhibitorKills, towerKills, dominionScore, dragonKills, teamId;
@@ -86,10 +88,7 @@ public class Team extends CoreData {
         if(vilemawKills != other.vilemawKills) {
             return false;
         }
-        if(winner != other.winner) {
-            return false;
-        }
-        return true;
+      return winner == other.winner;
     }
 
     /**

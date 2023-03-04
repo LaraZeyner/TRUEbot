@@ -15,7 +15,7 @@ public abstract class AbstractRateLimiter implements RateLimiter {
     public abstract boolean acquire(final long timeout, final TimeUnit unit) throws InterruptedException;
 
     @Override
-    public <T> T call(final Callable<T> callable) throws InterruptedException, Exception {
+    public <T> T call(final Callable<T> callable) throws Exception {
         acquire();
 
         try {
@@ -26,7 +26,7 @@ public abstract class AbstractRateLimiter implements RateLimiter {
     }
 
     @Override
-    public <T> T call(final Callable<T> callable, final long timeout, final TimeUnit unit) throws InterruptedException, Exception {
+    public <T> T call(final Callable<T> callable, final long timeout, final TimeUnit unit) throws Exception {
         if(!acquire(timeout, unit)) {
             throw new TimeoutException("Rate Limiter timed out waiting for permit!", TimeoutException.Type.RATE_LIMITER);
         }

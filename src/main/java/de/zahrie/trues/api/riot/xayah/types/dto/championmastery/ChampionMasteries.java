@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.championmastery;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ChampionMasteries extends DataObject.ListProxy<ChampionMastery> {
+    @Serial
     private static final long serialVersionUID = 1227811809749905862L;
     private String platform, summonerId;
 
@@ -34,13 +37,8 @@ public class ChampionMasteries extends DataObject.ListProxy<ChampionMastery> {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

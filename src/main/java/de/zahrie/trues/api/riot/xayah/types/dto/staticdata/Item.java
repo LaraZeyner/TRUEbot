@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.Set;
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Item extends DataObject {
+    @Serial
     private static final long serialVersionUID = 2549241438645633740L;
     private Map<String, String> effect;
     private Gold gold;
@@ -186,13 +188,8 @@ public class Item extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

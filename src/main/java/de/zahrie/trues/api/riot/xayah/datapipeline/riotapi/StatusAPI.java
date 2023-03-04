@@ -28,30 +28,30 @@ public class StatusAPI extends RiotAPIService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ShardStatus>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public ShardStatus next() {
+            final Platform platform = iterator.next();
+
+            final String endpoint = "lol/status/v3/shard-data";
+            final ShardStatus data = get(ShardStatus.class, endpoint, platform, "lol/status/v3/shard-data");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public ShardStatus next() {
-                final Platform platform = iterator.next();
+            data.setPlatform(platform.getTag());
+            return data;
+          }
 
-                final String endpoint = "lol/status/v3/shard-data";
-                final ShardStatus data = get(ShardStatus.class, endpoint, platform, "lol/status/v3/shard-data");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 

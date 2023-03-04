@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ParticipantTimeline extends CoreData {
+    @Serial
     private static final long serialVersionUID = 7991068856747791693L;
     private StatTotals creepScoreDifference, gold, experienceDifference, creepScore, experience, damageTakenDifference, damageTaken;
 
@@ -61,13 +64,8 @@ public class ParticipantTimeline extends CoreData {
             return false;
         }
         if(gold == null) {
-            if(other.gold != null) {
-                return false;
-            }
-        } else if(!gold.equals(other.gold)) {
-            return false;
-        }
-        return true;
+          return other.gold == null;
+        } else return gold.equals(other.gold);
     }
 
     /**

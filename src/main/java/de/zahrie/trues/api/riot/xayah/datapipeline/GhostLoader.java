@@ -62,7 +62,7 @@ public class GhostLoader extends AbstractDataSource {
 
     private static String getCurrentVersion(final Platform platform, final PipelineContext context) {
         final de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm realm =
-            context.getPipeline().get(de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm.class, ImmutableMap.<String, Object> of("platform", platform));
+            context.getPipeline().get(de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm.class, ImmutableMap.of("platform", platform));
         return realm.getV();
     }
 
@@ -318,34 +318,34 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Champion>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Champion next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion();
-                if(ids != null) {
-                    final int id = ((Number)iterator.next()).intValue();
-                    data.setId(id);
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else if(keys != null) {
-                    data.setKey((String)iterator.next());
-                }
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setIncludedData(includedData);
-                return new Champion(data);
+          @Override
+          public Champion next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion();
+            if (ids != null) {
+              final int id = ((Number) iterator.next()).intValue();
+              data.setId(id);
+            } else if (names != null) {
+              data.setName((String) iterator.next());
+            } else {
+              data.setKey((String) iterator.next());
             }
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setIncludedData(includedData);
+            return new Champion(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -357,25 +357,25 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteries>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMasteries next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(iterator.next());
-                return new ChampionMasteries(data);
-            }
+          @Override
+          public ChampionMasteries next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries data =
+                new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(iterator.next());
+            return new ChampionMasteries(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -388,26 +388,26 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId", championIds, "championIds");
 
         final Iterator<Number> iterator = championIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMastery>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMastery next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(summonerId);
-                data.setChampionId(iterator.next().intValue());
-                return new ChampionMastery(data);
-            }
+          @Override
+          public ChampionMastery next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery data =
+                new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(summonerId);
+            data.setChampionId(iterator.next().intValue());
+            return new ChampionMastery(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -419,25 +419,25 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteryScore>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMasteryScore next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(iterator.next());
-                return new ChampionMasteryScore(data);
-            }
+          @Override
+          public ChampionMasteryScore next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore data =
+                new de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(iterator.next());
+            return new ChampionMasteryScore(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -448,24 +448,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ChampionRotation>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionRotation next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation();
-                data.setPlatform(iterator.next().getTag());
-                return new ChampionRotation(data);
-            }
+          @Override
+          public ChampionRotation next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation data =
+                new de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation();
+            data.setPlatform(iterator.next().getTag());
+            return new ChampionRotation(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -477,24 +477,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<CurrentMatch>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public CurrentMatch next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch data = new de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(iterator.next());
-                return new CurrentMatch(data);
-            }
+          @Override
+          public CurrentMatch next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch data = new de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(iterator.next());
+            return new CurrentMatch(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -505,24 +505,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<FeaturedMatches>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public FeaturedMatches next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches();
-                data.setPlatform(iterator.next().getTag());
-                return new FeaturedMatches(data);
-            }
+          @Override
+          public FeaturedMatches next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches data =
+                new de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatches();
+            data.setPlatform(iterator.next().getTag());
+            return new FeaturedMatches(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -547,33 +547,31 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Item>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Item next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setIncludedData(includedData);
-                if(ids != null) {
-                    data.setId(((Number)iterator.next()).intValue());
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else {
-                    return null;
-                }
-                return new Item(data);
+          @Override
+          public Item next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Item();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setIncludedData(includedData);
+            if (ids != null) {
+              data.setId(((Number) iterator.next()).intValue());
+            } else {
+              data.setName((String) iterator.next());
             }
+            return new Item(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -599,30 +597,30 @@ public class GhostLoader extends AbstractDataSource {
         }
 
         final Iterator<?> iterator = ids != null ? ids.iterator() : queues.iterator();
-        return CloseableIterators.from(new Iterator<League>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public League next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.league.League data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.league.League();
-                data.setPlatform(platform.getTag());
-                if(ids != null) {
-                    data.setId((String)iterator.next());
-                } else {
-                    data.setTier(tier.name());
-                    data.setQueue(((Queue)iterator.next()).getTag());
-                }
-                return new League(data);
+          @Override
+          public League next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.league.League data =
+                new de.zahrie.trues.api.riot.xayah.types.data.league.League();
+            data.setPlatform(platform.getTag());
+            if (ids != null) {
+              data.setId((String) iterator.next());
+            } else {
+              data.setTier(tier.name());
+              data.setQueue(((Queue) iterator.next()).getTag());
             }
+            return new League(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -634,25 +632,25 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<LeaguePositions>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public LeaguePositions next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.league.LeaguePositions data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.league.LeaguePositions();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(iterator.next());
-                return new LeaguePositions(data);
-            }
+          @Override
+          public LeaguePositions next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.league.LeaguePositions data =
+                new de.zahrie.trues.api.riot.xayah.types.data.league.LeaguePositions();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(iterator.next());
+            return new LeaguePositions(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -676,32 +674,30 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Map>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Map next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                if(ids != null) {
-                    data.setId(((Number)iterator.next()).intValue());
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else {
-                    return null;
-                }
-                return new Map(data);
+          @Override
+          public Map next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Map();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            if (ids != null) {
+              data.setId(((Number) iterator.next()).intValue());
+            } else {
+              data.setName((String) iterator.next());
             }
+            return new Map(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -726,33 +722,31 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Mastery>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Mastery next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setIncludedData(includedData);
-                if(ids != null) {
-                    data.setId(((Number)iterator.next()).intValue());
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else {
-                    return null;
-                }
-                return new Mastery(data);
+          @Override
+          public Mastery next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Mastery();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setIncludedData(includedData);
+            if (ids != null) {
+              data.setId(((Number) iterator.next()).intValue());
+            } else {
+              data.setName((String) iterator.next());
             }
+            return new Mastery(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -764,24 +758,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<Match>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Match next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.match.Match data = new de.zahrie.trues.api.riot.xayah.types.data.match.Match();
-                data.setPlatform(platform.getTag());
-                data.setId(iterator.next().longValue());
-                return new Match(data);
-            }
+          @Override
+          public Match next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.match.Match data = new de.zahrie.trues.api.riot.xayah.types.data.match.Match();
+            data.setPlatform(platform.getTag());
+            data.setId(iterator.next().longValue());
+            return new Match(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -790,9 +784,9 @@ public class GhostLoader extends AbstractDataSource {
     public CloseableIterator<MatchHistory> getManyMatchHistory(final java.util.Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final Iterable<String> accountIds = (Iterable<String>)query.get("accountIds");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         final Number beginTime = (Number)query.get("beginTime");
         final Number endTime = (Number)query.get("endTime");
         final Number beginIndex = (Number)query.get("beginIndex");
@@ -800,32 +794,32 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", accountIds, "accountIds");
 
         final Iterator<String> iterator = accountIds.iterator();
-        return CloseableIterators.from(new Iterator<MatchHistory>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public MatchHistory next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.match.MatchList data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.match.MatchList();
-                data.setPlatform(platform.getTag());
-                data.setAccountId(iterator.next());
-                data.setQueues(queues);
-                data.setSeasons(seasons);
-                data.setChampions(champions);
-                data.setStartTime(beginTime == null ? null : new DateTime(beginTime.longValue()));
-                data.setEndTime(endTime == null ? null : new DateTime(endTime.longValue()));
-                data.setStartIndex(beginIndex == null ? 0 : beginIndex.intValue());
-                data.setEndIndex(endIndex == null ? 0 : endIndex.intValue());
-                return new MatchHistory(data);
-            }
+          @Override
+          public MatchHistory next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.match.MatchList data =
+                new de.zahrie.trues.api.riot.xayah.types.data.match.MatchList();
+            data.setPlatform(platform.getTag());
+            data.setAccountId(iterator.next());
+            data.setQueues(queues);
+            data.setSeasons(seasons);
+            data.setChampions(champions);
+            data.setStartTime(beginTime == null ? null : new DateTime(beginTime.longValue()));
+            data.setEndTime(endTime == null ? null : new DateTime(endTime.longValue()));
+            data.setStartIndex(beginIndex == null ? 0 : beginIndex.intValue());
+            data.setEndIndex(endIndex == null ? 0 : endIndex.intValue());
+            return new MatchHistory(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -837,24 +831,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", names, "names");
 
         final Iterator<String> iterator = names.iterator();
-        return CloseableIterators.from(new Iterator<Patch>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Patch next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch();
-                data.setPlatform(platform.getTag());
-                data.setName(iterator.next());
-                return new Patch(data);
-            }
+          @Override
+          public Patch next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch();
+            data.setPlatform(platform.getTag());
+            data.setName(iterator.next());
+            return new Patch(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -868,26 +862,26 @@ public class GhostLoader extends AbstractDataSource {
         final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String)query.get("locale");
 
         final Iterator<Number> iterator = ids.iterator();
-        return CloseableIterators.from(new Iterator<ProfileIcon>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ProfileIcon next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setId(iterator.next().intValue());
-                return new ProfileIcon(data);
-            }
+          @Override
+          public ProfileIcon next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setId(iterator.next().intValue());
+            return new ProfileIcon(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -898,24 +892,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<Realm>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Realm next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm();
-                data.setPlatform(iterator.next().getTag());
-                return new Realm(data);
-            }
+          @Override
+          public Realm next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm data =
+                new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm();
+            data.setPlatform(iterator.next().getTag());
+            return new Realm(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -942,34 +936,34 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<ReforgedRune>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ReforgedRune next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune();
-                if(ids != null) {
-                    final int id = ((Number)iterator.next()).intValue();
-                    data.setId(id);
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else if(keys != null) {
-                    data.setKey((String)iterator.next());
-                }
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                return new ReforgedRune(data);
+          @Override
+          public ReforgedRune next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune data =
+                new de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune();
+            if (ids != null) {
+              final int id = ((Number) iterator.next()).intValue();
+              data.setId(id);
+            } else if (names != null) {
+              data.setName((String) iterator.next());
+            } else {
+              data.setKey((String) iterator.next());
             }
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            return new ReforgedRune(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -994,33 +988,31 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Rune>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Rune next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setIncludedData(includedData);
-                if(ids != null) {
-                    data.setId(((Number)iterator.next()).intValue());
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else {
-                    return null;
-                }
-                return new Rune(data);
+          @Override
+          public Rune next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Rune();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setIncludedData(includedData);
+            if (ids != null) {
+              data.setId(((Number) iterator.next()).intValue());
+            } else {
+              data.setName((String) iterator.next());
             }
+            return new Rune(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1031,24 +1023,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ShardStatus>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ShardStatus next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus();
-                data.setPlatform(iterator.next().getTag());
-                return new ShardStatus(data);
-            }
+          @Override
+          public ShardStatus next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus data =
+                new de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus();
+            data.setPlatform(iterator.next().getTag());
+            return new ShardStatus(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1065,34 +1057,32 @@ public class GhostLoader extends AbstractDataSource {
 
         final Iterator<String> iterator = puuids != null ? puuids.iterator()
             : accountIds != null ? accountIds.iterator() : summonerIds != null ? summonerIds.iterator() : summonerNames.iterator();
-        return CloseableIterators.from(new Iterator<Summoner>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Summoner next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner data = new de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner();
-                data.setPlatform(platform.getTag());
-                if(puuids != null) {
-                    data.setPuuid(iterator.next());
-                } else if(accountIds != null) {
-                    data.setAccountId(iterator.next());
-                } else if(summonerIds != null) {
-                    data.setId(iterator.next());
-                } else if(summonerNames != null) {
-                    data.setName(iterator.next());
-                } else {
-                    return null;
-                }
-                return new Summoner(data);
+          @Override
+          public Summoner next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner data = new de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner();
+            data.setPlatform(platform.getTag());
+            if (puuids != null) {
+              data.setPuuid(iterator.next());
+            } else if (accountIds != null) {
+              data.setAccountId(iterator.next());
+            } else if (summonerIds != null) {
+              data.setId(iterator.next());
+            } else {
+              data.setName(iterator.next());
             }
+            return new Summoner(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1117,34 +1107,32 @@ public class GhostLoader extends AbstractDataSource {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<SummonerSpell>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public SummonerSpell next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell();
-                data.setPlatform(platform.getTag());
-                data.setVersion(version);
-                data.setLocale(locale);
-                data.setIncludedData(includedData);
-                if(ids != null) {
-                    data.setId(((Number)iterator.next()).intValue());
-                } else if(names != null) {
-                    data.setName((String)iterator.next());
-                } else {
-                    return null;
-                }
-                return new SummonerSpell(data);
+          @Override
+          public SummonerSpell next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell data =
+                new de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell();
+            data.setPlatform(platform.getTag());
+            data.setVersion(version);
+            data.setLocale(locale);
+            data.setIncludedData(includedData);
+            if (ids != null) {
+              data.setId(((Number) iterator.next()).intValue());
+            } else {
+              data.setName((String) iterator.next());
             }
+            return new SummonerSpell(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1156,24 +1144,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<Timeline>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Timeline next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.match.Timeline data = new de.zahrie.trues.api.riot.xayah.types.data.match.Timeline();
-                data.setPlatform(platform.getTag());
-                data.setId(iterator.next().longValue());
-                return new Timeline(data);
-            }
+          @Override
+          public Timeline next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.match.Timeline data = new de.zahrie.trues.api.riot.xayah.types.data.match.Timeline();
+            data.setPlatform(platform.getTag());
+            data.setId(iterator.next().longValue());
+            return new Timeline(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1185,25 +1173,25 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", tournamentCodes, "tournamentCodes");
 
         final Iterator<String> iterator = tournamentCodes.iterator();
-        return CloseableIterators.from(new Iterator<TournamentMatches>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public TournamentMatches next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches();
-                data.setPlatform(platform.getTag());
-                data.setTournamentCode(iterator.next());
-                return new TournamentMatches(data);
-            }
+          @Override
+          public TournamentMatches next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches data =
+                new de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches();
+            data.setPlatform(platform.getTag());
+            data.setTournamentCode(iterator.next());
+            return new TournamentMatches(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1215,25 +1203,25 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<VerificationString>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public VerificationString next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString();
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(iterator.next());
-                return new VerificationString(data);
-            }
+          @Override
+          public VerificationString next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString data =
+                new de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode.VerificationString();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(iterator.next());
+            return new VerificationString(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1244,24 +1232,24 @@ public class GhostLoader extends AbstractDataSource {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<Versions>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Versions next() {
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions data =
-                    new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions();
-                data.setPlatform(iterator.next().getTag());
-                return new Versions(data);
-            }
+          @Override
+          public Versions next() {
+            final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions data =
+                new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Versions();
+            data.setPlatform(iterator.next().getTag());
+            return new Versions(data);
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -1357,9 +1345,9 @@ public class GhostLoader extends AbstractDataSource {
     public MatchHistory getMatchHistory(final java.util.Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final String accountId = (String)query.get("accountId");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         final Number beginTime = (Number)query.get("beginTime");
         final Number endTime = (Number)query.get("endTime");
         final Number beginIndex = (Number)query.get("beginIndex");

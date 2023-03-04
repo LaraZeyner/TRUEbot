@@ -4,7 +4,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.coverage.league.model.LeagueTier;
 import de.zahrie.trues.api.coverage.playday.config.RelativeTimeRange;
-import de.zahrie.trues.api.coverage.playday.config.TimeOffset;
+import de.zahrie.trues.api.datatypes.calendar.TimeOffset;
 
 public class Scheduling {
   private final List<SchedulingOption> options;

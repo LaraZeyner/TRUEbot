@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.status;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Translation extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4262012226331057196L;
     private String locale, content, heading;
 
@@ -33,13 +36,8 @@ public class Translation extends DataObject {
             return false;
         }
         if(locale == null) {
-            if(other.locale != null) {
-                return false;
-            }
-        } else if(!locale.equals(other.locale)) {
-            return false;
-        }
-        return true;
+          return other.locale == null;
+        } else return locale.equals(other.locale);
     }
 
     /**

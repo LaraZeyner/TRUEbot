@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Position extends CoreData {
+    @Serial
     private static final long serialVersionUID = 5993854891107334985L;
     private int x, y;
 
@@ -21,10 +24,7 @@ public class Position extends CoreData {
         if(x != other.x) {
             return false;
         }
-        if(y != other.y) {
-            return false;
-        }
-        return true;
+      return y == other.y;
     }
 
     /**

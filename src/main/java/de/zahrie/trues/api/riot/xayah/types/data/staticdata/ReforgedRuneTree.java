@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ReforgedRuneTree extends CoreData {
+    @Serial
     private static final long serialVersionUID = -7891267532058941565L;
     private ReforgedRunePath domination, inspriation, precision, resolve, sorcery;
 
@@ -47,13 +50,8 @@ public class ReforgedRuneTree extends CoreData {
             return false;
         }
         if(sorcery == null) {
-            if(other.sorcery != null) {
-                return false;
-            }
-        } else if(!sorcery.equals(other.sorcery)) {
-            return false;
-        }
-        return true;
+          return other.sorcery == null;
+        } else return sorcery.equals(other.sorcery);
     }
 
     /**

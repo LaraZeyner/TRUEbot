@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class BlockItem extends DataObject {
+    @Serial
     private static final long serialVersionUID = -3239564451614492586L;
     private int count, id;
 
@@ -25,10 +28,7 @@ public class BlockItem extends DataObject {
         if(count != other.count) {
             return false;
         }
-        if(id != other.id) {
-            return false;
-        }
-        return true;
+      return id == other.id;
     }
 
     /**

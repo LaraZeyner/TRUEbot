@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class StatTotals extends CoreData {
+    @Serial
     private static final long serialVersionUID = 8972227385369583903L;
     private double at10, at20, at30, atGameEnd;
 
@@ -27,10 +30,7 @@ public class StatTotals extends CoreData {
         if(Double.doubleToLongBits(at30) != Double.doubleToLongBits(other.at30)) {
             return false;
         }
-        if(Double.doubleToLongBits(atGameEnd) != Double.doubleToLongBits(other.atGameEnd)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(atGameEnd) == Double.doubleToLongBits(other.atGameEnd);
     }
 
     /**

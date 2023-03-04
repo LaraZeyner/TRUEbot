@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.championmastery;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ChampionMastery extends DataObject {
+    @Serial
     private static final long serialVersionUID = 7394525704993951448L;
     private long championId, championPointsUntilNextLevel, championPointsSinceLastLevel, lastPlayTime;
     private int championLevel, championPoints, tokensEarned;
@@ -56,10 +59,7 @@ public class ChampionMastery extends DataObject {
         } else if(!summonerId.equals(other.summonerId)) {
             return false;
         }
-        if(tokensEarned != other.tokensEarned) {
-            return false;
-        }
-        return true;
+      return tokensEarned == other.tokensEarned;
     }
 
     /**

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MapDetails extends DataObject {
+    @Serial
     private static final long serialVersionUID = -1421402363346671183L;
     private Image image;
     private long mapId;
@@ -66,13 +68,8 @@ public class MapDetails extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

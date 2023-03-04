@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ import com.google.common.base.Suppliers;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class MasteryTree extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.MasteryTree> {
+    @Serial
     private static final long serialVersionUID = -1554786890607091192L;
 
     private final Supplier<List<MasteryTreeTier>> cunning = Suppliers.memoize(() -> {

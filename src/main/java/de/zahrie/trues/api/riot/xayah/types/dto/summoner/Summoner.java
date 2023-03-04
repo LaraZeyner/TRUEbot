@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.summoner;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Summoner extends DataObject {
+    @Serial
     private static final long serialVersionUID = 2765678846662981362L;
     private String name, platform, puuid, accountId, id;
     private int profileIconId = -1;
@@ -61,10 +64,7 @@ public class Summoner extends DataObject {
         if(revisionDate != other.revisionDate) {
             return false;
         }
-        if(summonerLevel != other.summonerLevel) {
-            return false;
-        }
-        return true;
+      return summonerLevel == other.summonerLevel;
     }
 
     /**

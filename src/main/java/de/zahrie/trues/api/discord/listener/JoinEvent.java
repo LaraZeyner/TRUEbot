@@ -2,7 +2,7 @@ package de.zahrie.trues.api.discord.listener;
 
 
 import de.zahrie.trues.models.discord.member.DiscordMember;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 

@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.spectator;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class FeaturedMatch extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.spectator.FeaturedMatch> {
     public class Participant extends de.zahrie.trues.api.riot.xayah.types.core.spectator.Participant {
+        @Serial
         private static final long serialVersionUID = -9203624759697672200L;
 
         private final Supplier<Champion> champion = Suppliers.memoize(() -> {
@@ -105,6 +107,7 @@ public class FeaturedMatch extends OriannaObject<de.zahrie.trues.api.riot.xayah.
     }
 
     public class Team extends de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatchTeam {
+        @Serial
         private static final long serialVersionUID = -3789921485244822620L;
 
         private final Supplier<SearchableList<Champion>> bans = Suppliers.memoize(() -> {
@@ -146,6 +149,7 @@ public class FeaturedMatch extends OriannaObject<de.zahrie.trues.api.riot.xayah.
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 1986854843022789219L;
 
     private final Supplier<de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatchTeam> blueTeam =

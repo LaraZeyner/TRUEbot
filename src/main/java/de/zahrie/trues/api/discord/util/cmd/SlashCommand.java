@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.api.discord.builder.InfoPanelBuilder;
 import de.zahrie.trues.api.discord.util.cmd.annotations.Command;
 import de.zahrie.trues.api.discord.util.cmd.annotations.Embed;
@@ -11,7 +13,7 @@ import de.zahrie.trues.api.discord.util.cmd.annotations.Msg;
 import de.zahrie.trues.api.discord.util.cmd.annotations.Option;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.util.Const;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Message;
@@ -26,9 +28,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
-/**
- * Created by Lara on 10.02.2023 for TRUEbot
- */
 @Getter
 @Setter
 public abstract class SlashCommand {
@@ -83,35 +82,36 @@ public abstract class SlashCommand {
       wrappers.add(builder.build());
     }
 
-    final List<String> wrapperStrings = new ArrayList<>();
-    StringBuilder out = new StringBuilder();
+    final List<Chain> wrapperChains = new ArrayList<>();
+    Chain out = Chain.of();
     for (EmbedWrapper wrapper : wrappers) {
-      for (String t : wrapper.merge()) {
+      for (Chain t : wrapper.merge()) {
           if (out.length() + t.length() > Const.DISCORD_MESSAGE_MAX_CHARACTERS) {
-            wrapperStrings.add(out.toString());
-            out = new StringBuilder(t);
+            wrapperChains.add(out);
+            out = t;
           } else {
-            out.append(t);
+            out = out.add(t);
           }
-        out.append("\n\n\n\n");
+        out = out.add("\n\n\n\n");
       }
     }
-    String output = out.toString();
-    output += "zuletzt aktualisiert " + Time.TimeFormat.DEFAULT.now();
-    wrapperStrings.add(output);
+
+    out = out.add("zuletzt aktualisiert ")
+        .add(Time.of().chain(TimeFormat.DEFAULT));
+    wrapperChains.add(out);
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();
 
     WebhookMessageCreateAction<Message> message;
-    if (!wrapperStrings.isEmpty()) {
-      message = event.getHook().sendMessage(wrapperStrings.get(0));
+    if (!wrapperChains.isEmpty()) {
+      message = event.getHook().sendMessage(wrapperChains.get(0).toString());
       if (!wrapperEmbeds.isEmpty()) {
         message = message.setEmbeds(wrapperEmbeds);
       }
-      if (wrapperStrings.size() > 1 && !annotation.ephemeral()) {
-        for (int i = 1; i < wrapperStrings.size(); i++) {
-          final String msg = wrapperStrings.get(i);
-          event.getChannel().sendMessage(msg).queue();
+      if (wrapperChains.size() > 1 && !annotation.ephemeral()) {
+        for (int i = 1; i < wrapperChains.size(); i++) {
+          final Chain msg = wrapperChains.get(i);
+          event.getChannel().sendMessage(msg.toString()).queue();
         }
       }
     } else if (!wrapperEmbeds.isEmpty()) {
@@ -169,7 +169,7 @@ public abstract class SlashCommand {
     final var subCmds = this.subCommands.stream().filter(subCommand -> subCommand.getSubCommands().isEmpty()).toList();
     final var subCmdGroups = this.subCommands.stream().filter(subCommand -> !subCommand.getSubCommands().isEmpty()).toList();
     for (var option : options) {
-      boolean hasAutoComplete = completions.stream().anyMatch(autoCompletion -> autoCompletion.optionName().equals(option.getName()));
+      final boolean hasAutoComplete = completions.stream().anyMatch(autoCompletion -> autoCompletion.optionName().equals(option.getName()));
         option.setAutoComplete(hasAutoComplete);
     }
     return Commands.slash(this.name, this.description)

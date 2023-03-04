@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ProfileIcons extends CoreData.ListProxy<ProfileIcon> {
+    @Serial
     private static final long serialVersionUID = 8345308369968782039L;
     private String version, locale, type, platform;
 
@@ -48,13 +51,8 @@ public class ProfileIcons extends CoreData.ListProxy<ProfileIcon> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

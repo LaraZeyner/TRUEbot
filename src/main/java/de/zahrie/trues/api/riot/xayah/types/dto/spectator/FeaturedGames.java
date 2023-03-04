@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class FeaturedGames extends DataObject {
+    @Serial
     private static final long serialVersionUID = -355626288926056661L;
     private long clientRefreshInterval;
     private List<FeaturedGameInfo> gameList;
@@ -37,13 +39,8 @@ public class FeaturedGames extends DataObject {
             return false;
         }
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class LevelTip extends DataObject {
+    @Serial
     private static final long serialVersionUID = -375410470788542702L;
     private List<String> effect, label;
 
@@ -32,13 +34,8 @@ public class LevelTip extends DataObject {
             return false;
         }
         if(label == null) {
-            if(other.label != null) {
-                return false;
-            }
-        } else if(!label.equals(other.label)) {
-            return false;
-        }
-        return true;
+          return other.label == null;
+        } else return label.equals(other.label);
     }
 
     /**

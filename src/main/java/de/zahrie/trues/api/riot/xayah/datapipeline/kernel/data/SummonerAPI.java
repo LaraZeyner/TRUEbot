@@ -49,29 +49,25 @@ public class SummonerAPI extends KernelService {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Summoner>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public Summoner next() {
-                final Object identifier = iterator.next();
+          @Override
+          public Summoner next() {
+            final Object identifier = iterator.next();
 
-                final String endpoint = baseEndpoint + identifier;
-                final Summoner data = get(Summoner.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = baseEndpoint + identifier;
 
-                return data;
-            }
+            return get(Summoner.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -85,7 +81,7 @@ public class SummonerAPI extends KernelService {
         final String summonerName = (String)query.get("name");
         Utilities.checkAtLeastOneNotNull(puuid, "puuid", accountId, "accountId", summonerId, "id", summonerName, "name");
 
-        String endpoint;
+        final String endpoint;
         if(puuid != null) {
             endpoint = "lol/summoner/v4/summoners/by-puuid/" + puuid;
         } else if(accountId != null) {
@@ -98,11 +94,6 @@ public class SummonerAPI extends KernelService {
             return null;
         }
 
-        final Summoner data = get(Summoner.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
-
-        return data;
+      return get(Summoner.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 }

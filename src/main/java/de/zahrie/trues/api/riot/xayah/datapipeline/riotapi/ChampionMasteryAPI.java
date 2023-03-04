@@ -101,27 +101,27 @@ public class ChampionMasteryAPI extends RiotAPIService {
         }
 
         final Iterator<Number> iterator = championIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMastery>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public ChampionMastery next() {
-                final Number championId = iterator.next();
-                for(final ChampionMastery mastery : data) {
-                    if(mastery.getChampionId() == championId.longValue()) {
-                        return mastery;
-                    }
-                }
-                return null;
+          @Override
+          public ChampionMastery next() {
+            final Number championId = iterator.next();
+            for (final ChampionMastery mastery : data) {
+              if (mastery.getChampionId() == championId.longValue()) {
+                return mastery;
+              }
             }
+            return null;
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -133,35 +133,35 @@ public class ChampionMasteryAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteries>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public ChampionMasteries next() {
+            final String summonerId = iterator.next();
+
+            final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId;
+            final ChampionMasteries data = get(ChampionMasteries.class, endpoint, platform,
+                "lol/champion-mastery/v4/champion-masteries/by-summoner/summonerId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public ChampionMasteries next() {
-                final String summonerId = iterator.next();
-
-                final String endpoint = "lol/champion-mastery/v4/champion-masteries/by-summoner/" + summonerId;
-                final ChampionMasteries data = get(ChampionMasteries.class, endpoint, platform,
-                    "lol/champion-mastery/v4/champion-masteries/by-summoner/summonerId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setSummonerId(summonerId);
-                data.setPlatform(platform.getTag());
-                for(final ChampionMastery mastery : data) {
-                    mastery.setPlatform(platform.getTag());
-                }
-                return data;
+            data.setSummonerId(summonerId);
+            data.setPlatform(platform.getTag());
+            for (final ChampionMastery mastery : data) {
+              mastery.setPlatform(platform.getTag());
             }
+            return data;
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -173,31 +173,31 @@ public class ChampionMasteryAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<ChampionMasteryScore>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public ChampionMasteryScore next() {
+            final String summonerId = iterator.next();
+
+            final String endpoint = "lol/champion-mastery/v4/scores/by-summoner/" + summonerId;
+            final ChampionMasteryScore data = get(ChampionMasteryScore.class, endpoint, platform, "lol/champion-mastery/v4/scores/by-summoner/summonerId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public ChampionMasteryScore next() {
-                final String summonerId = iterator.next();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(summonerId);
+            return data;
+          }
 
-                final String endpoint = "lol/champion-mastery/v4/scores/by-summoner/" + summonerId;
-                final ChampionMasteryScore data = get(ChampionMasteryScore.class, endpoint, platform, "lol/champion-mastery/v4/scores/by-summoner/summonerId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(summonerId);
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

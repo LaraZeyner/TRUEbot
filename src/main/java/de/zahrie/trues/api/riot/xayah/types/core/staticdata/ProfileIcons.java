@@ -1,10 +1,9 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.CloseableIterators;
@@ -16,7 +15,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon, de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcons> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
         private String version, locale;
 
@@ -67,7 +66,7 @@ public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.t
         }
     }
 
-    public static class SubsetBuilder {
+    public static final class SubsetBuilder {
         private final Iterable<Integer> ids;
         private Platform platform;
         private boolean streaming = false;
@@ -129,6 +128,7 @@ public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.t
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -8957363143121010944L;
 
     public static ProfileIcons get() {
@@ -177,9 +177,7 @@ public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.t
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -207,32 +205,28 @@ public class ProfileIcons extends GhostObject.ListProxy<ProfileIcon, de.zahrie.t
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcons data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcons.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(data1 -> {
-                    final ProfileIcon icon = new ProfileIcon(data1);
-                    icon.markAsGhostLoaded(ProfileIcon.PROFILE_ICON_LOAD_GROUP);
-                    return icon;
-                });
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcons data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcons.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(data1 -> {
+          final ProfileIcon icon = new ProfileIcon(data1);
+          icon.markAsGhostLoaded(ProfileIcon.PROFILE_ICON_LOAD_GROUP);
+          return icon;
+        });
+      }
     }
 }

@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class FeaturedMatches extends CoreData.ListProxy<FeaturedMatch> {
+    @Serial
     private static final long serialVersionUID = 2972903457763427690L;
     private String platform;
     private Duration refreshInterval;
@@ -37,13 +40,8 @@ public class FeaturedMatches extends CoreData.ListProxy<FeaturedMatch> {
             return false;
         }
         if(refreshInterval == null) {
-            if(other.refreshInterval != null) {
-                return false;
-            }
-        } else if(!refreshInterval.equals(other.refreshInterval)) {
-            return false;
-        }
-        return true;
+          return other.refreshInterval == null;
+        } else return refreshInterval.equals(other.refreshInterval);
     }
 
     /**

@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.base.Supplier;
@@ -13,7 +13,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class ProfileIcon extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon> {
-    public static class Builder {
+    public static final class Builder {
         private final int id;
         private Platform platform;
         private String version, locale;
@@ -68,6 +68,7 @@ public class ProfileIcon extends GhostObject<de.zahrie.trues.api.riot.xayah.type
         }
     }
     public static final String PROFILE_ICON_LOAD_GROUP = "profile-icon";
+    @Serial
     private static final long serialVersionUID = -3350437868875062008L;
 
     public static Builder withId(final int id) {
@@ -105,9 +106,7 @@ public class ProfileIcon extends GhostObject<de.zahrie.trues.api.riot.xayah.type
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            PROFILE_ICON_LOAD_GROUP
-        });
+        return List.of(PROFILE_ICON_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -128,31 +127,26 @@ public class ProfileIcon extends GhostObject<de.zahrie.trues.api.riot.xayah.type
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case PROFILE_ICON_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getId() != -1) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(PROFILE_ICON_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getId() != -1) {
+          builder.put("id", coreData.getId());
         }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ProfileIcon.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

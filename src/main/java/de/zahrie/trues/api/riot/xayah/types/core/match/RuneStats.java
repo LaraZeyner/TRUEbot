@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRune;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Versions;
 
 public class RuneStats extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.RuneStats> {
+    @Serial
     private static final long serialVersionUID = 3663530937677122757L;
 
     private final Supplier<ReforgedRune> rune = Suppliers.memoize(() -> {

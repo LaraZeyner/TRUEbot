@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Passive extends CoreData {
+    @Serial
     private static final long serialVersionUID = -6521242873129068744L;
     private Image image;
     private String sanitizedDescription, name, description;
@@ -41,13 +44,8 @@ public class Passive extends CoreData {
             return false;
         }
         if(sanitizedDescription == null) {
-            if(other.sanitizedDescription != null) {
-                return false;
-            }
-        } else if(!sanitizedDescription.equals(other.sanitizedDescription)) {
-            return false;
-        }
-        return true;
+          return other.sanitizedDescription == null;
+        } else return sanitizedDescription.equals(other.sanitizedDescription);
     }
 
     /**

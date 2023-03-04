@@ -61,37 +61,37 @@ public class SummonerAPI extends RiotAPIService {
             return null;
         }
 
-        return CloseableIterators.from(new Iterator<Summoner>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public Summoner next() {
+            final String identifier = iterator.next();
+            if (names) {
+              try {
+                Utilities.checkSummonerName(identifier);
+              } catch (final QueryValidationException e) {
+                return null;
+              }
             }
 
-            @Override
-            public Summoner next() {
-                final String identifier = iterator.next();
-                if(names) {
-                    try {
-                        Utilities.checkSummonerName(identifier);
-                    } catch(final QueryValidationException e) {
-                        return null;
-                    }
-                }
-
-                final String endpoint = baseEndpoint + identifier;
-                final Summoner data = get(Summoner.class, endpoint, platform, limiter);
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                return data;
+            final String endpoint = baseEndpoint + identifier;
+            final Summoner data = get(Summoner.class, endpoint, platform, limiter);
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+            data.setPlatform(platform.getTag());
+            return data;
+          }
+
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -105,8 +105,8 @@ public class SummonerAPI extends RiotAPIService {
         final String summonerName = (String)query.get("name");
         Utilities.checkAtLeastOneNotNull(puuid, "puuid", accountId, "accountId", summonerId, "id", summonerName, "name");
 
-        String endpoint;
-        String limiter;
+        final String endpoint;
+        final String limiter;
         if(puuid != null) {
             endpoint = "lol/summoner/v4/summoners/by-puuid/" + puuid;
             limiter = "lol/summoner/v4/summoners/by-puuid/puuid";

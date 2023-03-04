@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.status;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Region;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 
 public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -44,6 +44,7 @@ public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.type
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -7141887712080838849L;
     public static final String SHARD_STATUS_LOAD_GROUP = "shard-status";
 
@@ -100,9 +101,7 @@ public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.type
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            SHARD_STATUS_LOAD_GROUP
-        });
+        return List.of(SHARD_STATUS_LOAD_GROUP);
     }
 
     public List<String> getLocales() {
@@ -144,21 +143,17 @@ public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.type
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case SHARD_STATUS_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(SHARD_STATUS_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

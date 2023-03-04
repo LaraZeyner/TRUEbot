@@ -1,4 +1,4 @@
-package de.zahrie.trues.util.util;
+package de.zahrie.trues.api.datatypes.collection;
 
 import java.io.Serial;
 import java.util.ArrayList;
@@ -9,15 +9,15 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by Lara on 24.02.2023 for TRUEbot
  */
-public class TrueList<E> extends ArrayList<E> {
+public class Stack<E> extends ArrayList<E> {
   @Serial
   private static final long serialVersionUID = 3877927374583616003L;
 
-  public TrueList() {
+  public Stack() {
     super();
   }
 
-  public TrueList(@NotNull Collection<? extends E> c) {
+  public Stack(@NotNull Collection<? extends E> c) {
     super(c);
   }
 

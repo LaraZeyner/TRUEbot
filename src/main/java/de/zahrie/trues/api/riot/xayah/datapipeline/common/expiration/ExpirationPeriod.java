@@ -2,7 +2,7 @@ package de.zahrie.trues.api.riot.xayah.datapipeline.common.expiration;
 
 import java.util.concurrent.TimeUnit;
 
-public class ExpirationPeriod {
+public final class ExpirationPeriod {
     public static ExpirationPeriod create(final long time, final TimeUnit unit) {
         final ExpirationPeriod period = new ExpirationPeriod();
         period.setPeriod(time);

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ParticipantTimeline extends DataObject {
+    @Serial
     private static final long serialVersionUID = -9108740894475294174L;
     private Map<String, Double> csDiffPerMinDeltas, goldPerMinDeltas, xpDiffPerMinDeltas, creepsPerMinDeltas, xpPerMinDeltas, damageTakenDiffPerMinDeltas,
             damageTakenPerMinDeltas;
@@ -87,13 +89,8 @@ public class ParticipantTimeline extends DataObject {
             return false;
         }
         if(xpPerMinDeltas == null) {
-            if(other.xpPerMinDeltas != null) {
-                return false;
-            }
-        } else if(!xpPerMinDeltas.equals(other.xpPerMinDeltas)) {
-            return false;
-        }
-        return true;
+          return other.xpPerMinDeltas == null;
+        } else return xpPerMinDeltas.equals(other.xpPerMinDeltas);
     }
 
     /**

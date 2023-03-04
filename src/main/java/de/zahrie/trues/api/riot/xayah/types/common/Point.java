@@ -5,5 +5,5 @@ public enum Point {
         POINT_B,
         POINT_C,
         POINT_D,
-        POINT_E;
+        POINT_E
 }

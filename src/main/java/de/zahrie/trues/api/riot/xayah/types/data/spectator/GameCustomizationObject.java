@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class GameCustomizationObject extends CoreData {
+    @Serial
     private static final long serialVersionUID = 1530217080261396957L;
     private String category, content;
 
@@ -26,13 +29,8 @@ public class GameCustomizationObject extends CoreData {
             return false;
         }
         if(content == null) {
-            if(other.content != null) {
-                return false;
-            }
-        } else if(!content.equals(other.content)) {
-            return false;
-        }
-        return true;
+          return other.content == null;
+        } else return content.equals(other.content);
     }
 
     /**

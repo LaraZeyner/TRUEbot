@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class RuneStats extends CoreData {
+    @Serial
     private static final long serialVersionUID = -5080946844563036159L;
     private double percentTimeSpentDeadPerLevel, percentArmorPenetrationPerLevel, percentCriticalStrikeDamage, percentMagicResist, percentHealthRegen,
             percentMovespeed, magicResist, energyRegenPerLevel, energy, magicPenetrationPerLevel, percentLifesteal, mana, percentCooldownReduction,
@@ -218,10 +221,7 @@ public class RuneStats extends CoreData {
         if(Double.doubleToLongBits(timeSpentDead) != Double.doubleToLongBits(other.timeSpentDead)) {
             return false;
         }
-        if(Double.doubleToLongBits(timeSpentDeadPerLevel) != Double.doubleToLongBits(other.timeSpentDeadPerLevel)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(timeSpentDeadPerLevel) == Double.doubleToLongBits(other.timeSpentDeadPerLevel);
     }
 
     /**

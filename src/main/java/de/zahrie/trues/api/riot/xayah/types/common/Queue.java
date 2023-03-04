@@ -670,11 +670,11 @@ public enum Queue {
     private final int id;
     private final String tag;
 
-    private Queue(final int id) {
+    Queue(final int id) {
         this(id, null);
     }
 
-    private Queue(final int id, final String tag) {
+    Queue(final int id, final String tag) {
         this.id = id;
         this.tag = tag;
     }

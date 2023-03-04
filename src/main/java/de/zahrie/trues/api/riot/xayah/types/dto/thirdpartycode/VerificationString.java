@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.thirdpartycode;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,6 +32,7 @@ public class VerificationString extends DataObject {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 9177660941963582527L;
     private String string, platform, summonerId;
 
@@ -61,13 +63,8 @@ public class VerificationString extends DataObject {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

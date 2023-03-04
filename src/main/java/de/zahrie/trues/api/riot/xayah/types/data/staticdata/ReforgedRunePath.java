@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ReforgedRunePath extends CoreData.ListProxy<ReforgedRuneSlot> {
+    @Serial
     private static final long serialVersionUID = 1254352945803411545L;
     private int id;
     private String name, key, image;
@@ -45,13 +48,8 @@ public class ReforgedRunePath extends CoreData.ListProxy<ReforgedRuneSlot> {
             return false;
         }
         if(name == null) {
-            if(other.name != null) {
-                return false;
-            }
-        } else if(!name.equals(other.name)) {
-            return false;
-        }
-        return true;
+          return other.name == null;
+        } else return name.equals(other.name);
     }
 
     /**

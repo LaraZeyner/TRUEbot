@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Image extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4913831808071030898L;
     private String full, group, sprite;
     private int h, w, y, x;
@@ -53,10 +56,7 @@ public class Image extends DataObject {
         if(x != other.x) {
             return false;
         }
-        if(y != other.y) {
-            return false;
-        }
-        return true;
+      return y == other.y;
     }
 
     /**

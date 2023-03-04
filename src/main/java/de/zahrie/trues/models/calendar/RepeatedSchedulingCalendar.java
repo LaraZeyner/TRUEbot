@@ -2,8 +2,9 @@ package de.zahrie.trues.models.calendar;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,7 +27,8 @@ public class RepeatedSchedulingCalendar extends SchedulingCalendar implements Se
   private static final long serialVersionUID = 8384587779953917815L;
 
   @Column(name = "repeat_end")
-  private Calendar repeatEnd;
+  @Type(TimeCoverter.class)
+  private Time repeatEnd;
 
   @Column(name = "repeat_interval")
   private Integer repeatInterval;

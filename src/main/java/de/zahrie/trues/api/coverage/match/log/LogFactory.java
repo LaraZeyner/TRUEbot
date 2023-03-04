@@ -1,8 +1,8 @@
 package de.zahrie.trues.api.coverage.match.log;
 
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.util.util.Util;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.database.Database;
 import de.zahrie.trues.util.logger.Logger;
 
 /**
@@ -10,25 +10,26 @@ import de.zahrie.trues.util.logger.Logger;
  */
 public final class LogFactory {
 
-  public static MatchLog handleUserWithTeam(MatchLog log, String content) {
-    content = Util.between(content, "(", ")", -1);
-    if (content.equals("admin")) {
+  public static MatchLog handleUserWithTeam(MatchLog log, Chain content) {
+    content = content.between("(", ")", -1);
+    if (content.toString().equals("admin")) {
       return log;
     }
-    content = content.replace("Team ", "");
-    int teamIndex = Integer.parseInt(content);
-    Participator team;
-    if (teamIndex == 1) {
-      team = log.getMatch().getHome();
-    } else if (teamIndex == 2) {
-      team = log.getMatch().getGuest();
-    } else {
-      Logger.getLogger("LogFactory").warning(teamIndex + " spielt nicht - Log fehlerhaft");
-      return log;
+    final Integer teamIndex = content.replace("Team ", "").intValue();
+    if (teamIndex != null) {
+      final Participator team;
+      if (teamIndex == 1) {
+        team = log.getMatch().getHome();
+      } else if (teamIndex == 2) {
+        team = log.getMatch().getGuest();
+      } else {
+        Logger.getLogger("LogFactory").warning(teamIndex + " spielt nicht - Log fehlerhaft");
+        return log;
+      }
+      log.setParticipator(team);
+      team.getLogs().add(log);
+      Database.save(log);
     }
-    log.setParticipator(team);
-    team.getLogs().add(log);
-    Database.save(log);
     return log;
   }
 

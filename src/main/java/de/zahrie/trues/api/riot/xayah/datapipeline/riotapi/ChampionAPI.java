@@ -43,30 +43,30 @@ public class ChampionAPI extends RiotAPIService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<ChampionInfo>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public ChampionInfo next() {
+            final Platform platform = iterator.next();
+
+            final String endpoint = "lol/platform/v3/champion-rotations";
+            final ChampionInfo data = get(ChampionInfo.class, endpoint, platform, "lol/platform/v3/champion-rotations");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public ChampionInfo next() {
-                final Platform platform = iterator.next();
+            data.setPlatform(platform.getTag());
+            return data;
+          }
 
-                final String endpoint = "lol/platform/v3/champion-rotations";
-                final ChampionInfo data = get(ChampionInfo.class, endpoint, platform, "lol/platform/v3/champion-rotations");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

@@ -13,5 +13,5 @@ public enum EventType {
         PORO_KING_SUMMON,
         SKILL_LEVEL_UP,
         WARD_KILL,
-        WARD_PLACED;
+        WARD_PLACED
 }

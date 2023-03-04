@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ParticipantIdentity extends DataObject {
+    @Serial
     private static final long serialVersionUID = -5678421894249739595L;
     private int participantId;
     private Player player;
@@ -27,13 +30,8 @@ public class ParticipantIdentity extends DataObject {
             return false;
         }
         if(player == null) {
-            if(other.player != null) {
-                return false;
-            }
-        } else if(!player.equals(other.player)) {
-            return false;
-        }
-        return true;
+          return other.player == null;
+        } else return player.equals(other.player);
     }
 
     /**

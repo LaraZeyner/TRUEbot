@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.status;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ShardStatus extends CoreData {
+    @Serial
     private static final long serialVersionUID = -3562231855274100852L;
     private List<String> locales;
     private String name, hostname, regionTag, slug, platform;
@@ -65,13 +67,8 @@ public class ShardStatus extends CoreData {
             return false;
         }
         if(slug == null) {
-            if(other.slug != null) {
-                return false;
-            }
-        } else if(!slug.equals(other.slug)) {
-            return false;
-        }
-        return true;
+          return other.slug == null;
+        } else return slug.equals(other.slug);
     }
 
     /**

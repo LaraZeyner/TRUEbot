@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchEvent extends DataObject {
+    @Serial
     private static final long serialVersionUID = 6204646184948219767L;
     private List<Integer> assistingParticipantIds;
     private String eventType, towerType, ascendedType, levelUpType, pointCaptured, wardType, monsterType, type, monsterSubType, laneType, buildingType;
@@ -143,13 +145,8 @@ public class MatchEvent extends DataObject {
             return false;
         }
         if(wardType == null) {
-            if(other.wardType != null) {
-                return false;
-            }
-        } else if(!wardType.equals(other.wardType)) {
-            return false;
-        }
-        return true;
+          return other.wardType == null;
+        } else return wardType.equals(other.wardType);
     }
 
     /**

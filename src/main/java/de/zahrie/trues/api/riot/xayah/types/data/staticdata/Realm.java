@@ -1,13 +1,15 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Realm extends CoreData {
+    @Serial
     private static final long serialVersionUID = 6579774823038008437L;
     private Map<String, String> latestVersions;
-    private String legacyMode, latestDataDragon, store, defaultLocale, version, CDN, CSSVersion, platform;
+    private String legacyMode, latestDataDragon, store, defaultLocale, version, cdn, CSSVersion, platform;
     private int maxProfileIconId;
 
     @Override
@@ -22,11 +24,11 @@ public class Realm extends CoreData {
             return false;
         }
         final Realm other = (Realm)obj;
-        if(CDN == null) {
-            if(other.CDN != null) {
+        if(cdn == null) {
+            if(other.cdn != null) {
                 return false;
             }
-        } else if(!CDN.equals(other.CDN)) {
+        } else if(!cdn.equals(other.cdn)) {
             return false;
         }
         if(CSSVersion == null) {
@@ -82,20 +84,15 @@ public class Realm extends CoreData {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**
      * @return the DDN
      */
-    public String getCDN() {
-        return CDN;
+    public String getCdn() {
+        return cdn;
     }
 
     /**
@@ -165,7 +162,7 @@ public class Realm extends CoreData {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (CDN == null ? 0 : CDN.hashCode());
+        result = prime * result + (cdn == null ? 0 : cdn.hashCode());
         result = prime * result + (CSSVersion == null ? 0 : CSSVersion.hashCode());
         result = prime * result + (defaultLocale == null ? 0 : defaultLocale.hashCode());
         result = prime * result + (latestDataDragon == null ? 0 : latestDataDragon.hashCode());
@@ -179,11 +176,11 @@ public class Realm extends CoreData {
     }
 
     /**
-     * @param CDN
+     * @param cdn
      *        the CDN to set
      */
-    public void setCDN(final String CDN) {
-        this.CDN = CDN;
+    public void setCdn(final String cdn) {
+        this.cdn = cdn;
     }
 
     /**

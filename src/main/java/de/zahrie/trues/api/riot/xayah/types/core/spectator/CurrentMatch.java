@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.spectator;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +30,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch> {
-    public static class Builder {
+    public static final class Builder {
         private final Summoner summoner;
 
         private Builder(final Summoner summoner) {
@@ -46,6 +46,7 @@ public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
     }
 
     public class Player extends de.zahrie.trues.api.riot.xayah.types.core.spectator.Player {
+        @Serial
         private static final long serialVersionUID = 4959827158399514603L;
 
         private final Supplier<Champion> champion = Suppliers.memoize(() -> {
@@ -158,6 +159,7 @@ public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
     }
 
     public class Team extends de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatchTeam {
+        @Serial
         private static final long serialVersionUID = 6283190060704502909L;
 
         private final Supplier<SearchableList<Champion>> bans = Suppliers.memoize(() -> {
@@ -200,6 +202,7 @@ public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
     }
 
     public static final String CURRENT_GAME_LOAD_GROUP = "current-game";
+    @Serial
     private static final long serialVersionUID = 2151849959267002960L;
 
     public static Builder forSummoner(final Summoner summoner) {
@@ -283,9 +286,7 @@ public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            CURRENT_GAME_LOAD_GROUP
-        });
+        return List.of(CURRENT_GAME_LOAD_GROUP);
     }
 
     public Map getMap() {
@@ -347,24 +348,20 @@ public class CurrentMatch extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case CURRENT_GAME_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getSummonerId() != null) {
-                    builder.put("summonerId", coreData.getSummonerId());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(CURRENT_GAME_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getSummonerId() != null) {
+          builder.put("summonerId", coreData.getSummonerId());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.spectator.CurrentMatch.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

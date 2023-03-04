@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.championmastery;
 
+import java.io.Serial;
+
 import org.joda.time.DateTime;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ChampionMastery extends CoreData {
+    @Serial
     private static final long serialVersionUID = -6045032013873774634L;
     private boolean chestGranted;
     private DateTime lastPlayed;
@@ -62,10 +65,7 @@ public class ChampionMastery extends CoreData {
         } else if(!summonerId.equals(other.summonerId)) {
             return false;
         }
-        if(tokens != other.tokens) {
-            return false;
-        }
-        return true;
+      return tokens == other.tokens;
     }
 
     /**

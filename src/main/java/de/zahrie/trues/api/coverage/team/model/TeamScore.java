@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.models.Standing;
@@ -14,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -57,12 +59,11 @@ class TeamScore implements Serializable, Comparable<TeamScore> {
     return this.place + ". (" + this.getWins() + "/" + this.getLosses() + ")";
   }
 
-  private long compareScore() {
-    return (10 - league.getTier() * 100_000L) + (1000 - this.place) * 100 + Math.round(getStanding().getWinrate().getRate() * 100);
-  }
-
   @Override
-  public int compareTo(TeamScore o) {
-    return (int) (compareScore() - o.compareScore());
+  public int compareTo(@NotNull TeamScore o) {
+    return Comparator.comparing((TeamScore o1) -> o1.getLeague().getTier())
+        .thenComparing(TeamScore::getPlace)
+        .thenComparing((TeamScore o1) -> o1.getStanding().getWinrate().rate(), Comparator.reverseOrder())
+        .compare(this, o);
   }
 }

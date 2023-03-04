@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.discord.util.cmd.annotations.Column;
 import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.NotNull;
 
 /**

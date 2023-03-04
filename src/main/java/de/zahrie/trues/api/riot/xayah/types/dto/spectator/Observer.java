@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Observer extends DataObject {
+    @Serial
     private static final long serialVersionUID = -9110057560473353917L;
     private String encryptionKey;
 
@@ -23,13 +26,8 @@ public class Observer extends DataObject {
         }
         final Observer other = (Observer)obj;
         if(encryptionKey == null) {
-            if(other.encryptionKey != null) {
-                return false;
-            }
-        } else if(!encryptionKey.equals(other.encryptionKey)) {
-            return false;
-        }
-        return true;
+          return other.encryptionKey == null;
+        } else return encryptionKey.equals(other.encryptionKey);
     }
 
     /**

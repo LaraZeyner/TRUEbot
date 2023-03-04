@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class StatTotals extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.StatTotals> {
+    @Serial
     private static final long serialVersionUID = -8528007572486657286L;
 
     public StatTotals(final de.zahrie.trues.api.riot.xayah.types.data.match.StatTotals coreData) {

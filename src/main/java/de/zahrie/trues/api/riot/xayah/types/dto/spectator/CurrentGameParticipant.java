@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class CurrentGameParticipant extends DataObject {
+    @Serial
     private static final long serialVersionUID = 8063243501212757938L;
     private boolean bot;
     private List<GameCustomizationObject> gameCustomizationObjects;
@@ -67,10 +69,7 @@ public class CurrentGameParticipant extends DataObject {
         } else if(!summonerName.equals(other.summonerName)) {
             return false;
         }
-        if(teamId != other.teamId) {
-            return false;
-        }
-        return true;
+      return teamId == other.teamId;
     }
 
     /**

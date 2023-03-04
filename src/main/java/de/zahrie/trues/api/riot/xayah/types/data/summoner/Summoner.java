@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.summoner;
 
+import java.io.Serial;
+
 import org.joda.time.DateTime;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Summoner extends CoreData {
+    @Serial
     private static final long serialVersionUID = -1972373394213716333L;
     private int level;
     private String name, platform, puuid, accountId, id;
@@ -65,13 +68,8 @@ public class Summoner extends CoreData {
             return false;
         }
         if(updated == null) {
-            if(other.updated != null) {
-                return false;
-            }
-        } else if(!updated.equals(other.updated)) {
-            return false;
-        }
-        return true;
+          return other.updated == null;
+        } else return updated.equals(other.updated);
     }
 
     /**

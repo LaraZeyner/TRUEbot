@@ -122,13 +122,8 @@ public class RiotAPI extends CompositeDataSource {
                 return false;
             }
             if(services == null) {
-                if(other.services != null) {
-                    return false;
-                }
-            } else if(!services.equals(other.services)) {
-                return false;
-            }
-            return true;
+              return other.services == null;
+            } else return services.equals(other.services);
         }
 
         /**
@@ -225,7 +220,7 @@ public class RiotAPI extends CompositeDataSource {
             result = prime * result + (http500Strategy == null ? 0 : http500Strategy.hashCode());
             result = prime * result + (http503Strategy == null ? 0 : http503Strategy.hashCode());
             result = prime * result + (httpTimeoutStrategy == null ? 0 : httpTimeoutStrategy.hashCode());
-            long temp;
+            final long temp;
             temp = Double.doubleToLongBits(limitingShare);
             result = prime * result + (int)(temp ^ temp >>> 32);
             result = prime * result + (limitingType == null ? 0 : limitingType.hashCode());

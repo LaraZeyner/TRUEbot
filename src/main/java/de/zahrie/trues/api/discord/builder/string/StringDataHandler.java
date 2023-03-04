@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.discord.util.cmd.annotations.Column;
 import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
-import de.zahrie.trues.util.database.CellEntry;
+import de.zahrie.trues.database.CellEntry;
 import lombok.RequiredArgsConstructor;
 
 /**

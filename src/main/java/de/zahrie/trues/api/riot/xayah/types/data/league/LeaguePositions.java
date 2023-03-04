@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class LeaguePositions extends CoreData.ListProxy<LeagueEntry> {
+    @Serial
     private static final long serialVersionUID = -78697578110185006L;
     private String platform, summonerId;
 
@@ -34,13 +37,8 @@ public class LeaguePositions extends CoreData.ListProxy<LeagueEntry> {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.thirdpartycode;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class VerificationString extends CoreData {
+    @Serial
     private static final long serialVersionUID = 6011690200339393247L;
     private String platform, string, summonerId;
 
@@ -33,13 +36,8 @@ public class VerificationString extends CoreData {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

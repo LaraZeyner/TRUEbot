@@ -13,7 +13,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public abstract class Timelines {
-    public static class Builder {
+    public static final class Builder {
         private final Iterable<Long> ids;
         private Platform platform;
         private boolean streaming = false;

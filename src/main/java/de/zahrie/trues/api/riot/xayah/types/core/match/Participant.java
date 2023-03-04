@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.common.Lane;
 import de.zahrie.trues.api.riot.xayah.types.common.Role;
 import de.zahrie.trues.api.riot.xayah.types.common.RunePath;
@@ -15,6 +17,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public abstract class Participant extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.Participant> {
+    @Serial
     private static final long serialVersionUID = 5673949825555239078L;
 
     public Participant(final de.zahrie.trues.api.riot.xayah.types.data.match.Participant coreData) {

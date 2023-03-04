@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class MasteryTree extends CoreData {
+    @Serial
     private static final long serialVersionUID = 501183840631690977L;
     private List<MasteryTreeTier> resolve, ferocity, cunning;
 
@@ -35,13 +37,8 @@ public class MasteryTree extends CoreData {
             return false;
         }
         if(resolve == null) {
-            if(other.resolve != null) {
-                return false;
-            }
-        } else if(!resolve.equals(other.resolve)) {
-            return false;
-        }
-        return true;
+          return other.resolve == null;
+        } else return resolve.equals(other.resolve);
     }
 
     /**

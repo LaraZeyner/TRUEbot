@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class SummonerSpell extends CoreData {
+    @Serial
     private static final long serialVersionUID = 1751783167017619377L;
     private List<Double> cooldowns;
     private List<Integer> costs, ranges;
@@ -179,13 +181,8 @@ public class SummonerSpell extends CoreData {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

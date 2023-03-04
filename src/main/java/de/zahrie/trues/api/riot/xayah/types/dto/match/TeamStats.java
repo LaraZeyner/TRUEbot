@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class TeamStats extends DataObject {
+    @Serial
     private static final long serialVersionUID = 7571269845686606334L;
     private List<TeamBans> bans;
     private int baronKills, riftHeraldKills, teamId, vilemawKills, inhibitorKills, towerKills, dominionVictoryScore, dragonKills;
@@ -77,13 +79,8 @@ public class TeamStats extends DataObject {
             return false;
         }
         if(win == null) {
-            if(other.win != null) {
-                return false;
-            }
-        } else if(!win.equals(other.win)) {
-            return false;
-        }
-        return true;
+          return other.win == null;
+        } else return win.equals(other.win);
     }
 
     /**

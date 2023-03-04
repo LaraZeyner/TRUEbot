@@ -11,7 +11,7 @@ import com.google.common.collect.Multimap;
 
 public abstract class AbstractSearchableObject implements SearchableObject {
     private static final Map<Class<?>, Object> locks = new ConcurrentHashMap<>();
-    private static Map<Class<?>, Multimap<Class<?>, Method>> searchable = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Multimap<Class<?>, Method>> searchable = new ConcurrentHashMap<>();
 
     @Override
     public boolean contains(final Object item) {
@@ -25,7 +25,7 @@ public abstract class AbstractSearchableObject implements SearchableObject {
         }
 
         for(final Method method : targets) {
-            Object result;
+            final Object result;
             try {
                 result = method.invoke(this);
             } catch(final InvocationTargetException e) {
@@ -40,11 +40,10 @@ public abstract class AbstractSearchableObject implements SearchableObject {
 
             if(item == result) {
                 return true;
-            } else if(item != null && result != null && item.equals(result)) {
+            } else if(item.equals(result)) {
                 return true;
-            } else if(result instanceof SearchableObject) {
-                final SearchableObject obj = (SearchableObject)result;
-                if(obj.contains(item)) {
+            } else if(result instanceof final SearchableObject obj) {
+              if(obj.contains(item)) {
                     return true;
                 }
             }

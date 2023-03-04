@@ -2,19 +2,20 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
-import de.zahrie.trues.api.coverage.stage.Betable;
-import de.zahrie.trues.models.betting.Bet;
+import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.coverage.match.log.MatchLog;
+import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.models.betting.Bet;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,6 +37,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -61,8 +63,9 @@ public class Match implements Betable, Serializable {
   private Playday matchday;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "coverage_start", nullable = false)
-  private Calendar start;
+  private Time start;
 
   @Column(name = "rate_offset", nullable = false)
   private short rateOffset = 0;
@@ -100,7 +103,7 @@ public class Match implements Betable, Serializable {
     return participators.stream().filter(team -> !team.isFirstPick()).findFirst().orElse(null);
   }
 
-  public Match(Playday matchday, Calendar start) {
+  public Match(Playday matchday, Time start) {
     this.matchday = matchday;
     this.start = start;
   }

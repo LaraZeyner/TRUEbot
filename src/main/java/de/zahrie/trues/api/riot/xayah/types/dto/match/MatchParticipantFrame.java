@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchParticipantFrame extends DataObject {
+    @Serial
     private static final long serialVersionUID = -1475394108130028013L;
     private MatchPosition position;
     private int totalGold, teamScore, participantId, level, currentGold, minionsKilled, dominionScore, xp, jungleMinionsKilled;
@@ -54,10 +57,7 @@ public class MatchParticipantFrame extends DataObject {
         if(totalGold != other.totalGold) {
             return false;
         }
-        if(xp != other.xp) {
-            return false;
-        }
-        return true;
+      return xp == other.xp;
     }
 
     /**

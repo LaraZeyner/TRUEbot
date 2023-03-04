@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MasteryTreeList extends DataObject {
+    @Serial
     private static final long serialVersionUID = -3220972376433060053L;
     private List<MasteryTreeItem> masteryTreeItems;
 
@@ -25,13 +27,8 @@ public class MasteryTreeList extends DataObject {
         }
         final MasteryTreeList other = (MasteryTreeList)obj;
         if(masteryTreeItems == null) {
-            if(other.masteryTreeItems != null) {
-                return false;
-            }
-        } else if(!masteryTreeItems.equals(other.masteryTreeItems)) {
-            return false;
-        }
-        return true;
+          return other.masteryTreeItems == null;
+        } else return masteryTreeItems.equals(other.masteryTreeItems);
     }
 
     /**

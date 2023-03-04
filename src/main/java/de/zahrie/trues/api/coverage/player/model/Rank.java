@@ -61,6 +61,7 @@ public class Rank implements Serializable {
   private int mmr;
 
   public String getWinrate() {
+    //TODO (Abgie) 01.03.2023: Winrate
     if (this.wins > 0) {
       return Math.round(this.wins * 100.0 / (this.wins + this.losses))  + "%";
     }

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class TeamBans extends DataObject {
+    @Serial
     private static final long serialVersionUID = 7531863877099848361L;
     private int pickTurn, championId;
 
@@ -25,10 +28,7 @@ public class TeamBans extends DataObject {
         if(championId != other.championId) {
             return false;
         }
-        if(pickTurn != other.pickTurn) {
-            return false;
-        }
-        return true;
+      return pickTurn == other.pickTurn;
     }
 
     /**

@@ -4,8 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.zahrie.trues.util.util.Time;
-import de.zahrie.trues.util.util.Util;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -54,16 +55,17 @@ public class EmbedCreator {
   }
 
   private void getBaseBuilder() {
-    final String footer = "zuletzt aktualisiert " + Time.TimeFormat.DEFAULT.now();
-    this.currentBuilder = new EmbedBuilder().setFooter(footer);
+    String str = "zuletzt aktualisiert " + Time.of().chain(TimeFormat.DEFAULT).toString();
+    final Chain footer = Chain.of("zuletzt aktualisiert ").add(Time.of().chain(TimeFormat.DEFAULT));
+    this.currentBuilder = new EmbedBuilder().setFooter(footer.toString());
     this.totalDataLength = footer.length();
 
-    final String titleStripped = Util.strip(this.title, MessageEmbed.TITLE_MAX_LENGTH);
-    this.currentBuilder.setTitle(titleStripped);
+    final Chain titleStripped = Chain.of(title).strip(MessageEmbed.TITLE_MAX_LENGTH);
+    this.currentBuilder.setTitle(titleStripped.toString());
     this.totalDataLength += titleStripped.length();
 
-    final String descriptionStripped = Util.strip(this.description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
-    this.currentBuilder.setDescription(descriptionStripped);
+    final Chain descriptionStripped = Chain.of(description).strip(MessageEmbed.DESCRIPTION_MAX_LENGTH);
+    this.currentBuilder.setDescription(descriptionStripped.toString());
     this.totalDataLength += descriptionStripped.length();
 
     if (this.color != null) {
@@ -116,7 +118,7 @@ public class EmbedCreator {
     List<Integer> cols = new ArrayList<>();
     for (int i = 0; i < waitingColumns.get(0).value().split("\n").length / 5; i++) {
       final int j = enumerated ? i * 5 : i;
-      final List<Integer> cls = waitingColumns.stream().map(c -> Util.ordinalIndexOf(c.value(), "\n", j)).toList();
+      final List<Integer> cls = waitingColumns.stream().map(c -> Chain.of(c.value()).ordinalIndexOf("\n", j)).toList();
       if (cls.stream().reduce(0, Integer::sum) > space) {
         splitFields(cols);
         break;
@@ -148,7 +150,7 @@ public class EmbedCreator {
   private int determineWaiting(int index) {
     int skipped = 0;
     for (int i = index +1; i < this.data.size(); i++) {
-      EmbedColumn col = this.data.get(i);
+      final EmbedColumn col = this.data.get(i);
       if (!col.inline() || this.waitingColumns.size() == 3) {
         break;
       }
@@ -165,8 +167,8 @@ public class EmbedCreator {
 
   private void addAllColumns() {
     for (EmbedColumn column : this.waitingColumns) {
-      final String name = Util.strip(column.name(), MessageEmbed.TITLE_MAX_LENGTH);
-      this.currentBuilder.addField(name, column.value(), column.inline());
+      final Chain name = Chain.of(column.name()).strip(MessageEmbed.TITLE_MAX_LENGTH);
+      this.currentBuilder.addField(name.toString(), column.value(), column.inline());
     }
     this.waitingColumns.clear();
   }

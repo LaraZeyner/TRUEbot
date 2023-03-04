@@ -7,5 +7,5 @@ public enum Position {
         MIDDLE,
         NONE,
         TOP,
-        UTILITY;
+        UTILITY
 }

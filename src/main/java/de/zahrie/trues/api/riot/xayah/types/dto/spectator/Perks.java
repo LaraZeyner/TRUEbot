@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Perks extends DataObject {
+    @Serial
     private static final long serialVersionUID = 7440133663518034542L;
     private List<Long> perkIds;
     private long perkStyle, perkSubStyle;
@@ -31,10 +33,7 @@ public class Perks extends DataObject {
         if(perkStyle != other.perkStyle) {
             return false;
         }
-        if(perkSubStyle != other.perkSubStyle) {
-            return false;
-        }
-        return true;
+      return perkSubStyle == other.perkSubStyle;
     }
 
     /**

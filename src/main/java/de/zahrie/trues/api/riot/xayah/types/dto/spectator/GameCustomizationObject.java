@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class GameCustomizationObject extends DataObject {
+    @Serial
     private static final long serialVersionUID = 2834126701838925649L;
     private String category, content;
 
@@ -26,13 +29,8 @@ public class GameCustomizationObject extends DataObject {
             return false;
         }
         if(content == null) {
-            if(other.content != null) {
-                return false;
-            }
-        } else if(!content.equals(other.content)) {
-            return false;
-        }
-        return true;
+          return other.content == null;
+        } else return content.equals(other.content);
     }
 
     /**

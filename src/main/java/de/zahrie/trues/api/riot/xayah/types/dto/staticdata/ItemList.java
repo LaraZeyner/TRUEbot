@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.Set;
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ItemList extends DataObject {
+    @Serial
     private static final long serialVersionUID = 3935373185410370517L;
     private Map<String, Item> data;
     private List<Group> groups;
@@ -80,13 +82,8 @@ public class ItemList extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

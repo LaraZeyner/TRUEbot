@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 
 /**
  * Created by Lara on 11.02.2023 for TRUEbot

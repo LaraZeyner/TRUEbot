@@ -5,5 +5,5 @@ public enum MonsterType {
         BLUE_GOLEM,
         DRAGON,
         RED_LIZARD,
-        VILEMAW;
+        VILEMAW
 }

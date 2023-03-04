@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.common.AscensionType;
@@ -19,6 +21,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item;
 
 public abstract class Event extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.Event> {
+    @Serial
     private static final long serialVersionUID = -2437642335207262614L;
 
     public Event(final de.zahrie.trues.api.riot.xayah.types.data.match.Event coreData) {

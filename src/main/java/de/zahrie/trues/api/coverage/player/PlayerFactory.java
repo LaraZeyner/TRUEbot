@@ -3,7 +3,7 @@ package de.zahrie.trues.api.coverage.player;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.api.riot.Xayah;
 import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import de.zahrie.trues.util.logger.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public final class PlayerFactory {
 
   @Nullable
   public static PrimePlayer getPrimePlayer(int primeId, String summonerName) {
-    PrimePlayer player = getPlayer(primeId);
+    final PrimePlayer player = getPlayer(primeId);
     if (player != null) {
       updatePrmAccount(player, summonerName);
       return player;
@@ -55,7 +55,7 @@ public final class PlayerFactory {
 
   @Nullable
   private static PrimePlayer performNoPuuid(String summonerName) {
-    PrimePlayer primePlayer = determineExistingPlayerFromName(summonerName);
+    final PrimePlayer primePlayer = determineExistingPlayerFromName(summonerName);
     if (primePlayer == null) {
       Logger.getLogger("Player").attention("Der Spieler existiert nicht");
       return null;

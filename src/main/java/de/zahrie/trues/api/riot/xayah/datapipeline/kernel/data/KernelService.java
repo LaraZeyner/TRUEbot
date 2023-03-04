@@ -35,8 +35,8 @@ import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class KernelService extends AbstractDataSource {
     @JsonDeserialize(using = FailedRequestStrategy.Deserializer.class)
-    public static interface FailedRequestStrategy {
-        public static class Configuration {
+    public interface FailedRequestStrategy {
+        class Configuration {
             private long backoff;
             private TimeUnit backoffUnit;
             private FailedRequestStrategy backupStrategy;
@@ -74,10 +74,7 @@ public class KernelService extends AbstractDataSource {
                 if(maxAttempts != other.maxAttempts) {
                     return false;
                 }
-                if(type != other.type) {
-                    return false;
-                }
-                return true;
+              return type == other.type;
             }
 
             /**
@@ -184,7 +181,7 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static class Deserializer extends JsonDeserializer<FailedRequestStrategy> {
+        class Deserializer extends JsonDeserializer<FailedRequestStrategy> {
             @Override
             public FailedRequestStrategy deserialize(final JsonParser parser, final DeserializationContext context) throws IOException {
                 final Configuration config = context.readValue(parser, Configuration.class);
@@ -199,7 +196,7 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static class ExponentialBackoff implements FailedRequestStrategy {
+        class ExponentialBackoff implements FailedRequestStrategy {
             private static final long DEFAULT_BACKOFF = 1;
             private static final int DEFAULT_BACKOFF_FACTOR = 2;
             private static final TimeUnit DEFAULT_BACKOFF_UNIT = TimeUnit.SECONDS;
@@ -254,7 +251,7 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static class LinearBackoff implements FailedRequestStrategy {
+        class LinearBackoff implements FailedRequestStrategy {
             private static final long DEFAULT_BACKOFF = 1;
             private static final TimeUnit DEFAULT_BACKOFF_UNIT = TimeUnit.SECONDS;
             private static final FailedRequestStrategy DEFAULT_BACKUP_STRATEGY = new ThrowException();
@@ -304,7 +301,7 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static class ReturnNull implements FailedRequestStrategy {
+        class ReturnNull implements FailedRequestStrategy {
             public ReturnNull() {
                 this(new Configuration());
             }
@@ -327,14 +324,14 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static class Serializer extends JsonSerializer<FailedRequestStrategy> {
+        class Serializer extends JsonSerializer<FailedRequestStrategy> {
             @Override
             public void serialize(final FailedRequestStrategy strategy, final JsonGenerator generator, final SerializerProvider provider) throws IOException {
                 generator.writeObject(strategy.getConfiguration());
             }
         }
 
-        public static class ThrowException implements FailedRequestStrategy {
+        class ThrowException implements FailedRequestStrategy {
             public ThrowException() {
                 this(new Configuration());
             }
@@ -357,7 +354,7 @@ public class KernelService extends AbstractDataSource {
             }
         }
 
-        public static enum Type {
+        enum Type {
                 EXPONENTIAL_BACKOFF(ExponentialBackoff.class),
                 LINEAR_BACKOFF(LinearBackoff.class),
                 RETURN_NULL(ReturnNull.class),
@@ -369,7 +366,7 @@ public class KernelService extends AbstractDataSource {
                 return FOR_CLASS.get(clazz);
             }
 
-            private static final Map<Class<? extends FailedRequestStrategy>, Type> getForClass() {
+            private static Map<Class<? extends FailedRequestStrategy>, Type> getForClass() {
                 final Builder<Class<? extends FailedRequestStrategy>, Type> builder = ImmutableMap.builder();
                 for(final Type type : values()) {
                     builder.put(type.type, type);
@@ -379,7 +376,7 @@ public class KernelService extends AbstractDataSource {
 
             private final Class<? extends FailedRequestStrategy> type;
 
-            private Type(final Class<? extends FailedRequestStrategy> type) {
+            Type(final Class<? extends FailedRequestStrategy> type) {
                 this.type = type;
             }
 
@@ -390,16 +387,16 @@ public class KernelService extends AbstractDataSource {
         }
 
         @JsonValue
-        public Configuration getConfiguration();
+        Configuration getConfiguration();
 
-        public <T extends CoreData> T onFailedRequest(KernelService service, RequestContext<T> context, Response response, OriannaException e);
+        <T extends CoreData> T onFailedRequest(KernelService service, RequestContext<T> context, Response response, OriannaException e);
     }
 
     private static class RequestContext<T> {
-        public int attemptCount = 0;
-        public String endpoint;
-        public Multimap<String, String> parameters;
-        public Class<T> type;
+        public int attemptCount;
+        public final String endpoint;
+        public final Multimap<String, String> parameters;
+        public final Class<T> type;
 
         public RequestContext(final Class<T> type, final String endpoint, final Multimap<String, String> parameters) {
             this.type = type;
@@ -460,7 +457,7 @@ public class KernelService extends AbstractDataSource {
     private <T extends CoreData> T get(final RequestContext<T> context) {
         context.attemptCount += 1;
 
-        Response response = null;
+        final Response response;
         try {
             response = client.get(host, port, context.endpoint, context.parameters, defaultHeaders);
         } catch(final TimeoutException e) {
@@ -472,40 +469,45 @@ public class KernelService extends AbstractDataSource {
                 + "! Report this to the orianna team.", e);
         }
 
-        switch(response.getStatusCode()) {
-            case 400:
-                LOGGER.error("Got \"Bad Request\" from " + host + "/" + context.endpoint + "!");
-                throw new BadRequestException("A Kernel request to " + host + "/" + context.endpoint
-                    + " returned \"Bad Request\". If the problem persists, report this to the orianna team.");
-            case 404:
-                LOGGER.info("Got \"Not Found\" from " + host + "/" + context.endpoint + "!");
-                return http404Strategy.onFailedRequest(this, context, response,
-                    new NotFoundException("A Kernel request to " + host + "/" + context.endpoint
-                        + " returned \"Not Found\". If this was unexpected, check your query parameters to ensure they are correct."));
-            case 500:
-                LOGGER.error("Got \"Internal Server Error\" from " + host + "/" + context.endpoint + "!");
-                return http500Strategy.onFailedRequest(this, context, response,
-                    new InternalServerErrorException("A Kernel request to " + host + "/" + context.endpoint
-                        + " returned \"Internal Server Error\". Check the Kernel logs for errors. Sometimes the Riot API experiences these when under extreme load and Kernel will forward them - if that problem persists, try catching this exception, waiting briefly, and trying again."));
-            case 503:
-                LOGGER.error("Got \"Service Unavailable\" from " + host + "/" + context.endpoint + "!");
-                return http503Strategy.onFailedRequest(this, context, response,
-                    new ServiceUnavailableException("A Kernel request to " + host + "/" + context.endpoint
-                        + " returned \"Service Unavailable\". The Riot API is likely to be down for a short period of time, and can't be used in the meantime."));
-            case 504:
-                final TimeoutException.Type type = TimeoutException.Type.valueOf(response.getHeaders().get("X-Timeout-Type").iterator().next());
-                LOGGER.error("Got \"Gateway Timeout\" from " + host + "/" + context.endpoint + "!");
-                return http504Strategy.onFailedRequest(this, context, response,
-                    new GatewayTimeoutException("A Kernel request to " + host + "/" + context.endpoint
-                        + " returned \"Gateway Timeout\". This may mean connections to the Riot API are very slow right now.", type));
-            default:
-                if(response.getStatusCode() >= 400) {
-                    LOGGER.error("Get request to " + host + "/" + context.endpoint + " returned " + response.getStatusCode() + ": " + response.getBody());
-                    throw new OriannaException("An unknown error code (" + response.getStatusCode() + ") was returned from the Kernel with message: "
-                        + response.getBody());
-                }
-                break;
+      switch (response.getStatusCode()) {
+        case 400 -> {
+          LOGGER.error("Got \"Bad Request\" from " + host + "/" + context.endpoint + "!");
+          throw new BadRequestException("A Kernel request to " + host + "/" + context.endpoint
+              + " returned \"Bad Request\". If the problem persists, report this to the orianna team.");
         }
+        case 404 -> {
+          LOGGER.info("Got \"Not Found\" from " + host + "/" + context.endpoint + "!");
+          return http404Strategy.onFailedRequest(this, context, response,
+              new NotFoundException("A Kernel request to " + host + "/" + context.endpoint
+                  + " returned \"Not Found\". If this was unexpected, check your query parameters to ensure they are correct."));
+        }
+        case 500 -> {
+          LOGGER.error("Got \"Internal Server Error\" from " + host + "/" + context.endpoint + "!");
+          return http500Strategy.onFailedRequest(this, context, response,
+              new InternalServerErrorException("A Kernel request to " + host + "/" + context.endpoint
+                  + " returned \"Internal Server Error\". Check the Kernel logs for errors. Sometimes the Riot API experiences these when under extreme load and Kernel will forward them - if that problem persists, try catching this exception, waiting briefly, and trying again."));
+        }
+        case 503 -> {
+          LOGGER.error("Got \"Service Unavailable\" from " + host + "/" + context.endpoint + "!");
+          return http503Strategy.onFailedRequest(this, context, response,
+              new ServiceUnavailableException("A Kernel request to " + host + "/" + context.endpoint
+                  + " returned \"Service Unavailable\". The Riot API is likely to be down for a short period of time, and can't be used in the meantime."));
+        }
+        case 504 -> {
+          final TimeoutException.Type type = TimeoutException.Type.valueOf(response.getHeaders().get("X-Timeout-Type").iterator().next());
+          LOGGER.error("Got \"Gateway Timeout\" from " + host + "/" + context.endpoint + "!");
+          return http504Strategy.onFailedRequest(this, context, response,
+              new GatewayTimeoutException("A Kernel request to " + host + "/" + context.endpoint
+                  + " returned \"Gateway Timeout\". This may mean connections to the Riot API are very slow right now.", type));
+        }
+        default -> {
+          if (response.getStatusCode() >= 400) {
+            LOGGER.error("Get request to " + host + "/" + context.endpoint + " returned " + response.getStatusCode() + ": " + response.getBody());
+            throw new OriannaException("An unknown error code (" + response.getStatusCode() + ") was returned from the Kernel with message: "
+                + response.getBody());
+          }
+        }
+      }
 
         return msgpack ? CoreData.fromBytes(context.type, response.getBytes()) : CoreData.fromJSON(context.type, response.getBody());
     }

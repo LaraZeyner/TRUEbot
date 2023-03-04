@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Runes extends CoreData.ListProxy<Integer> {
+    @Serial
     private static final long serialVersionUID = -3762685297780616690L;
     private int primaryPath, secondaryPath;
 
@@ -29,10 +32,7 @@ public class Runes extends CoreData.ListProxy<Integer> {
         if(primaryPath != other.primaryPath) {
             return false;
         }
-        if(secondaryPath != other.secondaryPath) {
-            return false;
-        }
-        return true;
+      return secondaryPath == other.secondaryPath;
     }
 
     /**

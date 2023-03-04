@@ -28,29 +28,25 @@ public class ThirdPartyCodeAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<VerificationString>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public VerificationString next() {
-                final String summonerId = iterator.next();
+          @Override
+          public VerificationString next() {
+            final String summonerId = iterator.next();
 
-                final String endpoint = "lol/platform/v4/third-party-code/by-summoner/" + summonerId;
-                final VerificationString data = get(VerificationString.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/platform/v4/third-party-code/by-summoner/" + summonerId;
 
-                return data;
-            }
+            return get(VerificationString.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -61,11 +57,7 @@ public class ThirdPartyCodeAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId");
 
         final String endpoint = "lol/platform/v4/third-party-code/by-summoner/" + summonerId;
-        final VerificationString data = get(VerificationString.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(VerificationString.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 }

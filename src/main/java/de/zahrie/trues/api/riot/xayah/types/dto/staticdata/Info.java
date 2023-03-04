@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Info extends DataObject {
+    @Serial
     private static final long serialVersionUID = -7050088759392929214L;
     private int difficulty, attack, defense, magic;
 
@@ -31,10 +34,7 @@ public class Info extends DataObject {
         if(difficulty != other.difficulty) {
             return false;
         }
-        if(magic != other.magic) {
-            return false;
-        }
-        return true;
+      return magic == other.magic;
     }
 
     /**

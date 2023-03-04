@@ -13,11 +13,11 @@ public class ChampionTransformer extends AbstractDataTransformer {
     @Transform(from = ChampionInfo.class, to = ChampionRotation.class)
     public ChampionRotation transform(final ChampionInfo item, final PipelineContext context) {
         final ChampionRotation rotation = new ChampionRotation();
-        rotation.setFreeChampionIds(new HashSet<Integer>(item.getFreeChampionIds().size()));
+        rotation.setFreeChampionIds(new HashSet<>(item.getFreeChampionIds().size()));
         for(final Integer id : item.getFreeChampionIds()) {
             rotation.getFreeChampionIds().add(id);
         }
-        rotation.setFreeChampionIdsForNewPlayers(new HashSet<Integer>(item.getFreeChampionIdsForNewPlayers().size()));
+        rotation.setFreeChampionIdsForNewPlayers(new HashSet<>(item.getFreeChampionIdsForNewPlayers().size()));
         for(final Integer id : item.getFreeChampionIdsForNewPlayers()) {
             rotation.getFreeChampionIdsForNewPlayers().add(id);
         }
@@ -29,11 +29,11 @@ public class ChampionTransformer extends AbstractDataTransformer {
     @Transform(from = ChampionRotation.class, to = ChampionInfo.class)
     public ChampionInfo transform(final ChampionRotation item, final PipelineContext context) {
         final ChampionInfo info = new ChampionInfo();
-        info.setFreeChampionIds(new ArrayList<Integer>(item.getFreeChampionIds().size()));
+        info.setFreeChampionIds(new ArrayList<>(item.getFreeChampionIds().size()));
         for(final Integer id : item.getFreeChampionIds()) {
             info.getFreeChampionIds().add(id);
         }
-        info.setFreeChampionIdsForNewPlayers(new ArrayList<Integer>(item.getFreeChampionIdsForNewPlayers().size()));
+        info.setFreeChampionIdsForNewPlayers(new ArrayList<>(item.getFreeChampionIdsForNewPlayers().size()));
         for(final Integer id : item.getFreeChampionIdsForNewPlayers()) {
             info.getFreeChampionIdsForNewPlayers().add(id);
         }

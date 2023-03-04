@@ -5,5 +5,5 @@ public enum Role {
         DUO_CARRY,
         DUO_SUPPORT,
         NONE,
-        SOLO;
+        SOLO
 }

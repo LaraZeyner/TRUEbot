@@ -1,12 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +22,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpell, de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells> {
-    public static class Builder {
+    public static final class Builder {
         private Set<String> includedData;
         private Platform platform;
         private String version, locale;
@@ -88,7 +88,7 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
         }
     }
 
-    public static class SubsetBuilder {
+    public static final class SubsetBuilder {
         private Iterable<Integer> ids;
         private Set<String> includedData;
         private Iterable<String> names;
@@ -176,6 +176,7 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 5959243824688735482L;
 
     public static SummonerSpells get() {
@@ -251,9 +252,7 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -281,35 +280,31 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                if(coreData.getIncludedData() != null) {
-                    builder.put("includedData", coreData.getIncludedData());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(data1 -> {
-                    final SummonerSpell spell = new SummonerSpell(data1);
-                    spell.markAsGhostLoaded(SummonerSpell.SUMMONER_SPELL_LOAD_GROUP);
-                    return spell;
-                });
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        if (coreData.getIncludedData() != null) {
+          builder.put("includedData", coreData.getIncludedData());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(data1 -> {
+          final SummonerSpell spell = new SummonerSpell(data1);
+          spell.markAsGhostLoaded(SummonerSpell.SUMMONER_SPELL_LOAD_GROUP);
+          return spell;
+        });
+      }
     }
 }

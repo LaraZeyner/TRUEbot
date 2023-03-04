@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ReforgedRune extends DataObject {
+    @Serial
     private static final long serialVersionUID = 968057662476737104L;
     private int id, pathId, slot;
     private String key, name, shortDesc, longDesc, icon, platform, version, locale;
@@ -78,13 +81,8 @@ public class ReforgedRune extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ReforgedRunePath extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4065548610702730382L;
     private int id;
     private String key, name, icon;
@@ -47,13 +49,8 @@ public class ReforgedRunePath extends DataObject {
             return false;
         }
         if(slots == null) {
-            if(other.slots != null) {
-                return false;
-            }
-        } else if(!slots.equals(other.slots)) {
-            return false;
-        }
-        return true;
+          return other.slots == null;
+        } else return slots.equals(other.slots);
     }
 
     /**

@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Platform;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class ItemSet extends OriannaObject.MapProxy<Item, Integer, Integer, Integer, de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemSet> {
+    @Serial
     private static final long serialVersionUID = -8917142329487068965L;
 
     private static java.util.Map<Item, Integer> convert(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ItemSet coreData) {

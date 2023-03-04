@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchTimeline extends DataObject {
+    @Serial
     private static final long serialVersionUID = 5433246300212121306L;
     private long frameInterval, matchId;
     private List<MatchFrame> frames;
@@ -40,13 +42,8 @@ public class MatchTimeline extends DataObject {
             return false;
         }
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

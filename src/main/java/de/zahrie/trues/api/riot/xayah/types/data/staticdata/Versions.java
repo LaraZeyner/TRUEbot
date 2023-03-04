@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Versions extends CoreData.ListProxy<String> {
+    @Serial
     private static final long serialVersionUID = 7796346778021458628L;
     private String platform;
 
@@ -27,13 +30,8 @@ public class Versions extends CoreData.ListProxy<String> {
         }
         final Versions other = (Versions)obj;
         if(platform == null) {
-            if(other.platform != null) {
-                return false;
-            }
-        } else if(!platform.equals(other.platform)) {
-            return false;
-        }
-        return true;
+          return other.platform == null;
+        } else return platform.equals(other.platform);
     }
 
     /**

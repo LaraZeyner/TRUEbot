@@ -2,9 +2,9 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class Scrimmage extends Match implements Serializable {
   @Serial
   private static final long serialVersionUID = -5376878014104117438L;
 
-  public Scrimmage(Playday matchday, Calendar start) {
+  public Scrimmage(Playday matchday, Time start) {
     super(matchday, start);
   }
 

@@ -83,8 +83,8 @@ public class LeagueTransformer extends AbstractDataTransformer {
         list.setLeagueId(item.getId());
         list.setName(item.getName());
         list.setPlatform(item.getPlatform());
-        list.setQueue(item.getQueue().toString());
-        list.setTier(item.getTier().toString());
+        list.setQueue(item.getQueue());
+        list.setTier(item.getTier());
         return list;
     }
 

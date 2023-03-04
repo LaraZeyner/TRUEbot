@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class RuneStats extends DataObject {
+    @Serial
     private static final long serialVersionUID = 6641812278072766150L;
     private double PercentTimeDeadModPerLevel, PercentArmorPenetrationModPerLevel, PercentCritDamageMod, PercentSpellBlockMod, PercentHPRegenMod,
             PercentMovementSpeedMod, FlatSpellBlockMod, FlatEnergyRegenModPerLevel, FlatEnergyPoolMod, FlatMagicPenetrationModPerLevel, PercentLifeStealMod,
@@ -224,10 +227,7 @@ public class RuneStats extends DataObject {
         if(Double.doubleToLongBits(PercentTimeDeadMod) != Double.doubleToLongBits(other.PercentTimeDeadMod)) {
             return false;
         }
-        if(Double.doubleToLongBits(PercentTimeDeadModPerLevel) != Double.doubleToLongBits(other.PercentTimeDeadModPerLevel)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(PercentTimeDeadModPerLevel) == Double.doubleToLongBits(other.PercentTimeDeadModPerLevel);
     }
 
     /**

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class BannedChampion extends DataObject {
+    @Serial
     private static final long serialVersionUID = -8791690504376358795L;
     private long championId, teamId;
     private int pickTurn;
@@ -29,10 +32,7 @@ public class BannedChampion extends DataObject {
         if(pickTurn != other.pickTurn) {
             return false;
         }
-        if(teamId != other.teamId) {
-            return false;
-        }
-        return true;
+      return teamId == other.teamId;
     }
 
     /**

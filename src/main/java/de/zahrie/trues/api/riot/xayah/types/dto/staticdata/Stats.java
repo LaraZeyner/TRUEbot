@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Stats extends DataObject {
+    @Serial
     private static final long serialVersionUID = -6639707481634048220L;
     private double armorperlevel, hpperlevel, attackdamage, mpperlevel, attackspeedoffset, armor, hp, hpregenperlevel, spellblock, attackrange, movespeed,
             attackdamageperlevel, mpregenperlevel, mp, spellblockperlevel, crit, mpregen, attackspeedperlevel, hpregen, critperlevel;
@@ -80,10 +83,7 @@ public class Stats extends DataObject {
         if(Double.doubleToLongBits(spellblock) != Double.doubleToLongBits(other.spellblock)) {
             return false;
         }
-        if(Double.doubleToLongBits(spellblockperlevel) != Double.doubleToLongBits(other.spellblockperlevel)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(spellblockperlevel) == Double.doubleToLongBits(other.spellblockperlevel);
     }
 
     /**

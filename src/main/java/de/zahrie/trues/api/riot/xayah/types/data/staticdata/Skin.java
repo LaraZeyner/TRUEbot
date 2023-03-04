@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Skin extends CoreData {
+    @Serial
     private static final long serialVersionUID = -3932839942794265363L;
     private String name, championKey;
     private int number, id;
@@ -36,10 +39,7 @@ public class Skin extends CoreData {
         } else if(!name.equals(other.name)) {
             return false;
         }
-        if(number != other.number) {
-            return false;
-        }
-        return true;
+      return number == other.number;
     }
 
     /**

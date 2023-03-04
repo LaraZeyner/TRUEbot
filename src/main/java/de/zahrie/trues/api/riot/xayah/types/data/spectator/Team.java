@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Team extends CoreData {
+    @Serial
     private static final long serialVersionUID = 6157643673390149489L;
     private List<Integer> bans;
     private String platform;
@@ -36,10 +38,7 @@ public class Team extends CoreData {
         } else if(!platform.equals(other.platform)) {
             return false;
         }
-        if(side != other.side) {
-            return false;
-        }
-        return true;
+      return side == other.side;
     }
 
     /**

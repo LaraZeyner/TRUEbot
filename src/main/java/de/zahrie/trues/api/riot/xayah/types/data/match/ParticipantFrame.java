@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ParticipantFrame extends CoreData {
+    @Serial
     private static final long serialVersionUID = 7837530112594043529L;
     private int goldEarned, teamScore, level, gold, creepScore, dominionScore, experience, neutralMinionsKilled;
     private Position position;
@@ -47,10 +50,7 @@ public class ParticipantFrame extends CoreData {
         } else if(!position.equals(other.position)) {
             return false;
         }
-        if(teamScore != other.teamScore) {
-            return false;
-        }
-        return true;
+      return teamScore == other.teamScore;
     }
 
     /**

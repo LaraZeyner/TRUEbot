@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
@@ -10,6 +11,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public abstract class Player extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.spectator.Player> {
+    @Serial
     private static final long serialVersionUID = 4241892066509529815L;
 
     public Player(final de.zahrie.trues.api.riot.xayah.types.data.spectator.Player coreData) {

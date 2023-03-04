@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class RuneStats extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.RuneStats> {
+    @Serial
     private static final long serialVersionUID = 4652123421737049777L;
 
     public RuneStats(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.RuneStats coreData) {

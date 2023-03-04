@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class ChampionSpell extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ChampionSpell> {
+    @Serial
     private static final long serialVersionUID = 766914644995245142L;
 
     private final Supplier<SearchableList<Image>> alternativeImages = Suppliers.memoize(() -> {

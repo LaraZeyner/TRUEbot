@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ChampionSpell extends DataObject {
+    @Serial
     private static final long serialVersionUID = -4120852259618975907L;
     private List<Image> altImages;
     private List<Double> cooldown;
@@ -170,13 +172,8 @@ public class ChampionSpell extends DataObject {
             return false;
         }
         if(vars == null) {
-            if(other.vars != null) {
-                return false;
-            }
-        } else if(!vars.equals(other.vars)) {
-            return false;
-        }
-        return true;
+          return other.vars == null;
+        } else return vars.equals(other.vars);
     }
 
     /**

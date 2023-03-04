@@ -1,9 +1,9 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.CloseableIterators;
@@ -15,7 +15,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patch, de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patches> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -45,7 +45,7 @@ public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.ri
         }
     }
 
-    public static class SubsetBuilder {
+    public static final class SubsetBuilder {
         private final Iterable<String> names;
         private Platform platform;
         private boolean streaming = false;
@@ -85,6 +85,7 @@ public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.ri
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -5292748792439392962L;
 
     public static Patches get() {
@@ -121,9 +122,7 @@ public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.ri
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -136,26 +135,22 @@ public class Patches extends GhostObject.ListProxy<Patch, de.zahrie.trues.api.ri
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patches data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patches.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(data1 -> {
-                    final Patch patch = new Patch(data1);
-                    patch.markAsGhostLoaded(Patch.PATCH_LOAD_GROUP);
-                    return patch;
-                });
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patches data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Patches.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(data1 -> {
+          final Patch patch = new Patch(data1);
+          patch.markAsGhostLoaded(Patch.PATCH_LOAD_GROUP);
+          return patch;
+        });
+      }
     }
 }

@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Items extends CoreData.ListProxy<Item> {
+    @Serial
     private static final long serialVersionUID = -1018271544203795043L;
     private List<ItemGroup> groups;
     private Set<String> includedData;
@@ -75,13 +77,8 @@ public class Items extends CoreData.ListProxy<Item> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

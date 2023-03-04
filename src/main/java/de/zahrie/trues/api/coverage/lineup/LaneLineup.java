@@ -3,7 +3,7 @@ package de.zahrie.trues.api.coverage.lineup;
 import java.util.Comparator;
 
 import de.zahrie.trues.models.riot.Lane;
-import de.zahrie.trues.util.util.TrueList;
+import de.zahrie.trues.api.datatypes.collection.Stack;
 import lombok.Getter;
 
 /**
@@ -12,11 +12,11 @@ import lombok.Getter;
 @Getter
 public class LaneLineup {
   private final Lane lane;
-  private final TrueList<LaneGames> players;
+  private final Stack<LaneGames> players;
 
   public LaneLineup(Lane lane) {
     this.lane = lane;
-    this.players = new TrueList<>();
+    this.players = new Stack<>();
   }
 
   public void sort() {

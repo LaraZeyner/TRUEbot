@@ -19,7 +19,7 @@ public enum Map {
 
     private static final java.util.Map<Integer, Map> BY_ID = getById();
 
-    private static final java.util.Map<Integer, Map> getById() {
+    private static java.util.Map<Integer, Map> getById() {
         final Builder<Integer, Map> builder = ImmutableMap.builder();
         for(final Map map : values()) {
             builder.put(map.id, map);
@@ -33,7 +33,7 @@ public enum Map {
 
     private final int id;
 
-    private Map(final int id) {
+    Map(final int id) {
         this.id = id;
     }
 

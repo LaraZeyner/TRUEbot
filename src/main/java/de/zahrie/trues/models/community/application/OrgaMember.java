@@ -2,8 +2,9 @@ package de.zahrie.trues.models.community.application;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.models.community.OrgaTeam;
 import de.zahrie.trues.models.discord.member.DiscordMember;
 import jakarta.persistence.Column;
@@ -23,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,9 +32,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity(name = "OrgaMember")
-@Table(name = "orga_member", indexes = {
-        @Index(name = "idx_app", columnList = "discord_user, lineup_role, lane, orga_team",
-                unique = true) })
+@Table(name = "orga_member", indexes = {@Index(name = "idx_app", columnList = "discord_user, lineup_role, lane, orga_team", unique = true)})
 public class OrgaMember implements Serializable {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
@@ -67,8 +67,9 @@ public class OrgaMember implements Serializable {
   @Column(name = "looking_for_team", nullable = false)
   private boolean isLookingForTeam;
 
+  @Type(TimeCoverter.class)
   @Column(name = "app_timestamp")
-  private Calendar appTimestamp = Calendar.getInstance();
+  private Time appTimestamp = new Time();
 
   @Column(name = "app_accepted")
   private Boolean isAccepted;

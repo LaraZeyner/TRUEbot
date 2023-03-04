@@ -2,10 +2,11 @@ package de.zahrie.trues.models.discord.member;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.models.discord.DiscordGroup;
 import de.zahrie.trues.models.discord.GroupAssignReason;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -51,16 +53,18 @@ public class DiscordMemberGroup implements Serializable {
 
   @Id
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "assign_time", nullable = false)
-  private Calendar start;
+  private Time start;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "reason", nullable = false, length = 8)
   private GroupAssignReason reason;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "permission_end")
-  private Calendar end;
+  private Time end;
 
   @Column(name = "active", nullable = false)
   private boolean isActive = false;

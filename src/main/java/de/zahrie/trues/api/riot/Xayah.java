@@ -10,7 +10,7 @@ public final class Xayah extends Orianna {
 
   public static void run() {
     Xayah.loadConfiguration("riotcfg.json");
-    var json = JSON.fromFile("connect.json");
+    final var json = JSON.fromFile("connect.json");
     Xayah.setRiotAPIKey(json.getString("riot"));
   }
 

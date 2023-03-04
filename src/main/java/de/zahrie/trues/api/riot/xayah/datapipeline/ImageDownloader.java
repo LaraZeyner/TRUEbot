@@ -49,28 +49,28 @@ public class ImageDownloader extends AbstractDataSource {
         Utilities.checkNotNull(urls, "urls");
 
         final Iterator<String> iterator = urls.iterator();
-        return CloseableIterators.from(new Iterator<BufferedImage>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public BufferedImage next() {
-                final String url = iterator.next();
+          @Override
+          public BufferedImage next() {
+            final String url = iterator.next();
 
-                try {
-                    final Response response = client.get(url);
-                    return ImageIO.read(new ByteArrayInputStream(response.getBytes()));
-                } catch(final IOException e) {
-                    throw new OriannaException("Failed to download image from " + url, e);
-                }
+            try {
+              final Response response = client.get(url);
+              return ImageIO.read(new ByteArrayInputStream(response.getBytes()));
+            } catch (final IOException e) {
+              throw new OriannaException("Failed to download image from " + url, e);
             }
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

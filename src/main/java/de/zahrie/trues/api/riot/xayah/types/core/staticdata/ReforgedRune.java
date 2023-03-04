@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
@@ -12,7 +12,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 
 public class ReforgedRune extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune> {
-    public static class Builder {
+    public static final class Builder {
         private Integer id;
         private String name, key, version, locale;
         private Platform platform;
@@ -87,6 +87,7 @@ public class ReforgedRune extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
     }
 
     public static final String REFORGED_RUNE_LOAD_GROUP = "reforged-rune";
+    @Serial
     private static final long serialVersionUID = -5938555056954804134L;
 
     public static Builder named(final String name) {
@@ -138,9 +139,7 @@ public class ReforgedRune extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            REFORGED_RUNE_LOAD_GROUP
-        });
+        return List.of(REFORGED_RUNE_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -197,37 +196,32 @@ public class ReforgedRune extends GhostObject<de.zahrie.trues.api.riot.xayah.typ
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case REFORGED_RUNE_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getId() != 0) {
-                    builder.put("id", coreData.getId());
-                }
-                if(coreData.getName() != null) {
-                    builder.put("name", coreData.getName());
-                }
-                if(coreData.getKey() != null) {
-                    builder.put("key", coreData.getKey());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(REFORGED_RUNE_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getId() != 0) {
+          builder.put("id", coreData.getId());
         }
+        if (coreData.getName() != null) {
+          builder.put("name", coreData.getName());
+        }
+        if (coreData.getKey() != null) {
+          builder.put("key", coreData.getKey());
+        }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

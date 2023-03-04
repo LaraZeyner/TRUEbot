@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.champion;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.base.Supplier;
@@ -17,7 +17,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 
 public class ChampionRotation extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -48,6 +48,7 @@ public class ChampionRotation extends GhostObject<de.zahrie.trues.api.riot.xayah
 
     public static final String CHAMPION_ROTATION_LOAD_GROUP = "champion-rotation";
 
+    @Serial
     private static final long serialVersionUID = 3798507940612239922L;
 
     public static ChampionRotation get() {
@@ -103,9 +104,7 @@ public class ChampionRotation extends GhostObject<de.zahrie.trues.api.riot.xayah
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            CHAMPION_ROTATION_LOAD_GROUP
-        });
+        return List.of(CHAMPION_ROTATION_LOAD_GROUP);
     }
 
     public int getMaxNewPlayerLevel() {
@@ -125,22 +124,17 @@ public class ChampionRotation extends GhostObject<de.zahrie.trues.api.riot.xayah
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case CHAMPION_ROTATION_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-
-                final de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(CHAMPION_ROTATION_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.champion.ChampionRotation.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

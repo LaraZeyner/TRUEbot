@@ -5,5 +5,5 @@ public enum MonsterSubType {
         EARTH_DRAGON,
         ELDER_DRAGON,
         FIRE_DRAGON,
-        WATER_DRAGON;
+        WATER_DRAGON
 }

@@ -1,9 +1,9 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.CloseableIterators;
@@ -15,7 +15,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
         private final String tournamentCode;
 
@@ -49,7 +49,7 @@ public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zah
         }
     }
 
-    public static class ManyBuilder {
+    public static final class ManyBuilder {
         private Platform platform;
         private boolean streaming = false;
         private final Iterable<String> tournamentCodes;
@@ -91,6 +91,7 @@ public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zah
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 4715908923360892531L;
 
     public static Builder forTournamentCode(final String tournamentCode) {
@@ -119,9 +120,7 @@ public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zah
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -138,25 +137,21 @@ public class TournamentMatches extends GhostObject.ListProxy<Match, Long, de.zah
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getTournamentCode() != null) {
-                    builder.put("tournamentCode", coreData.getTournamentCode());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(id -> Match.withId(id).get());
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getTournamentCode() != null) {
+          builder.put("tournamentCode", coreData.getTournamentCode());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.TournamentMatches.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(id -> Match.withId(id).get());
+      }
     }
 }

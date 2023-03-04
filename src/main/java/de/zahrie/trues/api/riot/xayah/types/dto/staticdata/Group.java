@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Group extends DataObject {
+    @Serial
     private static final long serialVersionUID = 590184784584559757L;
     private String MaxGroupOwnable, key;
 
@@ -30,13 +33,8 @@ public class Group extends DataObject {
             return false;
         }
         if(key == null) {
-            if(other.key != null) {
-                return false;
-            }
-        } else if(!key.equals(other.key)) {
-            return false;
-        }
-        return true;
+          return other.key == null;
+        } else return key.equals(other.key);
     }
 
     /**

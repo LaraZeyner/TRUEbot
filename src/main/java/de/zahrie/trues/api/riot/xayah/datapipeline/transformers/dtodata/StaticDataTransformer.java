@@ -772,7 +772,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
             patches.add(transform(item.getPatches().get(i), context));
         }
         patches.setPlatform(item.getPlatform());
-        patches.setShifts(new HashMap<String, Duration>());
+        patches.setShifts(new HashMap<>());
         for(final String platform : item.getShifts().keySet()) {
             final Duration shift = new Duration(item.getShifts().get(platform));
             patches.getShifts().put(platform, shift);
@@ -783,7 +783,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
     @Transform(from = de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm.class, to = Realm.class)
     public Realm transform(final de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm item, final PipelineContext context) {
         final Realm realm = new Realm();
-        realm.setCDN(item.getCdn());
+        realm.setCdn(item.getCdn());
         realm.setCSSVersion(item.getCss());
         realm.setDefaultLocale(item.getL());
         realm.setLatestDataDragon(item.getDd());
@@ -1417,7 +1417,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
             mastery.setSanitizedDescription(new ArrayList<>(item.getSanitizedDescriptions()));
         }
         if(item.getTree() != null) {
-            mastery.setMasteryTree(item.getTree().toString().substring(0, 1) + item.getTree().toString().toLowerCase().substring(1));
+            mastery.setMasteryTree(item.getTree().charAt(0) + item.getTree().toLowerCase().substring(1));
         }
         mastery.setVersion(item.getVersion());
         return mastery;
@@ -1532,12 +1532,12 @@ public class StaticDataTransformer extends AbstractDataTransformer {
     @Transform(from = Patches.class, to = de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Patches.class)
     public de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Patches transform(final Patches item, final PipelineContext context) {
         final de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Patches patches = new de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Patches();
-        patches.setPatches(new ArrayList<de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Patch>(item.size()));
+        patches.setPatches(new ArrayList<>(item.size()));
         for(int i = item.size() - 1; i >= 0; i--) {
             patches.getPatches().add(transform(item.get(i), context));
         }
         patches.setPlatform(item.getPlatform());
-        patches.setShifts(new HashMap<String, Long>());
+        patches.setShifts(new HashMap<>());
         for(final String platform : item.getShifts().keySet()) {
             patches.getShifts().put(platform, item.getShifts().get(platform).getMillis());
         }
@@ -1599,7 +1599,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
     @Transform(from = Realm.class, to = de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm.class)
     public de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm transform(final Realm item, final PipelineContext context) {
         final de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm realm = new de.zahrie.trues.api.riot.xayah.types.dto.staticdata.Realm();
-        realm.setCdn(item.getCDN());
+        realm.setCdn(item.getCdn());
         realm.setCss(item.getCSSVersion());
         realm.setL(item.getDefaultLocale());
         realm.setDd(item.getLatestDataDragon());
@@ -1638,7 +1638,7 @@ public class StaticDataTransformer extends AbstractDataTransformer {
         items.setBlocks(blocks);
         items.setChampion((String)context.get("key"));
         items.setMap(item.getMap());
-        items.setMode(item.getMode().toString());
+        items.setMode(item.getMode());
         items.setPriority(item.isPriority());
         items.setTitle(item.getTitle());
         items.setType(item.getType());
@@ -1987,25 +1987,15 @@ public class StaticDataTransformer extends AbstractDataTransformer {
         final ReforgedRuneTree tree = new ReforgedRuneTree();
         for(final de.zahrie.trues.api.riot.xayah.types.dto.staticdata.ReforgedRunePath path : item) {
             final RunePath p = RunePath.withId(path.getId());
-            switch(p) {
-                case DOMINATION:
-                    tree.setDomination(transform(path, context));
-                    break;
-                case INSPIRATION:
-                    tree.setInspriation(transform(path, context));
-                    break;
-                case PRECISION:
-                    tree.setPrecision(transform(path, context));
-                    break;
-                case RESOLVE:
-                    tree.setResolve(transform(path, context));
-                    break;
-                case SORCERY:
-                    tree.setSorcery(transform(path, context));
-                    break;
-                default:
-                    break;
+          switch (p) {
+            case DOMINATION -> tree.setDomination(transform(path, context));
+            case INSPIRATION -> tree.setInspriation(transform(path, context));
+            case PRECISION -> tree.setPrecision(transform(path, context));
+            case RESOLVE -> tree.setResolve(transform(path, context));
+            case SORCERY -> tree.setSorcery(transform(path, context));
+            default -> {
             }
+          }
         }
         return tree;
     }

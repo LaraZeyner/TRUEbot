@@ -10,18 +10,16 @@ import de.zahrie.trues.api.coverage.playday.config.RelativeTimeRange;
 import de.zahrie.trues.api.coverage.season.CoverageDepartment;
 import de.zahrie.trues.api.coverage.stage.Scheduleable;
 import de.zahrie.trues.api.coverage.stage.StageType;
-import de.zahrie.trues.util.util.Clock;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.calendar.Clock;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @ToString

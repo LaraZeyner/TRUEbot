@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Champion extends CoreData {
+    @Serial
     private static final long serialVersionUID = 6905745329767401177L;
     private int difficultyRating, physicalRating, defenseRating, magicRating, id;
     private List<String> enemyTips, tags, allyTips;
@@ -172,13 +174,8 @@ public class Champion extends CoreData {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

@@ -1,10 +1,16 @@
-package de.zahrie.trues.util.database;
+package de.zahrie.trues.database;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 
+import de.zahrie.trues.api.coverage.season.OrgaCupSeason;
+import de.zahrie.trues.api.coverage.season.SuperCupSeason;
 import de.zahrie.trues.api.coverage.stage.model.CalibrationStage;
+import de.zahrie.trues.api.coverage.stage.model.CreationStage;
+import de.zahrie.trues.api.coverage.stage.model.GroupStage;
+import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.coverage.stage.model.PlayoffStage;
 import de.zahrie.trues.api.coverage.stage.model.SignupStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.league.model.League;
@@ -24,10 +30,12 @@ import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.ProfessionalSeason;
 import de.zahrie.trues.api.coverage.season.PrimeSeason;
 import de.zahrie.trues.api.coverage.season.Season;
+import de.zahrie.trues.api.coverage.stage.model.WaitingStage;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.models.betting.Bet;
 import de.zahrie.trues.models.calendar.ApplicationCalendar;
+import de.zahrie.trues.models.calendar.CalendarBase;
 import de.zahrie.trues.models.calendar.RepeatedSchedulingCalendar;
 import de.zahrie.trues.models.calendar.SchedulingCalendar;
 import de.zahrie.trues.models.calendar.TeamCalendar;
@@ -59,21 +67,24 @@ public class FactoryBuilder {
     final Configuration configuration = addClasses(List.of(
         ApplicationCalendar.class,
         Bet.class,
-        ProfessionalSeason.class,
+        CalendarBase.class,
         CalibrationStage.class,
         Champion.class,
         ChannelPermissionPattern.class,
         CommandPermission.class,
+        CreationStage.class,
         DiscordChannel.class,
         DiscordGroup.class,
         DiscordMember.class,
         DiscordMemberGroup.class,
         Game.class,
+        GroupStage.class,
         League.class,
         Lineup.class,
         LineupMatchLog.class,
         Match.class,
         MatchLog.class,
+        OrgaCupSeason.class,
         OrgaLog.class,
         OrgaMember.class,
         OrgaTeam.class,
@@ -81,11 +92,14 @@ public class FactoryBuilder {
         Performance.class,
         PermissionPattern.class,
         Playday.class,
+        PlayoffStage.class,
         Player.class,
+        PlayStage.class,
         PrimeMatch.class,
         PrimePlayer.class,
         PrimeSeason.class,
         PrimeTeam.class,
+        ProfessionalSeason.class,
         Rank.class,
         RepeatedSchedulingCalendar.class,
         ScheduleableMatch.class,
@@ -95,13 +109,15 @@ public class FactoryBuilder {
         Selection.class,
         SignupStage.class,
         Stage.class,
+        SuperCupSeason.class,
         Team.class,
         TeamCalendar.class,
         TeamPerf.class,
         TournamentMatch.class,
         UserCalendar.class,
         Voting.class,
-        VotingEntry.class
+        VotingEntry.class,
+        WaitingStage.class
     ));
     final Properties properties = configuration.getProperties();
     final StandardServiceRegistryBuilder registry = new StandardServiceRegistryBuilder().applySettings(properties);
@@ -117,5 +133,4 @@ public class FactoryBuilder {
   public static SessionFactory build() {
     return FactoryBuilder.buildSessionFactory();
   }
-
 }

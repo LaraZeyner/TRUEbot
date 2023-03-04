@@ -1,6 +1,5 @@
 package de.zahrie.trues.api.coverage.match.model;
 
-import java.util.Calendar;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.log.LineupMatchLog;
@@ -9,20 +8,18 @@ import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.util.database.Database;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.database.Database;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class PrimeMatchImpl {
   private final PrimeMatch match;
 
-  public boolean updateLogs(Calendar timestamp, String userWithTeam, MatchLogAction action, String details) {
-    final Calendar calendar = getLastLogTime();
-    if (timestamp.before(calendar)) {
-      return false;
-    }
-    if (action.equals(MatchLogAction.lineup_player_ready)) {
+  public boolean updateLogs(Time timestamp, Chain userWithTeam, MatchLogAction action, String details) {
+    final Time calendar = getLastLogTime();
+    if (timestamp.before(calendar) || action.equals(MatchLogAction.lineup_player_ready)) {
       return false;
     }
     var log = new MatchLog(timestamp, action, match, details);
@@ -41,8 +38,8 @@ public class PrimeMatchImpl {
     return true;
   }
 
-  public Calendar getLastLogTime() {
-    return match.getLogs().stream().map(MatchLog::getTimestamp).max(Calendar::compareTo).orElse(Time.min());
+  public Time getLastLogTime() {
+    return match.getLogs().stream().map(MatchLog::getTimestamp).max(Time::compareTo).orElse(Time.min());
   }
 
 }

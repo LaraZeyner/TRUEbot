@@ -2,8 +2,9 @@ package de.zahrie.trues.models.voting;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -15,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,8 +38,9 @@ public class Voting implements Serializable {
   private String question;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "deadline")
-  private Calendar deadline;
+  private Time deadline;
 
   @Column(name = "anonym", nullable = false)
   private boolean isAnonymous = false;

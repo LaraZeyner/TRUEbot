@@ -1,7 +1,5 @@
 package de.zahrie.trues.api.coverage.match;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
@@ -18,19 +16,17 @@ import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
-import de.zahrie.trues.util.util.Util;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 14.02.2023 for TRUEbot
- */
 @Getter
 public class MatchLoader extends GamesportsLoader {
-  public static int idFromURL(String url) {
-    return Integer.parseInt(Util.between(url, "/matches/", "-"));
+  public static Integer idFromURL(Chain url) {
+    return url.between("/matches/", "-").intValue();
   }
 
   private PrimeMatch match;
@@ -44,16 +40,13 @@ public class MatchLoader extends GamesportsLoader {
     super(URLType.MATCH, matchId);
   }
 
-
   MatchLoader create() {
-    final String pageTitle = html.find("h1").text();
-    final String seasonName = Util.between(pageTitle, null, ":");
-    final PrimeSeason primeSeason = SeasonFactory.getSeason(seasonName);
+    final Chain seasonName = html.find("h1").text().between(null, ":");
+    final PrimeSeason primeSeason = SeasonFactory.getSeason(seasonName.toString());
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
-    final String divisionName = division.text();
-    final String urlString = division.find("a").getAttribute("href");
-    final String between = Util.between(urlString, "/group/", "-");
-    final League league = LeagueFactory.getGroup(primeSeason, divisionName, Integer.parseInt(between));
+    final Chain divisionName = division.text();
+    final int urlString = division.find("a").getAttribute("href").between("/group/", "-").intValue();
+    final League league = LeagueFactory.getGroup(primeSeason, divisionName.toString(), urlString);
     final Playday playday = getPlayday(league);
     final PlaydayScheduler playdayScheduler = new PlaydayScheduleHandler(league.getStage(), playday.getIdx(), league.getTier()).create();
     final SchedulingRange scheduling = playdayScheduler.scheduling();
@@ -76,18 +69,14 @@ public class MatchLoader extends GamesportsLoader {
     if (data.size() < 2) {
       return PlaydayFactory.fromMatchtime(league.getStage(), getMatchtime());
     }
-    final String playdayName = data.get(1).text();
-    final int index = playdayName.equals("Tiebreaker") ? 8 : Integer.parseInt(playdayName.split(" ")[1]);
+    final Chain playdayName = data.get(1).text();
+    final int index = playdayName.toString().equals("Tiebreaker") ? 8 : playdayName.split(" ")[1].intValue();
     return PlaydayFactory.getPlayday(league.getStage(), index);
   }
 
-  private Calendar getMatchtime() {
-    final String matchTimeEpoch = html.findId("div", "league-match-time")
-        .getAttribute("data-time");
-    final Date matchTime = new Date(Long.parseLong(matchTimeEpoch) * 1000);
-    final Calendar calendar = Calendar.getInstance();
-    calendar.setTime(matchTime);
-    return calendar;
+  private Time getMatchtime() {
+    final int matchTimeEpoch = html.findId("div", "league-match-time").getAttribute("data-time").intValue();
+    return Time.fromEpoch(matchTimeEpoch);
   }
 
   private List<PrimeTeam> getTeams() {

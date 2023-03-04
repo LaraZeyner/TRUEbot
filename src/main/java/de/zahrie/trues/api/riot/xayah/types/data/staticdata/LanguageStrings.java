@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class LanguageStrings extends CoreData.MapProxy<String, String> {
+    @Serial
     private static final long serialVersionUID = -707733689156471315L;
     private String version, type, locale, platform;
 
@@ -40,13 +43,8 @@ public class LanguageStrings extends CoreData.MapProxy<String, String> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchReference extends DataObject {
+    @Serial
     private static final long serialVersionUID = 4433468912283592631L;
     private int champion, season, queue;
     private long gameId, timestamp;
@@ -60,10 +63,7 @@ public class MatchReference extends DataObject {
         if(season != other.season) {
             return false;
         }
-        if(timestamp != other.timestamp) {
-            return false;
-        }
-        return true;
+      return timestamp == other.timestamp;
     }
 
     /**

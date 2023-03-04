@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
+
 import org.joda.time.Duration;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class ParticipantStats extends CoreData {
+    @Serial
     private static final long serialVersionUID = 20839886308063483L;
     private int altarsCaptured, altarsNeutralized, assists, championLevel, combatScore, deaths, doubleKills, goldEarned, goldSpent, inhibitorKills,
             killingSprees, kills, largestCriticalStrike, largestKillingSpree, largestMultiKill, neutralMinionsKilled, neutralMinionsKilledInEnemyJungle,
@@ -261,10 +264,7 @@ public class ParticipantStats extends CoreData {
         if(wardsPlaced != other.wardsPlaced) {
             return false;
         }
-        if(winner != other.winner) {
-            return false;
-        }
-        return true;
+      return winner == other.winner;
     }
 
     /**

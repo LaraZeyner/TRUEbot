@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class RuneStats extends CoreData {
+    @Serial
     private static final long serialVersionUID = -461218494339044648L;
     private int id;
     private String platform, version;
@@ -40,13 +42,8 @@ public class RuneStats extends CoreData {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

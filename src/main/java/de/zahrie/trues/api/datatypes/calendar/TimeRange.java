@@ -1,6 +1,6 @@
-package de.zahrie.trues.api.coverage.playday.config;
+package de.zahrie.trues.api.datatypes.calendar;
 
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.coverage.playday.config.AbstractTimeRange;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

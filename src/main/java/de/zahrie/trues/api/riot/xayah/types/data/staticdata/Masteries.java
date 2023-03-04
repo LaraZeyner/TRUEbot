@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Masteries extends CoreData.ListProxy<Mastery> {
+    @Serial
     private static final long serialVersionUID = -9197451234285899745L;
     private Set<String> includedData;
     private MasteryTree tree;
@@ -66,13 +68,8 @@ public class Masteries extends CoreData.ListProxy<Mastery> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

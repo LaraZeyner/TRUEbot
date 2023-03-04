@@ -12,7 +12,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.league.LeagueEntry;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
 import de.zahrie.trues.api.coverage.player.model.RankFactory;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 

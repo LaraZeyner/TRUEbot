@@ -61,30 +61,30 @@ public class SpectatorAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<CurrentGameInfo>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public CurrentGameInfo next() {
+            final String summonerId = iterator.next();
+
+            final String endpoint = "lol/spectator/v4/active-games/by-summoner/" + summonerId;
+            final CurrentGameInfo data = get(CurrentGameInfo.class, endpoint, platform, "lol/spectator/v4/active-games/by-summoner/summonerId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public CurrentGameInfo next() {
-                final String summonerId = iterator.next();
+            data.setSummonerId(summonerId);
+            return data;
+          }
 
-                final String endpoint = "lol/spectator/v4/active-games/by-summoner/" + summonerId;
-                final CurrentGameInfo data = get(CurrentGameInfo.class, endpoint, platform, "lol/spectator/v4/active-games/by-summoner/summonerId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setSummonerId(summonerId);
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -95,30 +95,30 @@ public class SpectatorAPI extends RiotAPIService {
         Utilities.checkNotNull(platforms, "platforms");
 
         final Iterator<Platform> iterator = platforms.iterator();
-        return CloseableIterators.from(new Iterator<FeaturedGames>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public FeaturedGames next() {
+            final Platform platform = iterator.next();
+
+            final String endpoint = "lol/spectator/v4/featured-games";
+            final FeaturedGames data = get(FeaturedGames.class, endpoint, platform, "lol/spectator/v4/featured-games");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public FeaturedGames next() {
-                final Platform platform = iterator.next();
+            data.setPlatform(platform.getTag());
+            return data;
+          }
 
-                final String endpoint = "lol/spectator/v4/featured-games";
-                final FeaturedGames data = get(FeaturedGames.class, endpoint, platform, "lol/spectator/v4/featured-games");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

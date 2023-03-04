@@ -3,6 +3,7 @@ package de.zahrie.trues.api.riot.xayah.datapipeline.common;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -26,336 +27,327 @@ import okhttp3.Request;
 import okhttp3.ResponseBody;
 
 public class HTTPClient {
-    public static class Configuration {
-        private static final long DEFAULT_CONNECT_TIMEOUT = 3;
-        private static final TimeUnit DEFAULT_CONNECT_TIMEOUT_UNIT = TimeUnit.SECONDS;
-        private static final boolean DEFAULT_HTTPS = true;
-        private static final long DEFAULT_RATE_LIMITER_TIMEOUT = -1;
-        private static final TimeUnit DEFAULT_RATE_LIMITER_TIMEOUT_UNIT = TimeUnit.DAYS;
-        private static final long DEFAULT_READ_TIMEOUT = 3;
-        private static final TimeUnit DEFAULT_READ_TIMEOUT_UNIT = TimeUnit.SECONDS;
-        private long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
-        private TimeUnit connectTimeoutUnit = DEFAULT_CONNECT_TIMEOUT_UNIT;
+  public static class Configuration {
+    private static final long DEFAULT_CONNECT_TIMEOUT = 3;
+    private static final TimeUnit DEFAULT_CONNECT_TIMEOUT_UNIT = TimeUnit.SECONDS;
+    private static final boolean DEFAULT_HTTPS = true;
+    private static final long DEFAULT_RATE_LIMITER_TIMEOUT = -1;
+    private static final TimeUnit DEFAULT_RATE_LIMITER_TIMEOUT_UNIT = TimeUnit.DAYS;
+    private static final long DEFAULT_READ_TIMEOUT = 3;
+    private static final TimeUnit DEFAULT_READ_TIMEOUT_UNIT = TimeUnit.SECONDS;
+    private long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
+    private TimeUnit connectTimeoutUnit = DEFAULT_CONNECT_TIMEOUT_UNIT;
 
-        private boolean https = DEFAULT_HTTPS;
-        private long rateLimiterTimeout = DEFAULT_RATE_LIMITER_TIMEOUT;
-        private TimeUnit rateLimiterTimeoutUnit = DEFAULT_RATE_LIMITER_TIMEOUT_UNIT;
-        private long readTimeout = DEFAULT_READ_TIMEOUT;
-        private TimeUnit readTimeoutUnit = DEFAULT_READ_TIMEOUT_UNIT;
+    private boolean https = DEFAULT_HTTPS;
+    private long rateLimiterTimeout = DEFAULT_RATE_LIMITER_TIMEOUT;
+    private TimeUnit rateLimiterTimeoutUnit = DEFAULT_RATE_LIMITER_TIMEOUT_UNIT;
+    private long readTimeout = DEFAULT_READ_TIMEOUT;
+    private TimeUnit readTimeoutUnit = DEFAULT_READ_TIMEOUT_UNIT;
 
-        /**
-         * @return the connectTimeout
-         */
-        public long getConnectTimeout() {
-            return connectTimeout;
-        }
-
-        /**
-         * @return the connectTimeoutUnit
-         */
-        public TimeUnit getConnectTimeoutUnit() {
-            return connectTimeoutUnit;
-        }
-
-        /**
-         * @return the rateLimiterTimeout
-         */
-        public long getRateLimiterTimeout() {
-            return rateLimiterTimeout;
-        }
-
-        /**
-         * @return the rateLimiterTimeoutUnit
-         */
-        public TimeUnit getRateLimiterTimeoutUnit() {
-            return rateLimiterTimeoutUnit;
-        }
-
-        /**
-         * @return the readTimeout
-         */
-        public long getReadTimeout() {
-            return readTimeout;
-        }
-
-        /**
-         * @return the readTimeoutUnit
-         */
-        public TimeUnit getReadTimeoutUnit() {
-            return readTimeoutUnit;
-        }
-
-        /**
-         * @return the https
-         */
-        public boolean isHttps() {
-            return https;
-        }
-
-        /**
-         * @param connectTimeout
-         *        the connectTimeout to set
-         */
-        public void setConnectTimeout(final long connectTimeout) {
-            this.connectTimeout = connectTimeout;
-        }
-
-        /**
-         * @param connectTimeoutUnit
-         *        the connectTimeoutUnit to set
-         */
-        public void setConnectTimeoutUnit(final TimeUnit connectTimeoutUnit) {
-            this.connectTimeoutUnit = connectTimeoutUnit;
-        }
-
-        /**
-         * @param https
-         *        the https to set
-         */
-        public void setHttps(final boolean https) {
-            this.https = https;
-        }
-
-        /**
-         * @param rateLimiterTimeout
-         *        the rateLimiterTimeout to set
-         */
-        public void setRateLimiterTimeout(final long rateLimiterTimeout) {
-            this.rateLimiterTimeout = rateLimiterTimeout;
-        }
-
-        /**
-         * @param rateLimiterTimeoutUnit
-         *        the rateLimiterTimeoutUnit to set
-         */
-        public void setRateLimiterTimeoutUnit(final TimeUnit rateLimiterTimeoutUnit) {
-            this.rateLimiterTimeoutUnit = rateLimiterTimeoutUnit;
-        }
-
-        /**
-         * @param readTimeout
-         *        the readTimeout to set
-         */
-        public void setReadTimeout(final long readTimeout) {
-            this.readTimeout = readTimeout;
-        }
-
-        /**
-         * @param readTimeoutUnit
-         *        the readTimeoutUnit to set
-         */
-        public void setReadTimeoutUnit(final TimeUnit readTimeoutUnit) {
-            this.readTimeoutUnit = readTimeoutUnit;
-        }
+    /**
+     * @return the connectTimeout
+     */
+    public long getConnectTimeout() {
+      return connectTimeout;
     }
 
-    public static class Response {
-        private final String body;
+    /**
+     * @return the connectTimeoutUnit
+     */
+    public TimeUnit getConnectTimeoutUnit() {
+      return connectTimeoutUnit;
+    }
 
-        private final byte[] bytes;
-        private final Multimap<String, String> headers;
-        private final int statusCode;
+    /**
+     * @return the rateLimiterTimeout
+     */
+    public long getRateLimiterTimeout() {
+      return rateLimiterTimeout;
+    }
 
-        public Response(final byte[] bytes, final int statusCode, final Multimap<String, String> headers) {
-            this.bytes = bytes;
-            body = null;
-            this.statusCode = statusCode;
-            this.headers = headers;
+    /**
+     * @return the rateLimiterTimeoutUnit
+     */
+    public TimeUnit getRateLimiterTimeoutUnit() {
+      return rateLimiterTimeoutUnit;
+    }
+
+    /**
+     * @return the readTimeout
+     */
+    public long getReadTimeout() {
+      return readTimeout;
+    }
+
+    /**
+     * @return the readTimeoutUnit
+     */
+    public TimeUnit getReadTimeoutUnit() {
+      return readTimeoutUnit;
+    }
+
+    /**
+     * @return the https
+     */
+    public boolean isHttps() {
+      return https;
+    }
+
+    /**
+     * @param connectTimeout the connectTimeout to set
+     */
+    public void setConnectTimeout(final long connectTimeout) {
+      this.connectTimeout = connectTimeout;
+    }
+
+    /**
+     * @param connectTimeoutUnit the connectTimeoutUnit to set
+     */
+    public void setConnectTimeoutUnit(final TimeUnit connectTimeoutUnit) {
+      this.connectTimeoutUnit = connectTimeoutUnit;
+    }
+
+    /**
+     * @param https the https to set
+     */
+    public void setHttps(final boolean https) {
+      this.https = https;
+    }
+
+    /**
+     * @param rateLimiterTimeout the rateLimiterTimeout to set
+     */
+    public void setRateLimiterTimeout(final long rateLimiterTimeout) {
+      this.rateLimiterTimeout = rateLimiterTimeout;
+    }
+
+    /**
+     * @param rateLimiterTimeoutUnit the rateLimiterTimeoutUnit to set
+     */
+    public void setRateLimiterTimeoutUnit(final TimeUnit rateLimiterTimeoutUnit) {
+      this.rateLimiterTimeoutUnit = rateLimiterTimeoutUnit;
+    }
+
+    /**
+     * @param readTimeout the readTimeout to set
+     */
+    public void setReadTimeout(final long readTimeout) {
+      this.readTimeout = readTimeout;
+    }
+
+    /**
+     * @param readTimeoutUnit the readTimeoutUnit to set
+     */
+    public void setReadTimeoutUnit(final TimeUnit readTimeoutUnit) {
+      this.readTimeoutUnit = readTimeoutUnit;
+    }
+  }
+
+  public static class Response {
+    private final String body;
+
+    private final byte[] bytes;
+    private final Multimap<String, String> headers;
+    private final int statusCode;
+
+    public Response(final byte[] bytes, final int statusCode, final Multimap<String, String> headers) {
+      this.bytes = bytes;
+      body = null;
+      this.statusCode = statusCode;
+      this.headers = headers;
+    }
+
+    public Response(final String body, final int statusCode, final Multimap<String, String> headers) {
+      this.body = body;
+      bytes = null;
+      this.statusCode = statusCode;
+      this.headers = headers;
+    }
+
+    /**
+     * @return the body
+     */
+    public String getBody() {
+      return body;
+    }
+
+    /**
+     * @return the bytes
+     */
+    public byte[] getBytes() {
+      return bytes;
+    }
+
+    /**
+     * @return the headers
+     */
+    public Multimap<String, String> getHeaders() {
+      return headers;
+    }
+
+    /**
+     * @return the statusCode
+     */
+    public int getStatusCode() {
+      return statusCode;
+    }
+
+    public boolean isString() {
+      return body != null;
+    }
+  }
+
+  private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
+  private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
+
+  private static String removeLeadingSlashes(final String url) {
+    final Pattern pattern = Pattern.compile("^(/*)(.*)");
+    final Matcher matcher = pattern.matcher(url);
+    if (!matcher.matches()) {
+      return url;
+    }
+    return matcher.group(2);
+  }
+
+  private final OkHttpClient client;
+  private final boolean https;
+  private final long rateLimiterTimeout;
+  private final TimeUnit rateLimiterTimeoutUnit;
+
+  public HTTPClient() {
+    this(new Configuration());
+  }
+
+  public HTTPClient(final Configuration config) {
+    client = new OkHttpClient.Builder().connectTimeout(config.getConnectTimeout(), config.getConnectTimeoutUnit())
+        .readTimeout(config.getReadTimeout(), config.getReadTimeoutUnit()).build();
+    rateLimiterTimeout = config.getRateLimiterTimeout();
+    rateLimiterTimeoutUnit = config.getRateLimiterTimeoutUnit();
+    https = config.isHttps();
+  }
+
+  public Response get(final String url) throws IOException {
+    final HttpUrl parsed = HttpUrl.parse(url);
+    return get(parsed != null ? parsed.host() : null, parsed != null ? parsed.port() : 0, parsed != null ? parsed.encodedPath() : null, (Multimap<String, String>) null, null, null);
+  }
+
+  public Response get(final String host, final int port, final String url) throws IOException {
+    return get(host, port, url, (Multimap<String, String>) null, null, null);
+  }
+
+  public Response get(final String host, final int port, final String url, final Map<String, String> parameters, final Map<String, String> headers)
+      throws IOException {
+    return get(host, port, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, null);
+  }
+
+  public Response get(final String host, final int port, final String url, final Map<String, String> parameters, final Map<String, String> headers,
+                      final RateLimiter rateLimiter) throws IOException {
+    return get(host, port, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, rateLimiter);
+  }
+
+  public Response get(final String host, final int port, final String url, final Multimap<String, String> parameters, final Map<String, String> headers)
+      throws IOException {
+    return get(host, port, url, parameters, headers, null);
+  }
+
+  public Response get(final String host, final int port, final String url, final Multimap<String, String> parameters, final Map<String, String> headers,
+                      final RateLimiter rateLimiter) throws IOException {
+    final HttpUrl.Builder urlBuilder = new HttpUrl.Builder().scheme(https ? "https" : "http").host(host).port(port).addPathSegments(removeLeadingSlashes(url));
+    if (parameters != null && !parameters.isEmpty()) {
+      for (final String key : parameters.keySet()) {
+        for (final String value : parameters.get(key)) {
+          urlBuilder.addQueryParameter(key, value);
         }
+      }
+    }
+    final HttpUrl httpURL = urlBuilder.build();
 
-        public Response(final String body, final int statusCode, final Multimap<String, String> headers) {
-            this.body = body;
-            bytes = null;
-            this.statusCode = statusCode;
-            this.headers = headers;
+    Request.Builder requestBuilder = new Request.Builder().url(httpURL);
+    if (headers != null && !headers.isEmpty()) {
+      requestBuilder = requestBuilder.headers(Headers.of(headers));
+    }
+    final Request request = requestBuilder.build();
+
+    final Callable<Response> requestor = () -> {
+      LOGGER.info("Making GET request to " + httpURL);
+      String body = null;
+      byte[] bytes = null;
+      final int statusCode;
+      final Headers responseHeaders;
+      try (final okhttp3.Response response = client.newCall(request).execute()) {
+        statusCode = response.code();
+        responseHeaders = response.headers();
+        try (final ResponseBody responseBody = response.body()) {
+          if ((responseBody != null ? responseBody.contentLength() : 0) == 0L) {
+            body = "";
+            bytes = new byte[0];
+          } else if (JSON_MEDIA_TYPE != null && JSON_MEDIA_TYPE.type().equals(Objects.requireNonNull(responseBody.contentType()).type())
+              && JSON_MEDIA_TYPE.subtype().equals(Objects.requireNonNull(responseBody.contentType()).subtype())) {
+            body = responseBody.string();
+          }
         }
-
-        /**
-         * @return the body
-         */
-        public String getBody() {
-            return body;
+      } catch (final SSLProtocolException e) {
+        if (e.getCause() instanceof SocketTimeoutException) {
+          // The SocketTimeoutException is wrapped in an SSLProtocolException if the timeout is during the handshake
+          throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
         }
+        throw e;
+      } catch (final SocketTimeoutException e) {
+        throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
+      }
 
-        /**
-         * @return the bytes
-         */
-        public byte[] getBytes() {
-            return bytes;
-        }
+      final ImmutableListMultimap.Builder<String, String> mapBuilder = ImmutableListMultimap.builder();
+      for (final String key : responseHeaders.names()) {
+        mapBuilder.putAll(key, responseHeaders.get(key));
+      }
 
-        /**
-         * @return the headers
-         */
-        public Multimap<String, String> getHeaders() {
-            return headers;
-        }
+      if (body != null) {
+        return new Response(body, statusCode, mapBuilder.build());
+      } else {
+        return new Response(bytes, statusCode, mapBuilder.build());
+      }
+    };
 
-        /**
-         * @return the statusCode
-         */
-        public int getStatusCode() {
-            return statusCode;
-        }
-
-        public boolean isString() {
-            return body != null;
-        }
+    if (rateLimiter == null) {
+      try {
+        return requestor.call();
+      } catch (TimeoutException | IOException e) {
+        throw e;
+      } catch (final Exception e) {
+        LOGGER.error("Unexpected error performing GET request!", e);
+        throw new RuntimeException(e);
+      }
+    } else {
+      try {
+        return rateLimiter.call(requestor, rateLimiterTimeout, rateLimiterTimeoutUnit);
+      } catch (final TimeoutException e) {
+        throw e;
+      } catch (final Exception e) {
+        LOGGER.error("Unexpected error performing GET request!", e);
+        throw new RuntimeException(e);
+      }
     }
+  }
 
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
-    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
+  public Response get(final String host, final String url) throws IOException {
+    return get(host, https ? 443 : 80, url, (Multimap<String, String>) null, null, null);
+  }
 
-    private static String removeLeadingSlashes(final String url) {
-        final Pattern pattern = Pattern.compile("^(/*)(.*)");
-        final Matcher matcher = pattern.matcher(url);
-        if(!matcher.matches()) {
-            return url;
-        }
-        return matcher.group(2);
-    }
+  public Response get(final String host, final String url, final Map<String, String> parameters, final Map<String, String> headers) throws IOException {
+    return get(host, https ? 443 : 80, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, null);
+  }
 
-    private final OkHttpClient client;
-    private final boolean https;
-    private final long rateLimiterTimeout;
-    private final TimeUnit rateLimiterTimeoutUnit;
+  public Response get(final String host, final String url, final Map<String, String> parameters, final Map<String, String> headers,
+                      final RateLimiter rateLimiter) throws IOException {
+    return get(host, https ? 443 : 80, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, rateLimiter);
+  }
 
-    public HTTPClient() {
-        this(new Configuration());
-    }
+  public Response get(final String host, final String url, final Multimap<String, String> parameters, final Map<String, String> headers) throws IOException {
+    return get(host, https ? 443 : 80, url, parameters, headers, null);
+  }
 
-    public HTTPClient(final Configuration config) {
-        client = new OkHttpClient.Builder().connectTimeout(config.getConnectTimeout(), config.getConnectTimeoutUnit())
-            .readTimeout(config.getReadTimeout(), config.getReadTimeoutUnit()).build();
-        rateLimiterTimeout = config.getRateLimiterTimeout();
-        rateLimiterTimeoutUnit = config.getRateLimiterTimeoutUnit();
-        https = config.isHttps();
-    }
-
-    public Response get(final String url) throws IOException {
-        final HttpUrl parsed = HttpUrl.parse(url);
-        return get(parsed.host(), parsed.port(), parsed.encodedPath(), (Multimap<String, String>)null, null, null);
-    }
-
-    public Response get(final String host, final int port, final String url) throws IOException {
-        return get(host, port, url, (Multimap<String, String>)null, null, null);
-    }
-
-    public Response get(final String host, final int port, final String url, final Map<String, String> parameters, final Map<String, String> headers)
-        throws IOException {
-        return get(host, port, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, null);
-    }
-
-    public Response get(final String host, final int port, final String url, final Map<String, String> parameters, final Map<String, String> headers,
-        final RateLimiter rateLimiter) throws IOException {
-        return get(host, port, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, rateLimiter);
-    }
-
-    public Response get(final String host, final int port, final String url, final Multimap<String, String> parameters, final Map<String, String> headers)
-        throws IOException {
-        return get(host, port, url, parameters, headers, null);
-    }
-
-    public Response get(final String host, final int port, final String url, final Multimap<String, String> parameters, final Map<String, String> headers,
-        final RateLimiter rateLimiter) throws IOException {
-        HttpUrl.Builder urlBuilder = new HttpUrl.Builder().scheme(https ? "https" : "http").host(host).port(port).addPathSegments(removeLeadingSlashes(url));
-        if(parameters != null && !parameters.isEmpty()) {
-            for(final String key : parameters.keySet()) {
-                for(final String value : parameters.get(key)) {
-                    urlBuilder = urlBuilder.addQueryParameter(key, value);
-                }
-            }
-        }
-        final HttpUrl httpURL = urlBuilder.build();
-
-        Request.Builder requestBuilder = new Request.Builder().url(httpURL);
-        if(headers != null && !headers.isEmpty()) {
-            requestBuilder = requestBuilder.headers(Headers.of(headers));
-        }
-        final Request request = requestBuilder.build();
-
-        final Callable<Response> requestor = () -> {
-            LOGGER.info("Making GET request to " + httpURL);
-            String body = null;
-            byte[] bytes = null;
-            int statusCode;
-            Headers responseHeaders;
-            try(okhttp3.Response response = client.newCall(request).execute()) {
-                statusCode = response.code();
-                responseHeaders = response.headers();
-                try(ResponseBody responseBody = response.body()) {
-                    if(responseBody.contentLength() == 0L) {
-                        body = "";
-                        bytes = new byte[0];
-                    } else if(JSON_MEDIA_TYPE.type().equals(responseBody.contentType().type())
-                        && JSON_MEDIA_TYPE.subtype().equals(responseBody.contentType().subtype())) {
-                        body = responseBody.string();
-                    } else {
-                        bytes = responseBody.bytes();
-                    }
-                }
-            } catch(final SSLProtocolException e) {
-                if(e.getCause() instanceof SocketTimeoutException) {
-                    // The SocketTimeoutException is wrapped in an SSLProtocolException if the timeout is during the handshake
-                    throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
-                }
-                throw e;
-            } catch(final SocketTimeoutException e) {
-                throw new TimeoutException("HTTP GET request timed out!", Type.HTTP);
-            }
-
-            ImmutableListMultimap.Builder<String, String> mapBuilder = ImmutableListMultimap.<String, String> builder();
-            for(final String key : responseHeaders.names()) {
-                mapBuilder = mapBuilder.putAll(key, responseHeaders.get(key));
-            }
-
-            if(body != null) {
-                return new Response(body, statusCode, mapBuilder.build());
-            } else {
-                return new Response(bytes, statusCode, mapBuilder.build());
-            }
-        };
-
-        if(rateLimiter == null) {
-            try {
-                return requestor.call();
-            } catch(TimeoutException | IOException e) {
-                throw e;
-            } catch(final Exception e) {
-                LOGGER.error("Unexpected error performing GET request!", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                return rateLimiter.call(requestor, rateLimiterTimeout, rateLimiterTimeoutUnit);
-            } catch(final TimeoutException e) {
-                throw e;
-            } catch(final Exception e) {
-                LOGGER.error("Unexpected error performing GET request!", e);
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public Response get(final String host, final String url) throws IOException {
-        return get(host, https ? 443 : https ? 443 : 80, url, (Multimap<String, String>)null, null, null);
-    }
-
-    public Response get(final String host, final String url, final Map<String, String> parameters, final Map<String, String> headers) throws IOException {
-        return get(host, https ? 443 : 80, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, null);
-    }
-
-    public Response get(final String host, final String url, final Map<String, String> parameters, final Map<String, String> headers,
-        final RateLimiter rateLimiter) throws IOException {
-        return get(host, https ? 443 : 80, url, parameters == null ? null : ImmutableListMultimap.copyOf(parameters.entrySet()), headers, rateLimiter);
-    }
-
-    public Response get(final String host, final String url, final Multimap<String, String> parameters, final Map<String, String> headers) throws IOException {
-        return get(host, https ? 443 : 80, url, parameters, headers, null);
-    }
-
-    public Response get(final String host, final String url, final Multimap<String, String> parameters, final Map<String, String> headers,
-        final RateLimiter limiter) throws IOException {
-        return get(host, https ? 443 : 80, url, parameters, headers, limiter);
-    }
+  public Response get(final String host, final String url, final Multimap<String, String> parameters, final Map<String, String> headers,
+                      final RateLimiter limiter) throws IOException {
+    return get(host, https ? 443 : 80, url, parameters, headers, limiter);
+  }
 }

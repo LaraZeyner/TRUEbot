@@ -29,31 +29,31 @@ public class ThirdPartyCodeAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<VerificationString>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public VerificationString next() {
+            final String summonerId = iterator.next();
+
+            final String endpoint = "lol/platform/v4/third-party-code/by-summoner/" + summonerId;
+            final VerificationString data = get(VerificationString.class, endpoint, platform, "lol/platform/v4/third-party-code/by-summoner/summonerId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public VerificationString next() {
-                final String summonerId = iterator.next();
+            data.setPlatform(platform.getTag());
+            data.setSummonerId(summonerId);
+            return data;
+          }
 
-                final String endpoint = "lol/platform/v4/third-party-code/by-summoner/" + summonerId;
-                final VerificationString data = get(VerificationString.class, endpoint, platform, "lol/platform/v4/third-party-code/by-summoner/summonerId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                data.setSummonerId(summonerId);
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 

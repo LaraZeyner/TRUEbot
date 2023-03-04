@@ -1,10 +1,10 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -18,7 +18,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRune, de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
         private String version, locale;
 
@@ -69,7 +69,7 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
         }
     }
 
-    public static class SubsetBuilder {
+    public static final class SubsetBuilder {
         private Iterable<Integer> ids;
         private Iterable<String> names, keys;
         private Platform platform;
@@ -148,6 +148,7 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -766565807713688277L;
 
     public static ReforgedRunes get() {
@@ -220,9 +221,7 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            LIST_PROXY_LOAD_GROUP
-        });
+        return List.of(LIST_PROXY_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -247,32 +246,28 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case LIST_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadListProxyData(data1 -> {
-                    final ReforgedRune rune = new ReforgedRune(data1);
-                    rune.markAsGhostLoaded(ReforgedRune.REFORGED_RUNE_LOAD_GROUP);
-                    return rune;
-                });
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(LIST_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadListProxyData(data1 -> {
+          final ReforgedRune rune = new ReforgedRune(data1);
+          rune.markAsGhostLoaded(ReforgedRune.REFORGED_RUNE_LOAD_GROUP);
+          return rune;
+        });
+      }
     }
 }

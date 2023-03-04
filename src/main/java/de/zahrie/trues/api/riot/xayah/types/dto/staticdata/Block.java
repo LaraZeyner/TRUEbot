@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Block extends DataObject {
+    @Serial
     private static final long serialVersionUID = -4507298877038993071L;
     private List<BlockItem> items;
     private boolean recMath;
@@ -37,13 +39,8 @@ public class Block extends DataObject {
             return false;
         }
         if(type == null) {
-            if(other.type != null) {
-                return false;
-            }
-        } else if(!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+          return other.type == null;
+        } else return type.equals(other.type);
     }
 
     /**

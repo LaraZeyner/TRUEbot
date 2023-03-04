@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.status;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ShardStatus extends DataObject {
+    @Serial
     private static final long serialVersionUID = -5691519391151145076L;
     private List<String> locales;
     private String name, region_tag, hostname, slug, platform;
@@ -65,13 +67,8 @@ public class ShardStatus extends DataObject {
             return false;
         }
         if(slug == null) {
-            if(other.slug != null) {
-                return false;
-            }
-        } else if(!slug.equals(other.slug)) {
-            return false;
-        }
-        return true;
+          return other.slug == null;
+        } else return slug.equals(other.slug);
     }
 
     /**

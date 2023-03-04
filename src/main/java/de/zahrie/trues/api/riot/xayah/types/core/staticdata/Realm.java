@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Region;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 
 public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
 
         private Builder() {}
@@ -44,6 +44,7 @@ public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     }
 
     public static final String REALM_LOAD_GROUP = "realm";
+    @Serial
     private static final long serialVersionUID = 232469766173551775L;
 
     public static Realm get() {
@@ -72,17 +73,17 @@ public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
 
     @Override
     public boolean exists() {
-        if(coreData.getCDN() == null) {
+        if(coreData.getCdn() == null) {
             load(REALM_LOAD_GROUP);
         }
-        return coreData.getCDN() != null;
+        return coreData.getCdn() != null;
     }
 
     public String getCDN() {
-        if(coreData.getCDN() == null) {
+        if(coreData.getCdn() == null) {
             load(REALM_LOAD_GROUP);
         }
-        return coreData.getCDN();
+        return coreData.getCdn();
     }
 
     public String getCSSVersion() {
@@ -119,9 +120,7 @@ public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            REALM_LOAD_GROUP
-        });
+        return List.of(REALM_LOAD_GROUP);
     }
 
     public int getMaxProfileIconId() {
@@ -155,21 +154,17 @@ public class Realm extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case REALM_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(REALM_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.Realm.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

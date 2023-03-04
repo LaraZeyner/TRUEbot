@@ -12,12 +12,12 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public abstract class Summoners {
-    public static class Builder {
+    public static final class Builder {
         private enum KeyType {
                 ACCOUNT_ID,
                 ID,
                 NAME,
-                PUUID;
+                PUUID
         }
 
         private Platform platform;
@@ -25,22 +25,14 @@ public abstract class Summoners {
         private boolean streaming = false;
 
         private Builder(final Iterable<String> keys, final KeyType keyType) {
-            switch(keyType) {
-                case ACCOUNT_ID:
-                    accountIds = keys;
-                    break;
-                case ID:
-                    ids = keys;
-                    break;
-                case NAME:
-                    names = keys;
-                    break;
-                case PUUID:
-                    puuids = keys;
-                    break;
-                default:
-                    break;
+          switch (keyType) {
+            case ACCOUNT_ID -> accountIds = keys;
+            case ID -> ids = keys;
+            case NAME -> names = keys;
+            case PUUID -> puuids = keys;
+            default -> {
             }
+          }
         }
 
         public SearchableList<Summoner> get() {

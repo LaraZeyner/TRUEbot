@@ -2,19 +2,18 @@ package de.zahrie.trues.api.coverage.lineup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
+import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.database.Database;
 import de.zahrie.trues.models.riot.Lane;
-import de.zahrie.trues.util.database.Database;
-import de.zahrie.trues.util.util.Time;
 import lombok.Getter;
 
 /**
@@ -47,9 +46,9 @@ public class LineupCreator extends LineupCreatorBase {
   }
 
   private void handleLineup(Player player, Participator participator) {
-    final Calendar calendar = new Time(-180);
+    final Time time = new Time(-180);
     final Team team = participator.getTeam();
-    final List<Object[]> list = Database.Find.findObjectList(new String[]{"player", "team", "start"}, new Object[]{player, team, calendar},
+    final List<Object[]> list = Database.Find.findObjectList(new String[]{"player", "team", "start"}, new Object[]{player, team, time},
         "Player.getLanePlayed");
     for (Object[] o : list) {
       final Lane lane = Lane.valueOf(o[0].toString().toUpperCase());

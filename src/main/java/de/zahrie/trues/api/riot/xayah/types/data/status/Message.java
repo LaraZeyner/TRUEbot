@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.status;
 
+import java.io.Serial;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -7,6 +8,7 @@ import org.joda.time.DateTime;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Message extends CoreData {
+    @Serial
     private static final long serialVersionUID = -8814273304853296172L;
     private DateTime created, updated;
     private String severity, author, content, id, heading;
@@ -74,13 +76,8 @@ public class Message extends CoreData {
             return false;
         }
         if(updated == null) {
-            if(other.updated != null) {
-                return false;
-            }
-        } else if(!updated.equals(other.updated)) {
-            return false;
-        }
-        return true;
+          return other.updated == null;
+        } else return updated.equals(other.updated);
     }
 
     /**

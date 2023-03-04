@@ -56,7 +56,7 @@ public class LeagueAPI extends RiotAPIService {
             }
         }
 
-        LeagueList data;
+        final LeagueList data;
         if(leagueId == null) {
             final String endpoint = LEAGUE_LIST_ENDPOINTS.get(tier) + queue.getTag();
             data = get(LeagueList.class, endpoint, platform, LEAGUE_LIST_ENDPOINTS.get(tier) + "/queue");
@@ -117,45 +117,45 @@ public class LeagueAPI extends RiotAPIService {
         }
 
         final Iterator<?> iterator = leagueIds == null ? queues.iterator() : leagueIds.iterator();
-        return CloseableIterators.from(new Iterator<LeagueList>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public LeagueList next() {
+            final LeagueList data;
+            if (leagueIds == null) {
+              final Queue queue = (Queue) iterator.next();
+
+              if (!Queue.RANKED.contains(queue)) {
+                return null;
+              }
+
+              final String endpoint = LEAGUE_LIST_ENDPOINTS.get(tier) + queue.getTag();
+              data = get(LeagueList.class, endpoint, platform, LEAGUE_LIST_ENDPOINTS.get(tier) + "/queue");
+
+              if (data != null && data.getQueue() == null) {
+                data.setQueue(queue.getTag());
+              }
+            } else {
+              final String leagueId = (String) iterator.next();
+              final String endpoint = "lol/league/v4/leagues/" + leagueId;
+              data = get(LeagueList.class, endpoint, platform, "lol/league/v4/leagues/leagueId");
+            }
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public LeagueList next() {
-                LeagueList data;
-                if(leagueIds == null) {
-                    final Queue queue = (Queue)iterator.next();
+            data.setPlatform(platform.getTag());
+            return data;
+          }
 
-                    if(!Queue.RANKED.contains(queue)) {
-                        return null;
-                    }
-
-                    final String endpoint = LEAGUE_LIST_ENDPOINTS.get(tier) + queue.getTag();
-                    data = get(LeagueList.class, endpoint, platform, LEAGUE_LIST_ENDPOINTS.get(tier) + "/queue");
-
-                    if(data != null && data.getQueue() == null && queue != null) {
-                        data.setQueue(queue.getTag());
-                    }
-                } else {
-                    final String leagueId = (String)iterator.next();
-                    final String endpoint = "lol/league/v4/leagues/" + leagueId;
-                    data = get(LeagueList.class, endpoint, platform, "lol/league/v4/leagues/leagueId");
-                }
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -167,34 +167,34 @@ public class LeagueAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<LeaguePositions>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public LeaguePositions next() {
+            final String summonerId = iterator.next();
+
+            final String endpoint = "lol/league/v4/entries/by-summoner/" + summonerId;
+            final LeaguePositions data = get(LeaguePositions.class, endpoint, platform, "lol/league/v4/entries/by-summoner/summonerId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public LeaguePositions next() {
-                final String summonerId = iterator.next();
-
-                final String endpoint = "lol/league/v4/entries/by-summoner/" + summonerId;
-                final LeaguePositions data = get(LeaguePositions.class, endpoint, platform, "lol/league/v4/entries/by-summoner/summonerId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setSummonerId(summonerId);
-                data.setPlatform(platform.getTag());
-                for(final LeagueEntry entry : data) {
-                    entry.setPlatform(platform.getTag());
-                }
-                return data;
+            data.setSummonerId(summonerId);
+            data.setPlatform(platform.getTag());
+            for (final LeagueEntry entry : data) {
+              entry.setPlatform(platform.getTag());
             }
+            return data;
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

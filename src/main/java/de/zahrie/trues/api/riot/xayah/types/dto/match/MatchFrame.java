@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchFrame extends DataObject {
+    @Serial
     private static final long serialVersionUID = -4247119702676575684L;
     private List<MatchEvent> events;
     private Map<String, MatchParticipantFrame> participantFrames;
@@ -41,10 +43,7 @@ public class MatchFrame extends DataObject {
         } else if(!participantFrames.equals(other.participantFrames)) {
             return false;
         }
-        if(timestamp != other.timestamp) {
-            return false;
-        }
-        return true;
+      return timestamp == other.timestamp;
     }
 
     /**

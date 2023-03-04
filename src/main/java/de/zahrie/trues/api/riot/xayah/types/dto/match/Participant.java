@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Participant extends DataObject {
+    @Serial
     private static final long serialVersionUID = -2817707228676211450L;
     private String highestAchievedSeasonTier;
     private int participantId, teamId, spell2Id, spell1Id, championId;
@@ -51,13 +54,8 @@ public class Participant extends DataObject {
             return false;
         }
         if(timeline == null) {
-            if(other.timeline != null) {
-                return false;
-            }
-        } else if(!timeline.equals(other.timeline)) {
-            return false;
-        }
-        return true;
+          return other.timeline == null;
+        } else return timeline.equals(other.timeline);
     }
 
     /**

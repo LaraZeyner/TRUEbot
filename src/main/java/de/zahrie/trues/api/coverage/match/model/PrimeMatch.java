@@ -2,11 +2,11 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.stage.Betable;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -32,7 +32,7 @@ public class PrimeMatch extends ScheduleableMatch implements Betable, Serializab
   @Column(name = "match_id")
   private Integer matchId;
 
-  public PrimeMatch(Playday matchday, Calendar start, League league, Calendar schedulingStart, Calendar schedulingEnd, Integer matchId) {
+  public PrimeMatch(Playday matchday, Time start, League league, Time schedulingStart, Time schedulingEnd, Integer matchId) {
     super(matchday, start, league, schedulingStart, schedulingEnd);
     this.matchId = matchId;
   }

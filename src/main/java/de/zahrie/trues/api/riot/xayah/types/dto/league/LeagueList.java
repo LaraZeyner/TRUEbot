@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.league;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class LeagueList extends DataObject {
+    @Serial
     private static final long serialVersionUID = -8010527033889002648L;
     private List<LeagueItem> entries;
     private String leagueId, tier, queue, name, platform;
@@ -57,13 +59,8 @@ public class LeagueList extends DataObject {
             return false;
         }
         if(tier == null) {
-            if(other.tier != null) {
-                return false;
-            }
-        } else if(!tier.equals(other.tier)) {
-            return false;
-        }
-        return true;
+          return other.tier == null;
+        } else return tier.equals(other.tier);
     }
 
     /**

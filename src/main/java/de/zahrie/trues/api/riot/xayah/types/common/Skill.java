@@ -11,7 +11,7 @@ public enum Skill {
 
     private static final java.util.Map<Integer, Skill> BY_SLOT = getBySlot();
 
-    private static final java.util.Map<Integer, Skill> getBySlot() {
+    private static java.util.Map<Integer, Skill> getBySlot() {
         final Builder<Integer, Skill> builder = ImmutableMap.builder();
         for(final Skill skill : values()) {
             builder.put(skill.slot, skill);
@@ -25,7 +25,7 @@ public enum Skill {
 
     private final int slot;
 
-    private Skill(final int slot) {
+    Skill(final int slot) {
         this.slot = slot;
     }
 

@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Player extends DataObject {
+    @Serial
     private static final long serialVersionUID = -6098509258697874128L;
     private String currentPlatformId, summonerName, matchHistoryUri, platformId, currentAccountId, summonerId, accountId;
     private int profileIcon;
@@ -65,13 +68,8 @@ public class Player extends DataObject {
             return false;
         }
         if(summonerName == null) {
-            if(other.summonerName != null) {
-                return false;
-            }
-        } else if(!summonerName.equals(other.summonerName)) {
-            return false;
-        }
-        return true;
+          return other.summonerName == null;
+        } else return summonerName.equals(other.summonerName);
     }
 
     /**

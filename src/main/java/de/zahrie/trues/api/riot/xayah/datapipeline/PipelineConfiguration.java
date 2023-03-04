@@ -150,7 +150,7 @@ public class PipelineConfiguration {
         final List<PipelineElement> elements = new ArrayList<>(config.getElements() != null ? config.getElements().size() : 0);
         if(config.getElements() != null) {
             for(final PipelineElementConfiguration eConfig : config.getElements()) {
-                Class<?> clazz;
+                final Class<?> clazz;
                 try {
                     clazz = Class.forName(eConfig.getClassName());
                 } catch(final ClassNotFoundException e) {
@@ -163,7 +163,7 @@ public class PipelineConfiguration {
                 }
 
                 if(eConfig.getConfigClassName() != null) {
-                    Class<?> configClazz;
+                    final Class<?> configClazz;
                     try {
                         configClazz = Class.forName(eConfig.getConfigClassName());
                     } catch(final ClassNotFoundException e) {
@@ -209,8 +209,7 @@ public class PipelineConfiguration {
             }
         }
 
-        final DataPipeline pipeline = new DataPipeline(transformers, elements);
-        return pipeline;
+      return new DataPipeline(transformers, elements);
     }
 
     private List<PipelineElementConfiguration> elements = new ArrayList<>(1);

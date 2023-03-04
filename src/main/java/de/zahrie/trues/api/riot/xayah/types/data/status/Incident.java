@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.status;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -7,6 +8,7 @@ import org.joda.time.DateTime;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Incident extends CoreData {
+    @Serial
     private static final long serialVersionUID = -8747080125041481057L;
     private boolean active;
     private DateTime created;
@@ -39,13 +41,8 @@ public class Incident extends CoreData {
             return false;
         }
         if(updates == null) {
-            if(other.updates != null) {
-                return false;
-            }
-        } else if(!updates.equals(other.updates)) {
-            return false;
-        }
-        return true;
+          return other.updates == null;
+        } else return updates.equals(other.updates);
     }
 
     /**

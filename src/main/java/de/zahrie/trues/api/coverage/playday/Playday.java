@@ -2,11 +2,12 @@ package de.zahrie.trues.api.coverage.playday;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,6 +27,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,18 +58,20 @@ public class Playday implements Serializable {
   private short idx;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "playday_start", nullable = false)
-  private Calendar start;
+  private Time start;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "playday_end", nullable = false)
-  private Calendar end;
+  private Time end;
 
   @OneToMany(mappedBy = "matchday")
   @ToString.Exclude
   private Set<Match> matches;
 
-  public Playday(PlayStage stage, short index, Calendar start, Calendar end) {
+  public Playday(PlayStage stage, short index, Time start, Time end) {
     this.stage = stage;
     this.idx = index;
     this.start = start;

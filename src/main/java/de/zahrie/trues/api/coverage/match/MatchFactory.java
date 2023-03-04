@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.coverage.match;
 
 import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
 /**

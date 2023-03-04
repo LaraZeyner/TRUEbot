@@ -24,7 +24,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Patch;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public abstract class MatchHistories {
-    public static class Builder {
+    public static final class Builder {
         public class RecentBuilder {
             public SearchableList<MatchHistory> get() {
                 final List<String> ids = new ArrayList<>();
@@ -32,7 +32,7 @@ public abstract class MatchHistories {
                 Summoner summoner = iterator.next();
 
                 if(summoner == null) {
-                    return SearchableLists.from(Collections.<MatchHistory> emptyList());
+                    return SearchableLists.from(Collections.emptyList());
                 }
 
                 final Platform platform = summoner.getPlatform();
@@ -85,7 +85,7 @@ public abstract class MatchHistories {
             Summoner summoner = iterator.next();
 
             if(summoner == null) {
-                return SearchableLists.from(Collections.<MatchHistory> emptyList());
+                return SearchableLists.from(Collections.emptyList());
             }
 
             final Platform platform = summoner.getPlatform();

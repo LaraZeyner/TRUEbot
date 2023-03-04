@@ -2,8 +2,8 @@ package de.zahrie.trues.models.discord.member;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.models.discord.DiscordGroup;
 import lombok.Data;
 
@@ -16,6 +16,6 @@ public class DiscordMemberGroupId implements Serializable {
 
   private DiscordGroup group;
 
-  private Calendar start;
+  private Time start;
 
 }

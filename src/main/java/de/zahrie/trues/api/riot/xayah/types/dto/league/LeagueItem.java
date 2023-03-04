@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class LeagueItem extends DataObject {
+    @Serial
     private static final long serialVersionUID = 2521820374904983414L;
     private boolean hotStreak, veteran, freshBlood, inactive;
     private MiniSeries miniSeries;
@@ -67,10 +70,7 @@ public class LeagueItem extends DataObject {
         if(veteran != other.veteran) {
             return false;
         }
-        if(wins != other.wins) {
-            return false;
-        }
-        return true;
+      return wins == other.wins;
     }
 
     /**

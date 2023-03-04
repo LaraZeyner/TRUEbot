@@ -2,7 +2,7 @@ package de.zahrie.trues.api.discord.util.cmd;
 
 import java.util.List;
 
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
 /**

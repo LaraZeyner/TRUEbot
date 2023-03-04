@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Rune extends DataObject {
+    @Serial
     private static final long serialVersionUID = 7083514158515535826L;
     private int runeId, rank;
 
@@ -25,10 +28,7 @@ public class Rune extends DataObject {
         if(rank != other.rank) {
             return false;
         }
-        if(runeId != other.runeId) {
-            return false;
-        }
-        return true;
+      return runeId == other.runeId;
     }
 
     /**

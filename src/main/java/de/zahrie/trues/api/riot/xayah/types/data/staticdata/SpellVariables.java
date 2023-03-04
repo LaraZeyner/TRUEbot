@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class SpellVariables extends CoreData {
+    @Serial
     private static final long serialVersionUID = 448643445379458097L;
     private List<Double> coefficients;
     private String ranksWith, dynamic, link, key;
@@ -50,13 +52,8 @@ public class SpellVariables extends CoreData {
             return false;
         }
         if(ranksWith == null) {
-            if(other.ranksWith != null) {
-                return false;
-            }
-        } else if(!ranksWith.equals(other.ranksWith)) {
-            return false;
-        }
-        return true;
+          return other.ranksWith == null;
+        } else return ranksWith.equals(other.ranksWith);
     }
 
     /**

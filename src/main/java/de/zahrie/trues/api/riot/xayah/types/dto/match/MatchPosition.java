@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.match;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MatchPosition extends DataObject {
+    @Serial
     private static final long serialVersionUID = -1276964566555133628L;
     private int x, y;
 
@@ -25,10 +28,7 @@ public class MatchPosition extends DataObject {
         if(x != other.x) {
             return false;
         }
-        if(y != other.y) {
-            return false;
-        }
-        return true;
+      return y == other.y;
     }
 
     /**

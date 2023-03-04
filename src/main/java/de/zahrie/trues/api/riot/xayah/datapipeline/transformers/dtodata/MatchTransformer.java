@@ -176,7 +176,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk0() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk0());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk0Var1());
             rune.getVariables().add(item.getStats().getPerk0Var2());
             rune.getVariables().add(item.getStats().getPerk0Var3());
@@ -187,7 +187,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk1() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk1());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk1Var1());
             rune.getVariables().add(item.getStats().getPerk1Var2());
             rune.getVariables().add(item.getStats().getPerk1Var3());
@@ -198,7 +198,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk2() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk2());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk2Var1());
             rune.getVariables().add(item.getStats().getPerk2Var2());
             rune.getVariables().add(item.getStats().getPerk2Var3());
@@ -209,7 +209,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk3() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk3());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk3Var1());
             rune.getVariables().add(item.getStats().getPerk3Var2());
             rune.getVariables().add(item.getStats().getPerk3Var3());
@@ -220,7 +220,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk4() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk4());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk4Var1());
             rune.getVariables().add(item.getStats().getPerk4Var2());
             rune.getVariables().add(item.getStats().getPerk4Var3());
@@ -231,7 +231,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(item.getStats().getPerk5() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(item.getStats().getPerk5());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(item.getStats().getPerk5Var1());
             rune.getVariables().add(item.getStats().getPerk5Var2());
             rune.getVariables().add(item.getStats().getPerk5Var3());
@@ -420,7 +420,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk0() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk0());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk0Var1());
             rune.getVariables().add(participant.getStats().getPerk0Var2());
             rune.getVariables().add(participant.getStats().getPerk0Var3());
@@ -429,7 +429,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk1() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk1());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk1Var1());
             rune.getVariables().add(participant.getStats().getPerk1Var2());
             rune.getVariables().add(participant.getStats().getPerk1Var3());
@@ -438,7 +438,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk2() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk2());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk2Var1());
             rune.getVariables().add(participant.getStats().getPerk2Var2());
             rune.getVariables().add(participant.getStats().getPerk2Var3());
@@ -447,7 +447,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk3() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk3());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk3Var1());
             rune.getVariables().add(participant.getStats().getPerk3Var2());
             rune.getVariables().add(participant.getStats().getPerk3Var3());
@@ -456,7 +456,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk4() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk4());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk4Var1());
             rune.getVariables().add(participant.getStats().getPerk4Var2());
             rune.getVariables().add(participant.getStats().getPerk4Var3());
@@ -465,7 +465,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         if(participant.getStats().getPerk5() != 0) {
             final RuneStats rune = new RuneStats();
             rune.setId(participant.getStats().getPerk5());
-            rune.setVariables(new ArrayList<Integer>(3));
+            rune.setVariables(new ArrayList<>(3));
             rune.getVariables().add(participant.getStats().getPerk5Var1());
             rune.getVariables().add(participant.getStats().getPerk5Var2());
             rune.getVariables().add(participant.getStats().getPerk5Var3());
@@ -490,29 +490,29 @@ public class MatchTransformer extends AbstractDataTransformer {
         final MatchEvent event = new MatchEvent();
         event.setAfterId(item.getAfterId());
         if(item.getAscensionType() != null) {
-            event.setAscendedType(item.getAscensionType().toString());
+            event.setAscendedType(item.getAscensionType());
         }
         if(item.getAssistingParticipants() != null) {
             event.setAssistingParticipantIds(new ArrayList<>(item.getAssistingParticipants()));
         }
         event.setBeforeId(item.getBeforeId());
         if(item.getBuildingType() != null) {
-            event.setBuildingType(item.getBuildingType().toString());
+            event.setBuildingType(item.getBuildingType());
         }
         if(item.getCapturedPoint() != null) {
-            event.setPointCaptured(item.getCapturedPoint().toString());
+            event.setPointCaptured(item.getCapturedPoint());
         }
         event.setCreatorId(item.getCreatorId());
         event.setItemId(item.getItemId());
         event.setKillerId(item.getKillerId());
         if(item.getLaneType() != null) {
-            event.setLaneType(item.getLaneType().toString());
+            event.setLaneType(item.getLaneType());
         }
         if(item.getLevelUpType() != null) {
-            event.setLevelUpType(item.getLevelUpType().toString());
+            event.setLevelUpType(item.getLevelUpType());
         }
         if(item.getMonsterSubType() != null) {
-            event.setMonsterSubType(item.getMonsterSubType().toString());
+            event.setMonsterSubType(item.getMonsterSubType());
         }
         event.setParticipantId(item.getParticipantId());
         if(item.getPosition() != null) {
@@ -522,14 +522,14 @@ public class MatchTransformer extends AbstractDataTransformer {
         event.setTeamId(item.getTeam());
         event.setTimestamp(item.getTimestamp().getMillis());
         if(item.getTurretType() != null) {
-            event.setTowerType(item.getTurretType().toString());
+            event.setTowerType(item.getTurretType());
         }
         if(item.getType() != null) {
-            event.setType(item.getType().toString());
+            event.setType(item.getType());
         }
         event.setVictimId(item.getVictimId());
         if(item.getWardType() != null) {
-            event.setWardType(item.getWardType().toString());
+            event.setWardType(item.getWardType());
         }
         return event;
     }
@@ -560,8 +560,8 @@ public class MatchTransformer extends AbstractDataTransformer {
         match.setGameCreation(item.getCreationTime().getMillis());
         match.setGameDuration(item.getDuration().getStandardSeconds());
         match.setGameId(item.getId());
-        match.setGameMode(item.getMode().toString());
-        match.setGameType(item.getType().toString());
+        match.setGameMode(item.getMode());
+        match.setGameType(item.getType());
         match.setGameVersion(item.getVersion());
         match.setMapId(item.getMap());
         final List<ParticipantIdentity> identities = new ArrayList<>(item.getParticipants().size());
@@ -734,10 +734,10 @@ public class MatchTransformer extends AbstractDataTransformer {
         reference.setChampion(item.getChampionId());
         reference.setTimestamp(item.getCreationTime().getMillis());
         reference.setGameId(item.getId());
-        reference.setLane(item.getLane().toString());
+        reference.setLane(item.getLane());
         reference.setPlatformId(item.getPlatform());
         reference.setQueue(item.getQueue());
-        reference.setRole(item.getRole().toString());
+        reference.setRole(item.getRole());
         reference.setSeason(item.getSeason());
         return reference;
     }
@@ -1069,7 +1069,7 @@ public class MatchTransformer extends AbstractDataTransformer {
         final Object previousSecondaryRunePath = context.put("secondaryRunePath", item.getSecondaryRunePath());
         final de.zahrie.trues.api.riot.xayah.types.dto.match.Participant participant = new de.zahrie.trues.api.riot.xayah.types.dto.match.Participant();
         participant.setChampionId(item.getChampionId());
-        participant.setHighestAchievedSeasonTier(item.getHighestTierInSeason().toString());
+        participant.setHighestAchievedSeasonTier(item.getHighestTierInSeason());
         participant.setParticipantId(item.getParticipantId());
         participant.setSpell1Id(item.getSummonerSpellDId());
         participant.setSpell2Id(item.getSummonerSpellFId());

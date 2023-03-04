@@ -114,13 +114,8 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         return false;
       }
       if (version == null) {
-        if (other.version != null) {
-          return false;
-        }
-      } else if (!version.equals(other.version)) {
-        return false;
-      }
-      return true;
+        return other.version == null;
+      } else return version.equals(other.version);
     }
 
     @Override
@@ -134,11 +129,11 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
   }
 
-  private static final Function<JsonNode, JsonNode> CHAMPION_PROCESSOR = new Function<JsonNode, JsonNode>() {
+  private static final java.util.function.Function<JsonNode, JsonNode> CHAMPION_PROCESSOR = new java.util.function.Function<>() {
     @Override
     public JsonNode apply(final JsonNode championTree) {
       if (championTree == null) {
-        return championTree;
+        return null;
       }
 
       // Swap key and id. They're reversed between ddragon and the API.
@@ -162,9 +157,9 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
   };
 
-  private static final Function<JsonNode, JsonNode> SPELL_PROCESSOR = spellTree -> {
+  private static final java.util.function.Function<JsonNode, JsonNode> SPELL_PROCESSOR = spellTree -> {
     if (spellTree == null) {
-      return spellTree;
+      return null;
     }
 
     // Swap key and id. They're reversed between ddragon and the API.
@@ -198,7 +193,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
   };
 
   private static String getCurrentVersion(final Platform platform, final PipelineContext context) {
-    final Realm realm = context.getPipeline().get(Realm.class, ImmutableMap.<String, Object>of("platform", platform));
+    final Realm realm = context.getPipeline().get(Realm.class, ImmutableMap.of("platform", platform));
     return realm.getV();
   }
 
@@ -230,12 +225,12 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(id, "id", name, "name", key, "key");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("championFull", version, locale);
 
-    final Champion data = DataObject.fromJSON(Champion.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final Champion data = DataObject.fromJSON(Champion.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_CHAMPION_TAGS));
 
       @Override
@@ -256,7 +251,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
           if (id != null && idNode != null && id.intValue() == idNode.asInt() || key != null && keyNode != null && key.equals(keyNode.asText())
               || name != null && nameNode != null && name.equals(nameNode.asText())) {
-            INCLUDED_DATA_PROCESSOR.apply(champion);
+            includedDataProcessor.apply(champion);
             CHAMPION_PROCESSOR.apply(champion);
             return champion;
           }
@@ -283,19 +278,19 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platform, "platform");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
     final Boolean dataById = query.get("dataById") == null ? Boolean.FALSE : (Boolean) query.get("dataById");
 
     final String content = get("championFull", version, locale);
 
-    final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_CHAMPION_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final ObjectNode data = (ObjectNode) tree.get("data");
@@ -304,7 +299,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode champion : data) {
-          INCLUDED_DATA_PROCESSOR.apply(champion);
+          includedDataProcessor.apply(champion);
           CHAMPION_PROCESSOR.apply(champion);
 
           if (dataById) {
@@ -344,12 +339,12 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(id, "id", name, "name");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("item", version, locale);
 
-    final Item data = DataObject.fromJSON(Item.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final Item data = DataObject.fromJSON(Item.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_ITEM_TAGS));
 
       @Override
@@ -372,7 +367,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           if (id != null && id.intValue() == Integer.parseInt(itemId) || name != null && name.equals(itemName)) {
             item.set("id", new IntNode(Integer.parseInt(itemId)));
 
-            INCLUDED_DATA_PROCESSOR.apply(item);
+            includedDataProcessor.apply(item);
             return item;
           }
         }
@@ -398,18 +393,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platform, "platform");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("item", version, locale);
 
-    final ItemList data = DataObject.fromJSON(ItemList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final ItemList data = DataObject.fromJSON(ItemList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_ITEM_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -424,7 +419,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final ObjectNode item = (ObjectNode) temp.get(itemId);
           item.set("id", new IntNode(Integer.parseInt(itemId)));
 
-          INCLUDED_DATA_PROCESSOR.apply(item);
+          includedDataProcessor.apply(item);
         }
 
         return tree;
@@ -490,18 +485,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(ids, "ids", names, "names", keys, "keys");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("championFull", version, locale);
 
-    final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_CHAMPION_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final ObjectNode data = (ObjectNode) tree.get("data");
@@ -510,7 +505,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode champion : data) {
-          INCLUDED_DATA_PROCESSOR.apply(champion);
+          includedDataProcessor.apply(champion);
           CHAMPION_PROCESSOR.apply(champion);
 
           final String key = champion.get("key").asText();
@@ -531,7 +526,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setIncludedData(includedData);
-    final Map<String, Champion> byName = ids == null && keys == null ? new HashMap<String, Champion>() : null;
+    final Map<String, Champion> byName = ids == null && keys == null ? new HashMap<>() : null;
     for (final Champion champion : data.getData().values()) {
       champion.setPlatform(platform.getTag());
       champion.setVersion(data.getVersion());
@@ -548,7 +543,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
       iterator = names.iterator();
     } else iterator = Objects.requireNonNullElse(ids, keys).iterator();
 
-    return CloseableIterators.from(new Iterator<Champion>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -579,11 +574,11 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final Iterable<String> versions = (Iterable<String>) query.get("versions");
     Utilities.checkNotNull(platform, "platform", versions, "versions");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
     final Boolean dataById = query.get("dataById") == null ? Boolean.FALSE : (Boolean) query.get("dataById");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<ChampionList>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -595,14 +590,14 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final String content = get("championFull", version, locale);
 
-        final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<JsonNode, JsonNode>() {
-          private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+        final ChampionList data = DataObject.fromJSON(ChampionList.class, new Function<>() {
+          private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
               IncludedDataProcessor.DEFAULT_CHAMPION_TAGS));
 
           @Override
           public JsonNode apply(final JsonNode tree) {
             if (tree == null) {
-              return tree;
+              return null;
             }
 
             final ObjectNode data = (ObjectNode) tree.get("data");
@@ -611,7 +606,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
             }
 
             for (final JsonNode champion : data) {
-              INCLUDED_DATA_PROCESSOR.apply(champion);
+              includedDataProcessor.apply(champion);
               CHAMPION_PROCESSOR.apply(champion);
 
               if (dataById) {
@@ -658,18 +653,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(ids, "ids", names, "names");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("item", version, locale);
 
-    final ItemList data = DataObject.fromJSON(ItemList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final ItemList data = DataObject.fromJSON(ItemList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_ITEM_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -684,7 +679,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final ObjectNode item = (ObjectNode) temp.get(itemId);
           item.set("id", new IntNode(Integer.parseInt(itemId)));
 
-          INCLUDED_DATA_PROCESSOR.apply(item);
+          includedDataProcessor.apply(item);
         }
 
         return tree;
@@ -697,7 +692,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setIncludedData(includedData);
-    final Map<String, Item> byName = ids == null ? new HashMap<String, Item>() : null;
+    final Map<String, Item> byName = ids == null ? new HashMap<>() : null;
     for (final Item item : data.getData().values()) {
       item.setPlatform(platform.getTag());
       item.setVersion(data.getVersion());
@@ -710,7 +705,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<?> iterator = ids == null ? names.iterator() : ids.iterator();
-    return CloseableIterators.from(new Iterator<Item>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -741,10 +736,10 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final Iterable<String> versions = (Iterable<String>) query.get("versions");
     Utilities.checkNotNull(platform, "platform", versions, "versions");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<ItemList>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -756,14 +751,14 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final String content = get("item", version, locale);
 
-        final ItemList data = DataObject.fromJSON(ItemList.class, new Function<JsonNode, JsonNode>() {
-          private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+        final ItemList data = DataObject.fromJSON(ItemList.class, new Function<>() {
+          private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
               IncludedDataProcessor.DEFAULT_ITEM_TAGS));
 
           @Override
           public JsonNode apply(final JsonNode tree) {
             if (tree == null) {
-              return tree;
+              return null;
             }
 
             final JsonNode temp = tree.get("data");
@@ -778,7 +773,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
               final ObjectNode item = (ObjectNode) temp.get(itemId);
               item.set("id", new IntNode(Integer.parseInt(itemId)));
 
-              INCLUDED_DATA_PROCESSOR.apply(item);
+              includedDataProcessor.apply(item);
             }
 
             return tree;
@@ -850,7 +845,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
 
     final Iterator<String> iterator = locales.iterator();
-    return CloseableIterators.from(new Iterator<LanguageStrings>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -887,7 +882,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<MapData>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -937,7 +932,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
       return null;
     }
 
-    final Map<String, MapDetails> byName = ids == null ? new HashMap<String, MapDetails>() : null;
+    final Map<String, MapDetails> byName = ids == null ? new HashMap<>() : null;
     for (final MapDetails details : data.getData().values()) {
       details.setPlatform(platform.getTag());
       details.setVersion(data.getVersion());
@@ -949,7 +944,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<?> iterator = ids == null ? names.iterator() : ids.iterator();
-    return CloseableIterators.from(new Iterator<MapDetails>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -983,18 +978,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(ids, "ids", names, "names");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("mastery", version, locale);
 
-    final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_MASTERY_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -1003,7 +998,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode mastery : temp) {
-          INCLUDED_DATA_PROCESSOR.apply(mastery);
+          includedDataProcessor.apply(mastery);
         }
 
         return tree;
@@ -1016,7 +1011,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setIncludedData(includedData);
-    final Map<String, Mastery> byName = ids == null ? new HashMap<String, Mastery>() : null;
+    final Map<String, Mastery> byName = ids == null ? new HashMap<>() : null;
     for (final Mastery mastery : data.getData().values()) {
       mastery.setPlatform(platform.getTag());
       mastery.setVersion(data.getVersion());
@@ -1029,7 +1024,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<?> iterator = ids == null ? names.iterator() : ids.iterator();
-    return CloseableIterators.from(new Iterator<Mastery>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1060,10 +1055,10 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final Iterable<String> versions = (Iterable<String>) query.get("versions");
     Utilities.checkNotNull(platform, "platform", versions, "versions");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<MasteryList>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1075,14 +1070,14 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final String content = get("mastery", version, locale);
 
-        final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<JsonNode, JsonNode>() {
-          private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+        final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<>() {
+          private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
               IncludedDataProcessor.DEFAULT_MASTERY_TAGS));
 
           @Override
           public JsonNode apply(final JsonNode tree) {
             if (tree == null) {
-              return tree;
+              return null;
             }
 
             final JsonNode temp = tree.get("data");
@@ -1091,7 +1086,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
             }
 
             for (final JsonNode mastery : temp) {
-              INCLUDED_DATA_PROCESSOR.apply(mastery);
+              includedDataProcessor.apply(mastery);
             }
 
             return tree;
@@ -1129,7 +1124,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<ProfileIconData>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1178,7 +1173,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<Number> iterator = ids.iterator();
-    return CloseableIterators.from(new Iterator<ProfileIconDetails>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1209,7 +1204,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platforms, "platforms");
 
     final Iterator<Platform> iterator = platforms.iterator();
-    return CloseableIterators.from(new Iterator<Realm>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1252,7 +1247,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
     final ReforgedRuneTree data = DataObject.fromJSON(ReforgedRuneTree.class, tree -> {
       if (tree == null) {
-        return tree;
+        return null;
       }
 
       for (final JsonNode path : tree) {
@@ -1282,8 +1277,8 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setVersion(version);
-    final Map<String, ReforgedRune> byKey = ids == null ? new HashMap<String, ReforgedRune>() : null;
-    final Map<Integer, ReforgedRune> byId = ids != null ? new HashMap<Integer, ReforgedRune>() : null;
+    final Map<String, ReforgedRune> byKey = ids == null ? new HashMap<>() : null;
+    final Map<Integer, ReforgedRune> byId = ids != null ? new HashMap<>() : null;
     for (final ReforgedRunePath path : data) {
       for (final ReforgedRuneSlot slot : path.getSlots()) {
         for (final ReforgedRune rune : slot.getRunes()) {
@@ -1311,7 +1306,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
       iterator = names.iterator();
     }
 
-    return CloseableIterators.from(new Iterator<ReforgedRune>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1344,7 +1339,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<ReforgedRuneTree>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1358,7 +1353,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final ReforgedRuneTree data = DataObject.fromJSON(ReforgedRuneTree.class, tree -> {
           if (tree == null) {
-            return tree;
+            return null;
           }
 
           for (final JsonNode path : tree) {
@@ -1417,18 +1412,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(ids, "ids", names, "names");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("rune", version, locale);
 
-    final RuneList data = DataObject.fromJSON(RuneList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final RuneList data = DataObject.fromJSON(RuneList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_RUNE_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -1443,7 +1438,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final ObjectNode rune = (ObjectNode) temp.get(runeId);
           rune.set("id", new IntNode(Integer.parseInt(runeId)));
 
-          INCLUDED_DATA_PROCESSOR.apply(rune);
+          includedDataProcessor.apply(rune);
         }
 
         return tree;
@@ -1456,7 +1451,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setIncludedData(includedData);
-    final Map<String, Rune> byName = ids == null ? new HashMap<String, Rune>() : null;
+    final Map<String, Rune> byName = ids == null ? new HashMap<>() : null;
     for (final Rune rune : data.getData().values()) {
       rune.setPlatform(platform.getTag());
       rune.setVersion(data.getVersion());
@@ -1469,7 +1464,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<?> iterator = ids == null ? names.iterator() : ids.iterator();
-    return CloseableIterators.from(new Iterator<Rune>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1500,10 +1495,10 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final Iterable<String> versions = (Iterable<String>) query.get("versions");
     Utilities.checkNotNull(platform, "platform", versions, "versions");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<RuneList>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1515,14 +1510,14 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final String content = get("rune", version, locale);
 
-        final RuneList data = DataObject.fromJSON(RuneList.class, new Function<JsonNode, JsonNode>() {
-          private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+        final RuneList data = DataObject.fromJSON(RuneList.class, new Function<>() {
+          private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
               IncludedDataProcessor.DEFAULT_RUNE_TAGS));
 
           @Override
           public JsonNode apply(final JsonNode tree) {
             if (tree == null) {
-              return tree;
+              return null;
             }
 
             final JsonNode temp = tree.get("data");
@@ -1537,7 +1532,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
               final ObjectNode rune = (ObjectNode) temp.get(runeId);
               rune.set("id", new IntNode(Integer.parseInt(runeId)));
 
-              INCLUDED_DATA_PROCESSOR.apply(rune);
+              includedDataProcessor.apply(rune);
             }
 
             return tree;
@@ -1576,19 +1571,19 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(ids, "ids", names, "names");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
     final Boolean dataById = query.get("dataById") == null ? Boolean.FALSE : (Boolean) query.get("dataById");
 
     final String content = get("summoner", version, locale);
 
-    final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_SUMMONER_SPELL_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final ObjectNode data = (ObjectNode) tree.get("data");
@@ -1597,7 +1592,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode spell : data) {
-          INCLUDED_DATA_PROCESSOR.apply(spell);
+          includedDataProcessor.apply(spell);
           SPELL_PROCESSOR.apply(spell);
 
           if (dataById) {
@@ -1618,7 +1613,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     data.setPlatform(platform.getTag());
     data.setLocale(locale);
     data.setIncludedData(includedData);
-    final Map<String, SummonerSpell> byName = ids == null ? new HashMap<String, SummonerSpell>() : null;
+    final Map<String, SummonerSpell> byName = ids == null ? new HashMap<>() : null;
     for (final SummonerSpell spell : data.getData().values()) {
       spell.setPlatform(platform.getTag());
       spell.setVersion(data.getVersion());
@@ -1631,7 +1626,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     }
 
     final Iterator<?> iterator = ids == null ? names.iterator() : ids.iterator();
-    return CloseableIterators.from(new Iterator<SummonerSpell>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1662,11 +1657,11 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     final Iterable<String> versions = (Iterable<String>) query.get("versions");
     Utilities.checkNotNull(platform, "platform", versions, "versions");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
     final Boolean dataById = query.get("dataById") == null ? Boolean.FALSE : (Boolean) query.get("dataById");
 
     final Iterator<String> iterator = versions.iterator();
-    return CloseableIterators.from(new Iterator<SummonerSpellList>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1678,14 +1673,14 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
         final String content = get("summoner", version, locale);
 
-        final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<JsonNode, JsonNode>() {
-          private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+        final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<>() {
+          private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
               IncludedDataProcessor.DEFAULT_SUMMONER_SPELL_TAGS));
 
           @Override
           public JsonNode apply(final JsonNode tree) {
             if (tree == null) {
-              return tree;
+              return null;
             }
 
             final ObjectNode data = (ObjectNode) tree.get("data");
@@ -1694,7 +1689,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
             }
 
             for (final JsonNode spell : data) {
-              INCLUDED_DATA_PROCESSOR.apply(spell);
+              includedDataProcessor.apply(spell);
               SPELL_PROCESSOR.apply(spell);
 
               if (dataById) {
@@ -1738,7 +1733,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platforms, "platforms");
 
     final Iterator<Platform> iterator = platforms.iterator();
-    return CloseableIterators.from(new Iterator<Versions>() {
+    return CloseableIterators.from(new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
@@ -1836,12 +1831,12 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(id, "id", name, "name");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("mastery", version, locale);
 
-    final Mastery data = DataObject.fromJSON(Mastery.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final Mastery data = DataObject.fromJSON(Mastery.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_MASTERY_TAGS));
 
       @Override
@@ -1860,7 +1855,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final String masteryName = mastery.get("name").asText();
 
           if (id != null && idNode != null && id.intValue() == idNode.asInt() || name != null && name.equals(masteryName)) {
-            INCLUDED_DATA_PROCESSOR.apply(mastery);
+            includedDataProcessor.apply(mastery);
             return mastery;
           }
         }
@@ -1886,18 +1881,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platform, "platform");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("mastery", version, locale);
 
-    final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final MasteryList data = DataObject.fromJSON(MasteryList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_MASTERY_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -1906,7 +1901,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode mastery : temp) {
-          INCLUDED_DATA_PROCESSOR.apply(mastery);
+          includedDataProcessor.apply(mastery);
         }
 
         return tree;
@@ -2057,7 +2052,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
 
     final ReforgedRuneTree data = DataObject.fromJSON(ReforgedRuneTree.class, tree -> {
       if (tree == null) {
-        return tree;
+        return null;
       }
 
       for (final JsonNode path : tree) {
@@ -2109,12 +2104,12 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(id, "id", name, "name");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("rune", version, locale);
 
-    final Rune data = DataObject.fromJSON(Rune.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final Rune data = DataObject.fromJSON(Rune.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_RUNE_TAGS));
 
       @Override
@@ -2137,7 +2132,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           if (id != null && id.intValue() == Integer.parseInt(runeId) || name != null && name.equals(runeName)) {
             rune.set("id", new IntNode(Integer.parseInt(runeId)));
 
-            INCLUDED_DATA_PROCESSOR.apply(rune);
+            includedDataProcessor.apply(rune);
             return rune;
           }
         }
@@ -2163,18 +2158,18 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platform, "platform");
     final String version = (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("rune", version, locale);
 
-    final RuneList data = DataObject.fromJSON(RuneList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final RuneList data = DataObject.fromJSON(RuneList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_RUNE_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final JsonNode temp = tree.get("data");
@@ -2189,7 +2184,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final ObjectNode rune = (ObjectNode) temp.get(runeId);
           rune.set("id", new IntNode(Integer.parseInt(runeId)));
 
-          INCLUDED_DATA_PROCESSOR.apply(rune);
+          includedDataProcessor.apply(rune);
         }
 
         return tree;
@@ -2221,12 +2216,12 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkAtLeastOneNotNull(id, "id", name, "name");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
 
     final String content = get("summoner", version, locale);
 
-    final SummonerSpell data = DataObject.fromJSON(SummonerSpell.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final SummonerSpell data = DataObject.fromJSON(SummonerSpell.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_SUMMONER_SPELL_TAGS));
 
       @Override
@@ -2245,7 +2240,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
           final String spellName = spell.get("name").asText();
 
           if (id != null && idNode != null && id.intValue() == idNode.asInt() || name != null && name.equals(spellName)) {
-            INCLUDED_DATA_PROCESSOR.apply(spell);
+            includedDataProcessor.apply(spell);
             SPELL_PROCESSOR.apply(spell);
             return spell;
           }
@@ -2271,19 +2266,19 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
     Utilities.checkNotNull(platform, "platform");
     final String version = query.get("version") == null ? getCurrentVersion(platform, context) : (String) query.get("version");
     final String locale = query.get("locale") == null ? platform.getDefaultLocale() : (String) query.get("locale");
-    final Set<String> includedData = query.get("includedData") == null ? Collections.<String>emptySet() : (Set<String>) query.get("includedData");
+    final Set<String> includedData = query.get("includedData") == null ? Collections.emptySet() : (Set<String>) query.get("includedData");
     final Boolean dataById = query.get("dataById") == null ? Boolean.FALSE : (Boolean) query.get("dataById");
 
     final String content = get("summoner", version, locale);
 
-    final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<JsonNode, JsonNode>() {
-      private final Function<JsonNode, JsonNode> INCLUDED_DATA_PROCESSOR = new IncludedDataProcessor(Sets.union(includedData,
+    final SummonerSpellList data = DataObject.fromJSON(SummonerSpellList.class, new Function<>() {
+      private final Function<JsonNode, JsonNode> includedDataProcessor = new IncludedDataProcessor(Sets.union(includedData,
           IncludedDataProcessor.DEFAULT_SUMMONER_SPELL_TAGS));
 
       @Override
       public JsonNode apply(final JsonNode tree) {
         if (tree == null) {
-          return tree;
+          return null;
         }
 
         final ObjectNode data = (ObjectNode) tree.get("data");
@@ -2292,7 +2287,7 @@ public class DataDragon extends AbstractLocallyCachedCDN<DataDragon.Request> {
         }
 
         for (final JsonNode spell : data) {
-          INCLUDED_DATA_PROCESSOR.apply(spell);
+          includedDataProcessor.apply(spell);
           SPELL_PROCESSOR.apply(spell);
 
           if (dataById) {

@@ -2,7 +2,6 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -10,6 +9,8 @@ import java.util.Set;
 import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
@@ -30,6 +31,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -47,23 +49,30 @@ public class Season implements Betable, Seasonable, Serializable {
   @Serial
   private static final long serialVersionUID = 3263600626506335102L;
 
-  private final CoverageDepartment coverageDepartment =
-      CoverageDepartment.Scrimmage;
+  //TODO (Abgie) 01.03.2023: Interface
+  private final CoverageDepartment coverageDepartment = CoverageDepartment.Scrimmage;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "coverage_season_id", columnDefinition = "TINYINT UNSIGNED not null")
   private short id;
+
   @Column(name = "season_name", nullable = false, length = 15)
   private String name;
+
   @Column(name = "season_full", length = 25)
   private String fullName;
+
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "season_start", nullable = false)
-  private Calendar start;
+  private Time start;
+
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "season_end", nullable = false)
-  private Calendar end;
+  private Time end;
+
   @OneToMany(mappedBy = "season")
   @ToString.Exclude
   private Set<Stage> stages = new LinkedHashSet<>();
@@ -83,4 +92,5 @@ public class Season implements Betable, Seasonable, Serializable {
   public CoverageDepartment type() {
     return null;
   }
+
 }

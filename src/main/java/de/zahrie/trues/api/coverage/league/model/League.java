@@ -14,7 +14,7 @@ import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.io.request.URLType;
-import de.zahrie.trues.util.util.Time;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -78,7 +78,7 @@ public class League implements Serializable {
 
 
   public Time getAlternative(Playday playday) {
-    final PlaydayScheduler scheduler = new PlaydayScheduleHandler((PlayStage) stage, playday.getId(), getTier()).create();
+    final PlaydayScheduler scheduler = new PlaydayScheduleHandler(stage, playday.getId(), getTier()).create();
     return scheduler.defaultTime();
   }
   public boolean isStarter() {
@@ -86,7 +86,7 @@ public class League implements Serializable {
   }
 
   public String getUrl() {
-    return String.format(URLType.LEAGUE.getUrlName(), ((PrimeSeason) stage.getSeason()).getPrmId(), ((PlayStage) stage).pageId(), prmId);
+    return String.format(URLType.LEAGUE.getUrlName(), ((PrimeSeason) stage.getSeason()).getPrmId(), stage.pageId(), prmId);
   }
 
 }

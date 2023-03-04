@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class SummonerSpells extends CoreData.ListProxy<SummonerSpell> {
+    @Serial
     private static final long serialVersionUID = -1083191958513156896L;
     private Set<String> includedData;
     private String version, locale, type, platform;
@@ -58,13 +60,8 @@ public class SummonerSpells extends CoreData.ListProxy<SummonerSpell> {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

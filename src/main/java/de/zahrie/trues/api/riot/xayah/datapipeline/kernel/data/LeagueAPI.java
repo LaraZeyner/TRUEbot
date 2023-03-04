@@ -53,7 +53,7 @@ public class LeagueAPI extends KernelService {
             }
         }
 
-        League data;
+        final League data;
         if(leagueId == null) {
             final String endpoint = LEAGUE_ENDPOINTS.get(tier) + queue.getTag();
             data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
@@ -61,11 +61,8 @@ public class LeagueAPI extends KernelService {
             final String endpoint = "lol/league/v4/leagues/" + leagueId;
             data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
         }
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return data;
     }
 
     @Get(LeaguePositions.class)
@@ -75,12 +72,8 @@ public class LeagueAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerId, "summonerId");
 
         final String endpoint = "lol/league/v4/entries/by-summoner/" + summonerId;
-        final LeaguePositions data = get(LeaguePositions.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-        if(data == null) {
-            return null;
-        }
 
-        return data;
+      return get(LeaguePositions.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
     }
 
     @SuppressWarnings("unchecked")
@@ -105,40 +98,37 @@ public class LeagueAPI extends KernelService {
         }
 
         final Iterator<?> iterator = leagueIds == null ? queues.iterator() : leagueIds.iterator();
-        return CloseableIterators.from(new Iterator<League>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public League next() {
+            final League data;
+            if (leagueIds == null) {
+              final Queue queue = (Queue) iterator.next();
+
+              if (!Queue.RANKED.contains(queue)) {
+                return null;
+              }
+
+              final String endpoint = LEAGUE_ENDPOINTS.get(tier) + queue.getTag();
+              data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+            } else {
+              final String leagueId = (String) iterator.next();
+              final String endpoint = "lol/league/v4/leagues/" + leagueId;
+              data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
             }
 
-            @Override
-            public League next() {
-                League data;
-                if(leagueIds == null) {
-                    final Queue queue = (Queue)iterator.next();
+            return data;
+          }
 
-                    if(!Queue.RANKED.contains(queue)) {
-                        return null;
-                    }
-
-                    final String endpoint = LEAGUE_ENDPOINTS.get(tier) + queue.getTag();
-                    data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                } else {
-                    final String leagueId = (String)iterator.next();
-                    final String endpoint = "lol/league/v4/leagues/" + leagueId;
-                    data = get(League.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                }
-                if(data == null) {
-                    return null;
-                }
-
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -150,29 +140,25 @@ public class LeagueAPI extends KernelService {
         Utilities.checkNotNull(platform, "platform", summonerIds, "summonerIds");
 
         final Iterator<String> iterator = summonerIds.iterator();
-        return CloseableIterators.from(new Iterator<LeaguePositions>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-            @Override
-            public LeaguePositions next() {
-                final String summonerId = iterator.next();
+          @Override
+          public LeaguePositions next() {
+            final String summonerId = iterator.next();
 
-                final String endpoint = "lol/league/v4/entries/by-summoner/" + summonerId;
-                final LeaguePositions data = get(LeaguePositions.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
-                if(data == null) {
-                    return null;
-                }
+            final String endpoint = "lol/league/v4/entries/by-summoner/" + summonerId;
 
-                return data;
-            }
+            return get(LeaguePositions.class, endpoint, ImmutableMap.of("platform", platform.getTag()));
+          }
 
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 }

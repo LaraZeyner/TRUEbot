@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.joda.time.Duration;
@@ -7,6 +8,7 @@ import org.joda.time.Duration;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Event extends CoreData {
+    @Serial
     private static final long serialVersionUID = -7302365844977796491L;
     private String ascensionType, buildingType, capturedPoint, laneType, levelUpType, monsterSubType, monsterType, turretType, type, wardType;
     private List<Integer> assistingParticipants;
@@ -138,13 +140,8 @@ public class Event extends CoreData {
             return false;
         }
         if(wardType == null) {
-            if(other.wardType != null) {
-                return false;
-            }
-        } else if(!wardType.equals(other.wardType)) {
-            return false;
-        }
-        return true;
+          return other.wardType == null;
+        } else return wardType.equals(other.wardType);
     }
 
     /**

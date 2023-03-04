@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class League extends CoreData.ListProxy<LeagueEntry> {
+    @Serial
     private static final long serialVersionUID = -238522505205131178L;
     private String name, id, platform, queue, tier;
 
@@ -55,13 +58,8 @@ public class League extends CoreData.ListProxy<LeagueEntry> {
             return false;
         }
         if(tier == null) {
-            if(other.tier != null) {
-                return false;
-            }
-        } else if(!tier.equals(other.tier)) {
-            return false;
-        }
-        return true;
+          return other.tier == null;
+        } else return tier.equals(other.tier);
     }
 
     /**

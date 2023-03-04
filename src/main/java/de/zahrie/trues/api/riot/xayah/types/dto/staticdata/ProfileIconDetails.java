@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ProfileIconDetails extends DataObject {
+    @Serial
     private static final long serialVersionUID = -2126432456061661599L;
     private long id;
     private Image image;
@@ -49,13 +52,8 @@ public class ProfileIconDetails extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

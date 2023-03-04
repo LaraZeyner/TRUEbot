@@ -14,7 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 
 public abstract class ChampionRotations {
-    public static class Builder {
+    public static final class Builder {
         private final Iterable<Platform> platforms;
         private boolean streaming = false;
 

@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class CurrentGameInfo extends DataObject {
+    @Serial
     private static final long serialVersionUID = 8404258577980252927L;
     private List<BannedChampion> bannedChampions;
     private long gameId, gameStartTime, mapId, gameLength, gameQueueConfigId;
@@ -82,13 +84,8 @@ public class CurrentGameInfo extends DataObject {
             return false;
         }
         if(summonerId == null) {
-            if(other.summonerId != null) {
-                return false;
-            }
-        } else if(!summonerId.equals(other.summonerId)) {
-            return false;
-        }
-        return true;
+          return other.summonerId == null;
+        } else return summonerId.equals(other.summonerId);
     }
 
     /**

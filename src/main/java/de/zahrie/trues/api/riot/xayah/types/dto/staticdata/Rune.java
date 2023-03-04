@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Rune extends DataObject {
+    @Serial
     private static final long serialVersionUID = 2820800997497722091L;
     private int id;
     private Image image;
@@ -105,13 +107,8 @@ public class Rune extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

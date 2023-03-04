@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class ChampionList extends DataObject {
+    @Serial
     private static final long serialVersionUID = -6473883697778009202L;
     private Map<String, Champion> data;
     private boolean dataById;
@@ -78,13 +80,8 @@ public class ChampionList extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

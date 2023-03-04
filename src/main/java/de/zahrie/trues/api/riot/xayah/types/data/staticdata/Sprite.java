@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Sprite extends CoreData {
+    @Serial
     private static final long serialVersionUID = -1150310890474962226L;
     private String full, version;
     private int x, y, width, height;
@@ -42,10 +45,7 @@ public class Sprite extends CoreData {
         if(x != other.x) {
             return false;
         }
-        if(y != other.y) {
-            return false;
-        }
-        return true;
+      return y == other.y;
     }
 
     /**

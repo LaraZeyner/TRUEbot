@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.league;
 
+import java.io.Serial;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import de.zahrie.trues.api.riot.xayah.types.common.Division;
@@ -12,6 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class LeagueEntry extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.league.LeagueEntry> implements Comparable<LeagueEntry> {
+    @Serial
     private static final long serialVersionUID = -8320702451565649681L;
 
     private final Supplier<League> league = Suppliers.memoize(() -> {

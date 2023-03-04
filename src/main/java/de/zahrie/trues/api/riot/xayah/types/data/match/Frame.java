@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.match;
 
+import java.io.Serial;
 import java.util.Map;
 
 import org.joda.time.Duration;
@@ -7,6 +8,7 @@ import org.joda.time.Duration;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Frame extends CoreData.ListProxy<Event> {
+    @Serial
     private static final long serialVersionUID = -2557460148105527544L;
     private Map<Integer, ParticipantFrame> participantFrames;
     private Duration timestamp;
@@ -39,13 +41,8 @@ public class Frame extends CoreData.ListProxy<Event> {
             return false;
         }
         if(timestamp == null) {
-            if(other.timestamp != null) {
-                return false;
-            }
-        } else if(!timestamp.equals(other.timestamp)) {
-            return false;
-        }
-        return true;
+          return other.timestamp == null;
+        } else return timestamp.equals(other.timestamp);
     }
 
     /**

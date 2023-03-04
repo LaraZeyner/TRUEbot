@@ -7,7 +7,7 @@ import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
 import de.zahrie.trues.api.discord.builder.string.StringCreator;
 import de.zahrie.trues.api.discord.builder.embed.EmbedCreator;
 import de.zahrie.trues.api.discord.builder.string.StringQueryBuilder;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 
 /**
  * Created by Lara on 12.02.2023 for TRUEbot

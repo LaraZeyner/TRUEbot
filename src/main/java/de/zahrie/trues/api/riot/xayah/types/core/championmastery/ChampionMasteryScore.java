@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.championmastery;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.base.Supplier;
@@ -14,7 +14,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class ChampionMasteryScore extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore> implements Comparable<ChampionMasteryScore> {
-    public static class Builder {
+    public static final class Builder {
         private final Summoner summoner;
 
         private Builder(final Summoner summoner) {
@@ -30,6 +30,7 @@ public class ChampionMasteryScore extends GhostObject<de.zahrie.trues.api.riot.x
     }
 
     public static final String CHAMPION_MASTERY_SCORE_LOAD_GROUP = "champion-mastery-score";
+    @Serial
     private static final long serialVersionUID = 5794183951997021894L;
 
     public static Builder forSummoner(final Summoner summoner) {
@@ -62,9 +63,7 @@ public class ChampionMasteryScore extends GhostObject<de.zahrie.trues.api.riot.x
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            CHAMPION_MASTERY_SCORE_LOAD_GROUP
-        });
+        return List.of(CHAMPION_MASTERY_SCORE_LOAD_GROUP);
     }
 
     public Platform getPlatform() {
@@ -89,24 +88,20 @@ public class ChampionMasteryScore extends GhostObject<de.zahrie.trues.api.riot.x
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case CHAMPION_MASTERY_SCORE_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getSummonerId() != null) {
-                    builder.put("summonerId", coreData.getSummonerId());
-                }
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(CHAMPION_MASTERY_SCORE_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getSummonerId() != null) {
+          builder.put("summonerId", coreData.getSummonerId());
         }
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteryScore.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+      }
     }
 }

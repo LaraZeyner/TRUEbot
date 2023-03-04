@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Realm extends DataObject {
+    @Serial
     private static final long serialVersionUID = 56986044820906047L;
     private String lg, dd, l, store, v, cdn, css, platform;
     private Map<String, String> n;
@@ -86,13 +88,8 @@ public class Realm extends DataObject {
             return false;
         }
         if(v == null) {
-            if(other.v != null) {
-                return false;
-            }
-        } else if(!v.equals(other.v)) {
-            return false;
-        }
-        return true;
+          return other.v == null;
+        } else return v.equals(other.v);
     }
 
     /**

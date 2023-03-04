@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -43,7 +43,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.api.riot.xayah.types.data.match.MatchReference;
 
 public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.match.Match> {
-    public static class Builder {
+    public static final class Builder {
         private final long id;
         private Platform platform;
         private String tournamentCode;
@@ -85,7 +85,8 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
         }
     }
 
-    public class Participant extends de.zahrie.trues.api.riot.xayah.types.core.match.Participant {
+    public final class Participant extends de.zahrie.trues.api.riot.xayah.types.core.match.Participant {
+        @Serial
         private static final long serialVersionUID = -4802669460954679635L;
 
         private final Supplier<Champion> champion = Suppliers.memoize(() -> {
@@ -95,7 +96,7 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
             Champion.Builder builder = Champion.withId(coreData.getChampionId()).withPlatform(Platform.withTag(coreData.getCurrentPlatform()));
             if(coreData.getVersion() != null) {
                 final String version = Versions.withPlatform(Platform.withTag(coreData.getCurrentPlatform())).get().getBestMatch(coreData.getVersion());
-                builder = builder.withVersion(version);
+              builder.withVersion(version);
             }
             return builder.get();
         });
@@ -300,7 +301,8 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
         }
     }
 
-    public class Team extends de.zahrie.trues.api.riot.xayah.types.core.match.Team {
+    public final class Team extends de.zahrie.trues.api.riot.xayah.types.core.match.Team {
+        @Serial
         private static final long serialVersionUID = -5787154563875265507L;
 
         private final Supplier<SearchableList<Champion>> bans = Suppliers.memoize(() -> {
@@ -417,6 +419,7 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     }
 
     public static final String MATCH_LOAD_GROUP = "match";
+    @Serial
     private static final long serialVersionUID = -9106364274355437548L;
 
     private static void replaceData(final de.zahrie.trues.api.riot.xayah.types.data.match.Participant from,
@@ -484,56 +487,57 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
     private final boolean fromReference;
 
     private final Supplier<SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant>> participants =
-        Suppliers.memoize(new Supplier<SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant>>() {
-            @Override
-            public SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> get() {
-                if(!fromReference) {
-                    load(MATCH_LOAD_GROUP);
-                    if(coreData.getParticipants() == null) {
+        Suppliers.memoize(new Supplier<>() {
+          @Override
+          public SearchableList<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> get() {
+            if (!fromReference) {
+              load(MATCH_LOAD_GROUP);
+              if (coreData.getParticipants() == null) {
+                return null;
+              }
+              final List<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> participants = new ArrayList<>(coreData.getParticipants().size());
+              for (final de.zahrie.trues.api.riot.xayah.types.data.match.Participant participant : coreData.getParticipants()) {
+                participants.add(new Participant(participant));
+              }
+              return SearchableLists.unmodifiableFrom(participants);
+            } else {
+              if (coreData.getParticipants() == null) {
+                return null;
+              }
+              final CloseableIterator<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> iterator =
+                  new CloseableIterator<>() {
+                    private ListIterator<de.zahrie.trues.api.riot.xayah.types.data.match.Participant> iterator = coreData.getParticipants().listIterator();
+
+                    @Override
+                    public void close() {
+                    }
+
+                    @Override
+                    public boolean hasNext() {
+                      if (iterator.hasNext()) {
+                        return true;
+                      }
+                      load(MATCH_LOAD_GROUP);
+                      iterator = coreData.getParticipants().listIterator(iterator.nextIndex());
+                      return iterator.hasNext();
+                    }
+
+                    @Override
+                    public Participant next() {
+                      if (!hasNext()) {
                         return null;
+                      }
+                      return new Participant(iterator.next());
                     }
-                    final List<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> participants = new ArrayList<>(coreData.getParticipants().size());
-                    for(final de.zahrie.trues.api.riot.xayah.types.data.match.Participant participant : coreData.getParticipants()) {
-                        participants.add(new Participant(participant));
+
+                    @Override
+                    public void remove() {
+                      throw new UnsupportedOperationException();
                     }
-                    return SearchableLists.unmodifiableFrom(participants);
-                } else {
-                    if(coreData.getParticipants() == null) {
-                        return null;
-                    }
-                    final CloseableIterator<de.zahrie.trues.api.riot.xayah.types.core.match.Participant> iterator =
-                        new CloseableIterator<de.zahrie.trues.api.riot.xayah.types.core.match.Participant>() {
-                            private ListIterator<de.zahrie.trues.api.riot.xayah.types.data.match.Participant> iterator = coreData.getParticipants().listIterator();
-
-                            @Override
-                            public void close() {}
-
-                            @Override
-                            public boolean hasNext() {
-                                if(iterator.hasNext()) {
-                                    return true;
-                                }
-                                load(MATCH_LOAD_GROUP);
-                                iterator = coreData.getParticipants().listIterator(iterator.nextIndex());
-                                return iterator.hasNext();
-                            }
-
-                            @Override
-                            public Participant next() {
-                                if(!hasNext()) {
-                                    return null;
-                                }
-                                return new Participant(iterator.next());
-                            }
-
-                            @Override
-                            public void remove() {
-                                throw new UnsupportedOperationException();
-                            }
-                        };
-                    return SearchableLists.unmodifiableFrom(new LazyList<>(iterator));
-                }
+                  };
+              return SearchableLists.unmodifiableFrom(new LazyList<>(iterator));
             }
+          }
         });
 
     private final Supplier<de.zahrie.trues.api.riot.xayah.types.core.match.Team> redTeam =
@@ -594,9 +598,7 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            MATCH_LOAD_GROUP
-        });
+        return List.of(MATCH_LOAD_GROUP);
     }
 
     public Map getMap() {
@@ -675,47 +677,42 @@ public class Match extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case MATCH_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getId() != 0L) {
-                    builder.put("matchId", coreData.getId());
-                }
-                if(coreData.getTournamentCode() != null) {
-                    builder.put("tournamentCode", coreData.getTournamentCode());
-                }
-
-                if(!fromReference) {
-                    final de.zahrie.trues.api.riot.xayah.types.data.match.Match data =
-                        Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.Match.class, builder.build());
-                    if(data != null) {
-                        coreData = data;
-                    }
-                } else {
-                    final de.zahrie.trues.api.riot.xayah.types.data.match.Match data =
-                        Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.Match.class, builder.build());
-                    if(data != null) {
-                        final de.zahrie.trues.api.riot.xayah.types.data.match.Participant fromReference = coreData.getParticipants().get(0);
-                        final Iterator<de.zahrie.trues.api.riot.xayah.types.data.match.Participant> iterator = data.getParticipants().iterator();
-                        while(iterator.hasNext()) {
-                            final de.zahrie.trues.api.riot.xayah.types.data.match.Participant participant = iterator.next();
-                            if(participant.getCurrentAccountId().equals(fromReference.getCurrentAccountId())) {
-                                replaceData(participant, fromReference);
-                                iterator.remove();
-                                break;
-                            }
-                        }
-                        data.getParticipants().add(0, fromReference);
-                        coreData = data;
-                    }
-                }
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(MATCH_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getId() != 0L) {
+          builder.put("matchId", coreData.getId());
+        }
+        if (coreData.getTournamentCode() != null) {
+          builder.put("tournamentCode", coreData.getTournamentCode());
+        }
+        if (!fromReference) {
+          final de.zahrie.trues.api.riot.xayah.types.data.match.Match data =
+              Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.Match.class, builder.build());
+          if (data != null) {
+            coreData = data;
+          }
+        } else {
+          final de.zahrie.trues.api.riot.xayah.types.data.match.Match data =
+              Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.match.Match.class, builder.build());
+          if (data != null) {
+            final de.zahrie.trues.api.riot.xayah.types.data.match.Participant fromReference = coreData.getParticipants().get(0);
+            final Iterator<de.zahrie.trues.api.riot.xayah.types.data.match.Participant> iterator = data.getParticipants().iterator();
+            while (iterator.hasNext()) {
+              final de.zahrie.trues.api.riot.xayah.types.data.match.Participant participant = iterator.next();
+              if (participant.getCurrentAccountId().equals(fromReference.getCurrentAccountId())) {
+                replaceData(participant, fromReference);
+                iterator.remove();
+                break;
+              }
+            }
+            data.getParticipants().add(0, fromReference);
+            coreData = data;
+          }
+        }
+      }
     }
 }

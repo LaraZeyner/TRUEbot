@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class ParticipantFrame extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.match.ParticipantFrame> {
+    @Serial
     private static final long serialVersionUID = -8233781937537156206L;
 
     private final Supplier<Position> position = Suppliers.memoize(() -> {

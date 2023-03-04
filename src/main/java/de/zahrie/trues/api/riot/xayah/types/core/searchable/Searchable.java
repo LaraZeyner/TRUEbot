@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Searchable {
-    public Class<?>[] value();
+    Class<?>[] value();
 }

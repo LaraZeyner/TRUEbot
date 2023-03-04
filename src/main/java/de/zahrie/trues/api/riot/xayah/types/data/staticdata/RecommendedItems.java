@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class RecommendedItems extends CoreData.ListProxy<ItemSet> {
+    @Serial
     private static final long serialVersionUID = 3130193939924356290L;
     private boolean priority;
     private String title, type, map, mode;
@@ -52,13 +55,8 @@ public class RecommendedItems extends CoreData.ListProxy<ItemSet> {
             return false;
         }
         if(type == null) {
-            if(other.type != null) {
-                return false;
-            }
-        } else if(!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+          return other.type == null;
+        } else return type.equals(other.type);
     }
 
     /**

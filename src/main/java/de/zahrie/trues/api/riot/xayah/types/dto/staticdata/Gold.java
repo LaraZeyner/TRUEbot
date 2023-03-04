@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Gold extends DataObject {
+    @Serial
     private static final long serialVersionUID = 6907973454310387830L;
     private boolean purchasable;
     private int sell, total, base;
@@ -32,10 +35,7 @@ public class Gold extends DataObject {
         if(sell != other.sell) {
             return false;
         }
-        if(total != other.total) {
-            return false;
-        }
-        return true;
+      return total == other.total;
     }
 
     /**

@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
-import java.util.Arrays;
+import java.io.Serial;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
@@ -10,7 +10,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Region;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 
 public class LanguageStrings extends GhostObject.MapProxy<String, String, String, String, de.zahrie.trues.api.riot.xayah.types.data.staticdata.LanguageStrings> {
-    public static class Builder {
+    public static final class Builder {
         private Platform platform;
         private String version, locale;
 
@@ -61,6 +61,7 @@ public class LanguageStrings extends GhostObject.MapProxy<String, String, String
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -513204164367714008L;
 
     public static LanguageStrings get() {
@@ -97,9 +98,7 @@ public class LanguageStrings extends GhostObject.MapProxy<String, String, String
 
     @Override
     protected List<String> getLoadGroups() {
-        return Arrays.asList(new String[] {
-            MAP_PROXY_LOAD_GROUP
-        });
+        return List.of(MAP_PROXY_LOAD_GROUP);
     }
 
     public String getLocale() {
@@ -127,28 +126,24 @@ public class LanguageStrings extends GhostObject.MapProxy<String, String, String
 
     @Override
     protected void loadCoreData(final String group) {
-        ImmutableMap.Builder<String, Object> builder;
-        switch(group) {
-            case MAP_PROXY_LOAD_GROUP:
-                builder = ImmutableMap.builder();
-                if(coreData.getPlatform() != null) {
-                    builder.put("platform", Platform.withTag(coreData.getPlatform()));
-                }
-                if(coreData.getVersion() != null) {
-                    builder.put("version", coreData.getVersion());
-                }
-                if(coreData.getLocale() != null) {
-                    builder.put("locale", coreData.getLocale());
-                }
-                final de.zahrie.trues.api.riot.xayah.types.data.staticdata.LanguageStrings data =
-                    Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.LanguageStrings.class, builder.build());
-                if(data != null) {
-                    coreData = data;
-                }
-                loadMapProxyData();
-                break;
-            default:
-                break;
+        final ImmutableMap.Builder<String, Object> builder;
+      if (group.equals(MAP_PROXY_LOAD_GROUP)) {
+        builder = ImmutableMap.builder();
+        if (coreData.getPlatform() != null) {
+          builder.put("platform", Platform.withTag(coreData.getPlatform()));
         }
+        if (coreData.getVersion() != null) {
+          builder.put("version", coreData.getVersion());
+        }
+        if (coreData.getLocale() != null) {
+          builder.put("locale", coreData.getLocale());
+        }
+        final de.zahrie.trues.api.riot.xayah.types.data.staticdata.LanguageStrings data =
+            Orianna.getSettings().getPipeline().get(de.zahrie.trues.api.riot.xayah.types.data.staticdata.LanguageStrings.class, builder.build());
+        if (data != null) {
+          coreData = data;
+        }
+        loadMapProxyData();
+      }
     }
 }

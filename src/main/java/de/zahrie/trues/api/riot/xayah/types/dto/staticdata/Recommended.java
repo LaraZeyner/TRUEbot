@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Recommended extends DataObject {
+    @Serial
     private static final long serialVersionUID = -1289817351999848211L;
     private List<Block> blocks;
     private String map, champion, title, mode, type;
@@ -65,13 +67,8 @@ public class Recommended extends DataObject {
             return false;
         }
         if(type == null) {
-            if(other.type != null) {
-                return false;
-            }
-        } else if(!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+          return other.type == null;
+        } else return type.equals(other.type);
     }
 
     /**

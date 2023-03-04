@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.data.spectator;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -8,6 +9,7 @@ import org.joda.time.Duration;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class FeaturedMatch extends CoreData {
+    @Serial
     private static final long serialVersionUID = -8433513503266730183L;
     private Team blueTeam, redTeam;
     private DateTime creationTime;
@@ -95,13 +97,8 @@ public class FeaturedMatch extends CoreData {
             return false;
         }
         if(type == null) {
-            if(other.type != null) {
-                return false;
-            }
-        } else if(!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+          return other.type == null;
+        } else return type.equals(other.type);
     }
 
     /**

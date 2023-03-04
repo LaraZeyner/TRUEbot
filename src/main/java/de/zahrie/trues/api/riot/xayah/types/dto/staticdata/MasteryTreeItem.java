@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MasteryTreeItem extends DataObject {
+    @Serial
     private static final long serialVersionUID = -8565981768467087946L;
     private int masteryId;
     private String prereq;
@@ -27,13 +30,8 @@ public class MasteryTreeItem extends DataObject {
             return false;
         }
         if(prereq == null) {
-            if(other.prereq != null) {
-                return false;
-            }
-        } else if(!prereq.equals(other.prereq)) {
-            return false;
-        }
-        return true;
+          return other.prereq == null;
+        } else return prereq.equals(other.prereq);
     }
 
     /**

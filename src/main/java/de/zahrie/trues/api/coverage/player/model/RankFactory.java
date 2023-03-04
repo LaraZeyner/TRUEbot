@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.player.model;
 
 import de.zahrie.trues.api.riot.xayah.types.common.Division;
 import de.zahrie.trues.api.riot.xayah.types.common.Tier;
-import de.zahrie.trues.util.database.Database;
+import de.zahrie.trues.database.Database;
 
 /**
  * Created by Lara on 23.02.2023 for TRUEbot

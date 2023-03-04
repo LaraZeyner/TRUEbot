@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class LanguageStrings extends DataObject {
+    @Serial
     private static final long serialVersionUID = -4892575797436164790L;
     private Map<String, String> data;
     private String version, platform, locale, type;
@@ -54,13 +56,8 @@ public class LanguageStrings extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

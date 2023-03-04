@@ -168,10 +168,10 @@ public class SpectatorTransformer extends AbstractDataTransformer {
         game.setBannedChampions(bans);
         game.setGameId(item.getId());
         game.setGameLength(item.getDuration().getMillis());
-        game.setGameMode(item.getMode().toString());
+        game.setGameMode(item.getMode());
         game.setGameQueueConfigId(item.getQueue());
         game.setGameStartTime(item.getCreationTime().getMillis());
-        game.setGameType(item.getType().toString());
+        game.setGameType(item.getType());
         game.setMapId(item.getMap());
         final Observer observer = new Observer();
         observer.setEncryptionKey(item.getObserverEncryptionKey());
@@ -272,10 +272,10 @@ public class SpectatorTransformer extends AbstractDataTransformer {
         game.setBannedChampions(bans);
         game.setGameId(item.getId());
         game.setGameLength(item.getDuration().getMillis());
-        game.setGameMode(item.getMode().toString());
+        game.setGameMode(item.getMode());
         game.setGameQueueConfigId(item.getQueue());
         game.setGameStartTime(item.getCreationTime().getMillis());
-        game.setGameType(item.getType().toString());
+        game.setGameType(item.getType());
         game.setMapId(item.getMap());
         final Observer observer = new Observer();
         observer.setEncryptionKey(item.getObserverEncryptionKey());

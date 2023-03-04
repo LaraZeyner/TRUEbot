@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.data.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Series extends CoreData {
+    @Serial
     private static final long serialVersionUID = -808103453588557335L;
     private String progress;
     private int wins, losses, winsRequired;
@@ -32,10 +35,7 @@ public class Series extends CoreData {
         if(winsRequired != other.winsRequired) {
             return false;
         }
-        if(wins != other.wins) {
-            return false;
-        }
-        return true;
+      return wins == other.wins;
     }
 
     /**

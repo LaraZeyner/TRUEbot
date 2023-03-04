@@ -1,10 +1,12 @@
 package de.zahrie.trues.api.riot.xayah.types.data.status;
 
+import java.io.Serial;
 import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;
 
 public class Service extends CoreData {
+    @Serial
     private static final long serialVersionUID = -1389985537061774240L;
     private List<Incident> incidents;
     private String status, name;
@@ -36,13 +38,8 @@ public class Service extends CoreData {
             return false;
         }
         if(status == null) {
-            if(other.status != null) {
-                return false;
-            }
-        } else if(!status.equals(other.status)) {
-            return false;
-        }
-        return true;
+          return other.status == null;
+        } else return status.equals(other.status);
     }
 
     /**

@@ -24,5 +24,5 @@ public enum GameMode {
         TUTORIAL_MODULE_1,
         TUTORIAL_MODULE_2,
         TUTORIAL_MODULE_3,
-        URF;
+        URF
 }

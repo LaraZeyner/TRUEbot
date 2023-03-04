@@ -1,6 +1,5 @@
-package de.zahrie.trues.util.database;
+package de.zahrie.trues.database;
 
-import lombok.val;
 import org.hibernate.query.Query;
 
 /**
@@ -9,7 +8,7 @@ import org.hibernate.query.Query;
 public class QueryFactory {
   static <T> T performSingle(Class<T> entityClass, String[] params, Object[] values, String subquery) {
     try {
-      val query = performWithSubquery(entityClass, params, values, subquery);
+      final var query = performWithSubquery(entityClass, params, values, subquery);
       return query.setMaxResults(1).getSingleResult();
     } catch (ClassCastException ex) {
       ex.printStackTrace();
@@ -18,7 +17,7 @@ public class QueryFactory {
   }
 
   static Query<Object[]> performWithSubquery(String[] params, Object[] values, String queryName) {
-    val query = Database.connection().session().getNamedQuery(queryName);
+    final var query = Database.connection().session().getNamedQuery(queryName);
     for (int i = 0; i < params.length; i++) {
       final String param = params[i];
       final Object value = values[i];
@@ -28,7 +27,7 @@ public class QueryFactory {
   }
 
   static <T> Query<T> performWithSubquery(Class<T> entityClass, String[] params, Object[] values, String subquery) {
-    val entityClassName = EntityFactory.getName(entityClass);
+    final var entityClassName = EntityFactory.getName(entityClass);
     return (Query<T>) performWithSubquery(params, values, entityClassName + "." + subquery);
   }
 }

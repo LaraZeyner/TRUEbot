@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.status;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import com.google.common.base.Suppliers;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class Message extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.status.Message> {
+    @Serial
     private static final long serialVersionUID = 4358755936137676315L;
 
     private final Supplier<Map<String, Translation>> translations = Suppliers.memoize(() -> {

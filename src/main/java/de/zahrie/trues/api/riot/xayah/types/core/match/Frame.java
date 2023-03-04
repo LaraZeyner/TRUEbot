@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.xayah.types.core.match;
 
+import java.io.Serial;
 import java.util.Map;
 
 import org.joda.time.Duration;
@@ -8,6 +9,7 @@ import com.google.common.base.Function;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public abstract class Frame extends OriannaObject.ListProxy<Event, de.zahrie.trues.api.riot.xayah.types.data.match.Event, de.zahrie.trues.api.riot.xayah.types.data.match.Frame> implements Comparable<Frame> {
+    @Serial
     private static final long serialVersionUID = 460862393234334223L;
 
     public Frame(final de.zahrie.trues.api.riot.xayah.types.data.match.Frame coreData) {

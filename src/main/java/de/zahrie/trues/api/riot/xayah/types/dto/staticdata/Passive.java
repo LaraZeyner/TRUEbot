@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class Passive extends DataObject {
+    @Serial
     private static final long serialVersionUID = -4720124346749130538L;
     private Image image;
     private String sanitizedDescription, name, description;
@@ -45,13 +48,8 @@ public class Passive extends DataObject {
             return false;
         }
         if(sanitizedDescription == null) {
-            if(other.sanitizedDescription != null) {
-                return false;
-            }
-        } else if(!sanitizedDescription.equals(other.sanitizedDescription)) {
-            return false;
-        }
-        return true;
+          return other.sanitizedDescription == null;
+        } else return sanitizedDescription.equals(other.sanitizedDescription);
     }
 
     /**

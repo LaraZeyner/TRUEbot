@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.league;
 
+import java.io.Serial;
+
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class MiniSeries extends DataObject {
+    @Serial
     private static final long serialVersionUID = 6265349801098708717L;
     private String progress;
     private int wins, losses, target;
@@ -36,10 +39,7 @@ public class MiniSeries extends DataObject {
         if(target != other.target) {
             return false;
         }
-        if(wins != other.wins) {
-            return false;
-        }
-        return true;
+      return wins == other.wins;
     }
 
     /**

@@ -2,10 +2,11 @@ package de.zahrie.trues.models.riot.matchhistory;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -40,8 +42,9 @@ public class Game implements Serializable {
   private String id;
 
   @Temporal(TemporalType.TIMESTAMP)
+  @Type(TimeCoverter.class)
   @Column(name = "start_time", nullable = false)
-  private Calendar start;
+  private Time start;
 
   @Column(name = "duration", columnDefinition = "SMALLINT UNSIGNED not null")
   private int durationInSeconds;

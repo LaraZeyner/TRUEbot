@@ -1,11 +1,13 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
 import java.util.Map;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 
 public class SummonerSpellList extends DataObject {
+    @Serial
     private static final long serialVersionUID = -3159860366441897899L;
     private Map<String, SummonerSpell> data;
     private Set<String> includedData;
@@ -63,13 +65,8 @@ public class SummonerSpellList extends DataObject {
             return false;
         }
         if(version == null) {
-            if(other.version != null) {
-                return false;
-            }
-        } else if(!version.equals(other.version)) {
-            return false;
-        }
-        return true;
+          return other.version == null;
+        } else return version.equals(other.version);
     }
 
     /**

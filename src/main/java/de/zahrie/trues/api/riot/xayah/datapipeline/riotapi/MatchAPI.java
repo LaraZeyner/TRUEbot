@@ -47,37 +47,37 @@ public class MatchAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<Match>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public Match next() {
+            final Number matchId = iterator.next();
+
+            final String endpoint;
+            final Match data;
+            if (tournamentCode == null) {
+              endpoint = "lol/match/v4/matches/" + matchId;
+              data = get(Match.class, endpoint, platform, "lol/match/v4/matches/matchId");
+            } else {
+              endpoint = "lol/match/v4/matches/" + matchId + "/by-tournament-code/" + tournamentCode;
+              data = get(Match.class, endpoint, platform, "lol/match/v4/matches/matchId/by-tournament-code/tournamentCode");
+            }
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public Match next() {
-                final Number matchId = iterator.next();
+            data.setTournamentCode(tournamentCode);
+            return data;
+          }
 
-                String endpoint;
-                Match data;
-                if(tournamentCode == null) {
-                    endpoint = "lol/match/v4/matches/" + matchId;
-                    data = get(Match.class, endpoint, platform, "lol/match/v4/matches/matchId");
-                } else {
-                    endpoint = "lol/match/v4/matches/" + matchId + "/by-tournament-code/" + tournamentCode;
-                    data = get(Match.class, endpoint, platform, "lol/match/v4/matches/matchId/by-tournament-code/tournamentCode");
-                }
-                if(data == null) {
-                    return null;
-                }
-
-                data.setTournamentCode(tournamentCode);
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -86,9 +86,9 @@ public class MatchAPI extends RiotAPIService {
     public CloseableIterator<Matchlist> getManyMatchlist(final Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final Iterable<String> accountIds = (Iterable<String>)query.get("accountIds");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         Number beginTime = (Number)query.get("beginTime");
         Number endTime = (Number)query.get("endTime");
         Number beginIndex = (Number)query.get("beginIndex");
@@ -152,59 +152,59 @@ public class MatchAPI extends RiotAPIService {
         final Number bIndex = beginIndex;
         final Number eIndex = endIndex;
         final Iterator<String> iterator = accountIds.iterator();
-        return CloseableIterators.from(new Iterator<Matchlist>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public Matchlist next() {
+            final String accountId = iterator.next();
+            final String endpoint = "lol/match/v4/matchlists/by-account/" + accountId;
+            final Matchlist data = get(Matchlist.class, endpoint, platform, parameters, "lol/match/v4/matchlists/by-account/accountId");
+            if (data == null) {
+              final Matchlist empty = new Matchlist();
+              empty.setMatches(Collections.emptyList());
+              empty.setPlatform(platform.getTag());
+              empty.setAccountId(accountId);
+              empty.setQueues(queues);
+              empty.setSeasons(seasons);
+              empty.setChampions(champions);
+              empty.setStartTime(bTime == null ? 0L : bTime.longValue());
+              empty.setEndTime(eTime == null ? 0L : eTime.longValue());
+              empty.setStartIndex(bIndex == null ? 0 : bIndex.intValue());
+              empty.setEndIndex(eIndex == null ? 0 : eIndex.intValue());
+              empty.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
+              empty.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
+              empty.setHistoryLength(HISTORY_LENGTH);
+              return empty;
             }
 
-            @Override
-            public Matchlist next() {
-                final String accountId = iterator.next();
-                final String endpoint = "lol/match/v4/matchlists/by-account/" + accountId;
-                final Matchlist data = get(Matchlist.class, endpoint, platform, parameters, "lol/match/v4/matchlists/by-account/accountId");
-                if(data == null) {
-                    final Matchlist empty = new Matchlist();
-                    empty.setMatches(Collections.<MatchReference> emptyList());
-                    empty.setPlatform(platform.getTag());
-                    empty.setAccountId(accountId);
-                    empty.setQueues(queues);
-                    empty.setSeasons(seasons);
-                    empty.setChampions(champions);
-                    empty.setStartTime(bTime == null ? 0L : bTime.longValue());
-                    empty.setEndTime(eTime == null ? 0L : eTime.longValue());
-                    empty.setStartIndex(bIndex == null ? 0 : bIndex.intValue());
-                    empty.setEndIndex(eIndex == null ? 0 : eIndex.intValue());
-                    empty.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
-                    empty.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
-                    empty.setHistoryLength(HISTORY_LENGTH);
-                    return empty;
-                }
-
-                if(bTime != null) {
-                    data.setStartTime(bTime.longValue());
-                }
-                if(eTime != null) {
-                    data.setEndTime(eTime.longValue());
-                }
-                data.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
-                data.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
-                data.setHistoryLength(HISTORY_LENGTH);
-                data.setQueues(queues);
-                data.setSeasons(seasons);
-                data.setChampions(champions);
-                data.setPlatform(platform.getTag());
-                data.setAccountId(accountId);
-                for(final MatchReference reference : data.getMatches()) {
-                    reference.setAccountId(accountId);
-                }
-                return data;
+            if (bTime != null) {
+              data.setStartTime(bTime.longValue());
             }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
+            if (eTime != null) {
+              data.setEndTime(eTime.longValue());
             }
+            data.setMaxSize(bTime != null && eTime != null ? Integer.MAX_VALUE : MAX_MATCH_INDEX_DIFFERENCE);
+            data.setMaxTimeRange(eTime != null ? Long.MAX_VALUE : ONE_WEEK_IN_MILLISECONDS);
+            data.setHistoryLength(HISTORY_LENGTH);
+            data.setQueues(queues);
+            data.setSeasons(seasons);
+            data.setChampions(champions);
+            data.setPlatform(platform.getTag());
+            data.setAccountId(accountId);
+            for (final MatchReference reference : data.getMatches()) {
+              reference.setAccountId(accountId);
+            }
+            return data;
+          }
+
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -216,31 +216,31 @@ public class MatchAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", matchIds, "matchIds");
 
         final Iterator<Number> iterator = matchIds.iterator();
-        return CloseableIterators.from(new Iterator<MatchTimeline>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public MatchTimeline next() {
+            final Number matchId = iterator.next();
+
+            final String endpoint = "lol/match/v4/timelines/by-match/" + matchId;
+            final MatchTimeline data = get(MatchTimeline.class, endpoint, platform, "lol/match/v4/timelines/by-match/matchId");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public MatchTimeline next() {
-                final Number matchId = iterator.next();
+            data.setPlatform(platform.getTag());
+            data.setMatchId(matchId.longValue());
+            return data;
+          }
 
-                final String endpoint = "lol/match/v4/timelines/by-match/" + matchId;
-                final MatchTimeline data = get(MatchTimeline.class, endpoint, platform, "lol/match/v4/timelines/by-match/matchId");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                data.setMatchId(matchId.longValue());
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -252,31 +252,31 @@ public class MatchAPI extends RiotAPIService {
         Utilities.checkNotNull(platform, "platform", tournamentCodes, "tournamentCodes");
 
         final Iterator<String> iterator = tournamentCodes.iterator();
-        return CloseableIterators.from(new Iterator<TournamentMatches>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
+        return CloseableIterators.from(new Iterator<>() {
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override
+          public TournamentMatches next() {
+            final String tournamentCode = iterator.next();
+
+            final String endpoint = "lol/match/v4/matches/by-tournament-code/" + tournamentCode + "/ids";
+            final TournamentMatches data = get(TournamentMatches.class, endpoint, platform, "lol/match/v4/matches/by-tournament-code/tournamentCode/ids");
+            if (data == null) {
+              return null;
             }
 
-            @Override
-            public TournamentMatches next() {
-                final String tournamentCode = iterator.next();
+            data.setPlatform(platform.getTag());
+            data.setTournamentCode(tournamentCode);
+            return data;
+          }
 
-                final String endpoint = "lol/match/v4/matches/by-tournament-code/" + tournamentCode + "/ids";
-                final TournamentMatches data = get(TournamentMatches.class, endpoint, platform, "lol/match/v4/matches/by-tournament-code/tournamentCode/ids");
-                if(data == null) {
-                    return null;
-                }
-
-                data.setPlatform(platform.getTag());
-                data.setTournamentCode(tournamentCode);
-                return data;
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
         });
     }
 
@@ -287,8 +287,8 @@ public class MatchAPI extends RiotAPIService {
         final String tournamentCode = (String)query.get("tournamentCode");
         Utilities.checkNotNull(platform, "platform", matchId, "matchId");
 
-        String endpoint;
-        Match data;
+        final String endpoint;
+        final Match data;
         if(tournamentCode == null) {
             endpoint = "lol/match/v4/matches/" + matchId;
             data = get(Match.class, endpoint, platform, "lol/match/v4/matches/matchId");
@@ -309,9 +309,9 @@ public class MatchAPI extends RiotAPIService {
     public Matchlist getMatchlist(final Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         final String accountId = (String)query.get("accountId");
-        final Set<Integer> queues = query.get("queues") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("queues");
-        final Set<Integer> seasons = query.get("seasons") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("seasons");
-        final Set<Integer> champions = query.get("champions") == null ? Collections.<Integer> emptySet() : (Set<Integer>)query.get("champions");
+        final Set<Integer> queues = query.get("queues") == null ? Collections.emptySet() : (Set<Integer>)query.get("queues");
+        final Set<Integer> seasons = query.get("seasons") == null ? Collections.emptySet() : (Set<Integer>)query.get("seasons");
+        final Set<Integer> champions = query.get("champions") == null ? Collections.emptySet() : (Set<Integer>)query.get("champions");
         Number beginTime = (Number)query.get("beginTime");
         Number endTime = (Number)query.get("endTime");
         Number beginIndex = (Number)query.get("beginIndex");
@@ -375,7 +375,7 @@ public class MatchAPI extends RiotAPIService {
         final Matchlist data = get(Matchlist.class, endpoint, platform, parameters, "lol/match/v4/matchlists/by-account/accountId");
         if(data == null) {
             final Matchlist empty = new Matchlist();
-            empty.setMatches(Collections.<MatchReference> emptyList());
+            empty.setMatches(Collections.emptyList());
             empty.setPlatform(platform.getTag());
             empty.setAccountId(accountId);
             empty.setQueues(queues);

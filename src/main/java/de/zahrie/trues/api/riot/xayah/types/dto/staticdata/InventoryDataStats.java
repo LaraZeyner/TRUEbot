@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.xayah.types.dto.staticdata;
 
+import java.io.Serial;
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
@@ -7,6 +9,7 @@ import de.zahrie.trues.api.riot.xayah.types.dto.DataObject;
 @JsonNaming(InventoryDataStats.JacksonNamingStrategy.class)
 public class InventoryDataStats extends DataObject {
     public static class JacksonNamingStrategy extends PropertyNamingStrategyBase {
+        @Serial
         private static final long serialVersionUID = 860782375575167663L;
 
         @Override
@@ -20,6 +23,7 @@ public class InventoryDataStats extends DataObject {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = 277601872683286664L;
     private double PercentCritDamageMod, PercentSpellBlockMod, PercentHPRegenMod, PercentMovementSpeedMod, FlatSpellBlockMod, FlatCritDamageMod,
             FlatEnergyPoolMod, PercentLifeStealMod, FlatMPPoolMod, FlatMovementSpeedMod, PercentAttackSpeedMod, FlatBlockMod, PercentBlockMod,
@@ -139,10 +143,7 @@ public class InventoryDataStats extends DataObject {
         if(Double.doubleToLongBits(PercentSpellBlockMod) != Double.doubleToLongBits(other.PercentSpellBlockMod)) {
             return false;
         }
-        if(Double.doubleToLongBits(PercentSpellVampMod) != Double.doubleToLongBits(other.PercentSpellVampMod)) {
-            return false;
-        }
-        return true;
+      return Double.doubleToLongBits(PercentSpellVampMod) == Double.doubleToLongBits(other.PercentSpellVampMod);
     }
 
     /**

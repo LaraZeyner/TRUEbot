@@ -14,7 +14,7 @@ public final class JSON extends JSONObject {
 
   public static JSON fromFile(String fileName) {
     try {
-      var path = Path.of(ClassLoader.getSystemResource(fileName).toURI());
+      final var path = Path.of(ClassLoader.getSystemResource(fileName).toURI());
       final String content = Files.readString(path);
       return new JSON(content);
     } catch (IOException | URISyntaxException e) {
