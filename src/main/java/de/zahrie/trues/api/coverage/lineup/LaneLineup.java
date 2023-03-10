@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.lineup;
 
 import java.util.Comparator;
 
-import de.zahrie.trues.models.riot.Lane;
+import de.zahrie.trues.api.riot.Lane;
 import de.zahrie.trues.api.datatypes.collection.Stack;
 import lombok.Getter;
 

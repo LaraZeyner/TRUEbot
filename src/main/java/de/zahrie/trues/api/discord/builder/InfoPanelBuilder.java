@@ -3,7 +3,7 @@ package de.zahrie.trues.api.discord.builder;
 import java.util.List;
 
 import de.zahrie.trues.api.discord.builder.embed.EmbedQueryBuilder;
-import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
+import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
 import de.zahrie.trues.api.discord.builder.string.StringCreator;
 import de.zahrie.trues.api.discord.builder.embed.EmbedCreator;
 import de.zahrie.trues.api.discord.builder.string.StringQueryBuilder;

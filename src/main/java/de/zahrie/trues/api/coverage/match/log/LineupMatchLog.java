@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.player.PlayerFactory;
+import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.datatypes.symbol.Chain;
 import jakarta.persistence.DiscriminatorValue;
@@ -28,7 +28,7 @@ public class LineupMatchLog extends MatchLog implements Serializable {
     return Arrays.stream(getDetails().split(", "))
         .map(playerString -> Chain.of(playerString).between(null, ":").intValue())
         .mapToInt(Integer::intValue)
-        .mapToObj(PlayerFactory::getPlayer)
+        .mapToObj(PrimePlayerFactory::getPlayer)
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
   }

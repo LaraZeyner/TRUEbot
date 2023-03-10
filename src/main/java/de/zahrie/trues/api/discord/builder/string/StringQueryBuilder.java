@@ -3,7 +3,7 @@ package de.zahrie.trues.api.discord.builder.string;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
+import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
 import de.zahrie.trues.database.Database;
 
 /**

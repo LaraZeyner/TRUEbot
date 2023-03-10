@@ -4,28 +4,25 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
+import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.RankFactory;
 import de.zahrie.trues.api.riot.Xayah;
 import de.zahrie.trues.api.riot.xayah.types.common.Division;
 import de.zahrie.trues.api.riot.xayah.types.common.Queue;
 import de.zahrie.trues.api.riot.xayah.types.common.Tier;
 import de.zahrie.trues.api.riot.xayah.types.core.league.LeagueEntry;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
-import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
-import de.zahrie.trues.api.coverage.player.model.RankFactory;
 import de.zahrie.trues.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
 public class PlayerHandler extends PlayerModel implements Serializable {
   @Serial
   private static final long serialVersionUID = -3900511589414972005L;
 
   @Builder
-  public PlayerHandler(@Deprecated String url, PrimePlayer player) {
+  public PlayerHandler(@Deprecated String url, Player player) {
     super(url, player);
   }
 

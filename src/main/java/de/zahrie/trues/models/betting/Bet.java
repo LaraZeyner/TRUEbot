@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.models.discord.member.DiscordMember;
+import de.zahrie.trues.api.discord.member.DiscordMember;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -3,7 +3,6 @@ package de.zahrie.trues.api.coverage.team.model;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.models.Standing;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

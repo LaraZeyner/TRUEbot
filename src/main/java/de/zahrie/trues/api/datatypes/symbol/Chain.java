@@ -54,8 +54,16 @@ public final class Chain extends ChainString {
     return new Chain(value + "" + c);
   }
 
+  public Chain between(String start) {
+    return between(start, null, 1);
+  }
+
   public Chain between(String start, String end) {
     return between(start, end, 1);
+  }
+
+  public Chain between(String start, int occurrence) {
+    return between(start, null, occurrence);
   }
 
   public Chain between(String start, String end, int occurrence) {
@@ -98,7 +106,7 @@ public final class Chain extends ChainString {
     return substring(0, Math.min(length, length()));
   }
 
-  public Chain capitalize() {
+  public Chain capitalizeFirst() {
     final char[] buffer = lower().toCharArray();
     boolean capitalizeNext = true;
     final char[] charArray = lower().toCharArray();

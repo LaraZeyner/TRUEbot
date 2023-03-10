@@ -63,7 +63,7 @@ public class TeamHandler extends TeamModel implements Serializable {
 
   private void updateRecordAndSeasons() {
     final List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li", "wide").stream()
-        .map(HTML::text).map(text -> text.between(":", null).toString()).toList();
+        .map(HTML::text).map(text -> text.between(":").toString()).toList();
     if (teamInfos.size() == 4) {
       final var seasons = Short.parseShort(teamInfos.get(2));
       team.setRecord(teamInfos.get(1), seasons);

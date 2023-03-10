@@ -1,84 +1,42 @@
 package de.zahrie.trues.api.coverage.player;
 
-import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
+import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.database.Database;
 import de.zahrie.trues.util.logger.Logger;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 public final class PlayerFactory {
-
   @Nullable
-  public static PrimePlayer getPlayer(int primeId) {
-    return Database.Find.find(PrimePlayer.class, new String[]{"primeId"}, new Object[]{primeId}, "fromPrimeId");
-  }
-
-  @Nullable
-  public static PrimePlayer getPrimePlayer(int primeId, String summonerName) {
-    final PrimePlayer player = getPlayer(primeId);
-    if (player != null) {
-      updatePrmAccount(player, summonerName);
-      return player;
-    }
-
-    final PrimePlayer p = determinePlayer(summonerName, primeId);
-    if (p != null) {
-      p.setPrmUserId(primeId);
-      Database.save(p);
-    }
-    return p;
-  }
-
-  private static void updatePrmAccount(PrimePlayer player, String summonerName) {
-    final Summoner summoner = Xayah.summonerNamed(summonerName).get();
-    final String puuid = summoner.getPuuid();
-    if (!player.getPuuid().equals(puuid) && puuid != null) {
-      player.setPuuid(puuid);
-      player.setSummonerName(summoner.getName());
+  public static Player getPlayer(String summonerName) {
+    Player player = lookForPlayer(summonerName);
+    if (player == null) {
+      final Summoner summoner = Xayah.summonerNamed(summonerName).get();
+      if (summoner == null) {
+        Logger.getLogger("Player").attention("Der Spieler existiert nicht");
+        return null;
+      }
+      player = new Player(summoner.getName(), summoner.getPuuid());
       Database.save(player);
     }
+    return player;
   }
 
-  @Nullable
-  private static PrimePlayer determinePlayer(String summonerName, int primeId) {
-    final String puuid = Xayah.summonerNamed(summonerName).get().getPuuid();
-    if (puuid != null) {
-      final PrimePlayer primePlayer = determineExistingPlayerFromPuuid(puuid);
-      return primePlayer != null ? primePlayer : new PrimePlayer(puuid, summonerName, primeId);
+  private static Player lookForPlayer(String summonerName) {
+    final Player player = determineExistingPlayerFromName(summonerName);
+    if (player != null) {
+      return player;
     }
-    return performNoPuuid(summonerName);
+    final Summoner summoner = Xayah.summonerNamed(summonerName).get();
+    return summoner == null ? null : determineExistingPlayerFromPuuid(summoner.getPuuid());
   }
 
-  @Nullable
-  private static PrimePlayer performNoPuuid(String summonerName) {
-    final PrimePlayer primePlayer = determineExistingPlayerFromName(summonerName);
-    if (primePlayer == null) {
-      Logger.getLogger("Player").attention("Der Spieler existiert nicht");
-      return null;
-    }
-
-    new PlayerHandler(null, primePlayer).updateName();
-    Database.save(primePlayer);
-
-    return determineExistingPlayerFromName(summonerName);
+  private static Player determineExistingPlayerFromName(String summonerName) {
+    return summonerName == null ? null : Database.Find.find(Player.class, new String[]{"name"}, new Object[]{summonerName}, "fromName");
   }
 
-  private static PrimePlayer determineExistingPlayerFromName(String summonerName) {
-    if (summonerName == null) {
-      return null;
-    }
-    return Database.Find.find(PrimePlayer.class, new String[]{"name"}, new Object[]{summonerName}, "fromName");
+  private static Player determineExistingPlayerFromPuuid(String puuid) {
+    return puuid == null ? null : Database.Find.find(Player.class, new String[]{"puuid"}, new Object[]{puuid}, "fromPuuid");
   }
-
-  private static PrimePlayer determineExistingPlayerFromPuuid(String puuid) {
-    if (puuid == null) {
-      return null;
-    }
-    return Database.Find.find(PrimePlayer.class, new String[]{"puuid"}, new Object[]{puuid}, "fromPuuid");
-  }
-
 }

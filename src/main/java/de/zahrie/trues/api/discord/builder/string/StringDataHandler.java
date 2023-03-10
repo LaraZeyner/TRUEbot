@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.zahrie.trues.api.discord.util.cmd.annotations.Column;
-import de.zahrie.trues.api.discord.util.cmd.annotations.DBQuery;
+import de.zahrie.trues.api.discord.command.slash.annotations.Column;
+import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
 import de.zahrie.trues.database.CellEntry;
 import lombok.RequiredArgsConstructor;
 

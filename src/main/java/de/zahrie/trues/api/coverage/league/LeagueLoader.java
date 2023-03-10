@@ -33,11 +33,11 @@ public class LeagueLoader extends GamesportsLoader {
   }
 
   public static String divisionNameFromURL(String url) {
-    Chain section = Chain.of(url).between("/", null, -1).between("-", null).replace("-", " ");
+    Chain section = Chain.of(url).between("/", null, -1).between("-").replace("-", " ");
     if (section.startsWith("division ")) {
       section = section.replace(".", section.lastIndexOf(" "));
     }
-    return section.capitalize().toString();
+    return section.capitalizeFirst().toString();
   }
 
   public static Integer stageIdFromUrl(String url) {
@@ -77,7 +77,7 @@ public class LeagueLoader extends GamesportsLoader {
 
   @NotNull
   private List<LeaguePlayday> getPlaydays() {
-    final Chain leagueName = html.find("h1").text().between(":", null);
+    final Chain leagueName = html.find("h1").text().between(":");
 
     if (leagueName.toString().equals(Const.Gamesports.STARTER_NAME)) {
       return List.of();

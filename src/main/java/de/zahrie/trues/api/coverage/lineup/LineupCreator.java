@@ -13,7 +13,7 @@ import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.models.riot.Lane;
+import de.zahrie.trues.api.riot.Lane;
 import lombok.Getter;
 
 /**

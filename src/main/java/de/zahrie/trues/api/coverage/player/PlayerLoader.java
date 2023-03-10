@@ -20,7 +20,7 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
 
   public PlayerLoader(int primeId, String summonerName) {
     super(URLType.PLAYER, primeId);
-    this.player = PlayerFactory.getPrimePlayer(primeId, summonerName);
+    this.player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
   }
 
   @Override

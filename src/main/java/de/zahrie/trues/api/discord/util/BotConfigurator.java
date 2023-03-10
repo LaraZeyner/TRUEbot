@@ -5,27 +5,30 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 10.02.2023 for TRUEbot
- */
 public class BotConfigurator extends ListenerAdapter {
   private JDABuilder builder;
 
   public JDA run() {
     final var json = JSON.fromFile("connect.json");
     final var apiKey = json.getString("discord");
-    this.builder = JDABuilder.createDefault(apiKey);
+    this.builder = JDABuilder.create(apiKey, ConfigLoader.getIntents());
     return this.configure();
   }
 
   private JDA configure() {
-    this.builder.setActivity(ConfigLoader.getActivity());
-    this.builder.setStatus(ConfigLoader.getStatus());
-    final JDA jda = this.builder.build();
-    jda.addEventListener(this);
-    return jda;
+    final JDA discordAPI = builder.setActivity(ConfigLoader.getActivity())
+        .enableCache(CacheFlag.ACTIVITY, CacheFlag.EMOJI, CacheFlag.CLIENT_STATUS, CacheFlag.FORUM_TAGS, CacheFlag.VOICE_STATE, CacheFlag.STICKER, CacheFlag.MEMBER_OVERRIDES, CacheFlag.ROLE_TAGS, CacheFlag.FORUM_TAGS, CacheFlag.ONLINE_STATUS, CacheFlag.SCHEDULED_EVENTS)
+        .setChunkingFilter(ChunkingFilter.ALL)
+        .setMemberCachePolicy(MemberCachePolicy.ALL)
+        .setStatus(ConfigLoader.getStatus())
+        .build();
+    discordAPI.addEventListener(this);
+    return discordAPI;
   }
 
   @Override

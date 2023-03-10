@@ -7,9 +7,10 @@ import java.util.Set;
 
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.database.Database;
 import de.zahrie.trues.database.types.TimeCoverter;
-import de.zahrie.trues.models.discord.member.DiscordMember;
-import de.zahrie.trues.models.riot.matchhistory.Performance;
+import de.zahrie.trues.api.discord.member.DiscordMember;
+import de.zahrie.trues.api.riot.matchhistory.Performance;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
@@ -50,6 +51,7 @@ import org.hibernate.annotations.Type;
 @DiscriminatorFormula("IF(prm_id IS NULL, 'null', 'not null')")
 @NamedNativeQuery(name = "Player.getLanePlayed", query = "SELECT lane, COUNT(*) FROM performance WHERE (t_perf IN (SELECT t_perf FROM performance JOIN player ON player=player_id JOIN team_perf ON t_perf=t_perf_id JOIN game ON game=game_id WHERE team IS NOT NULL AND team=%s AND game_type = 'ranked' AND start_time > %s GROUP BY t_perf, player.team HAVING COUNT(*) > 2 ORDER BY COUNT(*) DESC) OR t_perf IN (SELECT t_perf FROM performance JOIN team_perf ON t_perf_id=t_perf JOIN game ON game_id=game WHERE player=%s AND game_type IN ('tourney', 'clash') AND start_time > %s GROUP BY t_perf ORDER BY COUNT(*) DESC)) AND player=%s GROUP BY lane ORDER BY COUNT(*) DESC")
 @NamedQuery(name = "Player.fromName", query = "FROM PrimePlayer WHERE summonerName = :name")
+@NamedQuery(name = "Player.fromPuuid", query = "FROM PrimePlayer WHERE puuid = :puuid")
 public class Player implements Serializable {
 
   public Player(String summonerName, String puuid) {
@@ -128,5 +130,15 @@ public class Player implements Serializable {
       return Const.PLAYER_MMR_DEFAULT_VALUE;
     }
     return this.rank.getMmr();
+  }
+
+  public void setMember(DiscordMember member) {
+    if (this.member != null && !this.member.equals(member)) {
+      this.member.setPlayer(null);
+      Database.save(this.member);
+    }
+    this.member = member;
+    Database.save(this);
+    Database.save(member);
   }
 }

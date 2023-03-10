@@ -13,6 +13,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString
 public enum TimeFormat {
+  DAY("dd.MM."),
   DEFAULT("E, d. MMM YYYY HH:mm");
 
   private final String format;

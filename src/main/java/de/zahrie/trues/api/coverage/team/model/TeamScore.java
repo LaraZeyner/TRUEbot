@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.models.Standing;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;

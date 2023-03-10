@@ -1,9 +1,23 @@
 {
   "discord": {
-    "name": "Nunu"
+    "intents": [
+      "GUILD_MEMBERS",
+      "GUILD_MODERATION",
+      "GUILD_EMOJIS_AND_STICKERS",
+      "GUILD_WEBHOOKS",
+      "GUILD_INVITES",
+      "GUILD_VOICE_STATES",
+      "GUILD_PRESENCES",
+      "GUILD_MESSAGES",
+      "GUILD_MESSAGE_REACTIONS",
+      "GUILD_MESSAGE_TYPING",
+      "DIRECT_MESSAGES",
+      "DIRECT_MESSAGE_REACTIONS",
+      "DIRECT_MESSAGE_TYPING"
+    ],
+    "guild": 123456
   },
   "gamesports": {
-    "name": "Heimerdinger",
     "endpoints": {
       "league": "https://www.primeleague.gg/leagues/prm/%s/group/%s/%s",
       "match": "https://www.primeleague.gg/leagues/matches/%s",
@@ -11,13 +25,7 @@
       "team": "https://www.primeleague.gg/leagues/teams/%s"
     }
   },
-  "html": {
-    "name": "Ashe"
-  },
-  "json": {
-    "name": "Ryze"
-  },
-  "riot": {
-    "name": "Xayah"
-  }
+  "html": {},
+  "json": {},
+  "riot": {}
 }

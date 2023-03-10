@@ -1,13 +1,15 @@
 {
-  "bot": {
+  "discord": {
     "activity": {
       "type": "COMPETING",
       "text": "Prime League",
       "url": null
     },
-    "status": "ONLINE"
+    "status": "ONLINE",
+    "guild": 1234567890
   },
-  "gamesports": {
-
-  }
+  "gamesports": {},
+  "html": {},
+  "json": {},
+  "riot": {}
 }
