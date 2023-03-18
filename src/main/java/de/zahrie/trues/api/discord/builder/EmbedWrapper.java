@@ -41,10 +41,10 @@ public class EmbedWrapper {
           data.add(out);
           out = Chain.of(text);
         } else {
-          out = out.add(text);
+          out.add(text);
         }
       }
-      out = out.add("\n\n");
+      out.add("\n\n");
     }
     data.add(out);
 

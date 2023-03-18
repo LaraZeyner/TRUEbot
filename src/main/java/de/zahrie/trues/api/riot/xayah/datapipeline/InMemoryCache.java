@@ -48,7 +48,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.match.Timeline;
 import de.zahrie.trues.api.riot.xayah.types.core.match.TournamentMatches;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatches;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Items;
@@ -83,7 +83,7 @@ public class InMemoryCache extends AbstractDataStore {
         .put(ChampionMastery.class.getCanonicalName(), ExpirationPeriod.create(15L, TimeUnit.MINUTES))
         .put(ChampionMasteries.class.getCanonicalName(), ExpirationPeriod.create(15L, TimeUnit.MINUTES))
         .put(ChampionMasteryScore.class.getCanonicalName(), ExpirationPeriod.create(15L, TimeUnit.MINUTES))
-        .put(Champion.class.getCanonicalName(), ExpirationPeriod.create(DEFAULT_EXPIRATION_PERIOD_MAX, DEFAULT_EXPIRATION_PERIOD_UNIT_MAX))
+        .put(RiotChampion.class.getCanonicalName(), ExpirationPeriod.create(DEFAULT_EXPIRATION_PERIOD_MAX, DEFAULT_EXPIRATION_PERIOD_UNIT_MAX))
         .put(Champions.class.getCanonicalName(), ExpirationPeriod.create(DEFAULT_EXPIRATION_PERIOD_MAX, DEFAULT_EXPIRATION_PERIOD_UNIT_MAX))
         .put(CurrentMatch.class.getCanonicalName(), ExpirationPeriod.create(5L, TimeUnit.MINUTES))
         .put(FeaturedMatches.class.getCanonicalName(), ExpirationPeriod.create(5L, TimeUnit.MINUTES))
@@ -172,10 +172,10 @@ public class InMemoryCache extends AbstractDataStore {
         .storeByReference(true).build();
   }
 
-  @Get(Champion.class)
-  public Champion getChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
+  @Get(RiotChampion.class)
+  public RiotChampion getChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
     final int key = UniqueKeys.forChampionQuery(query);
-    return (Champion) cache.get(key);
+    return (RiotChampion) cache.get(key);
   }
 
   @Get(ChampionMasteries.class)
@@ -256,8 +256,8 @@ public class InMemoryCache extends AbstractDataStore {
     return (LeaguePositions) cache.get(key);
   }
 
-  @GetMany(Champion.class)
-  public CloseableIterator<Champion> getManyChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
+  @GetMany(RiotChampion.class)
+  public CloseableIterator<RiotChampion> getManyChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
     final List<Integer> keys = Lists.newArrayList(Objects.requireNonNull(UniqueKeys.forManyChampionQuery(query)));
     for (final Integer key : keys) {
       if (!cache.containsKey(key)) {
@@ -273,9 +273,9 @@ public class InMemoryCache extends AbstractDataStore {
       }
 
       @Override
-      public Champion next() {
+      public RiotChampion next() {
         final int key = iterator.next();
-        return (Champion) cache.get(key);
+        return (RiotChampion) cache.get(key);
       }
 
       @Override
@@ -1139,18 +1139,18 @@ public class InMemoryCache extends AbstractDataStore {
     return ignore;
   }
 
-  @Put(Champion.class)
-  public void putChampion(final Champion champion, final PipelineContext context) {
-    final int[] keys = UniqueKeys.forChampion(champion);
+  @Put(RiotChampion.class)
+  public void putChampion(final RiotChampion riotChampion, final PipelineContext context) {
+    final int[] keys = UniqueKeys.forChampion(riotChampion);
 
     if (keys.length < 3) {
-      final LoadHook hook = () -> putChampion(champion, null);
+      final LoadHook hook = () -> putChampion(riotChampion, null);
 
-      champion.registerGhostLoadHook(hook, Champion.CHAMPION_LOAD_GROUP);
+      riotChampion.registerGhostLoadHook(hook, RiotChampion.CHAMPION_LOAD_GROUP);
     }
 
     for (final int key : keys) {
-      cache.put(key, champion);
+      cache.put(key, riotChampion);
     }
   }
 
@@ -1275,10 +1275,10 @@ public class InMemoryCache extends AbstractDataStore {
     cache.put(key, positions);
   }
 
-  @PutMany(Champion.class)
-  public void putManyChampion(final Iterable<Champion> champions, final PipelineContext context) {
-    for (final Champion champion : champions) {
-      putChampion(champion, context);
+  @PutMany(RiotChampion.class)
+  public void putManyChampion(final Iterable<RiotChampion> champions, final PipelineContext context) {
+    for (final RiotChampion riotChampion : champions) {
+      putChampion(riotChampion, context);
     }
   }
 

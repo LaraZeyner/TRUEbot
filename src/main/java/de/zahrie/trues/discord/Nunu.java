@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public final class Nunu extends Willump {
   public static void run() {
@@ -25,6 +26,7 @@ public final class Nunu extends Willump {
     }
 
     public static Role getRole(long id) {
+      // TODO (Abgie) 15.03.2023: never used
       return Nunu.guild.getRoleById(id);
     }
 
@@ -39,12 +41,16 @@ public final class Nunu extends Willump {
 
   public static class DiscordChannel {
 
-    public static AudioChannel getChannel(Member member) {
+    public static AudioChannel getVoiceChannel(Member member) {
       final GuildVoiceState voiceState = member.getVoiceState();
       return voiceState == null ? null : voiceState.getChannel();
     }
-    public static VoiceChannel getChannel(long id) {
+    public static VoiceChannel getVoiceChannel(long id) {
       return Nunu.guild.getVoiceChannelById(id);
+    }
+
+    public static GuildChannel getChannel(long id) {
+      return Nunu.guild.getGuildChannelById(id);
     }
 
     public static boolean limitTo(VoiceChannel voiceChannel, int amount) {
@@ -60,6 +66,7 @@ public final class Nunu extends Willump {
     }
 
     public static VoiceChannel getChannelLike(String regex, Member invoker) {
+      // TODO (Abgie) 15.03.2023: never used
       return Nunu.guild.getVoiceChannelCache().stream()
           .filter(voiceChannel -> voiceChannel.getName().toLowerCase().contains(regex.toLowerCase()))
           .filter(voiceChannel -> invoker.getPermissions(voiceChannel).contains(Permission.VOICE_CONNECT))

@@ -21,9 +21,6 @@ import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 public class LeagueLoader extends GamesportsLoader {
   public static League season(Chain url, Chain name) {
     final int seasonId = Integer.parseInt(url.between("/prm/", "-").toString());
@@ -90,8 +87,8 @@ public class LeagueLoader extends GamesportsLoader {
       final List<PrimeMatch> primeMatches = playdayHTML.findAll("tr").stream()
           .map(match -> match.find("a").getAttribute("href"))
           .map(MatchLoader::idFromURL)
-          .filter(Objects::nonNull)
           .map(MatchFactory::getMatch)
+          .filter(Objects::nonNull)
           .toList();
       final var playday = new LeaguePlayday(PlaydayFactory.getPlayday(league.getStage(), i + 1), primeMatches);
       playdays.add(playday);

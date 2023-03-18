@@ -1,10 +1,11 @@
 package de.zahrie.trues.database;
 
-import de.zahrie.trues.util.logger.Logger;
+import lombok.extern.java.Log;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+@Log
 public record DatabaseConnection(SessionFactory sessionFactory, Session session, Transaction transaction) {
 
   public void commit() {
@@ -13,7 +14,8 @@ public record DatabaseConnection(SessionFactory sessionFactory, Session session,
       transaction.begin();
     } catch (Exception e) {
       transaction.rollback();
-      Logger.getLogger("Database").severe("Error saving. Transaction has been rolled back.");
+      log.severe("Error saving. Transaction has been rolled back.");
+      log.throwing(getClass().getName(), "commit", e);
       throw new RuntimeException(e);
     }
   }

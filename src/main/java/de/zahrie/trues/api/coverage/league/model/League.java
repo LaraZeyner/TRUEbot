@@ -76,8 +76,8 @@ public class League implements Serializable {
     return LeagueTier.fromName(name);
   }
 
-
   public Time getAlternative(Playday playday) {
+    //TODO (Abgie) 15.03.2023: never used
     final PlaydayScheduler scheduler = new PlaydayScheduleHandler(stage, playday.getId(), getTier()).create();
     return scheduler.defaultTime();
   }

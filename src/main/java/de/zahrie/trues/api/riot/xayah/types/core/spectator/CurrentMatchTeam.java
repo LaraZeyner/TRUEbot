@@ -5,7 +5,7 @@ import java.io.Serial;
 import de.zahrie.trues.api.riot.xayah.types.common.Side;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 
 public abstract class CurrentMatchTeam extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.spectator.Team> {
     @Serial
@@ -15,7 +15,7 @@ public abstract class CurrentMatchTeam extends OriannaObject<de.zahrie.trues.api
         super(coreData);
     }
 
-    public abstract SearchableList<Champion> getBans();
+    public abstract SearchableList<RiotChampion> getBans();
 
     public abstract SearchableList<Player> getParticipants();
 

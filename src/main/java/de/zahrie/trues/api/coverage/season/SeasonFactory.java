@@ -3,9 +3,6 @@ package de.zahrie.trues.api.coverage.season;
 import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 public final class SeasonFactory {
 
   @Nullable
@@ -17,5 +14,11 @@ public final class SeasonFactory {
   public static PrimeSeason getSeason(String seasonName) {
     return Database.Find.find(PrimeSeason.class, new String[]{"name"}, new Object[]{seasonName}, "fromName");
   }
+
+  @Nullable
+  public static PrimeSeason getLastSeason() {
+    return Database.Find.find(PrimeSeason.class, "lastSeason");
+  }
+
 
 }

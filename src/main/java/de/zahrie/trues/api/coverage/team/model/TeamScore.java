@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 @Embeddable
 @Getter
-class TeamScore implements Serializable, Comparable<TeamScore> {
+public class TeamScore implements Serializable, Comparable<TeamScore> {
   @Serial
   private static final long serialVersionUID = -4937687342237956160L;
 
@@ -44,6 +44,7 @@ class TeamScore implements Serializable, Comparable<TeamScore> {
   }
 
   TeamDestination getDestination() {
+    // TODO (Abgie) 15.03.2023: never used
     if (this.place < 3) {
       return TeamDestination.PROMOTION;
     }

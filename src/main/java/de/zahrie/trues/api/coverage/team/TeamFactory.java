@@ -4,9 +4,6 @@ import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 public class TeamFactory {
   public static PrimeTeam getTeam(int teamId) {
     PrimeTeam team = Database.Find.find(PrimeTeam.class, teamId);

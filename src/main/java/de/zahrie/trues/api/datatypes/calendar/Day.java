@@ -30,6 +30,7 @@ public class Day implements Comparable<Day>, Serializable {
   }
 
   public boolean isToday() {
+    // TODO (Abgie) 15.03.2023: never used
     return equals(new Time().getDay());
   }
 

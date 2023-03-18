@@ -3,9 +3,10 @@ package de.zahrie.trues.models.calendar;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,7 +21,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.DiscriminatorFormula;
 import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
@@ -31,9 +31,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "calendar")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorFormula("IF(discord_user IS NULL, 'team', " +
-    "IF(calendar_name = 'Scheduling', IF(repeated = 1, 'plan_repeated', 'plan'), " +
-    "IF(calendar_type = 'Bewerbung', 'user_app', 'user')))")
+@DiscriminatorColumn(name = "calendar_name")
 public class CalendarBase implements Serializable {
   @Serial
   private static final long serialVersionUID = 6429899319470109286L;
@@ -43,9 +41,6 @@ public class CalendarBase implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "calendar_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
-
-  @Column(name = "calendar_name", nullable = false, length = 200)
-  private String name;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Type(TimeCoverter.class)
@@ -57,4 +52,12 @@ public class CalendarBase implements Serializable {
   @Column(name = "calendar_end", nullable = false)
   private Time end;
 
+  @Column(name = "details", length = 1000)
+  private String details;
+
+  public CalendarBase(Time start, Time end, String details) {
+    this.start = start;
+    this.end = end;
+    this.details = details;
+  }
 }

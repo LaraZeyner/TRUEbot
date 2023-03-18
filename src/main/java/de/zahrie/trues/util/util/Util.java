@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Objects;
 
 public final class Util {
   public static int getInt(Object object) {
@@ -46,5 +47,13 @@ public final class Util {
 
   public static LocalDateTime getLocalDate(Date dateToConvert) {
     return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+  }
+
+  public static <T> T nonNull(T obj) {
+    return Objects.requireNonNull(obj);
+  }
+
+  public static <T> T nonNull(T obj, String message) {
+    return Objects.requireNonNull(obj, message);
   }
 }

@@ -6,7 +6,7 @@ import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.riot.Lane;
+import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.database.Database;
 
 /**

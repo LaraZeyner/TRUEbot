@@ -14,6 +14,7 @@ import lombok.ToString;
 @Embeddable
 @Getter
 public class ParticipatorRoute {
+  // TODO (Abgie) 01.03.2023: never used
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "route_group")
   @ToString.Exclude

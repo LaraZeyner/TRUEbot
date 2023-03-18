@@ -32,7 +32,7 @@ public class TeamCalendar extends CalendarBase implements Serializable {
   private static final long serialVersionUID = 8384587779953917815L;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "calendar_type", nullable = false, length = 200)
+  @Column(name = "calendar_type", nullable = false, length = 11)
   private TeamCalendarType type;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -40,8 +40,10 @@ public class TeamCalendar extends CalendarBase implements Serializable {
   @JoinColumn(name = "orga_team")
   @ToString.Exclude
   private OrgaTeam orgaTeam;
-
-  @Column(name = "details", length = 1000)
-  private String details;
-
+  private enum TeamCalendarType {
+    MEETING,
+    CLASH,
+    CALIBRATION,
+    TRAINING
+  }
 }

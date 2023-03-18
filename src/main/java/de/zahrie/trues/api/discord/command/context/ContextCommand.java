@@ -2,8 +2,8 @@ package de.zahrie.trues.api.discord.command.context;
 
 import java.util.function.Predicate;
 
-import de.zahrie.trues.api.discord.member.DiscordMember;
 import de.zahrie.trues.api.discord.Replyer;
+import de.zahrie.trues.api.discord.member.DiscordMember;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 @EqualsAndHashCode(callSuper = true)
 public abstract class ContextCommand extends Replyer {
   private Command.Type type;
-  private Predicate<DiscordMember> permissionCheck;
+  private Predicate<DiscordMember> permissionCheck = o -> true;
   private UserContextInteractionEvent event;
 
   public ContextCommand() {
@@ -24,11 +24,11 @@ public abstract class ContextCommand extends Replyer {
     if (annotation == null) {
       return;
     }
-    this.name = annotation.name();
+    this.name = annotation.value();
     this.type = annotation.type();
   }
 
-  protected abstract void execute(UserContextInteractionEvent event);
+  protected abstract boolean execute(UserContextInteractionEvent event);
 
   protected void setPermission(Predicate<DiscordMember> permissionCheck) {
     this.permissionCheck = permissionCheck;

@@ -3,14 +3,16 @@ package de.zahrie.trues.models.community;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.discord.group.DiscordGroup;
-import de.zahrie.trues.api.discord.member.DiscordMember;
+import de.zahrie.trues.api.discord.channel.DiscordChannel;
+import de.zahrie.trues.api.discord.group.CustomDiscordRole;
 import de.zahrie.trues.api.discord.group.RoleGranter;
+import de.zahrie.trues.api.discord.member.DiscordMember;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.models.community.application.ApplicationRole;
+import de.zahrie.trues.discord.Nunu;
 import de.zahrie.trues.models.community.application.OrgaMember;
 import de.zahrie.trues.models.community.application.OrgaMemberFactory;
 import de.zahrie.trues.models.community.application.TeamPosition;
@@ -20,6 +22,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -28,6 +31,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import net.dv8tion.jda.api.entities.Role;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,6 +40,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "orga_team")
+@NamedQuery(name = "OrgaTeam.findCategory", query = "FROM OrgaTeam WHERE category.discordId = :categoryId")
 public class OrgaTeam implements Serializable {
   @Serial
   private static final long serialVersionUID = 4608926794336892138L;
@@ -50,20 +55,30 @@ public class OrgaTeam implements Serializable {
   @ToString.Exclude
   private Team team;
 
-  @Column(name = "discord_role", nullable = false)
-  private long roleId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "team_role", nullable = false)
+  @ToString.Exclude
+  private CustomDiscordRole role;
 
-  @Column(name = "discord_category", nullable = false)
-  private long categoryId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "category_channel", nullable = false)
+  @ToString.Exclude
+  private DiscordChannel category;
 
-  @Column(name = "discord_chat", nullable = false)
-  private long chatId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "chat_channel", nullable = false)
+  @ToString.Exclude
+  private DiscordChannel chat;
 
-  @Column(name = "discord_voice", nullable = false)
-  private long voiceId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "voice_channel", nullable = false)
+  @ToString.Exclude
+  private DiscordChannel voice;
 
-  @Column(name = "discord_intern")
-  private Long internId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "info_channel", nullable = false)
+  @ToString.Exclude
+  private DiscordChannel info;
 
   @Column(name = "team_name_created", nullable = false, length = 100)
   private String nameCreation;
@@ -80,12 +95,13 @@ public class OrgaTeam implements Serializable {
   }
 
   public String getAbbreviation() {
+    // TODO (Abgie) 15.03.2023: never used
     return team == null ? abbreviationCreation : team.getAbbreviation();
   }
 
-  public void addRole(DiscordMember member, ApplicationRole role, TeamPosition position) {
-    if (role.equals(ApplicationRole.MAIN)) {
-      final OrgaMember mainOnPosition = OrgaMemberFactory.getOfTeam(this, TeamRole.MAIN, position);
+  public void addRole(DiscordMember member, TeamRole role, TeamPosition position) {
+    if (role.equals(TeamRole.MAIN)) {
+      final OrgaMember mainOnPosition = OrgaMemberFactory.getOfTeam(this, role, position);
       if (mainOnPosition != null) {
         mainOnPosition.setRole(TeamRole.SUBSTITUDE);
         Database.save(mainOnPosition);
@@ -94,26 +110,33 @@ public class OrgaTeam implements Serializable {
 
     OrgaMember orgaMember = OrgaMemberFactory.getOfTeam(member, this);
     if (orgaMember == null) {
-      orgaMember = new OrgaMember(member, this, TeamRole.valueOf(role.name()), position);
+      orgaMember = new OrgaMember(member, this, role, position);
     } else {
       orgaMember.setOrgaTeam(this);
-      orgaMember.setRole(TeamRole.valueOf(role.name()));
+      orgaMember.setRole(role);
       orgaMember.setPosition(position);
     }
     Database.save(orgaMember);
     Database.save(this);
 
-    var granter = new RoleGranter(member);
-    granter.remove(DiscordGroup.TRYOUT);
-    switch (role) {
-      case TRYOUT -> granter.add(DiscordGroup.ACCEPTED, 14);
-      case SUBSTITUDE, MAIN -> {
-        granter.add(DiscordGroup.ACCEPTED);
-        granter.remove(DiscordGroup.TRYOUT);
-      }
-    }
+    final var granter = new RoleGranter(member);
+    granter.addTeamRole(role, this);
+  }
 
-    granter.addTeam(this);
+  public void addCaptain(DiscordMember member) {
+    final OrgaMember orgaMember = OrgaMemberFactory.getOfTeam(member, this);
+    orgaMember.setCaptain(true);
+    Database.save(orgaMember);
+    final var granter = new RoleGranter(member);
+    granter.handleCaptain(true);
+  }
+
+  public void removeCaptain(DiscordMember member) {
+    final OrgaMember orgaMember = OrgaMemberFactory.getOfTeam(member, this);
+    orgaMember.setCaptain(false);
+    Database.save(orgaMember);
+    final var granter = new RoleGranter(member);
+    granter.handleCaptain(false);
   }
 
   public void removeRole(DiscordMember member) {
@@ -124,10 +147,28 @@ public class OrgaTeam implements Serializable {
     orgaMember.setActive(false);
     Database.save(orgaMember);
 
-    var granter = new RoleGranter(member);
-    granter.add(DiscordGroup.TRYOUT);
-    granter.remove(DiscordGroup.ACCEPTED);
+    final var granter = new RoleGranter(member);
+    granter.removeTeamRole(orgaMember.getRole(), this);
+  }
 
-    granter.removeTeam(this);
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final OrgaTeam orgaTeam)) return false;
+    if (team != null) return getTeam().equals((orgaTeam.getTeam()));
+    return getId() == orgaTeam.getId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
+  }
+
+  public Role getRole() {
+    return Nunu.DiscordRole.getRole(this);
+  }
+
+  public CustomDiscordRole getCustomRole() {
+    return role;
   }
 }

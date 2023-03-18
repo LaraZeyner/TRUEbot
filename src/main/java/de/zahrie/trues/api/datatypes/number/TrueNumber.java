@@ -24,6 +24,7 @@ public class TrueNumber extends Calculateable<TrueNumber> {
   }
 
   public String round() {
+    // TODO (Abgie) 15.03.2023: never used
     return hasDigits() && value <= 1 ? percentValue() : "" + round(0).intValue();
   }
 

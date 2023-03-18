@@ -22,5 +22,5 @@ public abstract class ModalBase extends Replyer {
 
   protected abstract Modal getModal(boolean value);
 
-  protected abstract void execute(ModalInteractionEvent event);
+  protected abstract boolean execute(ModalInteractionEvent event);
 }

@@ -12,9 +12,9 @@ public class JoinEvent extends ListenerAdapter {
   public void onGuildMemberJoin(GuildMemberJoinEvent event) {
     final var user = new DiscordMember();
     user.setDiscordId(event.getMember().getIdLong());
+    user.setMention(event.getMember().getAsMention());
     Database.save(user);
 
     // TODO send Hello-message
   }
-
 }

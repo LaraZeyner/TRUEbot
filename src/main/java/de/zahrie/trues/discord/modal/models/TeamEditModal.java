@@ -16,13 +16,18 @@ public class TeamEditModal extends ModalImpl {
     if (value) {
       builder = builder.addComponents(getTeams());
     }
-    return builder.addComponents(getApplicationRoleField(), getApplicationPosition()).build();
+    return builder.addComponents(getApplicationRoleField(), getApplicationPosition(), getBool()).build();
   }
 
   @Override
   @Msg("Der Nutzer wurde bearbeitet.")
-  protected void execute(ModalInteractionEvent event) {
-    getTeam().addRole(getInvoker(), getApplicationRole(), getTeamPosition());
-    sendMessage();
+  protected boolean execute(ModalInteractionEvent event) {
+    getTeam().addRole(getInvoker(), getTeamRole(), getTeamPosition());
+    if (getBoolValue()) {
+      getTeam().addCaptain(getInvoker());
+    } else {
+      getTeam().removeCaptain(getInvoker());
+    }
+    return sendMessage();
   }
 }

@@ -30,7 +30,7 @@ public record PlaydayScheduleHandler(PlayStage stage, int index, LeagueTier tier
   public TimeRange fromAbstractRange(RelativeTimeRange range) {
     final PlaydayConfig config = stage.playdayConfig();
 
-    final Time start = fromOffset(range.start(), (Time) stage.getStart());
+    final Time start = fromOffset(range.start(), stage.getStart());
     if (config.customDays() == null) {
       final RepeatType repeatType = config.repeater().type();
       start.add(Time.DATE, repeatType.getDays() * (index - 1));

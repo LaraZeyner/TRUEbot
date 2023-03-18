@@ -94,11 +94,6 @@ public class Time extends GregorianCalendar {
     return new Day(this);
   }
 
-  @Override
-  public Object clone() {
-    return super.clone();
-  }
-
   public Chain chain(TimeFormat timeFormat) {
     return timeFormat.of(this);
   }

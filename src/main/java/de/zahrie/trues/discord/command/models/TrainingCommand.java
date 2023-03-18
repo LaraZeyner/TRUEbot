@@ -1,12 +1,13 @@
 
 package de.zahrie.trues.discord.command.models;
 
-import de.zahrie.trues.api.discord.group.PermissionRole;
-import de.zahrie.trues.api.discord.member.DiscordMember;
+import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
+import de.zahrie.trues.api.discord.group.PermissionRole;
+import de.zahrie.trues.api.discord.member.DiscordMember;
 import de.zahrie.trues.discord.Nunu;
 import de.zahrie.trues.models.community.application.OrgaMember;
 import de.zahrie.trues.models.community.application.OrgaMemberFactory;
@@ -22,8 +23,8 @@ public class TrainingCommand extends SlashCommand {
   public boolean execute(SlashCommandInteractionEvent event) {
     final DiscordMember discordMember = getInvoker();
     final OrgaMember currentTeam = OrgaMemberFactory.getMostImportantTeam(discordMember);
-    final long channelId = currentTeam.getOrgaTeam().getVoiceId();
-    final VoiceChannel newChannel = Nunu.DiscordChannel.getChannel(channelId);
+    final DiscordChannel channel = currentTeam.getOrgaTeam().getVoice();
+    final VoiceChannel newChannel = Nunu.DiscordChannel.getVoiceChannel(channel.getDiscordId());
     if (newChannel == null) return errorMessage();
     final GuildVoiceState voiceState = getInvokingMember().getVoiceState();
     if (voiceState == null) return reply("Du bist in keinem Voicechannel");

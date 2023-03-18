@@ -22,7 +22,7 @@ public class TestCommand extends SlashCommand {
   @Override
   @Msg(value = "Hi **{}**", embeds = {
       @Embed(description = "Team-Standings", queries =
-      @DBQuery(query = "Team.Teaminfo", columns = {@Column("Teamname"), @Column("Division"), @Column("Score")}))})
+      @DBQuery(query = "PrimeTeam.Teaminfo", columns = {@Column("Teamname"), @Column("Division"), @Column("Score")}))})
   public boolean execute(SlashCommandInteractionEvent event) {
     final var name = Objects.requireNonNull(event.getOption("name")).getAsString();
     return sendMessage(name);

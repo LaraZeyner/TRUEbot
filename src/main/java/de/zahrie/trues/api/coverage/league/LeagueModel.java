@@ -9,9 +9,6 @@ import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
 @AllArgsConstructor
 public class LeagueModel implements Serializable {

@@ -1,6 +1,11 @@
 package de.zahrie.trues.api.coverage.match;
 
+import java.util.List;
+
+import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
+import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,4 +25,9 @@ public final class MatchFactory {
     return match;
   }
 
+  public static List<Team> getNextTeams() {
+    return Database.Find.findList(Match.class, "nextOrgaMatches").stream().filter(Match::isOrgagame)
+        .flatMap(nextOrgaMatch -> nextOrgaMatch.getParticipators().stream())
+        .map(Participator::getTeam).distinct().toList();
+  }
 }

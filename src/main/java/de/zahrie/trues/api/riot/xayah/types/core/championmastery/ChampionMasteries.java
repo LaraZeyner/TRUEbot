@@ -19,23 +19,23 @@ import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
 public class ChampionMasteries extends GhostObject.ListProxy<ChampionMastery, de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMastery, de.zahrie.trues.api.riot.xayah.types.data.championmastery.ChampionMasteries> {
   public static final class Builder {
     public final class SubBuilder {
-      private final Iterable<Champion> champions;
+      private final Iterable<RiotChampion> champions;
       private boolean streaming = false;
 
-      private SubBuilder(final Iterable<Champion> champions) {
+      private SubBuilder(final Iterable<RiotChampion> champions) {
         this.champions = champions;
       }
 
       public SearchableList<ChampionMastery> get() {
         final List<Integer> ids = new ArrayList<>();
-        for (final Champion champion : champions) {
-          ids.add(champion.getId());
+        for (final RiotChampion riotChampion : champions) {
+          ids.add(riotChampion.getId());
         }
 
         final ImmutableMap.Builder<String, Object> builder =
@@ -65,11 +65,11 @@ public class ChampionMasteries extends GhostObject.ListProxy<ChampionMastery, de
       return Orianna.getSettings().getPipeline().get(ChampionMasteries.class, builder.build());
     }
 
-    public SubBuilder withChampions(final Champion... champions) {
-      return new SubBuilder(Arrays.asList(champions));
+    public SubBuilder withChampions(final RiotChampion... riotChampions) {
+      return new SubBuilder(Arrays.asList(riotChampions));
     }
 
-    public SubBuilder withChampions(final Iterable<Champion> champions) {
+    public SubBuilder withChampions(final Iterable<RiotChampion> champions) {
       return new SubBuilder(champions);
     }
   }

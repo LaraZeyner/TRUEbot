@@ -57,7 +57,7 @@ public class RegisterCommand extends SlashCommand {
   }
 
   private boolean handleRiotAccount(String username, DiscordMember member) {
-    final Player player = PlayerFactory.getPlayer(username);
+    final Player player = PlayerFactory.getPlayerFromName(username);
     if (player == null) return errorMessage(username);
     if (player.getMember() != null) return reply("Der Account wurde bereits verknüpft.");
     player.setMember(member);
@@ -65,7 +65,7 @@ public class RegisterCommand extends SlashCommand {
   }
 
   private DiscordMember determineTarget(OptionMapping userMapping) {
-    if (userMapping == null || !getInvoker().isAbove(DiscordGroup.ACCEPTED)) {
+    if (userMapping == null || !getInvoker().isAbove(DiscordGroup.SUBSTITUDE)) {
       return getInvoker();
     }
     final Member target = userMapping.getAsMember();

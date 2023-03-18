@@ -1,13 +1,20 @@
 package de.zahrie.trues.api.discord.group;
 
+import de.zahrie.trues.api.discord.permissible.PermissionPattern;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.Permission;
+
+@RequiredArgsConstructor
+@Getter
 public enum GroupType {
-  academy,
-  _default,
-  department,
-  elo,
-  event,
-  hierarchical,
-  lane,
-  other,
-  team
+  DEFAULT(new PermissionPattern(Permission.NICKNAME_CHANGE).add(PermissionPattern.CHANNEL_INTERACT_TALK)),
+  PINGABLE(new PermissionPattern()),
+  ORGA_MEMBER(new PermissionPattern().add(PermissionPattern.CHANNEL_INTERACT_ADVANCED)),
+  STAFF(new PermissionPattern().add(PermissionPattern.GUILD_MODERATE).add(PermissionPattern.CHANNEL_INTERACT_MODERATE)),
+  ADMIN(new PermissionPattern().add(PermissionPattern.GUILD_ADMINISTRATE).add(PermissionPattern.CHANNEL_INTERACT_MODERATE)),
+  CONTENT(new PermissionPattern().add(PermissionPattern.CONTENT_CREATION));
+  
+  private final PermissionPattern pattern;
+
 }

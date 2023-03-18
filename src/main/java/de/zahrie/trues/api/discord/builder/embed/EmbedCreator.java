@@ -38,8 +38,8 @@ public class EmbedCreator {
     this.description = description;
   }
 
-  // TODO color
   public EmbedCreator(boolean enumerated, String title, String description, Color color) {
+    // TODO (Abgie) 15.03.2023: never used
     this.enumerated = enumerated;
     this.title = title;
     this.description = description;
@@ -55,7 +55,6 @@ public class EmbedCreator {
   }
 
   private void getBaseBuilder() {
-    String str = "zuletzt aktualisiert " + Time.of().chain(TimeFormat.DEFAULT).toString();
     final Chain footer = Chain.of("zuletzt aktualisiert ").add(Time.of().chain(TimeFormat.DEFAULT));
     this.currentBuilder = new EmbedBuilder().setFooter(footer.toString());
     this.totalDataLength = footer.length();

@@ -18,9 +18,6 @@ import de.zahrie.trues.util.io.request.HTML;
 import lombok.Builder;
 import lombok.Getter;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
 public class TeamHandler extends TeamModel implements Serializable {
   @Serial

@@ -71,6 +71,7 @@ public class Stage implements Serializable, Stageable {
   private Long discordEventId;
 
   public boolean isBetable() {
+    // TODO (Abgie) 15.03.2023: never used
     return this instanceof Betable;
   }
 

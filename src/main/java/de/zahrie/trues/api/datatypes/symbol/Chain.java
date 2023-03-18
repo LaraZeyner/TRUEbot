@@ -1,8 +1,12 @@
 package de.zahrie.trues.api.datatypes.symbol;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import lombok.NonNull;
+import org.slf4j.helpers.MessageFormatter;
 
 public final class Chain extends ChainString {
   private Chain(String value) {
@@ -43,15 +47,23 @@ public final class Chain extends ChainString {
   }
 
   public Chain add(Chain chain) {
-    return new Chain(value + chain.toString());
+    value += chain.toString();
+    return this;
   }
 
   public Chain add(String toAppend) {
-    return new Chain(value + toAppend);
+    value += toAppend;
+    return this;
+  }
+
+  public Chain add(Number toAppend) {
+    value += toAppend;
+    return this;
   }
 
   public Chain add(char c) {
-    return new Chain(value + "" + c);
+    value += "" + c;
+    return this;
   }
 
   public Chain between(String start) {
@@ -126,6 +138,26 @@ public final class Chain extends ChainString {
     return substring(0, index).add(Chain.of(sequence)).add(substring(index + sequence.length()));
   }
 
+  public int count(String substring) {
+    int count = 0, fromIndex = 0;
+    while ((fromIndex = value.indexOf(substring, fromIndex)) != -1) {
+      count++;
+      fromIndex++;
+    }
+    return count;
+  }
 
+  public Chain format(Object... data) {
+    return format(0, data);
+  }
+
+  public Chain format(int startingIndex, Object... data) {
+    if (data.length == 0) {
+      return this;
+    }
+    final List<Object> objects = Arrays.stream(data).toList().subList(startingIndex, count("{}"));
+    final String message = MessageFormatter.arrayFormat(value, objects.toArray()).getMessage();
+    return Chain.of(message);
+  }
 
 }

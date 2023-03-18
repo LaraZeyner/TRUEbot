@@ -1,141 +1,101 @@
 package de.zahrie.trues.api.discord.group;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.discord.member.DiscordMember;
-import de.zahrie.trues.api.discord.member.DiscordMemberGroup;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.discord.Nunu;
 import de.zahrie.trues.models.community.OrgaTeam;
-import net.dv8tion.jda.api.entities.Role;
+import de.zahrie.trues.models.community.application.OrgaMember;
+import de.zahrie.trues.models.community.application.OrgaMemberFactory;
+import de.zahrie.trues.models.community.application.TeamRole;
 
-public record RoleGranter(DiscordMember invoker, DiscordMember target) {
-
+public class RoleGranter extends RoleGranterBase {
   public RoleGranter(DiscordMember target) {
-    this(null, target);
+    super(target);
   }
 
-  public boolean isNotEmpty() {
-    return getAssignGroups().size() + getRemoveGroups().size() > 0;
+  public RoleGranter(DiscordMember target, DiscordMember invoker) {
+    super(target, invoker);
   }
 
-  public Set<DiscordGroup> getAssignGroups() {
-    final Set<DiscordGroup> assignable = getGroups();
-    assignable.removeAll(target.getActiveGroups());
-    return assignable;
+  public void addTeamRole(TeamRole role, OrgaTeam team) {
+    if (team != null) {
+      addTeam(team);
+      //TODO (Abgie) 14.03.2023: Maybe Remove after 14 Days
+    }
+
+    switch (role) {
+      case TRYOUT -> add(DiscordGroup.SUBSTITUDE, 14);
+      case SUBSTITUDE -> {
+        add(DiscordGroup.SUBSTITUDE);
+        remove(DiscordGroup.TRYOUT);
+      }
+      case MAIN -> {
+        add(DiscordGroup.PLAYER);
+        remove(DiscordGroup.TRYOUT);
+        remove(DiscordGroup.SUBSTITUDE);
+      }
+    }
   }
 
-  public Set<DiscordGroup> getRemoveGroups() {
-    final Set<DiscordGroup> assignable = getGroups();
-    assignable.retainAll(target.getActiveGroups());
-    return assignable;
+  public void removeTeamRole(TeamRole role, OrgaTeam team) {
+    if (team != null) {
+      removeTeam(team);
+    }
+    add(DiscordGroup.TRYOUT);
+    updateBasedOnGivenRoles();
   }
 
-  public Set<DiscordGroup> getGroups() {
-    final Set<DiscordGroup> activeGroups = invoker.getActiveGroups();
-    return activeGroups.stream().flatMap(activeGroup -> activeGroup.getAssignable().stream()).collect(Collectors.toSet());
+  public void updateBasedOnGivenRolesAndMembers(OrgaTeam team) {
+    updateBasedOnGivenRoles();
+    updateBasedOnMembers();
   }
 
-  public void perform(DiscordGroup group) {
-    if (target.getMember().getRoles().contains(group.getRole())) {
-      target.removeGroup(group, true);
+  private void updateBasedOnGivenRoles() {
+    final List<OrgaMember> currentTeams = OrgaMemberFactory.getCurrentTeams(target);
+    if (currentTeams.stream().anyMatch(OrgaMember::isCaptain)) {
+      add(DiscordGroup.TEAM_CAPTAIN);
     } else {
-      target.addGroup(group, true);
+      remove(DiscordGroup.TEAM_CAPTAIN);
+    }
+
+    if (currentTeams.stream().anyMatch(member -> member.getRole().equals(TeamRole.MAIN))) {
+      add(DiscordGroup.PLAYER);
+      remove(DiscordGroup.SUBSTITUDE);
+      remove(DiscordGroup.TRYOUT);
+      return;
+    } else {
+      remove(DiscordGroup.PLAYER);
+    }
+
+    if (currentTeams.stream().anyMatch(member -> member.getRole().equals(TeamRole.SUBSTITUDE))) {
+      add(DiscordGroup.SUBSTITUDE);
+      remove(DiscordGroup.TRYOUT);
+    } else {
+      remove(DiscordGroup.SUBSTITUDE);
     }
   }
 
-  public void add(DiscordGroup group) {
-    add(group, true, new Time(), 0);
-  }
-
-  public void add(DiscordGroup group, int days) {
-    add(group, true, new Time(), days);
-  }
-
-  public void add(DiscordGroup group, boolean perform, Time start, int days) {
-    if (days > 0) {
-      var memberGroup = new DiscordMemberGroup(target, group, start, start.plus(Time.DATE, days));
-      target.getGroups().add(memberGroup);
-      Database.save(memberGroup);
-      Database.save(this);
-    }
-    target.getGroups().stream().filter(DiscordMemberGroup::isActive)
-        .filter(discordMemberGroup -> discordMemberGroup.getDiscordGroup().equals(group)).findFirst().ifPresent(discordMemberGroup -> {
-          if (days > 0) {
-            final Time end = discordMemberGroup.getPermissionEnd();
-            final Time newEnd = start.plus(Time.DATE, days);
-            if (newEnd.after(end)) {
-              discordMemberGroup.setPermissionEnd(newEnd);
-            }
-          } else {
-            discordMemberGroup.setActive(false);
-            discordMemberGroup.setPermissionEnd(new Time());
-          }
-          Database.save(discordMemberGroup);
-        });
-
-    if (perform) {
-      final DiscordGroup departmentGroup = group.getDepartment().getGroup();
-      if (departmentGroup != null) {
-        addRole(departmentGroup.getRole());
+  private void updateBasedOnMembers() {
+    final List<OrgaMember> currentTeams = OrgaMemberFactory.getCurrentTeams(target);
+    final List<OrgaTeam> orgaTeams = Database.Find.findList(OrgaTeam.class);
+    final List<OrgaTeam> currentOrgaTeams = currentTeams.stream().map(OrgaMember::getOrgaTeam).toList();
+    for (final OrgaTeam orgaTeam : orgaTeams) {
+      if (currentOrgaTeams.contains(orgaTeam) && !target.getMember().getRoles().contains(orgaTeam.getRole())) {
+        addTeam(orgaTeam);
+        continue;
       }
-      final DiscordGroup tierGroup = group.getTier().getGroup();
-      if (tierGroup != null) {
-        addRole(tierGroup.getRole());
+      if (!currentOrgaTeams.contains(orgaTeam) && target.getMember().getRoles().contains(orgaTeam.getRole())) {
+        removeTeam(orgaTeam);
       }
-      addRole(group.getRole());
     }
   }
 
-  /**
-   * @param role Rolle wird nicht durch DiscordGroup repräsentiert
-   */
-  private void removeRole(Role role) {
-    Nunu.DiscordRole.removeRole(target.getMember(), role);
-  }
-
-  /**
-   * @param role Rolle wird nicht durch DiscordGroup repräsentiert
-   */
-  private void addRole(Role role) {
-    Nunu.DiscordRole.addRole(target.getMember(), role);
-  }
-
-  public void remove(DiscordGroup group) {
-    remove(group, true);
-  }
-
-  public void remove(DiscordGroup group, boolean perform) {
-    if (perform) {
-      final var groups = new HashSet<>(target.getActiveGroups());
-      groups.remove(group);
-      if (groups.stream().map(DiscordGroup::getDepartment).noneMatch(department -> department.equals(group.getDepartment()))) {
-        final DiscordGroup departmentGroup = group.getDepartment().getGroup();
-        if (departmentGroup != null && !departmentGroup.equals(group)) {
-          removeRole(departmentGroup.getRole());
-        }
-      }
-
-      if (groups.stream().map(DiscordGroup::getTier).noneMatch(tier -> tier.equals(group.getTier()))) {
-        final DiscordGroup tierGroup = group.getTier().getGroup();
-        if (tierGroup != null && !tierGroup.equals(group)) {
-          removeRole(tierGroup.getRole());
-        }
-      }
-      removeRole(group.getRole());
+  public void handleCaptain(boolean b) {
+    if (b) {
+      add(DiscordGroup.TEAM_CAPTAIN);
+    } else {
+      updateBasedOnGivenRoles();
     }
-  }
-
-  public void addTeam(OrgaTeam team) {
-    final Role role = Nunu.DiscordRole.getRole(team);
-    addRole(role);
-  }
-
-  public void removeTeam(OrgaTeam team) {
-    final Role role = Nunu.DiscordRole.getRole(team);
-    removeRole(role);
   }
 }

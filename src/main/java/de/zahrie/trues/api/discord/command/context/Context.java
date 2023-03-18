@@ -7,6 +7,6 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Context {
-  String name();
+  String value();
   Command.Type type() default Command.Type.USER;
 }

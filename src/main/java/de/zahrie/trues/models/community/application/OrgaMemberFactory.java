@@ -22,16 +22,22 @@ public class OrgaMemberFactory {
     return getCurrentTeams(member).stream().filter(member1 -> member1.getOrgaTeam().equals(team)).findFirst().orElse(null);
   }
 
-  public static OrgaMember getOfTeam(DiscordMember member, OrgaTeam team, TeamRole role) {
-    return getCurrentTeams(member).stream().filter(member1 -> member1.getRole().equals(role)).findFirst().orElse(null);
-  }
-
   public static OrgaMember getOfTeam(OrgaTeam team, TeamRole role, TeamPosition position) {
     return team.getOrgaMembers().stream().filter(member -> member.getRole().equals(role))
         .filter(member -> member.getPosition().equals(position)).findFirst().orElse(null);
   }
 
-  public static OrgaMember getOfTeam(DiscordMember member, TeamRole role) {
+  public static OrgaMember getOfRole(DiscordMember member, TeamRole role) {
+    // TODO (Abgie) 15.03.2023: never used
+    return member.getApps().stream().filter(app -> app.getRole().equals(role)).findFirst().orElse(null);
+  }
+
+  public static List<OrgaMember> getCaptainRoles(DiscordMember member) {
+    return Database.Find.findList(OrgaMember.class, new String[]{"member"}, new Object[]{member}, "ofMemberCaptain");
+  }
+
+  public static OrgaMember getCaptainsOfTeam(DiscordMember member, TeamRole role) {
+    // TODO (Abgie) 15.03.2023: never used
     return member.getApps().stream().filter(app -> app.getRole().equals(role)).findFirst().orElse(null);
   }
 }

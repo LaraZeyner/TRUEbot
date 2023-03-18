@@ -2,22 +2,20 @@ package de.zahrie.trues.api.riot.xayah.types.core.match;
 
 import java.io.Serial;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
 import com.merakianalytics.datapipelines.iterators.LazyList;
+import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.riot.xayah.Orianna;
 import de.zahrie.trues.api.riot.xayah.types.common.Platform;
 import de.zahrie.trues.api.riot.xayah.types.common.Queue;
@@ -26,12 +24,14 @@ import de.zahrie.trues.api.riot.xayah.types.common.Season;
 import de.zahrie.trues.api.riot.xayah.types.core.GhostObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Patch;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.api.riot.xayah.types.data.match.MatchList;
 import de.zahrie.trues.api.riot.xayah.types.data.match.MatchReference;
+import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
 
 public class MatchHistory extends GhostObject<MatchList> implements SearchableList<Match> {
   public static final class Builder {
@@ -84,19 +84,19 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
       return this;
     }
 
-    public Builder withChampions(final Champion... champions) {
+    public Builder withChampions(final RiotChampion... riotChampions) {
       final HashSet<Integer> champs = new HashSet<>();
-      for (final Champion champion : champions) {
-        champs.add(champion.getId());
+      for (final RiotChampion riotChampion : riotChampions) {
+        champs.add(riotChampion.getId());
       }
       this.champions = champs;
       return this;
     }
 
-    public Builder withChampions(final Iterable<Champion> champions) {
+    public Builder withChampions(final Iterable<RiotChampion> champions) {
       final HashSet<Integer> champs = new HashSet<>();
-      for (final Champion champion : champions) {
-        champs.add(champion.getId());
+      for (final RiotChampion riotChampion : champions) {
+        champs.add(riotChampion.getId());
       }
       this.champions = champs;
       return this;
@@ -153,8 +153,8 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
       return this;
     }
 
-    public Builder withStartTime(final DateTime startTime) {
-      this.startTime = startTime.getMillis();
+    public Builder withStartTime(final Time startTime) {
+      this.startTime = startTime.getTimeInMillis();
       return this;
     }
   }
@@ -213,48 +213,24 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
 
   private final Object batchLoadLock = new Object();
 
-  private final Supplier<Set<Champion>> champions = Suppliers.memoize(() -> {
-    if (coreData.getChampions() == null) {
-      return null;
-    }
-    return Set.copyOf(Champions.withIds(coreData.getChampions()).withPlatform(Platform.withTag(coreData.getPlatform())).get());
-  });
+  private final Supplier<Set<RiotChampion>> champions = Suppliers.memoize(() ->
+      coreData.getChampions() == null ? null : Set.copyOf(Champions.withIds(coreData.getChampions()).withPlatform(Platform.withTag(coreData.getPlatform())).get()))::get;
 
   private boolean complete = false;
   private DateTime endTime;
   private final SearchableList<Match> matches;
   private ListIterator<MatchReference> matchIterator = coreData.listIterator();
 
-  private final Supplier<Set<Queue>> queues = Suppliers.memoize(() -> {
-    if (coreData.getQueues() == null) {
-      return null;
-    }
-    final Set<Queue> queues = new HashSet<>();
-    for (final Integer id : coreData.getQueues()) {
-      queues.add(Queue.withId(id));
-    }
-    return Collections.unmodifiableSet(queues);
-  });
+  private final Supplier<Set<Queue>> queues = Suppliers.memoize(() ->
+      coreData.getQueues() == null ? null : coreData.getQueues().stream().map(Queue::withId).collect(Collectors.toUnmodifiableSet()))::get;
 
-  private final Supplier<Set<Season>> seasons = Suppliers.memoize(() -> {
-    if (coreData.getSeasons() == null) {
-      return null;
-    }
-    final Set<Season> seasons = new HashSet<>();
-    for (final Integer id : coreData.getSeasons()) {
-      seasons.add(Season.withId(id));
-    }
-    return Collections.unmodifiableSet(seasons);
-  });
+  private final Supplier<Set<Season>> seasons = Suppliers.memoize(() ->
+      coreData.getSeasons() == null ? null : coreData.getSeasons().stream().map(Season::withId).collect(Collectors.toUnmodifiableSet()))::get;
 
   private Integer startIndex;
 
-  private final Supplier<Summoner> summoner = Suppliers.memoize(() -> {
-    if (coreData.getAccountId() == null) {
-      return null;
-    }
-    return Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
-  });
+  private final Supplier<Summoner> summoner = Suppliers.memoize(() ->
+      coreData.getAccountId() == null ? null : Summoner.withAccountId(coreData.getAccountId()).withPlatform(Platform.withTag(coreData.getPlatform())).get())::get;
 
   public MatchHistory(final MatchList coreData) {
     super(coreData, 1);
@@ -342,7 +318,7 @@ public class MatchHistory extends GhostObject<MatchList> implements SearchableLi
     return matches.get(index);
   }
 
-  public Set<Champion> getChampions() {
+  public Set<RiotChampion> getChampions() {
     return champions.get();
   }
 

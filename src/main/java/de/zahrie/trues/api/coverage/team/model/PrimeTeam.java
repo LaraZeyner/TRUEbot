@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -34,7 +35,7 @@ public class PrimeTeam extends Team implements Serializable {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "division")
+  @JoinColumn(name = "division", nullable = false)
   @ToString.Exclude
   private League league;
 
@@ -47,6 +48,10 @@ public class PrimeTeam extends Team implements Serializable {
   public PrimeTeam(int prmId, String name, String abbreviation) {
     super(name, abbreviation);
     this.setPrmId(prmId);
+  }
+
+  public League getCurrentLeague() {
+    return league.getStage().getSeason().equals(SeasonFactory.getLastSeason()) ? league : null;
   }
 
   public void setScore(League division, String score) {

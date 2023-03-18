@@ -20,7 +20,7 @@ public class MatchLineups {
   }
 
   public MatchLineup getLineup(Participator participator) {
-    //TODO (Abgie) 01.03.2023: never used
+    // TODO (Abgie) 01.03.2023: never used
     return lineups.stream().filter(lineup -> lineup.getParticipator().equals(participator)).findFirst().orElse(null);
   }
 

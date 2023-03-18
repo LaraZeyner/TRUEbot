@@ -8,14 +8,13 @@ import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
-@Context(name = "Rollen bearbeiten")
+@Context("Rollen bearbeiten")
 public class RoleEditContext extends ContextCommand {
   @Override
   @Msg(value = "Der Nutzer wurde bearbeitet.")
   @UseView(ModalRegisterer.ROLE_EDIT)
-  public void execute(UserContextInteractionEvent event) {
+  public boolean execute(UserContextInteractionEvent event) {
     setPermission(o -> new RoleGranter(o, getTarget()).isNotEmpty());
-
-    sendModal();
+    return sendModal();
   }
 }

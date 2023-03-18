@@ -3,11 +3,9 @@ package de.zahrie.trues.util.io.request;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import de.zahrie.trues.util.logger.Logger;
+import lombok.extern.java.Log;
 
-/**
- * Created by Lara on 29.03.2022 for TRUES
- */
+@Log
 public final class Request {
   public static HTML requestHTML(URLType urlType, Object... arguments) {
     String urlString = urlType.getUrlName();
@@ -21,9 +19,10 @@ public final class Request {
         final URL url = new URL(urlString);
         return new HTMLRequester(url).html();
       }
-      Logger.getLogger("HTML").severe("No URL requested");
+      log.severe("No URL requested");
     } catch (MalformedURLException urlException) {
-      Logger.getLogger("HTML").severe("Wrong url", urlException);
+      log.severe("Wrong url");
+      log.throwing("Request", "requestHTML(String): HTML", urlException);
     }
     return new HTML();
   }

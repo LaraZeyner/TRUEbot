@@ -5,7 +5,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.ProfileIcon;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.SummonerSpell;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
@@ -18,8 +18,8 @@ public abstract class Player extends OriannaObject<de.zahrie.trues.api.riot.xaya
         super(coreData);
     }
 
-    @Searchable({Champion.class, String.class, int.class})
-    public abstract Champion getChampion();
+    @Searchable({RiotChampion.class, String.class, int.class})
+    public abstract RiotChampion getChampion();
 
     public abstract List<GameCustomizationObject> getCustomizationObjects();
 

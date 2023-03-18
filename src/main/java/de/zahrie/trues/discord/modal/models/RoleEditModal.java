@@ -25,9 +25,9 @@ public class RoleEditModal extends ModalImpl {
 
   @Override
   @Msg("Die Rollen wurden bearbeitet.")
-  public void execute(ModalInteractionEvent event) {
+  public boolean execute(ModalInteractionEvent event) {
     final DiscordMember invoker = DiscordMemberFactory.getMember(Objects.requireNonNull(event.getMember()));
     new RoleGranter(invoker, getInvoker()).add(getGroup(), getDays());
-    sendMessage();
+    return sendMessage();
   }
 }

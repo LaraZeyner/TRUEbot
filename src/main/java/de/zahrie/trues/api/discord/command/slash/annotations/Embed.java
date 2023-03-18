@@ -5,11 +5,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Embed {
-
   String value() default "";
-
   String description() default "keine Infos";
-
-  DBQuery[] queries();
-
+  DBQuery[] queries() default {};
 }

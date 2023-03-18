@@ -4,8 +4,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.Orianna;
@@ -61,24 +61,24 @@ public class ShardStatus extends GhostObject<de.zahrie.trues.api.riot.xayah.type
     }
 
     private final Supplier<List<String>> locales = Suppliers.memoize(() -> {
-        load(SHARD_STATUS_LOAD_GROUP);
-        if(coreData.getLocales() == null) {
-            return null;
-        }
-        return Collections.unmodifiableList(coreData.getLocales());
-    });
+      load(SHARD_STATUS_LOAD_GROUP);
+      if (coreData.getLocales() == null) {
+        return null;
+      }
+      return Collections.unmodifiableList(coreData.getLocales());
+    })::get;
 
     private final Supplier<List<Service>> services = Suppliers.memoize(() -> {
-        load(SHARD_STATUS_LOAD_GROUP);
-        if(coreData.getServices() == null) {
-            return null;
-        }
-        final List<Service> services = new ArrayList<>(coreData.getServices().size());
-        for(final de.zahrie.trues.api.riot.xayah.types.data.status.Service service : coreData.getServices()) {
-            services.add(new Service(service));
-        }
-        return Collections.unmodifiableList(services);
-    });
+      load(SHARD_STATUS_LOAD_GROUP);
+      if (coreData.getServices() == null) {
+        return null;
+      }
+      final List<Service> services = new ArrayList<>(coreData.getServices().size());
+      for (final de.zahrie.trues.api.riot.xayah.types.data.status.Service service : coreData.getServices()) {
+        services.add(new Service(service));
+      }
+      return Collections.unmodifiableList(services);
+    })::get;
 
     public ShardStatus(final de.zahrie.trues.api.riot.xayah.types.data.status.ShardStatus coreData) {
         super(coreData, 1);

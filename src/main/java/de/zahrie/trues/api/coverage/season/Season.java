@@ -26,6 +26,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -39,6 +40,7 @@ import org.hibernate.annotations.Type;
 @Setter
 @ToString
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "coverage_season",
         indexes = { @Index(name = "season_full", columnList = "season_full", unique = true),
                 @Index(name = "season_name", columnList = "season_name", unique = true),
@@ -55,6 +57,7 @@ public class Season implements Betable, Seasonable, Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "coverage_season_id", columnDefinition = "TINYINT UNSIGNED not null")
+  @EqualsAndHashCode.Include
   private short id;
 
   @Column(name = "season_name", nullable = false, length = 15)
@@ -92,5 +95,4 @@ public class Season implements Betable, Seasonable, Serializable {
   public CoverageDepartment type() {
     return null;
   }
-
 }

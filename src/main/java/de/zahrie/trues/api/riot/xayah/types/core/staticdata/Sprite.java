@@ -2,54 +2,54 @@ package de.zahrie.trues.api.riot.xayah.types.core.staticdata;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.function.Supplier;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.Orianna;
 import de.zahrie.trues.api.riot.xayah.types.core.OriannaObject;
 
 public class Sprite extends OriannaObject<de.zahrie.trues.api.riot.xayah.types.data.staticdata.Sprite> {
-    @Serial
-    private static final long serialVersionUID = -8084940963099982290L;
+  @Serial
+  private static final long serialVersionUID = -8084940963099982290L;
 
-    private final Supplier<BufferedImage> image = Suppliers.memoize(() -> {
-        if(coreData.getVersion() == null || coreData.getFull() == null) {
-            return null;
-        }
-        final BufferedImage image = Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.of("url", getURL()));
-        return image.getSubimage(coreData.getX(), coreData.getY(), coreData.getWidth(), coreData.getHeight());
-    });
-
-    public Sprite(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Sprite coreData) {
-        super(coreData);
+  private final Supplier<BufferedImage> image = Suppliers.memoize(() -> {
+    if (coreData.getVersion() == null || coreData.getFull() == null) {
+      return null;
     }
+    final BufferedImage image = Orianna.getSettings().getPipeline().get(BufferedImage.class, ImmutableMap.of("url", getURL()));
+    return image.getSubimage(coreData.getX(), coreData.getY(), coreData.getWidth(), coreData.getHeight());
+  })::get;
 
-    public BufferedImage get() {
-        return image.get();
-    }
+  public Sprite(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Sprite coreData) {
+    super(coreData);
+  }
 
-    public String getFull() {
-        return coreData.getFull();
-    }
+  public BufferedImage get() {
+    return image.get();
+  }
 
-    public int getHeight() {
-        return coreData.getHeight();
-    }
+  public String getFull() {
+    return coreData.getFull();
+  }
 
-    public String getURL() {
-        return "http://ddragon.leagueoflegends.com/cdn/" + coreData.getVersion() + "/img/sprite/" + coreData.getFull();
-    }
+  public int getHeight() {
+    return coreData.getHeight();
+  }
 
-    public int getWidth() {
-        return coreData.getWidth();
-    }
+  public String getURL() {
+    return "http://ddragon.leagueoflegends.com/cdn/" + coreData.getVersion() + "/img/sprite/" + coreData.getFull();
+  }
 
-    public int getX() {
-        return coreData.getX();
-    }
+  public int getWidth() {
+    return coreData.getWidth();
+  }
 
-    public int getY() {
-        return coreData.getY();
-    }
+  public int getX() {
+    return coreData.getX();
+  }
+
+  public int getY() {
+    return coreData.getY();
+  }
 }

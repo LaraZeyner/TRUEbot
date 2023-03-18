@@ -62,7 +62,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.match.TournamentMatches;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatches;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatches;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Items;
@@ -324,8 +324,8 @@ public abstract class Orianna {
     return ChampionMasteryScores.forSummoners(summoners);
   }
 
-  public static Champion.Builder championNamed(final String name) {
-    return Champion.named(name);
+  public static RiotChampion.Builder championNamed(final String name) {
+    return RiotChampion.named(name);
   }
 
   public static ChampionRotations.Builder championRotationsWithPlatforms(final Iterable<Platform> platforms) {
@@ -400,12 +400,12 @@ public abstract class Orianna {
     return Champions.withVersion(version);
   }
 
-  public static Champion.Builder championWithId(final int id) {
-    return Champion.withId(id);
+  public static RiotChampion.Builder championWithId(final int id) {
+    return RiotChampion.withId(id);
   }
 
-  public static Champion.Builder championWithKey(final String key) {
-    return Champion.withKey(key);
+  public static RiotChampion.Builder championWithKey(final String key) {
+    return RiotChampion.withKey(key);
   }
 
   public static CurrentMatches.Builder currentMatchesForSummoners(final Iterable<Summoner> summoners) {

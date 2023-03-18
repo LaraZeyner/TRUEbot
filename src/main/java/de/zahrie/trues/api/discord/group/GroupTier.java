@@ -16,7 +16,7 @@ public enum GroupTier {
   REGISTERED(20, Set.of()),
   APPLICANT(30, Set.of()),
   TRYOUT(40, Set.of()),
-  ACCEPTED(50, Set.of()),
+  SUBSTITUDE(50, Set.of()),
   ORGA_MEMBER(60, Set.of(DiscordGroup.FRIEND)),
   LEADER(70, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER)),
   MANAGEMENT(80, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.MENTOR, DiscordGroup.ANALYST,
@@ -28,7 +28,7 @@ public enum GroupTier {
   private final Set<DiscordGroup> assignable;
 
   public boolean isOrga() {
-    return permissionId >= ACCEPTED.getPermissionId();
+    return permissionId >= SUBSTITUDE.getPermissionId();
   }
 
   public boolean isStaff() {

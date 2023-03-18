@@ -3,34 +3,29 @@ package de.zahrie.trues.api.coverage.match.log;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.util.logger.Logger;
+import lombok.extern.java.Log;
 
-/**
- * Created by Lara on 17.02.2023 for TRUEbot
- */
+@Log
 public final class LogFactory {
-
-  public static MatchLog handleUserWithTeam(MatchLog log, Chain content) {
+  public static MatchLog handleUserWithTeam(MatchLog matchLog, Chain content) {
     content = content.between("(", ")", -1);
     if (content.toString().equals("admin")) {
-      return log;
+      return matchLog;
     }
-    final Integer teamIndex = content.replace("Team ", "").intValue();
-    if (teamIndex != null) {
-      final Participator team;
-      if (teamIndex == 1) {
-        team = log.getMatch().getHome();
-      } else if (teamIndex == 2) {
-        team = log.getMatch().getGuest();
-      } else {
-        Logger.getLogger("LogFactory").warning(teamIndex + " spielt nicht - Log fehlerhaft");
-        return log;
+    final int teamIndex = content.replace("Team ", "").intValue();
+    final Participator team;
+    switch (teamIndex) {
+      case 1 -> team = matchLog.getMatch().getHome();
+      case 2 -> team = matchLog.getMatch().getGuest();
+      default -> {
+        log.warning(teamIndex + " spielt nicht - Log fehlerhaft");
+        return matchLog;
       }
-      log.setParticipator(team);
-      team.getLogs().add(log);
-      Database.save(log);
     }
-    return log;
+    matchLog.setParticipator(team);
+    team.getLogs().add(matchLog);
+    Database.save(matchLog);
+    return matchLog;
   }
 
 }

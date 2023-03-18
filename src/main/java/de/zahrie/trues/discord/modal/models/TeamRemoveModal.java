@@ -17,8 +17,8 @@ public class TeamRemoveModal extends ModalImpl {
 
   @Override
   @Msg("Der Nutzer wurde aus dem Team entfernt.")
-  protected void execute(ModalInteractionEvent event) {
+  protected boolean execute(ModalInteractionEvent event) {
     getTeam().removeRole(getInvoker());
-    sendMessage();
+    return sendMessage();
   }
 }

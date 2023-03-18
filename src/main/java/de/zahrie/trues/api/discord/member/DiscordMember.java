@@ -59,6 +59,9 @@ public class DiscordMember implements Serializable {
   @Column(name = "discord_id", nullable = false)
   private long discordId;
 
+  @Column(name = "discord_mention", nullable = false)
+  private String mention;
+
   @Column(name = "msg_count", columnDefinition = "SMALLINT UNSIGNED not null")
   private int messagesSent = 0;
 

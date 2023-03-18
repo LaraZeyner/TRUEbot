@@ -37,22 +37,19 @@ import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.member.DiscordMember;
 import de.zahrie.trues.api.discord.member.DiscordMemberGroup;
+import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
+import de.zahrie.trues.api.riot.matchhistory.game.Game;
+import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
+import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
+import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
 import de.zahrie.trues.models.betting.Bet;
-import de.zahrie.trues.models.calendar.ApplicationCalendar;
 import de.zahrie.trues.models.calendar.CalendarBase;
-import de.zahrie.trues.models.calendar.RepeatedSchedulingCalendar;
-import de.zahrie.trues.models.calendar.SchedulingCalendar;
 import de.zahrie.trues.models.calendar.TeamCalendar;
 import de.zahrie.trues.models.calendar.UserCalendar;
 import de.zahrie.trues.models.community.OrgaTeam;
 import de.zahrie.trues.models.community.application.Application;
 import de.zahrie.trues.models.community.application.OrgaMember;
 import de.zahrie.trues.models.logging.OrgaLog;
-import de.zahrie.trues.api.riot.Champion;
-import de.zahrie.trues.api.riot.matchhistory.Game;
-import de.zahrie.trues.api.riot.matchhistory.Performance;
-import de.zahrie.trues.api.riot.matchhistory.Selection;
-import de.zahrie.trues.api.riot.matchhistory.TeamPerf;
 import de.zahrie.trues.models.voting.Voting;
 import de.zahrie.trues.models.voting.VotingEntry;
 import org.hibernate.SessionFactory;
@@ -64,7 +61,6 @@ public class DatabaseEntityRegisterer implements Registerer<SessionFactory> {
   private SessionFactory buildSessionFactory() {
     final Configuration configuration = addClasses(List.of(
         Application.class,
-        ApplicationCalendar.class,
         Bet.class,
         CalendarBase.class,
         CalibrationStage.class,
@@ -96,9 +92,7 @@ public class DatabaseEntityRegisterer implements Registerer<SessionFactory> {
         PrimeTeam.class,
         ProfessionalSeason.class,
         Rank.class,
-        RepeatedSchedulingCalendar.class,
         ScheduleableMatch.class,
-        SchedulingCalendar.class,
         Scrimmage.class,
         Season.class,
         Selection.class,

@@ -6,11 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.util.logger.Logger;
+import lombok.extern.java.Log;
 
-/**
- * Created by Lara on 14.02.2023 for TRUEbot
- */
+@Log
 public record HTMLRequester(URL url) {
 
   public HTML html() {
@@ -25,7 +23,8 @@ public record HTMLRequester(URL url) {
     try (final Scanner scanner = new Scanner(this.url.openStream(), StandardCharsets.UTF_8).useDelimiter("\\A")) {
       return scanner.hasNext() ? scanner.next() : "";
     } catch (IOException e) {
-      Logger.getLogger("HTML").severe("No URL requested", e);
+      log.severe("No URL requested");
+      log.throwing(getClass().getName(), "determineContent", e);
     }
     return "";
   }

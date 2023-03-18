@@ -27,6 +27,7 @@ public class TeamRecord implements Serializable {
   private Short losses;
 
   public Standing getStanding() {
+    // TODO (Abgie) 15.03.2023: never used
     return new Standing(wins, losses);
   }
 

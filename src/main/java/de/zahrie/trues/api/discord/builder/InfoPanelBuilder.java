@@ -2,60 +2,40 @@ package de.zahrie.trues.api.discord.builder;
 
 import java.util.List;
 
-import de.zahrie.trues.api.discord.builder.embed.EmbedQueryBuilder;
-import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
-import de.zahrie.trues.api.discord.builder.string.StringCreator;
+import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
 import de.zahrie.trues.api.discord.builder.embed.EmbedCreator;
+import de.zahrie.trues.api.discord.builder.embed.EmbedQueryBuilder;
+import de.zahrie.trues.api.discord.builder.string.StringCreator;
 import de.zahrie.trues.api.discord.builder.string.StringQueryBuilder;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
 
-/**
- * Created by Lara on 12.02.2023 for TRUEbot
- */
-public record InfoPanelBuilder(String title, String description, DBQuery[] queries) {
-
+public record InfoPanelBuilder(String title, String description, DBQuery[] queries, List<CustomEmbedData> embedData) {
   public EmbedWrapper build() {
     EmbedWrapper wrapper = EmbedWrapper.of();
     EmbedCreator currentEmbedCreator = null;
     StringCreator currentStringCreator = null;
 
-    for (DBQuery query : queries) {
-      final List<Object[]> entries = Database.Find.getData(query.query());
-
-      if (entries.get(0).length > 3) {
-        if (currentStringCreator == null) {
-          currentStringCreator = new StringCreator(query.enumerated(), this.title, this.description);
-        }
+    for (final DBQuery query : queries) {
+      if (query.columns().length > 3) {
+        if (currentStringCreator == null) currentStringCreator = new StringCreator(query.enumerated(), this.title, this.description);
         if (currentEmbedCreator != null) {
           wrapper = wrapper.embed(currentEmbedCreator.build());
           currentEmbedCreator = null;
         }
-
-        currentStringCreator = new StringQueryBuilder(currentStringCreator, queries).build();
+        currentStringCreator = new StringQueryBuilder(currentStringCreator, queries, embedData).build();
         continue;
       }
 
-      // EMBED
-      if (currentEmbedCreator == null) {
-        currentEmbedCreator = new EmbedCreator(query.enumerated(), this.title, this.description);
-      }
+      if (currentEmbedCreator == null) currentEmbedCreator = new EmbedCreator(query.enumerated(), this.title, this.description);
       if (currentStringCreator != null) {
         wrapper = wrapper.content(currentStringCreator.build());
         currentStringCreator = null;
       }
-
-      currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, queries).build();
-
+      currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, queries, embedData).build();
     }
 
-    if (currentEmbedCreator != null) {
-      wrapper = wrapper.embed(currentEmbedCreator.build());
-    }
-    if (currentStringCreator != null) {
-      wrapper = wrapper.content(currentStringCreator.build());
-    }
-
+    if (currentEmbedCreator != null) wrapper = wrapper.embed(currentEmbedCreator.build());
+    if (currentStringCreator != null) wrapper = wrapper.content(currentStringCreator.build());
     return wrapper;
   }
-
 }

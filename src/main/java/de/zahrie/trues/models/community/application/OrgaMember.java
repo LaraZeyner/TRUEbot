@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 @Entity(name = "OrgaMember")
 @Table(name = "orga_member", indexes = {@Index(name = "idx_app", columnList = "discord_user, lineup_role, lane, orga_team", unique = true)})
 @NamedQuery(name = "OrgaMember.ofMember", query = "FROM OrgaMember WHERE member = :member AND active = true")
+@NamedQuery(name = "OrgaMember.ofMemberCaptain", query = "FROM OrgaMember WHERE member = :member AND active = true AND captain = true")
 public class OrgaMember implements Serializable, Comparable<OrgaMember> {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
@@ -68,8 +69,11 @@ public class OrgaMember implements Serializable, Comparable<OrgaMember> {
   @Column(name = "timestamp")
   private Time timestamp = new Time();
 
+  @Column(name = "captain")
+  private boolean captain = false;
+
   @Column(name = "active")
-  private boolean isActive = true;
+  private boolean active = true;
 
   public OrgaMember(DiscordMember member, OrgaTeam orgaTeam, TeamRole role, TeamPosition position) {
     this.member = member;
@@ -77,7 +81,8 @@ public class OrgaMember implements Serializable, Comparable<OrgaMember> {
     this.role = role;
     this.position = position;
     this.timestamp = new Time();
-    this.isActive = true;
+    this.active = true;
+    this.captain = false;
   }
 
   @Override

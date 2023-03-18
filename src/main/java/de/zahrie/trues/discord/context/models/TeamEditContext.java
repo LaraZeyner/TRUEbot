@@ -8,15 +8,15 @@ import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
-@Context(name = "Teammember bearbeiten")
+@Context("Teammember bearbeiten")
 public class TeamEditContext extends ContextCommand {
   @Override
   @Msg(value = "Der Nutzer wurde bearbeitet.")
   @UseView(ModalRegisterer.TEAM_EDIT)
-  public void execute(UserContextInteractionEvent event) {
+  public boolean execute(UserContextInteractionEvent event) {
     setPermission(o -> o.isEvenOrAbove(DiscordGroup.TEAM_CAPTAIN));
 
     final boolean advancedPermissions = getInvoker().isAbove(DiscordGroup.TEAM_CAPTAIN);
-    sendModal(advancedPermissions);
+    return sendModal(advancedPermissions);
   }
 }

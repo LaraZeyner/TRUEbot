@@ -14,16 +14,13 @@ import de.zahrie.trues.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
 public class LeagueHandler extends LeagueModel implements Serializable {
   @Serial
   private static final long serialVersionUID = -5698606611490610348L;
 
   @Builder
-      //TODO (Abgie) 01.03.2023: Never used
+  @SuppressWarnings("unused")
   LeagueHandler(String url, League league, List<PrimeTeam> teams, List<LeaguePlayday> playdays) {
     super(url, league, teams, playdays);
   }

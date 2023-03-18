@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -227,12 +227,8 @@ public class SummonerSpells extends GhostObject.ListProxy<SummonerSpell, de.zahr
         return new Builder().withVersion(version);
     }
 
-    private final Supplier<Set<String>> includedData = Suppliers.memoize(() -> {
-        if(coreData.getIncludedData() == null) {
-            return null;
-        }
-        return Collections.unmodifiableSet(coreData.getIncludedData());
-    });
+    private final Supplier<Set<String>> includedData = Suppliers.memoize(() ->
+        coreData.getIncludedData() == null ? null : Collections.unmodifiableSet(coreData.getIncludedData()))::get;
 
     public SummonerSpells(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells coreData) {
         super(coreData, 1);

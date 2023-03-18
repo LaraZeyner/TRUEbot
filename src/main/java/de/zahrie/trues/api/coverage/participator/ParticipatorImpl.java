@@ -5,7 +5,7 @@ import java.util.List;
 import de.zahrie.trues.api.coverage.lineup.LineupFactory;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.riot.Lane;
+import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.database.Database;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +18,7 @@ public class ParticipatorImpl {
   }
 
   public void setOrderedLineup(List<Player> newLineup) {
+    // TODO (Abgie) 01.03.2023: never used
     setLineup(newLineup, true);
   }
 

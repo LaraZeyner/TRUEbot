@@ -9,12 +9,14 @@ import de.zahrie.trues.api.discord.command.PermissionCheck;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.Replyer;
+import de.zahrie.trues.util.util.Util;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -123,5 +125,14 @@ public abstract class SlashCommand extends Replyer {
   private SubcommandGroupData getSubCommandGroup() {
     final String commandName = name.contains(" ") ? Chain.of(name).between(" ", null, -1).toString() : name;
     return new SubcommandGroupData(commandName, description).addSubcommands(subCommands.stream().map(SlashCommand::getSubCommand).toList());
+  }
+
+  public OptionMapping get(String key) {
+    return Util.nonNull(((SlashCommandInteractionEvent)event).getOption(key));
+  }
+
+  public <T extends Enum<T>> T get(String key, Class<T> clazz) {
+    final OptionMapping optionMapping = get(key);
+    return optionMapping == null ? null : Chain.of(optionMapping.getAsString()).toEnum(clazz);
   }
 }

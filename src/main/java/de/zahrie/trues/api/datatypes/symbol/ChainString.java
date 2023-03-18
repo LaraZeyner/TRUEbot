@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 class ChainString implements Comparable<ChainString> {
-  protected final String value;
+  protected String value;
 
   protected ChainString(String value) {
     this.value = value;
@@ -113,5 +113,10 @@ class ChainString implements Comparable<ChainString> {
 
   public Chain upper() {
     return Chain.of(value.toUpperCase());
+  }
+
+  public <T extends Enum<T>> T toEnum(Class<T> clazz) {
+    final Chain replace = upper().replace(" ", "_");
+    return Enum.valueOf(clazz, replace.toString());
   }
 }

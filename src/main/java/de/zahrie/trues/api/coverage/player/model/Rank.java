@@ -3,8 +3,10 @@ package de.zahrie.trues.api.coverage.player.model;
 import java.io.Serial;
 import java.io.Serializable;
 
+import de.zahrie.trues.api.coverage.team.model.Standing;
 import de.zahrie.trues.api.riot.xayah.types.common.Division;
 import de.zahrie.trues.api.riot.xayah.types.common.Tier;
+import de.zahrie.trues.util.Format;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,7 +28,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "player_ranked", indexes = @Index(name = "idx_lplayer", columnList = "player"))
 @NamedQuery(name = "Rank.fromPlayer", query = "FROM Rank WHERE player = :player")
@@ -60,17 +61,18 @@ public class Rank implements Serializable {
   @Column(name = "mmr", columnDefinition = "SMALLINT UNSIGNED")
   private int mmr;
 
-  public String getWinrate() {
-    //TODO (Abgie) 01.03.2023: Winrate
-    if (this.wins > 0) {
-      return Math.round(this.wins * 100.0 / (this.wins + this.losses))  + "%";
-    }
-    return null;
+  public Standing getWinrate() {
+    return new Standing(wins, losses);
   }
 
   @Override
   public boolean equals(Object obj) {
     return obj instanceof Rank && this.player.equals(((Rank) obj).getPlayer());
+  }
+
+  @Override
+  public String toString() {
+    return tier + " " + division + " - " + points + " LP (" + getWinrate().format(Format.ADDITIONAL) + ")";
   }
 
   Rank(Player player, Tier tier, Division division, byte points, int wins, int losses) {

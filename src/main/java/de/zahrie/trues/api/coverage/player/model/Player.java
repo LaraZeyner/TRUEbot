@@ -3,16 +3,19 @@ package de.zahrie.trues.api.coverage.player.model;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.discord.member.DiscordMember;
+import de.zahrie.trues.api.riot.matchhistory.game.GameType;
+import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
+import de.zahrie.trues.api.riot.matchhistory.performance.PerformanceFactory;
 import de.zahrie.trues.database.Database;
 import de.zahrie.trues.database.types.TimeCoverter;
-import de.zahrie.trues.api.discord.member.DiscordMember;
-import de.zahrie.trues.api.riot.matchhistory.Performance;
 import de.zahrie.trues.util.Const;
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,7 +44,6 @@ import org.hibernate.annotations.Type;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "player", indexes = { @Index(name = "idx_lol_name", columnList = "lol_name"),
         @Index(name = "prm_id", columnList = "prm_id", unique = true),
@@ -107,6 +109,7 @@ public class Player implements Serializable {
   private Set<Lineup> lineups = new LinkedHashSet<>();
 
   public boolean isType(PlayerType type) {
+    // TODO (Abgie) 15.03.2023: never used
     if (type == null) {
       return true;
     }
@@ -126,10 +129,8 @@ public class Player implements Serializable {
   }
 
   public int getMMR() {
-    if (this.rank == null) {
-      return Const.PLAYER_MMR_DEFAULT_VALUE;
-    }
-    return this.rank.getMmr();
+    // TODO (Abgie) 15.03.2023: never used
+    return this.rank == null ? Const.PLAYER_MMR_DEFAULT_VALUE : this.rank.getMmr();
   }
 
   public void setMember(DiscordMember member) {
@@ -140,5 +141,14 @@ public class Player implements Serializable {
     this.member = member;
     Database.save(this);
     Database.save(member);
+  }
+
+  @Override
+  public String toString() {
+    return summonerName + " | " + getRank();
+  }
+
+  public List<Object[]> getLastGames(GameType gameType) {
+    return PerformanceFactory.getLastPlayerGames(gameType, this);
   }
 }

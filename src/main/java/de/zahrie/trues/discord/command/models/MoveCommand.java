@@ -1,7 +1,5 @@
 package de.zahrie.trues.discord.command.models;
 
-import java.util.Objects;
-
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -23,10 +21,10 @@ public class MoveCommand extends SlashCommand {
   @Msg(value = "Alle Nutzer wurden in den Channel **{}** verschoben.", error = "Du hast keinen Zugriff auf diesen Channel")
   public boolean execute(SlashCommandInteractionEvent event) {
     final Member invoker = getInvokingMember();
-    final AudioChannel currentChannel = Nunu.DiscordChannel.getChannel(invoker);
+    final AudioChannel currentChannel = Nunu.DiscordChannel.getVoiceChannel(invoker);
     if (currentChannel == null) return reply("Du bist in keinem gültigen Voicechannel");
-    final AudioChannel newChannel = Objects.requireNonNull(event.getOption("channel")).getAsChannel().asAudioChannel();
-    boolean success = send(invoker.getPermissions(newChannel).contains(Permission.VOICE_CONNECT), newChannel.getName());
+    final AudioChannel newChannel = get("channel").getAsChannel().asAudioChannel();
+    final boolean success = send(invoker.getPermissions(newChannel).contains(Permission.VOICE_CONNECT), newChannel.getName());
     if (success) {
       currentChannel.getMembers().forEach(member -> Nunu.DiscordChannel.move(member, newChannel));
     }

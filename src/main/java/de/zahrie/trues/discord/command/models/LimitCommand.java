@@ -22,9 +22,9 @@ public class LimitCommand extends SlashCommand {
   @Msg(value = "Der Channel wurde auf **{}** Nutzer limitiert.", error = "Der gib eine gültige Zahl ein.")
   public boolean execute(SlashCommandInteractionEvent event) {
     final var amount = Objects.requireNonNull(event.getOption("nutzer")).getAsInt();
-    final AudioChannel channel = Nunu.DiscordChannel.getChannel(getInvokingMember());
+    final AudioChannel channel = Nunu.DiscordChannel.getVoiceChannel(getInvokingMember());
     if (!(channel instanceof VoiceChannel)) return reply("Der Channel konnte nicht gefunden werden.");
-    boolean success = Nunu.DiscordChannel.limitTo((VoiceChannel) channel, amount);
+    final boolean success = Nunu.DiscordChannel.limitTo((VoiceChannel) channel, amount);
     if (amount == 0) {
       return reply("Die Limitierung wurde zurückgesetzt.");
     }

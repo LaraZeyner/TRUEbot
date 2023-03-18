@@ -29,7 +29,8 @@ public enum MatchLogAction {
   scheduling_confirm(EventStatus.scheduling_confirm, false),
   scheduling_suggest(EventStatus.scheduling_suggest, false),
   scheduling_expired(EventStatus.created, false),
-  score_report(EventStatus.score_report, false);
+  score_report(EventStatus.score_report, false),
+  team_added(null, false);
 
   private final EventStatus status;
   private final boolean force;

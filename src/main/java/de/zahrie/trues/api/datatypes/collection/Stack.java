@@ -6,9 +6,6 @@ import java.util.Collection;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 24.02.2023 for TRUEbot
- */
 public class Stack<E> extends ArrayList<E> {
   @Serial
   private static final long serialVersionUID = 3877927374583616003L;
@@ -18,10 +15,12 @@ public class Stack<E> extends ArrayList<E> {
   }
 
   public Stack(@NotNull Collection<? extends E> c) {
+    // TODO (Abgie) 15.03.2023: never used
     super(c);
   }
 
   public E firstOrNull() {
+    // TODO (Abgie) 15.03.2023: never used
     return this.stream().findFirst().orElse(null);
   }
 

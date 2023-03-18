@@ -22,6 +22,7 @@ import lombok.ToString;
 @DiscriminatorValue("prime_league")
 @NamedQuery(name = "PrimeSeason.fromSeasonId", query = "FROM PrimeSeason WHERE prmId = :seasonId")
 @NamedQuery(name = "PrimeSeason.fromName", query = "FROM PrimeSeason WHERE fullName = :name")
+@NamedQuery(name = "PrimeSeason.lastSeason", query = "FROM PrimeSeason WHERE start < NOW() ORDER BY start DESC LIMIT 1")
 public class PrimeSeason extends Season implements Serializable {
   @Serial
   private static final long serialVersionUID = 3498814029985658723L;

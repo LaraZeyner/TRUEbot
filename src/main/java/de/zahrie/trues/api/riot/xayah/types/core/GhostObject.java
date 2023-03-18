@@ -12,9 +12,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 import de.zahrie.trues.api.riot.xayah.types.data.CoreData;

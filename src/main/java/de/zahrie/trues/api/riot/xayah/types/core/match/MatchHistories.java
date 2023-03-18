@@ -19,7 +19,7 @@ import de.zahrie.trues.api.riot.xayah.types.common.Queue;
 import de.zahrie.trues.api.riot.xayah.types.common.Season;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Patch;
 import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 
@@ -138,19 +138,19 @@ public abstract class MatchHistories {
             return this;
         }
 
-        public Builder withChampions(final Champion... champions) {
+        public Builder withChampions(final RiotChampion... riotChampions) {
             final HashSet<Integer> champs = new HashSet<>();
-            for(final Champion champion : champions) {
-                champs.add(champion.getId());
+            for(final RiotChampion riotChampion : riotChampions) {
+                champs.add(riotChampion.getId());
             }
             this.champions = champs;
             return this;
         }
 
-        public Builder withChampions(final Iterable<Champion> champions) {
+        public Builder withChampions(final Iterable<RiotChampion> champions) {
             final HashSet<Integer> champs = new HashSet<>();
-            for(final Champion champion : champions) {
-                champs.add(champion.getId());
+            for(final RiotChampion riotChampion : champions) {
+                champs.add(riotChampion.getId());
             }
             this.champions = champs;
             return this;

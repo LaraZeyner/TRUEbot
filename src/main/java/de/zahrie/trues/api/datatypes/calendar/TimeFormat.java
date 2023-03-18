@@ -4,14 +4,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.util.logger.Logger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.java.Log;
 
 @Getter
 @RequiredArgsConstructor
 @ToString
+@Log
 public enum TimeFormat {
   DAY("dd.MM."),
   DEFAULT("E, d. MMM YYYY HH:mm");
@@ -23,6 +24,7 @@ public enum TimeFormat {
   }
 
   public Chain now() {
+    // TODO (Abgie) 15.03.2023: never used
     return this.of(new Time());
   }
 
@@ -30,7 +32,7 @@ public enum TimeFormat {
     try {
       return Time.of(format().parse(dateString.toString()));
     } catch (ParseException parseException) {
-      Logger.getLogger().severe("Fehler", parseException);
+      log.throwing("TimeFormat", "of(Chain): Time", parseException);
     }
     return Time.min();
   }

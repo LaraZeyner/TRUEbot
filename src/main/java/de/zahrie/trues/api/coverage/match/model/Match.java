@@ -27,6 +27,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -45,9 +46,9 @@ import org.hibernate.annotations.Type;
 @Setter
 @ToString
 @Entity
-@Table(name = "coverage",
-        indexes = { @Index(name = "idx_coverage", columnList = "match_id", unique = true) })
+@Table(name = "coverage", indexes = { @Index(name = "idx_coverage", columnList = "match_id", unique = true) })
 @DiscriminatorFormula("IF(coverage_group IS NULL, 'scrimmage', IF(scheduling_start IS NULL, 'bet', IF(match_id IS NULL, 'intern', 'prm')))")
+@NamedQuery(name = "Match.nextOrgaMatches", query = "FROM Match WHERE start > NOW() ORDER BY start")
 public class Match implements Betable, Serializable {
   @Serial
   private static final long serialVersionUID = -3826796156374823894L;

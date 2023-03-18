@@ -11,8 +11,8 @@ import de.zahrie.trues.util.Loader;
 import de.zahrie.trues.util.io.request.URLType;
 
 public class PlayerLoader extends GamesportsLoader implements Loader {
-  // TODO (Abgie) 27.02.2023:
   public static int idFromURL(String url) {
+    // TODO (Abgie) 15.03.2023: never used
     return Chain.of(url).between("/users/", "-").intValue();
   }
 

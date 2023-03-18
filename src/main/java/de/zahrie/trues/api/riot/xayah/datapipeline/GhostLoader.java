@@ -31,7 +31,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.match.Timeline;
 import de.zahrie.trues.api.riot.xayah.types.core.match.TournamentMatches;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatches;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Items;
@@ -67,8 +67,8 @@ public class GhostLoader extends AbstractDataSource {
     }
 
     @SuppressWarnings("unchecked")
-    @Get(Champion.class)
-    public Champion getChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
+    @Get(RiotChampion.class)
+    public RiotChampion getChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         Utilities.checkNotNull(platform, "platform");
         final Number id = (Number)query.get("id");
@@ -87,7 +87,7 @@ public class GhostLoader extends AbstractDataSource {
         data.setVersion(version);
         data.setLocale(locale);
         data.setIncludedData(includedData);
-        return new Champion(data);
+        return new RiotChampion(data);
     }
 
     @Get(ChampionMasteries.class)
@@ -295,8 +295,8 @@ public class GhostLoader extends AbstractDataSource {
     }
 
     @SuppressWarnings("unchecked")
-    @GetMany(Champion.class)
-    public CloseableIterator<Champion> getManyChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
+    @GetMany(RiotChampion.class)
+    public CloseableIterator<RiotChampion> getManyChampion(final java.util.Map<String, Object> query, final PipelineContext context) {
         final Platform platform = (Platform)query.get("platform");
         Utilities.checkNotNull(platform, "platform");
         final Iterable<Number> ids = (Iterable<Number>)query.get("ids");
@@ -325,7 +325,7 @@ public class GhostLoader extends AbstractDataSource {
           }
 
           @Override
-          public Champion next() {
+          public RiotChampion next() {
             final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data = new de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion();
             if (ids != null) {
               final int id = ((Number) iterator.next()).intValue();
@@ -339,7 +339,7 @@ public class GhostLoader extends AbstractDataSource {
             data.setVersion(version);
             data.setLocale(locale);
             data.setIncludedData(includedData);
-            return new Champion(data);
+            return new RiotChampion(data);
           }
 
           @Override

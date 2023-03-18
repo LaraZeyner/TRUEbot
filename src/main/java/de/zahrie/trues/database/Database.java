@@ -36,6 +36,10 @@ public final class Database {
       return connection.session().getNamedQuery(queryName).list();
     }
 
+    public static <T> List<T> findList(Class<T> entityClass, String subQuery) {
+      return findList(entityClass, new String[]{}, new Object[]{}, subQuery);
+    }
+
     public static <T> List<T> findList(Class<T> entityClass, String[] params, Object[] values) {
       return findList(entityClass, params, values, "findBy");
     }
@@ -44,12 +48,16 @@ public final class Database {
       return QueryFactory.performWithSubquery(entityClass, params, values, subQuery).list();
     }
 
-    public static List<Object[]> findObjectList(String[] params, Object[] values, String subQuery) {
-      return QueryFactory.performWithSubquery(params, values, subQuery).list();
+    public static List<Object[]> findObjectList(String[] params, Object[] values, String query) {
+      return QueryFactory.performWithSubquery(params, values, query).list();
     }
 
     public static <T> T find(Class<T> entityClass, long id) {
       return connection.session().get(entityClass, id);
+    }
+
+    public static <T> T find(Class<T> entityClass, String subQuery) {
+      return find(entityClass, new String[]{}, new Object[]{}, subQuery);
     }
 
     public static <T> T find(Class<T> entityClass, String[] params, Object[] values) {

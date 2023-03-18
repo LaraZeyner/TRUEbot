@@ -4,8 +4,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.merakianalytics.datapipelines.iterators.CloseableIterator;
@@ -88,7 +88,7 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
             }
         }
 
-        public SearchableList<de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRune> get() {
+        public SearchableList<ReforgedRune> get() {
             if(platform == null) {
                 platform = Orianna.getSettings().getDefaultPlatform();
                 if(platform == null) {
@@ -117,8 +117,8 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
                 builder.put("keys", keys);
             }
 
-            final CloseableIterator<de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRune> result =
-                Orianna.getSettings().getPipeline().getMany(de.zahrie.trues.api.riot.xayah.types.core.staticdata.ReforgedRune.class, builder.build(), streaming);
+            final CloseableIterator<ReforgedRune> result =
+                Orianna.getSettings().getPipeline().getMany(ReforgedRune.class, builder.build(), streaming);
             return streaming ? SearchableLists.from(CloseableIterators.toLazyList(result)) : SearchableLists.from(CloseableIterators.toList(result));
         }
 
@@ -200,12 +200,9 @@ public class ReforgedRunes extends GhostObject.ListProxy<ReforgedRune, de.zahrie
     }
 
     private final Supplier<ReforgedRuneTree> tree = Suppliers.memoize(() -> {
-        load(LIST_PROXY_LOAD_GROUP);
-        if(coreData.getTree() == null) {
-            return null;
-        }
-        return new ReforgedRuneTree(coreData.getTree(), ReforgedRunes.this);
-    });
+      load(LIST_PROXY_LOAD_GROUP);
+      return coreData.getTree() == null ? null : new ReforgedRuneTree(coreData.getTree(), ReforgedRunes.this);
+    })::get;
 
     public ReforgedRunes(final de.zahrie.trues.api.riot.xayah.types.data.staticdata.ReforgedRunes coreData) {
         super(coreData, 1);

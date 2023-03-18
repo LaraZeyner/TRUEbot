@@ -32,7 +32,7 @@ public abstract class Event extends OriannaObject<de.zahrie.trues.api.riot.xayah
 
     public abstract AscensionType getAscensionType();
 
-    public abstract SearchableList<Participant> getAssistingParticipants();
+    public abstract SearchableList<MatchParticipant> getAssistingParticipants();
 
     public abstract Item getBefore();
 
@@ -40,11 +40,11 @@ public abstract class Event extends OriannaObject<de.zahrie.trues.api.riot.xayah
 
     public abstract Point getCapturedPoint();
 
-    public abstract Participant getCreator();
+    public abstract MatchParticipant getCreator();
 
     public abstract Item getItem();
 
-    public abstract Participant getKiller();
+    public abstract MatchParticipant getKiller();
 
     public abstract LaneType getLaneType();
 
@@ -54,7 +54,7 @@ public abstract class Event extends OriannaObject<de.zahrie.trues.api.riot.xayah
 
     public abstract MonsterType getMonsterType();
 
-    public abstract Participant getParticipant();
+    public abstract MatchParticipant getParticipant();
 
     public abstract Position getPosition();
 
@@ -70,7 +70,7 @@ public abstract class Event extends OriannaObject<de.zahrie.trues.api.riot.xayah
 
     public abstract EventType getType();
 
-    public abstract Participant getVictim();
+    public abstract MatchParticipant getVictim();
 
     public abstract WardType getWardType();
 }

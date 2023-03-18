@@ -1,6 +1,8 @@
 package de.zahrie.trues.api.discord.permissible;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,16 +11,15 @@ import net.dv8tion.jda.api.Permission;
 
 @Data
 public class PermissionPattern {
-  protected static final PermissionPattern CHANNEL_ACCESS = new PermissionPattern(
+  public static final PermissionPattern CHANNEL_ACCESS = new PermissionPattern(
       Permission.MESSAGE_HISTORY,
       Permission.VIEW_CHANNEL,
       Permission.MESSAGE_ADD_REACTION,
       Permission.MESSAGE_EXT_EMOJI,
-      Permission.MESSAGE_EXT_STICKER,
-      Permission.USE_APPLICATION_COMMANDS
+      Permission.MESSAGE_EXT_STICKER
   );
 
-  protected static final PermissionPattern CHANNEL_INTERACT = new PermissionPattern(
+  public static final PermissionPattern CHANNEL_INTERACT = new PermissionPattern(
       Permission.MESSAGE_ATTACH_FILES,
       Permission.MESSAGE_EMBED_LINKS,
       Permission.MESSAGE_SEND,
@@ -26,70 +27,116 @@ public class PermissionPattern {
       Permission.REQUEST_TO_SPEAK,
       Permission.VOICE_CONNECT,
       Permission.CREATE_PUBLIC_THREADS,
-      Permission.CREATE_PRIVATE_THREADS
-  ).addPattern(CHANNEL_ACCESS);
+      Permission.CREATE_PRIVATE_THREADS,
+      Permission.USE_APPLICATION_COMMANDS
+  ).add(CHANNEL_ACCESS);
 
-  protected static final PermissionPattern CHANNEL_INTERACT_TALK = new PermissionPattern(
+  public static final PermissionPattern CHANNEL_INTERACT_TALK = new PermissionPattern(
       Permission.VOICE_SPEAK,
       Permission.VOICE_START_ACTIVITIES,
       Permission.VOICE_STREAM,
       Permission.VOICE_USE_VAD
-  ).addPattern(CHANNEL_INTERACT);
+  ).add(CHANNEL_INTERACT);
 
-  protected static final PermissionPattern CHANNEL_INTERACT_ADVANCED = new PermissionPattern(
+  public static final PermissionPattern CHANNEL_INTERACT_ADVANCED = new PermissionPattern(
       Permission.VOICE_MOVE_OTHERS,
       Permission.MESSAGE_MENTION_EVERYONE
-  ).addPattern(CHANNEL_INTERACT_TALK);
+  ).add(CHANNEL_INTERACT_TALK);
 
-  protected static final PermissionPattern CHANNEL_INTERACT_MODERATE = new PermissionPattern(
-      Permission.MANAGE_CHANNEL,
+  public static final PermissionPattern CHANNEL_INTERACT_MODERATE = new PermissionPattern(
       Permission.MANAGE_THREADS,
       Permission.MESSAGE_TTS,
       Permission.PRIORITY_SPEAKER,
       Permission.VOICE_MUTE_OTHERS,
       Permission.VOICE_DEAF_OTHERS
-  ).addPattern(CHANNEL_INTERACT_TALK);
+  ).add(CHANNEL_INTERACT_TALK);
 
-  protected static final PermissionPattern GUILD_VIEW = new PermissionPattern(
+  public static final PermissionPattern GUILD_VIEW = new PermissionPattern(
       Permission.VIEW_AUDIT_LOGS,
       Permission.VIEW_GUILD_INSIGHTS
   );
 
-  protected static final PermissionPattern GUILD_MODERATE = new PermissionPattern(
+  public static final PermissionPattern GUILD_MODERATE = new PermissionPattern(
       Permission.MESSAGE_MANAGE,
       Permission.MODERATE_MEMBERS,
       Permission.NICKNAME_MANAGE
-  ).addPattern(GUILD_VIEW);
+  ).add(GUILD_VIEW);
 
-  protected static final PermissionPattern GUILD_ADMINISTRATE = new PermissionPattern(
+  public static final PermissionPattern GUILD_ADMINISTRATE = new PermissionPattern(
+      Permission.MANAGE_CHANNEL,
       Permission.KICK_MEMBERS
-  ).addPattern(GUILD_MODERATE);
+  ).add(GUILD_MODERATE);
 
-  protected static final PermissionPattern CONTENT_CREATION = new PermissionPattern(
+  public static final PermissionPattern CONTENT_CREATION = new PermissionPattern(
       Permission.MANAGE_EMOJIS_AND_STICKERS,
       Permission.MANAGE_EVENTS,
       Permission.MANAGE_WEBHOOKS
   );
 
-  protected static final PermissionPattern ALL = new PermissionPattern(
+  public static final PermissionPattern ALL = new PermissionPattern(
       Permission.MANAGE_SERVER,
       Permission.MANAGE_ROLES,
       Permission.MANAGE_PERMISSIONS,
       Permission.NICKNAME_CHANGE,
       Permission.CREATE_INSTANT_INVITE,
       Permission.ADMINISTRATOR
-  ).addPattern(CHANNEL_INTERACT_MODERATE).addPattern(GUILD_ADMINISTRATE).addPattern(CONTENT_CREATION);
+  ).add(CHANNEL_INTERACT_MODERATE).add(GUILD_ADMINISTRATE).add(CONTENT_CREATION);
 
 
-  protected final Set<Permission> permissions;
+  protected final Map<Permission, Boolean> permissions;
 
   public PermissionPattern(Permission... permissions) {
-    this.permissions = Arrays.stream(permissions).collect(Collectors.toSet());
+    this.permissions = new HashMap<>();
+    allow(permissions);
   }
 
-  public PermissionPattern addPattern(PermissionPattern pattern) {
-    permissions.addAll(pattern.getPermissions());
+  public PermissionPattern add(PermissionPattern pattern) {
+    pattern.getPermissions().forEach(this::addSingle);
     return this;
   }
 
+  public PermissionPattern allow(Permission... permissions) {
+    return set(true, permissions);
+  }
+
+  public PermissionPattern allow(PermissionPattern pattern) {
+    final var permissions = (Permission[]) pattern.getPermissions().entrySet().stream().filter(Map.Entry::getValue).toArray();
+    return set(true, permissions);
+  }
+
+  public PermissionPattern deny(Permission... permissions) {
+    return set(false, permissions);
+  }
+
+  public PermissionPattern deny(PermissionPattern pattern) {
+    final var permissions = (Permission[]) pattern.getPermissions().entrySet().stream().filter(entry -> !entry.getValue()).toArray();
+    return set(false, permissions);
+  }
+
+  private PermissionPattern set(Boolean value, Permission[] permissions) {
+    Arrays.asList(permissions).forEach(permission -> addSingle(permission, value));
+    return this;
+  }
+
+  public PermissionPattern remove(Permission... permissions) {
+    Arrays.stream(permissions).forEach(this.permissions::remove);
+    return this;
+  }
+
+  public PermissionPattern remove(PermissionPattern pattern) {
+    this.permissions.keySet().stream().filter(permission -> pattern.getPermissions().containsKey(permission)).forEach(this.permissions::remove);
+    return this;
+  }
+
+  private void addSingle(Permission permission, Boolean value) {
+    permissions.put(permission, value);
+  }
+
+  public Set<Permission> getAllowed() {
+    return permissions.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toSet());
+  }
+
+  public Set<Permission> getDenied() {
+    return permissions.entrySet().stream().filter(entry -> !entry.getValue()).map(Map.Entry::getKey).collect(Collectors.toSet());
+  }
 }

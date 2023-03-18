@@ -19,7 +19,7 @@ import de.zahrie.trues.api.riot.xayah.types.core.match.Timeline;
 import de.zahrie.trues.api.riot.xayah.types.core.match.TournamentMatches;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.FeaturedMatches;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champions;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Item;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Items;
@@ -63,63 +63,63 @@ import de.zahrie.trues.api.riot.xayah.types.dto.staticdata.SummonerSpellList;
 public abstract class UniqueKeys {
   private static final Set<Tier> UNIQUE_TIERS = ImmutableSet.of(Tier.CHALLENGER, Tier.MASTER, Tier.GRANDMASTER);
 
-  public static int[] forChampion(final Champion champion) {
-    final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data = champion.getCoreData();
+  public static int[] forChampion(final RiotChampion riotChampion) {
+    final de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champion data = riotChampion.getCoreData();
     if (data.getId() != 0 && data.getName() != null && data.getKey() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
           }),
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
           }),
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
           })
       };
     } else if (data.getId() != 0 && data.getName() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
           }),
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
           })
       };
     } else if (data.getId() != 0 && data.getKey() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
           }),
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
           })
       };
     } else if (data.getName() != null && data.getKey() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
           }),
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
           })
       };
     } else if (data.getId() != 0) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getId(), data.getIncludedData()
           })
       };
     } else if (data.getName() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getName(), data.getIncludedData()
           })
       };
     } else if (data.getKey() != null) {
       return new int[]{
           Arrays.hashCode(new Object[]{
-              Champion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
+              RiotChampion.class.getCanonicalName(), data.getPlatform(), data.getVersion(), data.getLocale(), data.getKey(), data.getIncludedData()
           })
       };
     } else {
@@ -144,7 +144,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionDataQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -173,7 +172,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionDtoQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -204,7 +202,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionListDtoQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         ChampionList.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -335,13 +332,12 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
     final String key = (String) query.get("key");
     return Arrays.hashCode(new Object[]{
-        Champion.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
+        RiotChampion.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
         id == null ? name == null ? key : name : id.intValue(), query.get("includedData")
     });
   }
@@ -384,7 +380,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionsDataQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         de.zahrie.trues.api.riot.xayah.types.data.staticdata.Champions.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(),
@@ -393,7 +388,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forChampionsQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         Champions.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -517,7 +511,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemDataQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -541,7 +534,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemDtoQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -558,7 +550,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemListDtoQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         ItemList.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -566,7 +557,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -590,7 +580,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemsDataQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         de.zahrie.trues.api.riot.xayah.types.data.staticdata.Items.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(),
@@ -599,7 +588,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forItemsQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         Items.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -1186,7 +1174,7 @@ public abstract class UniqueKeys {
       @Override
       public Integer next() {
         return Arrays.hashCode(new Object[]{
-            Champion.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
+            RiotChampion.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
             ids != null ? ((Number) iterator.next()).intValue() : iterator.next(), query.get("includedData")
         });
       }
@@ -3582,7 +3570,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteriesDataQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         de.zahrie.trues.api.riot.xayah.types.data.staticdata.Masteries.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(),
@@ -3591,7 +3578,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteriesQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         Masteries.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -3640,7 +3626,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteryDataQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -3664,7 +3649,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteryDtoQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -3681,7 +3665,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteryListDtoQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         MasteryList.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -3689,7 +3672,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forMasteryQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4159,7 +4141,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRuneDataQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4183,7 +4164,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRuneDtoQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4200,7 +4180,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRuneListDtoQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         RuneList.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -4208,7 +4187,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRuneQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4232,7 +4210,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRunesDataQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         de.zahrie.trues.api.riot.xayah.types.data.staticdata.Runes.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(),
@@ -4241,7 +4218,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forRunesQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         Runes.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -4436,7 +4412,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellDataQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4460,7 +4435,6 @@ public abstract class UniqueKeys {
     };
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellDtoQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4477,7 +4451,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellListDtoQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         SummonerSpellList.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),
@@ -4485,7 +4458,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellQuery(final java.util.Map<String, Object> query) {
     final Number id = (Number) query.get("id");
     final String name = (String) query.get("name");
@@ -4509,7 +4481,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellsDataQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         de.zahrie.trues.api.riot.xayah.types.data.staticdata.SummonerSpells.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(),
@@ -4518,7 +4489,6 @@ public abstract class UniqueKeys {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public static int forSummonerSpellsQuery(final java.util.Map<String, Object> query) {
     return Arrays.hashCode(new Object[]{
         SummonerSpells.class.getCanonicalName(), ((Platform) query.get("platform")).getTag(), query.get("version"), query.get("locale"),

@@ -12,13 +12,9 @@ import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
-import de.zahrie.trues.util.util.Util;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 14.02.2023 for TRUEbot
- */
 @Getter
 public class TeamLoader extends GamesportsLoader {
   public static int idFromURL(Chain url) {
@@ -60,14 +56,12 @@ public class TeamLoader extends GamesportsLoader {
   private List<PrimePlayer> getPlayers() {
     final var players = new ArrayList<PrimePlayer>();
     for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
-      final Integer primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
-      if (primeId != null) {
-        final Chain summonerName = user.find("div", "txt-info").find("span").text();
-        final var playerLoader = new PlayerLoader(primeId, summonerName.toString());
-        final PlayerHandler playerHandler = playerLoader.load();
-        playerHandler.update();
-        players.add(playerHandler.getPlayer());
-      }
+      final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
+      final Chain summonerName = user.find("div", "txt-info").find("span").text();
+      final var playerLoader = new PlayerLoader(primeId, summonerName.toString());
+      final PlayerHandler playerHandler = playerLoader.load();
+      playerHandler.update();
+      players.add((PrimePlayer) playerHandler.getPlayer());
     }
 
     team.getPlayers().stream().filter(player -> !players.contains((PrimePlayer) player)).filter(Objects::nonNull).forEach(player -> new PlayerLoader(((PrimePlayer) player).getPrmUserId(), player.getSummonerName()).handleLeftTeam());

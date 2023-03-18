@@ -42,14 +42,14 @@ public class Team implements Serializable {
   @Serial
   private static final long serialVersionUID = -8929555475128771601L;
 
+
   @Id
+  @Column(name = "t_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int id;
+
   @Column(name = "team_id")
   private Integer prmId;
-
-  @Column(name = "t_id", columnDefinition = "SMALLINT UNSIGNED NOT NULL")
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  // TODO Dies hier soll der neue Index werden
-  private int id;
 
   @Column(name = "team_name", nullable = false, length = 100)
   private String name;
@@ -110,5 +110,9 @@ public class Team implements Serializable {
   public void setHighlight(boolean highlight) {
     this.highlight = highlight;
     Database.save(this);
+  }
+
+  public String getFullName() {
+    return name + " (" + abbreviation + ")";
   }
 }

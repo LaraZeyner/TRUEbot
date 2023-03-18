@@ -3,10 +3,8 @@ package de.zahrie.trues.api.riot.xayah.types.core.summoner;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-import org.joda.time.DateTime;
-
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import de.zahrie.trues.api.riot.xayah.Orianna;
@@ -24,14 +22,15 @@ import de.zahrie.trues.api.riot.xayah.types.core.league.LeagueEntry;
 import de.zahrie.trues.api.riot.xayah.types.core.league.LeaguePositions;
 import de.zahrie.trues.api.riot.xayah.types.core.match.Match;
 import de.zahrie.trues.api.riot.xayah.types.core.match.MatchHistory;
-import de.zahrie.trues.api.riot.xayah.types.core.match.Participant;
+import de.zahrie.trues.api.riot.xayah.types.core.match.MatchParticipant;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.Searchable;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableLists;
 import de.zahrie.trues.api.riot.xayah.types.core.spectator.CurrentMatch;
-import de.zahrie.trues.api.riot.xayah.types.core.staticdata.Champion;
 import de.zahrie.trues.api.riot.xayah.types.core.staticdata.ProfileIcon;
+import de.zahrie.trues.api.riot.xayah.types.core.staticdata.RiotChampion;
 import de.zahrie.trues.api.riot.xayah.types.core.thirdpartycode.VerificationString;
+import org.joda.time.DateTime;
 
 public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner> {
     public static final class Builder {
@@ -116,12 +115,9 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
     }
 
     private final Supplier<ProfileIcon> profileIcon = Suppliers.memoize(() -> {
-        load(SUMMONER_LOAD_GROUP);
-        if(coreData.getProfileIconId() == -1) {
-            return null;
-        }
-        return ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
-    });
+      load(SUMMONER_LOAD_GROUP);
+      return coreData.getProfileIconId() == -1 ? null : ProfileIcon.withId(coreData.getProfileIconId()).withPlatform(Platform.withTag(coreData.getPlatform())).get();
+    })::get;
 
     public Summoner(final de.zahrie.trues.api.riot.xayah.types.data.summoner.Summoner coreData) {
         super(coreData, 1);
@@ -147,16 +143,16 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
         return ChampionMasteries.forSummoner(this).get();
     }
 
-    public SearchableList<ChampionMastery> getChampionMasteries(final Champion... champions) {
+    public SearchableList<ChampionMastery> getChampionMasteries(final RiotChampion... riotChampions) {
+        return ChampionMasteries.forSummoner(this).withChampions(riotChampions).get();
+    }
+
+    public SearchableList<ChampionMastery> getChampionMasteries(final Iterable<RiotChampion> champions) {
         return ChampionMasteries.forSummoner(this).withChampions(champions).get();
     }
 
-    public SearchableList<ChampionMastery> getChampionMasteries(final Iterable<Champion> champions) {
-        return ChampionMasteries.forSummoner(this).withChampions(champions).get();
-    }
-
-    public ChampionMastery getChampionMastery(final Champion champion) {
-        return ChampionMastery.forSummoner(this).withChampion(champion).get();
+    public ChampionMastery getChampionMastery(final RiotChampion riotChampion) {
+        return ChampionMastery.forSummoner(this).withChampion(riotChampion).get();
     }
 
     public ChampionMasteryScore getChampionMasteryScore() {
@@ -171,7 +167,7 @@ public class Summoner extends GhostObject<de.zahrie.trues.api.riot.xayah.types.d
         final MatchHistory one = MatchHistory.forSummoner(this).withSeasons(season).withStartIndex(0).withEndIndex(1).get();
         if(!one.isEmpty()) {
             final Match match = one.get(0);
-            final Participant summoner = match.getParticipants().get(0);
+            final MatchParticipant summoner = match.getParticipants().get(0);
             return summoner.getHighestTierInSeason();
         }
         return null;

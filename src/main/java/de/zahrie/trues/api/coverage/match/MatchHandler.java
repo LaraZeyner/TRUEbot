@@ -21,18 +21,17 @@ import de.zahrie.trues.database.Database;
 import de.zahrie.trues.util.io.request.HTML;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.java.Log;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
+@Log
 public class MatchHandler extends MatchModel implements Serializable {
   @Serial
   private static final long serialVersionUID = -2773996422897802404L;
 
   @Builder
+  @SuppressWarnings("unused")
   public MatchHandler(HTML html, String url, PrimeMatch match, List<HTML> logs, List<PrimeTeam> teams) {
-    //TODO (Abgie) 01.03.2023: never used
     super(html, url, match, logs, teams);
   }
 
@@ -53,11 +52,9 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   private void updateMatchtime() {
-    final Integer epoch = html.find("span", "tztime").getAttribute("data-time").intValue();
-    if (epoch != null) {
-      final Time time = Time.fromEpoch(epoch);
-      match.setStart(time);
-    }
+    final int epoch = html.find("span", "tztime").getAttribute("data-time").intValue();
+    final Time time = Time.fromEpoch(epoch);
+    match.setStart(time);
   }
 
   public void updateResult() {
@@ -117,11 +114,8 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   private Time determineTimestamp(HTML html) {
-    final Integer stamp = html.find("span", "itime ").getAttribute("data-time").intValue();
-    if (stamp != null) {
-      return Time.fromEpoch(stamp);
-    }
-    return null;
+    final int stamp = html.find("span", "itime ").getAttribute("data-time").intValue();
+    return Time.fromEpoch(stamp);
   }
 
 }
