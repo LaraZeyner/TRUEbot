@@ -2,6 +2,7 @@ package de.zahrie.trues.database;
 
 import java.util.List;
 
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.NoResultException;
 import org.hibernate.SessionFactory;
 
@@ -51,6 +52,40 @@ public final class Database {
     }
   }
 
+  public static class Finder {
+    public static <T> List<T> getData(String queryString) {
+      return connection.getSession().createQuery(queryString).list();
+    }
+
+    public static <T> List<T> findList(String queryString, Class<T> entityClass) {
+      return findList(queryString, new String[]{}, new Object[]{}, entityClass);
+    }
+
+    public static <T> List<T> findList(String queryString, String[] params, Object[] values, Class<T> entityClass) {
+      return QueryFactory.performWithQueryString(queryString, params, values, entityClass).list();
+    }
+
+    public static List<Object[]> findObjectList(String queryString, String[] params, Object[] values) {
+      return QueryFactory.performWithQueryString(queryString, params, values).list();
+    }
+
+    public static <T> T find(String queryString, Class<T> entityClass) {
+      return find(queryString, new String[]{}, new Object[]{}, entityClass);
+    }
+
+    public static <T> T find(String queryString, String[] params, Object[] values, Class<T> entityClass) {
+      try {
+        return QueryFactory.performSingleQueryString(queryString, params, values, entityClass);
+      } catch (NoResultException exception) {
+        return null;
+      }
+    }
+
+    public static Object[] findObject(String queryString, String[] params, Object[] values) {
+      return Util.avoidNull(findObjectList(queryString, params, values).get(0), null);
+    }
+  }
+
   public static class Find {
     public static <T> List<T> findList(Class<T> entityClass) {
       final String entityClassName = EntityFactory.getName(entityClass);
@@ -70,11 +105,11 @@ public final class Database {
     }
 
     public static <T> List<T> findList(Class<T> entityClass, String[] params, Object[] values, String subQuery) {
-      return QueryFactory.performWithSubquery(entityClass, params, values, subQuery).list();
+      return QueryFactory.performWithNamedQuery(entityClass, params, values, subQuery).list();
     }
 
     public static List<Object[]> findObjectList(String[] params, Object[] values, String query) {
-      return QueryFactory.performWithSubquery(params, values, query).list();
+      return QueryFactory.performWithNamedQuery(params, values, query).list();
     }
 
     public static <T> T find(Class<T> entityClass, long id) {
@@ -95,6 +130,10 @@ public final class Database {
       } catch (NoResultException exception) {
         return null;
       }
+    }
+
+    public static Object[] findObject(String[] params, Object[] values, String subQuery) {
+      return Util.avoidNull(findObjectList(params, values, subQuery).get(0), null);
     }
   }
 

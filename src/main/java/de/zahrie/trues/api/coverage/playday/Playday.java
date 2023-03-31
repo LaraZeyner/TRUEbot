@@ -17,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -37,12 +36,9 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "coverage_playday", indexes = {
         @Index(name = "idx_playday_2", columnList = "stage, playday_index", unique = true) })
-@NamedQuery(name = "Playday.fromStageAndId", query = "FROM Playday WHERE stage = :stage AND idx = :id")
-@NamedQuery(name = "Playday.fromStageAndStart", query = "FROM Playday WHERE stage = :stage AND start = :start")
 public class Playday implements Serializable {
   @Serial
   private static final long serialVersionUID = -1118100065150854452L;
-
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,22 +56,22 @@ public class Playday implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   @Type(TimeCoverter.class)
   @Column(name = "playday_start", nullable = false)
-  private Time start;
+  private Time startTime;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Type(TimeCoverter.class)
   @Column(name = "playday_end", nullable = false)
-  private Time end;
+  private Time endTime;
 
   @OneToMany(mappedBy = "matchday")
   @ToString.Exclude
   private Set<Match> matches;
 
-  public Playday(PlayStage stage, short index, Time start, Time end) {
+  public Playday(PlayStage stage, short index, Time startTime, Time endTime) {
     this.stage = stage;
     this.idx = index;
-    this.start = start;
-    this.end = end;
+    this.startTime = startTime;
+    this.endTime = endTime;
   }
 
 }
