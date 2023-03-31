@@ -37,7 +37,6 @@ public class TeamHandler extends TeamModel implements Serializable {
     Database.save(team);
   }
 
-  //TODO (Abgie) 01.03.2023:
   public void loadDivision() {
     final LeagueLoader leagueLoader = new LeagueLoader(team.getLeague().getUrl());
     leagueLoader.load().updateAll();

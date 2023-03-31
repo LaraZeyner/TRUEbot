@@ -12,10 +12,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Lara on 10.02.2023 for TRUEbot
- */
-
 @RequiredArgsConstructor
 public class EmbedCreator {
   private final boolean enumerated;
@@ -55,7 +51,7 @@ public class EmbedCreator {
   }
 
   private void getBaseBuilder() {
-    final Chain footer = Chain.of("zuletzt aktualisiert ").add(Time.of().chain(TimeFormat.DEFAULT));
+    final Chain footer = Chain.of("zuletzt aktualisiert ").add(Time.of().text(TimeFormat.DEFAULT));
     this.currentBuilder = new EmbedBuilder().setFooter(footer.toString());
     this.totalDataLength = footer.length();
 

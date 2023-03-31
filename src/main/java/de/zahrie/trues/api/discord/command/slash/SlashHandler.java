@@ -3,7 +3,7 @@ package de.zahrie.trues.api.discord.command.slash;
 import java.util.List;
 
 import de.zahrie.trues.discord.command.CommandRegisterer;
-import de.zahrie.trues.discord.Nunu;
+import de.zahrie.trues.api.discord.util.Nunu;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,7 +13,7 @@ public class SlashHandler extends ListenerAdapter {
   private static final List<SlashCommand> commands = new CommandRegisterer().register();
 
   public static void handleCommands() {
-    Nunu.client.updateCommands().addCommands(
+    Nunu.getInstance().getClient().updateCommands().addCommands(
         commands.stream().map(SlashCommand::commandData).toList()
     ).queue();
   }

@@ -33,6 +33,9 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   TeamLoader create() {
+    if (html == null) {
+      return null;
+    }
     final Chain teamTitle = html.find("h1").text();
     final Chain name = teamTitle.between(null, " (", -1);
     final Chain abbreviation = teamTitle.between("(", ")", -1);

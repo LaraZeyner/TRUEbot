@@ -14,4 +14,8 @@ public class PlaydayFactory {
   public static Playday fromMatchtime(Stage stage, Time start) {
     return Database.Find.find(Playday.class, new String[]{"stage", "start"}, new Object[]{stage, start}, "fromStageAndStart");
   }
+
+  public static Playday current() {
+    //TODO (Abgie) 27.03.2023:
+  }
 }

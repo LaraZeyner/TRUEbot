@@ -1,14 +1,19 @@
 package de.zahrie.trues.api.coverage.player;
 
+import java.util.List;
+
+import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
 import de.zahrie.trues.database.Database;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;
 
 @Log
 public final class PlayerFactory {
+  public static List<Player> registeredPlayers() {
+    return Database.Find.findList(Player.class, "registered");
+  }
   public static Player findPlayer(String puuid) {
     return puuid == null ? null : Database.Find.find(Player.class, new String[]{"puuid"}, new Object[]{puuid}, "fromPuuid");
   }

@@ -8,6 +8,7 @@ import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import lombok.NonNull;
 import org.slf4j.helpers.MessageFormatter;
 
+@Deprecated
 public final class Chain extends ChainString {
   private Chain(String value) {
     super(value);
@@ -19,6 +20,10 @@ public final class Chain extends ChainString {
 
   public static Chain of(String value) {
     return new Chain(value);
+  }
+
+  public static Chain of(Object value) {
+    return new Chain(value.toString());
   }
 
   public static Chain of(char[] value) {
@@ -43,7 +48,7 @@ public final class Chain extends ChainString {
   }
 
   public Time time(TimeFormat timeFormat) {
-    return timeFormat.of(this);
+    return timeFormat.of(value);
   }
 
   public Chain add(Chain chain) {

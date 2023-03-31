@@ -3,27 +3,52 @@ package de.zahrie.trues.database;
 import java.util.List;
 
 import jakarta.persistence.NoResultException;
+import org.hibernate.SessionFactory;
 
 public final class Database {
   static DatabaseConnection connection;
 
   public static DatabaseConnection connection() {
-    if (connection == null) {
-      DatabaseConnector.connect();
-    }
     return connection;
   }
 
   public static void save(Object object) {
-    connection.session().merge(object);
+    connection.getSession().merge(object);
   }
 
   public static void remove(Object object) {
-    connection.session().remove(object);
+    connection.getSession().remove(object);
+  }
+
+  public static void saveAndCommit(Object object) {
+    save(object);
+    connection.commit();
+  }
+
+  public static void removeAndCommit(Object object) {
+    remove(object);
+    connection.commit();
   }
 
   public static void flush() {
-    connection.session().flush();
+    connection.getSession().flush();
+  }
+
+  public static class Connector {
+    public static void connect() {
+      if (connection != null) return;
+
+      final SessionFactory sessionFactory = new DatabaseEntityRegisterer().register();
+      final var session = sessionFactory.openSession();
+      final var transaction = session.beginTransaction();
+      connection = new DatabaseConnection(sessionFactory, session, transaction);
+    }
+
+    public static void disconnect() {
+      connection.getSession().close();
+      connection.getSessionFactory().close();
+      connection = null;
+    }
   }
 
   public static class Find {
@@ -33,7 +58,7 @@ public final class Database {
     }
 
     public static <T> List<T> getData(String queryName) {
-      return connection.session().getNamedQuery(queryName).list();
+      return connection.getSession().getNamedQuery(queryName).list();
     }
 
     public static <T> List<T> findList(Class<T> entityClass, String subQuery) {
@@ -53,7 +78,7 @@ public final class Database {
     }
 
     public static <T> T find(Class<T> entityClass, long id) {
-      return connection.session().get(entityClass, id);
+      return connection.getSession().get(entityClass, id);
     }
 
     public static <T> T find(Class<T> entityClass, String subQuery) {

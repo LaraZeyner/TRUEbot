@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 @Command(name = "test", descripion = "Dies ist ein Test", perm = @Perm(PermissionRole.EVERYONE), options = {
     @Option(name = "name", description = "Testname", choices = {"Hallo", "Welt"}),
-    @Option(name = "teamname", description = "Teamname des Communityteams", completion = "Team.Orgateams.str")
+    @Option(name = "teamname", description = "Teamname des Communityteams", completion = "OrgaTean.OrgaTeams.str")
 })
 public class TestCommand extends SlashCommand {
 

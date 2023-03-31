@@ -7,9 +7,6 @@ import de.zahrie.trues.api.coverage.player.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 @Getter
 @AllArgsConstructor
 public class PlayerModel implements Serializable {

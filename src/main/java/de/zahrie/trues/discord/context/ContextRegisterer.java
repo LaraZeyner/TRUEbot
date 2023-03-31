@@ -5,6 +5,7 @@ import java.util.List;
 import de.zahrie.trues.api.Registerer;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
 import de.zahrie.trues.discord.context.models.ApplyContext;
+import de.zahrie.trues.discord.context.models.MembersEditContext;
 import de.zahrie.trues.discord.context.models.ProfileContext;
 import de.zahrie.trues.discord.context.models.RoleEditContext;
 import de.zahrie.trues.discord.context.models.TeamEditContext;
@@ -16,6 +17,7 @@ public class ContextRegisterer extends ListenerAdapter implements Registerer<Lis
   public List<ContextCommand> register() {
     return List.of(
         new ApplyContext(),
+        new MembersEditContext(),
         new ProfileContext(),
         new RoleEditContext(),
         new TeamEditContext(),

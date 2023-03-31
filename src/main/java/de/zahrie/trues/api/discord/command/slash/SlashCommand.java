@@ -4,15 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import de.zahrie.trues.api.discord.util.Replyer;
 import de.zahrie.trues.api.discord.command.PermissionCheck;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
-import de.zahrie.trues.api.discord.Replyer;
-import de.zahrie.trues.util.util.Util;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.Util;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.ExtensionMethod;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -22,10 +30,12 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
+@ExtensionMethod(StringExtention.class)
 public abstract class SlashCommand extends Replyer {
   private String description;
   private PermissionCheck permissionCheck;
@@ -33,6 +43,10 @@ public abstract class SlashCommand extends Replyer {
   private List<SlashCommand> subCommands = List.of();
   private List<AutoCompletion> completions = new ArrayList<>();
   private boolean defered = false;
+
+  public Find find(String key) {
+    return new Find(key);
+  }
 
   public SlashCommand() {
     super(SlashCommandInteractionEvent.class);
@@ -58,7 +72,7 @@ public abstract class SlashCommand extends Replyer {
     }
   }
 
-  public SlashCommand(SlashCommand... commands) {
+  protected SlashCommand(SlashCommand... commands) {
     this();
     this.subCommands = List.of(commands);
   }
@@ -118,21 +132,92 @@ public abstract class SlashCommand extends Replyer {
   }
 
   private SubcommandData getSubCommand() {
-    final String commandName = name.contains(" ") ? Chain.of(name).between(" ", null, -1).toString() : name;
+    final String commandName = name.contains(" ") ? name.between(" ", null, -1) : name;
     return new SubcommandData(commandName, description).addOptions(this.options);
   }
 
   private SubcommandGroupData getSubCommandGroup() {
-    final String commandName = name.contains(" ") ? Chain.of(name).between(" ", null, -1).toString() : name;
+    final String commandName = name.contains(" ") ? name.between(" ", null, -1) : name;
     return new SubcommandGroupData(commandName, description).addSubcommands(subCommands.stream().map(SlashCommand::getSubCommand).toList());
   }
 
-  public OptionMapping get(String key) {
-    return Util.nonNull(((SlashCommandInteractionEvent)event).getOption(key));
+  public class Find {
+    private final String key;
+
+    public Find(String key) {
+      this.key = key;
+    }
+
+    public Boolean bool() {
+      return bool(null);
+    }
+
+    public Boolean bool(Boolean defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsBoolean();
+    }
+
+    public GuildChannelUnion channel() {
+      return channel(null);
+    }
+
+    public GuildChannelUnion channel(GuildChannelUnion defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsChannel();
+    }
+
+    public String string() {
+      return string(null);
+    }
+
+    public String string(String defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsString();
+    }
+
+    public Integer integer() {
+      return integer(null);
+    }
+
+    public Integer integer(Integer defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsInt();
+    }
+
+    public Member member() {
+      return member(null);
+    }
+
+    public Member member(Member defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsMember();
+    }
+
+    public Time time() {
+      return time(null);
+    }
+
+    public Time time(Time defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      return option == null ? defaultValue : option.getAsString().getTime();
+    }
+
+    public <T extends Enum<T>> T toEnum(Class<T> clazz) {
+      return toEnum(clazz, null);
+    }
+
+    public <T extends Enum<T>> T toEnum(Class<T> clazz, T defaultValue) {
+      final String string = string();
+      return string == null ? defaultValue : string.toEnum(clazz);
+    }
   }
 
-  public <T extends Enum<T>> T get(String key, Class<T> clazz) {
-    final OptionMapping optionMapping = get(key);
-    return optionMapping == null ? null : Chain.of(optionMapping.getAsString()).toEnum(clazz);
+  public GuildChannel getChannel() {
+    return Nunu.DiscordChannel.getChannel(Util.nonNull(event.getChannel()).getIdLong());
+  }
+
+  @Nullable
+  public OrgaTeam getLocatedTeam() {
+    return OrgaTeamFactory.getTeamFromChannel(getChannel());
   }
 }

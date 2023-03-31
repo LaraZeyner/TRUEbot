@@ -9,6 +9,7 @@ import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
 import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -80,5 +81,9 @@ public class Game implements Serializable {
 
   public boolean hasSelections() {
     return !selections.isEmpty();
+  }
+
+  public String getDuration() {
+    return Util.formatDuration(durationInSeconds);
   }
 }

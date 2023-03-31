@@ -6,9 +6,6 @@ import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import lombok.Getter;
 
-/**
- * Created by Lara on 24.02.2023 for TRUEbot
- */
 @Getter
 public class MatchLineup {
   private final Participator participator;
@@ -16,13 +13,6 @@ public class MatchLineup {
 
   public MatchLineup(Participator participator) {
     this.participator = participator;
-    this.lineup = handleLineup(participator);
+    this.lineup = new LineupCreator(participator).handleLineup();
   }
-
-
-  private List<Lineup> handleLineup(Participator participator) {
-    final var lineupCreator = new LineupCreator(participator);
-    return lineupCreator.handleLineup();
-  }
-
 }

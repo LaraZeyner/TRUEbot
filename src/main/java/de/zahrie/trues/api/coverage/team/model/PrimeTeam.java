@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -25,14 +26,17 @@ import lombok.ToString;
 @ToString
 @Entity
 @DiscriminatorValue("1")
-@NamedQuery(name = "PrimeTeam.Orgateams.str", query = "SELECT name FROM Team WHERE orgaTeam IS NOT NULL")
 @NamedQuery(name = "PrimeTeam.Teaminfo", query = "SELECT name, league.name, score FROM PrimeTeam WHERE orgaTeam IS NOT NULL")
 @NamedQuery(name = "PrimeTeam.fromNameAbbr", query = "FROM PrimeTeam WHERE name = :name AND abbreviation = :abbr")
+@NamedQuery(name = "PrimeTeam.fromName", query = "FROM PrimeTeam WHERE name = :name")
+@NamedQuery(name = "PrimeTeam.fromAbbr", query = "FROM PrimeTeam WHERE abbreviation = :abbr")
 @NamedQuery(name = "PrimeTeam.fromPrmId", query = "FROM PrimeTeam WHERE prmId = :id")
 public class PrimeTeam extends Team implements Serializable {
   @Serial
   private static final long serialVersionUID = 6594410747323472599L;
 
+  @Column(name = "team_id")
+  private Integer prmId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "division", nullable = false)
@@ -70,6 +74,11 @@ public class PrimeTeam extends Team implements Serializable {
     final String losses = record.split(" / ")[1];
     final short lossesInteger = Short.parseShort(losses);
     this.record = new TeamRecord(seasons, winsInteger, lossesInteger);
+  }
+
+  public boolean isActive() {
+    //TODO (Abgie) 25.03.2023:
+    return league == null;
   }
 
 }

@@ -22,9 +22,8 @@ public enum Department {
 
 
   public List<DiscordGroup> getPingableGroups() {
-    if (id == 200) {
-      return List.of(DiscordGroup.EVENT, DiscordGroup.TEAMS, DiscordGroup.COACHING);
-    }
+    if (id == 200) return List.of();
+    if (id == 210) return List.of(DiscordGroup.EVENT, DiscordGroup.TEAMS, DiscordGroup.COACHING);
     return List.of(DiscordGroup.of(id));
   }
 

@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 
 public record AutoCompletion (String optionName, String query) {
   public List<Command.Choice> getData() {
-    return Database.connection().session().createNamedQuery(this.query, String.class)
+    return Database.connection().getSession().createNamedQuery(this.query, String.class)
         .getResultList().stream().map(entry -> new Command.Choice(entry, entry)).toList();
   }
 }

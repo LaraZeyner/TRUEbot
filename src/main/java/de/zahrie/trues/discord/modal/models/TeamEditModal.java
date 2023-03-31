@@ -11,11 +11,9 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 public class TeamEditModal extends ModalImpl {
   @Override
   protected Modal getModal(boolean value) {
-    Modal.Builder builder = create(getTarget().getMember().getNickname() + " zu Team hinzufügen/bearbeiten")
+    Modal.Builder builder = create(getTargetMember().getNickname() + " zu Team hinzufügen/bearbeiten")
         .addComponents(getTargetUser());
-    if (value) {
-      builder = builder.addComponents(getTeams());
-    }
+    if (value) builder = builder.addComponents(getTeams());
     return builder.addComponents(getApplicationRoleField(), getApplicationPosition(), getBool()).build();
   }
 
@@ -23,11 +21,8 @@ public class TeamEditModal extends ModalImpl {
   @Msg("Der Nutzer wurde bearbeitet.")
   protected boolean execute(ModalInteractionEvent event) {
     getTeam().addRole(getInvoker(), getTeamRole(), getTeamPosition());
-    if (getBoolValue()) {
-      getTeam().addCaptain(getInvoker());
-    } else {
-      getTeam().removeCaptain(getInvoker());
-    }
+    if (getBoolValue()) getTeam().addCaptain(getInvoker());
+    else getTeam().removeCaptain(getInvoker());
     return sendMessage();
   }
 }

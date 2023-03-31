@@ -5,19 +5,19 @@ import java.util.List;
 import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
 import de.zahrie.trues.api.discord.builder.embed.EmbedCreator;
 import de.zahrie.trues.api.discord.builder.embed.EmbedQueryBuilder;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
 import de.zahrie.trues.api.discord.builder.string.StringCreator;
 import de.zahrie.trues.api.discord.builder.string.StringQueryBuilder;
-import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
 
-public record InfoPanelBuilder(String title, String description, DBQuery[] queries, List<CustomEmbedData> embedData) {
+public record InfoPanelBuilder(String title, String description, List<CustomQuery> queries, List<CustomEmbedData> embedData) {
   public EmbedWrapper build() {
     EmbedWrapper wrapper = EmbedWrapper.of();
     EmbedCreator currentEmbedCreator = null;
     StringCreator currentStringCreator = null;
 
-    for (final DBQuery query : queries) {
-      if (query.columns().length > 3) {
-        if (currentStringCreator == null) currentStringCreator = new StringCreator(query.enumerated(), this.title, this.description);
+    for (CustomQuery query : queries) {
+      if (query.getColumns().size() > 3) {
+        if (currentStringCreator == null) currentStringCreator = new StringCreator(query.isEnumerated(), this.title, this.description);
         if (currentEmbedCreator != null) {
           wrapper = wrapper.embed(currentEmbedCreator.build());
           currentEmbedCreator = null;
@@ -26,7 +26,7 @@ public record InfoPanelBuilder(String title, String description, DBQuery[] queri
         continue;
       }
 
-      if (currentEmbedCreator == null) currentEmbedCreator = new EmbedCreator(query.enumerated(), this.title, this.description);
+      if (currentEmbedCreator == null) currentEmbedCreator = new EmbedCreator(query.isEnumerated(), this.title, this.description);
       if (currentStringCreator != null) {
         wrapper = wrapper.content(currentStringCreator.build());
         currentStringCreator = null;

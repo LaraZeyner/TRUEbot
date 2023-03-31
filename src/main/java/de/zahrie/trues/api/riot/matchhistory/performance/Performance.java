@@ -2,12 +2,14 @@ package de.zahrie.trues.api.riot.matchhistory.performance;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.riot.matchhistory.KDA;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.NamedQuery;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,7 +40,7 @@ import org.hibernate.annotations.NamedQuery;
 @NamedQuery(name = "Performance.prmOfPlayer",
     query = "SELECT teamPerformance.game.start || ' - ' || lane, champion.name || ' vs ' || opponent.name, kda.kills || kda.deaths || kda.assists FROM Performance WHERE teamPerformance.game.type = :gameType AND player.summonerName = :player ORDER BY teamPerformance.game.start DESC LIMIT 10")
 @NamedQuery(name = "Performance.fromPlayerAndTPerf", query = "FROM Performance WHERE player = :player AND teamPerformance = :teamPerformance")
-public class Performance implements Serializable {
+public class Performance implements Serializable, Comparable<Performance> {
   @Serial
   private static final long serialVersionUID = -6819821644121738377L;
 
@@ -100,18 +103,21 @@ public class Performance implements Serializable {
     this.creeps = creeps;
   }
 
-  @Embeddable
-  @AllArgsConstructor
-  @NoArgsConstructor
-  @Getter
-  public static class KDA {
-    @Column(name = "kills", columnDefinition = "TINYINT UNSIGNED not null")
-    private short kills;
-
-    @Column(name = "deaths", columnDefinition = "TINYINT UNSIGNED not null")
-    private short deaths;
-
-    @Column(name = "assists", columnDefinition = "TINYINT UNSIGNED not null")
-    private short assists;
+  public String getPlayername() {
+    return player.getSummonerName();
   }
+
+  public String getMatchup() {
+    return champion.getName() + " vs " + Util.avoidNull(opponent, "no data", Champion::getName);
+  }
+
+  public String getStats() {
+    return kda.toString() + "(" + (lane.equals(Lane.UTILITY) ? vision : creeps) + ")";
+  }
+
+  @Override
+  public int compareTo(@NotNull Performance o) {
+    return Comparator.comparing(Performance::getLane).compare(this, o);
+  }
+
 }

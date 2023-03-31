@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.player;
 
 import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.api.riot.xayah.types.core.summoner.Summoner;
+import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.database.Database;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;

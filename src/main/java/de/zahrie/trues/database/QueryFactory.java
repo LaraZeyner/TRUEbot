@@ -17,7 +17,7 @@ public class QueryFactory {
   }
 
   static Query<Object[]> performWithSubquery(String[] params, Object[] values, String queryName) {
-    final var query = Database.connection().session().getNamedQuery(queryName);
+    final var query = Database.connection().getSession().getNamedQuery(queryName);
     for (int i = 0; i < params.length; i++) {
       final String param = params[i];
       final Object value = values[i];

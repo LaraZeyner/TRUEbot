@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.discord.builder.modal;
 
-import de.zahrie.trues.api.discord.Replyer;
+import de.zahrie.trues.api.discord.util.Replyer;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;

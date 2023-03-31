@@ -2,18 +2,20 @@ package de.zahrie.trues.api.riot.analyze;
 
 import java.util.Arrays;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import com.merakianalytics.orianna.types.common.Map;
+import com.merakianalytics.orianna.types.core.match.Match;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
+import de.zahrie.trues.api.riot.matchhistory.game.MatchExtension;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import de.zahrie.trues.api.riot.xayah.types.common.Map;
-import de.zahrie.trues.api.riot.xayah.types.core.match.Match;
 import de.zahrie.trues.database.Database;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 
 @Data
 @RequiredArgsConstructor
+@ExtensionMethod(MatchExtension.class)
 public class MatchAnalyzer {
   private final Match match;
   private final boolean alreadyInserted;
@@ -55,17 +57,13 @@ public class MatchAnalyzer {
     if (analyzer.getValidParticipants().isEmpty()) {
       return;
     }
+
     final TeamPerf side = analyzer.analyze();
     Database.save(side);
   }
 
   private Game createGame() {
-    final Time creationTime = match.getCreationTime();
-    final GameType gametype = match.getGameQueue();
     final int durationInSeconds = (int) Math.round(match.getDuration().getMillis() / 1000.);
-    final String platform = match.getPlatform().getTag();
-    final long id = match.getCoreData().getId();
-    final String matchId = platform + "_" + id;
-    return new Game(matchId, creationTime, durationInSeconds, gametype);
+    return new Game(match.getMatchId(), match.getCreation(), durationInSeconds, match.getGameQueue());
   }
 }

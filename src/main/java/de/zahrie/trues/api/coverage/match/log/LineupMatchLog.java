@@ -14,9 +14,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 
-/**
- * Created by Lara on 16.02.2023 for TRUEbot
- */
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("lineup_submit")

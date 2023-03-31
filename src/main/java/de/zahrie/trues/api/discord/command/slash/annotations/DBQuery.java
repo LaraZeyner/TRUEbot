@@ -5,13 +5,8 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DBQuery {
-
   String query() default "";
-
   Column[] columns();
-
   String[] params() default {};
-
   boolean enumerated() default false;
-
 }

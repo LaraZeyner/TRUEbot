@@ -1,7 +1,6 @@
 package de.zahrie.trues;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.database.DatabaseConnector;
+import de.zahrie.trues.util.Connectable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -9,28 +8,25 @@ import lombok.extern.java.Log;
 @Getter
 @Setter
 @Log
-public class PrimeData {
+public class PrimeData implements Connectable {
   private static PrimeData primeData;
 
+  static {
+    primeData = new PrimeData();
+    primeData.connect();
+  }
+
   public static PrimeData getInstance() {
-    if (primeData == null) {
-      primeData = new PrimeData();
-      primeData.init();
-    }
     return primeData;
   }
 
-  private Team trueTeam;
-
-  public PrimeData() {
-    DatabaseConnector.connect();
+  @Override
+  public void connect() {
   }
 
-  private void init() {
-    if (this.trueTeam == null) {
-      // this.trueTeam = Database.Find.find(Team.class, 142116);
-      log.info("Datenbank geladen");
-    }
-  }
 
+  @Override
+  public void disconnect() {
+
+  }
 }

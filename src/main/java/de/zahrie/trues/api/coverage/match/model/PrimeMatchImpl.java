@@ -19,7 +19,7 @@ public class PrimeMatchImpl {
 
   public boolean updateLogs(Time timestamp, Chain userWithTeam, MatchLogAction action, String details) {
     final Time calendar = getLastLogTime();
-    if (timestamp.before(calendar) || action.equals(MatchLogAction.lineup_player_ready)) {
+    if (timestamp.before(calendar) || action.equals(MatchLogAction.LINEUP_PLAYER_READY)) {
       return false;
     }
     var log = new MatchLog(timestamp, action, match, details);
@@ -30,7 +30,7 @@ public class PrimeMatchImpl {
     match.setLastMessage(lastMessage);
     Database.save(log);
 
-    if (log.getAction().equals(MatchLogAction.lineup_submit)) {
+    if (log.getAction().equals(MatchLogAction.LINEUP_SUBMIT)) {
       final List<Player> newLineup = ((LineupMatchLog) log).determineLineup();
       participator.get().setLineup(newLineup);
     }

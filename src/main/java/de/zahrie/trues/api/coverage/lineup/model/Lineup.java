@@ -6,6 +6,7 @@ import java.io.Serializable;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +26,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Lineup wird submitted ({@code ordered} = Command | {@code not ordered} = matchlog)
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -42,7 +46,7 @@ public class Lineup implements Serializable {
   @Column(name = "coverage_lineup_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "coverage_team", nullable = false)
   @ToString.Exclude
   private Participator participator;
@@ -61,5 +65,4 @@ public class Lineup implements Serializable {
     this.lane = lane;
     this.player = player;
   }
-
 }

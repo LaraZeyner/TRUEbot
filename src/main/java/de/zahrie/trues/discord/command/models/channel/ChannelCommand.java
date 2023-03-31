@@ -11,8 +11,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 @Command(name = "channel", perm = @Perm(PermissionRole.ORGA_MEMBER))
 public class ChannelCommand extends SlashCommand {
-  public ChannelCommand(SlashCommand... commands) {
-    super(commands);
+
+  public ChannelCommand() {
+    super(
+        new ChannelCreateCommand(),
+        new ChannelEditCommand()
+    );
   }
 
   @Override

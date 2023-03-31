@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 public class TeamRemoveModal extends ModalImpl {
   @Override
   protected Modal getModal(boolean value) {
-    return create(getTarget().getMember().getNickname() + " aus Team entfernen")
+    return create(getTargetMember().getNickname() + " aus Team entfernen")
         .addComponents(getTargetUser(), getTeams()).build();
   }
 

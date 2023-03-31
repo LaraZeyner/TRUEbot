@@ -7,7 +7,7 @@ import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.util.Loader;
+import de.zahrie.trues.api.coverage.Loader;
 import de.zahrie.trues.util.io.request.URLType;
 
 public class PlayerLoader extends GamesportsLoader implements Loader {

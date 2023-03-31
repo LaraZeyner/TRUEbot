@@ -1,46 +1,72 @@
 package de.zahrie.trues;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import de.zahrie.trues.api.riot.Xayah;
+import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.Connectable;
 import de.zahrie.trues.util.Const;
+import lombok.extern.java.Log;
 
-public class LoadupManager {
+@Log
+public class LoadupManager implements Connectable {
+  private static LoadupManager instance;
 
-  public static Date init() {
-    final Date date = new Date();
-    if (!Const.check()) {
-      System.exit(1);
-      return date;
-    }
-    Xayah.run();
-    PrimeData.getInstance();
-    return date;
+  public static LoadupManager getInstance() {
+    if (instance == null) instance = new LoadupManager();
+    return instance;
   }
+
+
+  private Calendar init;
+
+  private LoadupManager() {
+    this.init = Calendar.getInstance();
+  }
+
+  /**
+   * ueberpruefe Connection
+   */
+  @Override
+  public void connect() {
+    if (!Const.check()) System.exit(1);
+
+    Database.Connector.connect();
+    log.info("Datenbank geladen");
+
+    Xayah.getInstance().connect();
+    log.info("Riot-API geladen");
+
+    Nunu.getInstance().connect();
+    log.info("System gestartet in " + (Calendar.getInstance().getTimeInMillis() - init.getTimeInMillis()) + " Millisekunden.");
+  }
+
+
+  @Override
+  public void disconnect() {
+    final Calendar disconnectingTime = Calendar.getInstance();
+    Nunu.getInstance().disconnect();
+    Xayah.getInstance().disconnect();
+    Database.Connector.disconnect();
+    instance = null;
+    log.info("System beendet in " + (Calendar.getInstance().getTimeInMillis() - disconnectingTime.getTimeInMillis()) + " Millisekunden.");
+  }
+
+  public void restart() {
+    disconnect();
+    this.init = Calendar.getInstance();
+    connect();
+  }
+
 
 /*
   public static boolean loadRiotData() {
     val logger = Logger.getLogger("Riot-Data");
 
-    GametypeLoader.createTypes();
-    logger.info("Spielarten geladen");
-
-    RuneLoader.createItems();
-    logger.info("Runen geladen");
-
-    ItemLoader.createItems();
-    logger.info("Items geladen");
-
-    SpellLoader.createItems();
-    logger.info("Summoner Spells geladen");
-
     ChampionLoader.createChampions();
     logger.info("Champions geladen");
 
-    StatCatLoader.load();
-    logger.info("Statkategorien geladen");
-
-    PrimeData.getInstance().commit();
     return true;
   }
 

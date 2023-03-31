@@ -14,20 +14,25 @@ public class PermissionRole {
   public static final Integer REGISTERED = 1;
   public static final Integer APPLICANT = 2;
   public static final Integer TRYOUT = 3;
-  public static final Integer ACCEPTED = 4;
+  public static final Integer SUBSTITUDE = 4;
   public static final Integer EVENT_PLANNING = 5;
   public static final Integer CASTER = 6;
-  public static final Integer SOCIAL_MEDIA = 7;
-  public static final Integer PLAYER = 8;
-  public static final Integer COACH = 9;
-  public static final Integer EVENT_LEAD = 10;
-  public static final Integer SOCIAL_MEDIA_LEAD = 11;
-  public static final Integer TEAM_CAPTAIN = 12;
-  public static final Integer COACH_LEAD = 13;
-  public static final Integer EVENT_MANAGER = 14;
-  public static final Integer COMMUNITY_MANAGER = 15;
-  public static final Integer COACHING_MANAGER = 16;
-  public static final Integer ORGA_LEADER = 17;
+  public static final Integer DEVELOPER = 7;
+  public static final Integer SOCIAL_MEDIA = 8;
+  public static final Integer PLAYER = 9;
+  public static final Integer MENTOR = 10;
+  public static final Integer ANALYST = 11;
+  public static final Integer LANE_COACH = 12;
+  public static final Integer MENTAL_COACH = 13;
+  public static final Integer STRATEGIC_COACH = 14;
+  public static final Integer EVENT_LEAD = 15;
+  public static final Integer SOCIAL_MEDIA_LEAD = 16;
+  public static final Integer TEAM_CAPTAIN = 17;
+  public static final Integer TEAM_BUILDING = 18;
+  public static final Integer EVENT_MANAGER = 19;
+  public static final Integer COMMUNITY_MANAGER = 20;
+  public static final Integer COACHING_MANAGER = 21;
+  public static final Integer ORGA_LEADER = 22;
 
 
   public static final Integer ORGA_MEMBER = 105;

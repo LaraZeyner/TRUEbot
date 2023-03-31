@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -33,6 +34,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -47,7 +49,7 @@ import org.hibernate.annotations.Type;
                 @Index(name = "season_id", columnList = "season_id", unique = true) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "department", discriminatorType = DiscriminatorType.STRING)
-public class Season implements Betable, Seasonable, Serializable {
+public class Season implements Betable, Seasonable, Serializable, Comparable<Season> {
   @Serial
   private static final long serialVersionUID = 3263600626506335102L;
 
@@ -94,5 +96,10 @@ public class Season implements Betable, Seasonable, Serializable {
   @Override
   public CoverageDepartment type() {
     return null;
+  }
+
+  @Override
+  public int compareTo(@NotNull Season o) {
+    return Comparator.comparing(Season::getId).compare(this, o);
   }
 }

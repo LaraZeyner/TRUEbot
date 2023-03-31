@@ -6,7 +6,7 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
-import de.zahrie.trues.discord.Nunu;
+import de.zahrie.trues.api.discord.util.Nunu;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
@@ -23,7 +23,7 @@ public class MoveCommand extends SlashCommand {
     final Member invoker = getInvokingMember();
     final AudioChannel currentChannel = Nunu.DiscordChannel.getVoiceChannel(invoker);
     if (currentChannel == null) return reply("Du bist in keinem gültigen Voicechannel");
-    final AudioChannel newChannel = get("channel").getAsChannel().asAudioChannel();
+    final AudioChannel newChannel = find("channel").channel().asAudioChannel();
     final boolean success = send(invoker.getPermissions(newChannel).contains(Permission.VOICE_CONNECT), newChannel.getName());
     if (success) {
       currentChannel.getMembers().forEach(member -> Nunu.DiscordChannel.move(member, newChannel));

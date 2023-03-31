@@ -45,7 +45,7 @@ public class MatchHandler extends MatchModel implements Serializable {
         match.setStatus(determineStatus());
       }
     }
-    if (!match.getStatus().equals(EventStatus.played)) {
+    if (!match.getStatus().equals(EventStatus.PLAYED)) {
       LineupManager.getMatch(match).update();
     }
     Database.save(match);
@@ -79,11 +79,11 @@ public class MatchHandler extends MatchModel implements Serializable {
   private boolean updateLogs() {
     boolean updated = false;
     Collections.reverse(logs);
-    for (final HTML html : logs) {
+    for ( HTML html : logs) {
       final List<HTML> cells = html.findAll("td");
       final Time timestamp = determineTimestamp(cells.get(0));
       final Chain userWithTeam = cells.get(1).text();
-      final var action = MatchLogAction.valueOf(cells.get(2).text().toString());
+      final var action = MatchLogAction.valueOf(cells.get(2).text().upper().toString());
       final String details = cells.get(3).text().toString();
       updated = match.get().updateLogs(timestamp, userWithTeam, action, details) || updated;
     }
@@ -92,20 +92,20 @@ public class MatchHandler extends MatchModel implements Serializable {
 
   private EventStatus determineStatus() {
     if (!match.getResult().equals("-:-")) {
-      return EventStatus.played;
+      return EventStatus.PLAYED;
     }
-    EventStatus status = EventStatus.created;
+    EventStatus status = EventStatus.CREATED;
     boolean expired = false;
-    for (final MatchLog log : match.getLogs().stream().sorted(Comparator.comparing(MatchLog::getTimestamp).reversed()).toList()) {
+    for ( MatchLog log : match.getLogs().stream().sorted(Comparator.comparing(MatchLog::getTimestamp).reversed()).toList()) {
       final EventStatus eventStatus = log.getAction().getStatus();
       if (eventStatus == null) {
         continue;
       }
-      if (log.getAction().equals(MatchLogAction.scheduling_expired)) {
+      if (log.getAction().equals(MatchLogAction.SCHEDULING_EXPIRED)) {
         expired = true;
       }
-      if ((eventStatus.getOrder() > status.getOrder() || log.getAction().isForce()) &&
-          (!expired || !status.equals(EventStatus.scheduling_suggest))) {
+      if ((eventStatus.ordinal() > status.ordinal() || log.getAction().isForce()) &&
+          (!expired || !status.equals(EventStatus.SCHEDULING_SUGGEST))) {
         status = eventStatus;
       }
 

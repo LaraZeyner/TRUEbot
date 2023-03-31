@@ -30,11 +30,6 @@ class ChainString implements Comparable<ChainString> {
     return value.contains(s);
   }
 
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof String ? value.equals(o) : (o instanceof ChainString) && (this == o || value.equals(((ChainString) o).value));
-  }
-
   public boolean equalsCase(String anotherString) {
     return value.equalsIgnoreCase(anotherString);
   }
@@ -56,10 +51,6 @@ class ChainString implements Comparable<ChainString> {
     return value.indexOf(str, fromIndex);
   }
 
-  public boolean isBlank() {
-    return value.isBlank();
-  }
-
   public boolean isEmpty() {
     return value.isEmpty();
   }
@@ -78,9 +69,6 @@ class ChainString implements Comparable<ChainString> {
 
   public Chain lower() {
     return Chain.of(value.toLowerCase());
-  }
-  public Chain repeat(int count) {
-    return Chain.of(value.repeat(count));
   }
 
   public Chain replace(CharSequence target, CharSequence replacement) {

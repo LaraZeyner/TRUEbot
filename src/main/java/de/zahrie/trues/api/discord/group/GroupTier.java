@@ -19,10 +19,8 @@ public enum GroupTier {
   SUBSTITUDE(50, Set.of()),
   ORGA_MEMBER(60, Set.of(DiscordGroup.FRIEND)),
   LEADER(70, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER)),
-  MANAGEMENT(80, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.MENTOR, DiscordGroup.ANALYST,
-      DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH)),
-  ORGA_LEADER(90, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.MENTOR, DiscordGroup.ANALYST,
-      DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH));
+  MANAGEMENT(80, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH)),
+  ORGA_LEADER(90, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH));
 
   private final int permissionId;
   private final Set<DiscordGroup> assignable;
@@ -39,7 +37,7 @@ public enum GroupTier {
     return permissionId >= MANAGEMENT.getPermissionId();
   }
 
-  public Set<DiscordGroup> getPingableGroups() {
+  public Set<DiscordGroup> getInheritedGroups() {
     final var groups = new HashSet<DiscordGroup>();
     if (isOrga()) {
       groups.add(DiscordGroup.ORGA_MEMBER);

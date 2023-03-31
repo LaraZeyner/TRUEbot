@@ -7,30 +7,33 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.merakianalytics.orianna.types.core.match.Match;
+import com.merakianalytics.orianna.types.core.match.Participant;
+import com.merakianalytics.orianna.types.core.match.Team;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
+import de.zahrie.trues.api.riot.matchhistory.performance.ParticipantExtension;
 import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
 import de.zahrie.trues.api.riot.matchhistory.selection.SelectionType;
+import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamExtension;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerfFactory;
-import de.zahrie.trues.api.riot.xayah.types.core.match.Match;
-import de.zahrie.trues.api.riot.xayah.types.core.match.MatchParticipant;
-import de.zahrie.trues.api.riot.xayah.types.core.match.Team;
-import de.zahrie.trues.api.riot.xayah.types.core.searchable.SearchableList;
 import de.zahrie.trues.database.Database;
 import lombok.Data;
+import lombok.experimental.ExtensionMethod;
 
 @Data
+@ExtensionMethod({TeamExtension.class, ParticipantExtension.class})
 public class MatchSideAnalyzer {
   private final Match match;
   private final Game game;
   private final boolean alreadyInserted;
   private final boolean blueSide;
   private final Team team;
-  private final List<MatchParticipant> validParticipants;
+  private final List<Participant> validParticipants;
 
   public MatchSideAnalyzer(Match match, Game game, boolean alreadyInserted, boolean blueSide) {
     this.match = match;
@@ -44,9 +47,9 @@ public class MatchSideAnalyzer {
   public TeamPerf analyze() {
     TeamPerf teamPerformance = TeamPerfFactory.getTeamPerfBySide(game, blueSide);
     if (teamPerformance == null) {
-      final int kills = team.getParticipants().stream().map(part -> part.getStats().getKills()).mapToInt(Integer::intValue).sum();
-      final int deaths = team.getParticipants().stream().map(part -> part.getStats().getDeaths()).mapToInt(Integer::intValue).sum();
-      final int assists = team.getParticipants().stream().map(part -> part.getStats().getAssists()).mapToInt(Integer::intValue).sum();
+      final int kills = team.getParticipants().stream().map(part -> part.getKDA().getKills()).mapToInt(Short::shortValue).sum();
+      final int deaths = team.getParticipants().stream().map(part -> part.getKDA().getDeaths()).mapToInt(Short::shortValue).sum();
+      final int assists = team.getParticipants().stream().map(part -> part.getKDA().getAssists()).mapToInt(Short::shortValue).sum();
       final int gold = team.getParticipants().stream().map(part -> part.getStats().getGoldEarned()).mapToInt(Integer::intValue).sum();
       final int damage = team.getParticipants().stream().map(part -> part.getStats().getDamageDealt()).mapToInt(Integer::intValue).sum();
       final int vision = team.getParticipants().stream().map(part -> part.getStats().getVisionScore()).mapToInt(Integer::intValue).sum();
@@ -81,11 +84,11 @@ public class MatchSideAnalyzer {
 
   public void analyzeSelections() {
     final Team team = blueSide ? match.getBlueTeam() : match.getRedTeam();
-    handleSelectionType(game, blueSide, team.getBans(), SelectionType.BAN);
-    handleSelectionType(game, blueSide, team.getPickTurns(), SelectionType.PICK);
+    handleSelectionType(game, blueSide, team.getBanned(), SelectionType.BAN);
+    handleSelectionType(game, blueSide, team.getPicks(), SelectionType.PICK);
   }
 
-  private void handleSelectionType(Game game, boolean first, SearchableList<Champion> collection, SelectionType type) {
+  private void handleSelectionType(Game game, boolean first, List<Champion> collection, SelectionType type) {
     for (int i = 0; i < collection.size(); i++) {
       final Champion champion = collection.get(i);
       final Selection selection = new Selection(game, first, (byte) (i + 1), type, champion);

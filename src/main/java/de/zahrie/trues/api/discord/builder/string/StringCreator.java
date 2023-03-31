@@ -7,10 +7,6 @@ import de.zahrie.trues.util.Const;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Created by Lara on 10.02.2023 for TRUEbot
- */
-
 @RequiredArgsConstructor
 @Getter
 public class StringCreator {

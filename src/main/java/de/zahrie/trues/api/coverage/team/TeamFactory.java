@@ -5,13 +5,17 @@ import de.zahrie.trues.database.Database;
 import org.jetbrains.annotations.Nullable;
 
 public class TeamFactory {
+
+  @Nullable
   public static PrimeTeam getTeam(int teamId) {
-    PrimeTeam team = Database.Find.find(PrimeTeam.class, teamId);
+    PrimeTeam team = Database.Find.find(PrimeTeam.class, new String[]{""}, new Object[]{}, "fromPrmId");
     if (team != null) {
       return team;
     }
 
-    team = new TeamLoader(teamId).create().getTeam();
+    final TeamLoader teamLoader = new TeamLoader(teamId).create();
+    if (teamLoader == null) return null;
+    team = teamLoader.getTeam();
     Database.save(team);
     return team;
   }
@@ -35,5 +39,15 @@ public class TeamFactory {
   @Nullable
   public static PrimeTeam fromName(String name, String abbreviation) {
     return Database.Find.find(PrimeTeam.class, new String[]{"name", "abbr"}, new Object[]{name, abbreviation}, "fromNameAbbr");
+  }
+
+  @Nullable
+  public static PrimeTeam fromAbbreviation(String abbreviation) {
+    return Database.Find.find(PrimeTeam.class, new String[]{"abbr"}, new Object[]{abbreviation}, "fromAbbr");
+  }
+
+  @Nullable
+  public static PrimeTeam fromName(String name) {
+    return Database.Find.find(PrimeTeam.class, new String[]{"name"}, new Object[]{name}, "fromName");
   }
 }

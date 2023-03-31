@@ -1,10 +1,7 @@
 package de.zahrie.trues.database;
 
-import de.zahrie.trues.api.discord.command.slash.annotations.Column;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomColumn;
 
-/**
- * Created by Lara on 13.02.2023 for TRUEbot
- */
 public record CellEntry(Object entry) {
 
   @Override
@@ -12,8 +9,8 @@ public record CellEntry(Object entry) {
     return String.valueOf(this.entry);
   }
 
-  public String round(Column column) {
-    return round(column.round());
+  public String round(CustomColumn column) {
+    return round(column.getRound());
   }
 
   public String round(int amount) {

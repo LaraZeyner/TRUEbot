@@ -1,28 +1,31 @@
 package de.zahrie.trues.api.discord.group;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.discord.member.DiscordMember;
-import de.zahrie.trues.api.discord.member.DiscordMemberGroup;
+import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.database.Database;
-import de.zahrie.trues.discord.Nunu;
-import de.zahrie.trues.models.community.OrgaTeam;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Role;
 
 @Getter
 public class RoleGranterBase {
-  protected final DiscordMember target;
-  protected final DiscordMember invoker;
+  protected final DiscordUser target;
+  protected final DiscordUser invoker;
 
-  public RoleGranterBase(DiscordMember target) {
+  public RoleGranterBase(DiscordUser target) {
     this(null, target);
   }
 
-  public RoleGranterBase(DiscordMember target, DiscordMember invoker) {
+  public RoleGranterBase(DiscordUser target, DiscordUser invoker) {
     this.target = target;
     this.invoker = invoker;
   }
@@ -48,57 +51,83 @@ public class RoleGranterBase {
     return activeGroups.stream().flatMap(activeGroup -> activeGroup.getAssignable().stream()).collect(Collectors.toSet());
   }
 
+  public Set<DiscordGroup> getMemberGroups() {
+    final Set<DiscordGroup> activeGroups = invoker.getActiveGroups();
+    if (activeGroups.stream().anyMatch(activeGroup -> activeGroup.getTier().isAdmin())) {
+      return GroupTier.ORGA_MEMBER.getGroups().stream().filter(group -> !group.getDepartment().equals(Department.TEAMS)).collect(Collectors.toSet());
+    }
+    return Set.of();
+  }
+
   public void perform(DiscordGroup group) {
     if (target.getMember().getRoles().contains(group.getRole())) {
-      target.removeGroup(group, true);
+      target.removeGroup(group);
     } else {
-      target.addGroup(group, true);
+      target.addGroup(group);
     }
   }
 
 
-  public void add(DiscordGroup group) {
-    add(group, true, new Time(), 0);
+  public RoleGranterBase add(DiscordGroup group) {
+    return add(group, new Time(), 0);
   }
 
-  public void add(DiscordGroup group, int days) {
-    add(group, true, new Time(), days);
+  public RoleGranterBase add(DiscordGroup group, int days) {
+    return add(group, new Time(), days);
   }
 
-  public void add(DiscordGroup group, boolean perform, Time start, int days) {
+  public void updateRelatedRoles(DiscordUser user) {
+    //TODO (Abgie) 21.03.2023: never used
+    final Set<DiscordGroup> departmentGroups = user.getActiveGroups().stream().map(group -> group.getDepartment().getGroup()).filter(Objects::nonNull).collect(Collectors.toSet());
+    for ( DiscordGroup pingableGroup : Department.ALL.getPingableGroups()) {
+      if (departmentGroups.contains(pingableGroup)) {
+        addRole(pingableGroup.getRole());
+      } else {
+        removeRole(pingableGroup.getRole());
+      }
+    }
+
+    final Set<DiscordGroup> orgaGroups = user.getActiveGroups().stream().flatMap(group -> group.getTier().getInheritedGroups().stream()).collect(Collectors.toSet());
+    for ( DiscordGroup group : List.of(DiscordGroup.ORGA_MEMBER, DiscordGroup.STAFF, DiscordGroup.ADMIN)) {
+      if (orgaGroups.contains(group)) {
+        addRole(group.getRole());
+      } else {
+        removeRole(group.getRole());
+      }
+    }
+  }
+
+  public RoleGranterBase add(DiscordGroup group, Time start, int days) {
     if (days > 0) {
-      final var memberGroup = new DiscordMemberGroup(target, group, start, start.plus(Time.DATE, days));
-      target.getGroups().add(memberGroup);
-      Database.save(memberGroup);
+      final var userGroup = new DiscordUserGroup(target, group, start, start.plus(Time.DATE, days));
+      target.getGroups().add(userGroup);
+      Database.save(userGroup);
       Database.save(this);
     }
-    target.getGroups().stream().filter(DiscordMemberGroup::isActive)
-        .filter(discordMemberGroup -> discordMemberGroup.getDiscordGroup().equals(group)).findFirst().ifPresent(discordMemberGroup -> {
+    target.getGroups().stream().filter(DiscordUserGroup::isActive)
+        .filter(discordUserGroup -> discordUserGroup.getDiscordGroup().equals(group)).findFirst().ifPresent(discordUserGroup -> {
           if (days > 0) {
-            final Time end = discordMemberGroup.getPermissionEnd();
+            final Time end = discordUserGroup.getPermissionEnd();
             final Time newEnd = start.plus(Time.DATE, days);
             if (newEnd.after(end)) {
-              discordMemberGroup.setPermissionEnd(newEnd);
+              discordUserGroup.setPermissionEnd(newEnd);
             }
           } else {
-            discordMemberGroup.setActive(false);
-            discordMemberGroup.setPermissionEnd(new Time());
+            discordUserGroup.setActive(false);
+            discordUserGroup.setPermissionEnd(new Time());
           }
-          Database.save(discordMemberGroup);
+          Database.save(discordUserGroup);
         });
 
-    if (perform) {
-      final DiscordGroup departmentGroup = group.getDepartment().getGroup();
-      if (departmentGroup != null) {
-        addRole(departmentGroup.getRole());
-      }
-      for (final DiscordGroup pingableGroup : group.getTier().getPingableGroups()) {
-        if (pingableGroup != null) {
-          addRole(pingableGroup.getRole());
-        }
-      }
-      addRole(group.getRole());
-    }
+    updateRelatedRolesOnAdd(group);
+    addRole(group.getRole());
+    return this;
+  }
+
+  private void updateRelatedRolesOnAdd(DiscordGroup group) {
+    final DiscordGroup departmentGroup = group.getDepartment().getGroup();
+    if (departmentGroup != null) addRole(departmentGroup.getRole());
+    group.getTier().getInheritedGroups().stream().filter(Objects::nonNull).map(DiscordGroup::getRole).forEach(this::addRole);
   }
 
   /**
@@ -115,40 +144,51 @@ public class RoleGranterBase {
     Nunu.DiscordRole.addRole(target.getMember(), role);
   }
 
-  public void remove(DiscordGroup group) {
-    remove(group, true);
+  public RoleGranterBase remove(DiscordGroup group) {
+    if (!target.getMember().getRoles().contains(group.getRole())) {
+      return this;
+    }
+    updateRelatedRolesOnRemove(group);
+    removeRole(group.getRole());
+    return this;
   }
 
-  public void remove(DiscordGroup group, boolean perform) {
-    if (perform) {
-      if (!target.getMember().getRoles().contains(group.getRole())) {
-        return;
+  private void updateRelatedRolesOnRemove(DiscordGroup group) {
+    final var groups = new HashSet<>(target.getActiveGroups());
+    if (!groups.remove(group)) {
+      return;
+    }
+    if (groups.stream().map(DiscordGroup::getDepartment).noneMatch(department -> department.equals(group.getDepartment()))) {
+      final DiscordGroup departmentGroup = group.getDepartment().getGroup();
+      if (departmentGroup != null && !departmentGroup.equals(group)) {
+        removeRole(departmentGroup.getRole());
       }
-      final var groups = new HashSet<>(target.getActiveGroups());
-      groups.remove(group);
-      if (groups.stream().map(DiscordGroup::getDepartment).noneMatch(department -> department.equals(group.getDepartment()))) {
-        final DiscordGroup departmentGroup = group.getDepartment().getGroup();
-        if (departmentGroup != null && !departmentGroup.equals(group)) {
-          removeRole(departmentGroup.getRole());
-        }
-      }
+    }
 
-      if (groups.stream().map(DiscordGroup::getTier).noneMatch(tier -> tier.equals(group.getTier()))) {
-        final DiscordGroup tierGroup = group.getTier().getGroup();
-        if (tierGroup != null && !tierGroup.equals(group)) {
-          removeRole(tierGroup.getRole());
-        }
+    if (groups.stream().map(DiscordGroup::getTier).noneMatch(tier -> tier.equals(group.getTier()))) {
+      final DiscordGroup tierGroup = group.getTier().getGroup();
+      if (tierGroup != null && !tierGroup.equals(group)) {
+        removeRole(tierGroup.getRole());
       }
-      removeRole(group.getRole());
     }
   }
 
   public void addTeam(OrgaTeam team) {
-    addRole(team.getRole());
+    addRole(team.getGroup().getRole());
+  }
+
+  public void addOrga(TeamPosition position) {
+    if (position.getDiscordGroup() == null) throw new IllegalArgumentException("Kein Orgamember");
+    addRole(position.getDiscordGroup().getRole());
   }
 
   public void removeTeam(OrgaTeam team) {
-    removeRole(team.getRole());
+    removeRole(team.getGroup().getRole());
+  }
+
+  public void removeOrga(TeamPosition position) {
+    if (position.getDiscordGroup() == null) throw new IllegalArgumentException("Kein Orgamember");
+    removeRole(position.getDiscordGroup().getRole());
   }
 
 }

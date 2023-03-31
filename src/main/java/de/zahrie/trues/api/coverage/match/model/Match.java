@@ -2,8 +2,11 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
@@ -14,8 +17,10 @@ import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.database.Database;
 import de.zahrie.trues.database.types.TimeCoverter;
-import de.zahrie.trues.models.betting.Bet;
+import de.zahrie.trues.api.community.betting.Bet;
 import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.util.Util;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,6 +44,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
 import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,8 +54,9 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "coverage", indexes = { @Index(name = "idx_coverage", columnList = "match_id", unique = true) })
 @DiscriminatorFormula("IF(coverage_group IS NULL, 'scrimmage', IF(scheduling_start IS NULL, 'bet', IF(match_id IS NULL, 'intern', 'prm')))")
-@NamedQuery(name = "Match.nextOrgaMatches", query = "FROM Match WHERE start > NOW() ORDER BY start")
-public class Match implements Betable, Serializable {
+@NamedQuery(name = "Match.nextMatches", query = "FROM Match WHERE start > NOW() OR result = '-:-' ORDER BY start")
+@NamedQuery(name = "Match.getTeamMatches", query = "SELECT coverage FROM Participator WHERE team = :team AND (coverage.start >= :start OR coverage.result = '-:-') ORDER BY coverage.start")
+public class Match implements Betable, Serializable, Comparable<Match> {
   @Serial
   private static final long serialVersionUID = -3826796156374823894L;
 
@@ -58,7 +65,7 @@ public class Match implements Betable, Serializable {
   @Column(name = "coverage_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "matchday")
   @ToString.Exclude
   private Playday matchday;
@@ -73,7 +80,7 @@ public class Match implements Betable, Serializable {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 20)
-  private EventStatus status = EventStatus.created;
+  private EventStatus status = EventStatus.CREATED;
 
   @Column(name = "last_message", nullable = false, length = 1000)
   private String lastMessage = "keine Infos";
@@ -88,7 +95,7 @@ public class Match implements Betable, Serializable {
   @ToString.Exclude
   private Set<Participator> participators = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "coverage")
+  @OneToMany(mappedBy = "match")
   @ToString.Exclude
   private Set<Bet> bets = new LinkedHashSet<>();
 
@@ -100,8 +107,21 @@ public class Match implements Betable, Serializable {
     return participators.stream().filter(Participator::isFirstPick).findFirst().orElse(null);
   }
 
+  public String getHomeName() {
+    return Util.avoidNull(getHome(), "TBD", participator -> participator.getTeam().getName());
+  }
+
   public Participator getGuest() {
     return participators.stream().filter(team -> !team.isFirstPick()).findFirst().orElse(null);
+  }
+
+  public String getGuestName() {
+    return Util.avoidNull(getGuest(), "TBD", participator -> participator.getTeam().getName());
+  }
+
+  public Participator getOpponent(Team team) {
+    if (participators.stream().map(Participator::getTeam).noneMatch(team1 -> team1.equals(team))) return null;
+    return participators.stream().filter(participator -> !participator.getTeam().equals(team)).findFirst().orElse(null);
   }
 
   public Match(Playday matchday, Time start) {
@@ -109,7 +129,14 @@ public class Match implements Betable, Serializable {
     this.start = start;
   }
 
+  public Team getOpponentOf(Team team) {
+    return participators.stream().map(Participator::getTeam).filter(t -> !t.equals(team)).findFirst().orElse(null);
+  }
+
   public void setResult(String result) {
+    if (!result.equals("-:-") && !Pattern.compile("\\d+:\\d+").matcher(result).matches()) {
+      return;
+    }
     final String scoreTeam1 = result.split(":")[0];
     final int score1 = scoreTeam1.equals("-") ? 0 : Integer.parseInt(scoreTeam1);
     final Participator home = getHome();
@@ -125,9 +152,9 @@ public class Match implements Betable, Serializable {
       guest.setWins((short) score2);
       Database.save(guest);
     }
-
     this.result = result;
   }
+
 
   public boolean isOrgagame() {
     return Stream.of(getHome(), getGuest()).anyMatch(participator -> participator.getTeam().getOrgaTeam() != null);
@@ -155,5 +182,22 @@ public class Match implements Betable, Serializable {
     }
 
     Database.save(this);
+  }
+
+  @Override
+  public int compareTo(@NotNull Match o) {
+    return Comparator.comparing(Match::getStart).compare(this, o);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Match match)) return false;
+    return getId() == match.getId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
   }
 }

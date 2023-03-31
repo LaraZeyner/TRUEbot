@@ -5,9 +5,6 @@ import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
 
-/**
- * Created by Lara on 24.02.2023 for TRUEbot
- */
 public class LineupManager {
   private static final List<MatchLineups> lineups = new ArrayList<>();
 

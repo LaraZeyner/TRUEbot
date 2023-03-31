@@ -1,0 +1,14 @@
+TODO: LOGGING
+ commands
+ events
+
+TODO: Datenstrukturen
+ TRUEList, TRUENumber, Time, Chain entfernen
+ "Object"Impl.class - "Object"Factory.class aufteilen
+
+TODO: Player
+ Seasons mit Ranks
+
+TODO: new Match Found
+ Dropdown
+ Reevaluate

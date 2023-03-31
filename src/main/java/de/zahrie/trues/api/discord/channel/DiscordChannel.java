@@ -4,22 +4,21 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 
-import de.zahrie.trues.api.discord.group.CustomDiscordRole;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
-import de.zahrie.trues.discord.Nunu;
-import de.zahrie.trues.models.community.OrgaTeam;
-import de.zahrie.trues.util.util.Util;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +27,7 @@ import lombok.ToString;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
@@ -38,6 +38,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 @ToString
 @Entity(name = "DiscordChannel")
 @Table(name = "discord_channel")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "orga_team")
 @NamedQuery(name = "DiscordChannel.fromDiscordId", query = "FROM DiscordChannel WHERE discordId = :discordId")
 public class DiscordChannel implements Serializable {
   @Serial
@@ -55,70 +57,46 @@ public class DiscordChannel implements Serializable {
   private String name;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "permission_type", nullable = false)
+  private PermissionChannelType permissionType;
+
+  @Enumerated(EnumType.STRING)
   @Column(name = "channel_type", nullable = false)
-  private ChannelType type;
+  private ChannelType channelType;
 
-  @OneToOne(mappedBy = "category")
-  @Getter(AccessLevel.NONE)
-  private OrgaTeam categoryTeam;
-
-  @OneToOne(mappedBy = "chat")
-  @Getter(AccessLevel.NONE)
-  private OrgaTeam chatChannelTeam;
-
-  @OneToOne(mappedBy = "voice")
-  @Getter(AccessLevel.NONE)
-  private OrgaTeam voiceChannelTeam;
-
-  @OneToOne(mappedBy = "info")
-  @Getter(AccessLevel.NONE)
-  private OrgaTeam infoChannelTeam;
-
-  public DiscordChannel(long discordId, String name, ChannelType type) {
+  public DiscordChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType) {
     this.discordId = discordId;
     this.name = name;
-    this.type = type;
+    this.permissionType = permissionType;
+    this.channelType = channelType;
   }
 
-  public OrgaTeam getTeam() {
-    if (categoryTeam != null) return categoryTeam;
-    if (chatChannelTeam != null) return chatChannelTeam;
-    if (voiceChannelTeam != null) return voiceChannelTeam;
-    if (infoChannelTeam != null) return infoChannelTeam;
-    return null;
-  }
 
   public IPermissionContainer getChannel() {
     return (IPermissionContainer) Nunu.DiscordChannel.getChannel(discordId);
   }
 
   public void updatePermissions() {
-    final ChannelType.ChannelPattern channelPattern = type.getPattern();
+    final PermissionChannelType.ChannelPattern channelPattern = permissionType.getPattern();
     channelPattern.getData().forEach(((group, rolePattern) -> updateForGroup(group)));
   }
 
   public boolean updatePermission(Role role) {
-    final CustomDiscordRole customRole = getTeam().getCustomRole();
-    if (getTeam() != null && customRole.getRole().equals(role)) {
-      updateForGroup(DiscordGroup.TEAM_ROLE_PLACEHOLDER);
-    } else {
-      final DiscordGroup group = DiscordGroup.of(role.getIdLong());
-      if (group == null) return false;
-      updateForGroup(group);
-    }
+    final DiscordGroup group = DiscordGroup.of(role);
+    if (group == null) return false;
+    updateForGroup(group);
     return true;
   }
 
-  private void updateForGroup(DiscordGroup group) {
-    final ChannelRolePattern rolePattern = type.getPattern().getData().get(group);
-    final Role role = group.equals(DiscordGroup.TEAM_ROLE_PLACEHOLDER) ? getTeam().getRole() : group.getRole();
-    uFr(role, rolePattern);
+  protected void updateForGroup(DiscordGroup group) {
+    uFr(group.getRole(), group);
   }
 
-  private void uFr(Role role, ChannelRolePattern rolePattern) {
+  protected void uFr(Role role, DiscordGroup group) {
+    final ChannelRolePattern rolePattern = permissionType.getPattern().getData().get(group);
     final PermissionOverride permissionOverride = Util.nonNull(getChannel().getPermissionOverride(role), "Fehler mit Channel oder User");
     final Set<Permission> allowed = rolePattern.getAllowed();
-    final Set<Permission> pattern = type.getPattern().getData().get(DiscordGroup.EVERYONE).getDenied();
+    final Set<Permission> pattern = permissionType.getPattern().getData().get(DiscordGroup.EVERYONE).getDenied();
     if (!rolePattern.isRevokeAll()) {
       pattern.retainAll(rolePattern.getRevokeDenials());
     }

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.discord.Nunu;
+import de.zahrie.trues.api.discord.util.Nunu;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Role;
@@ -25,20 +25,21 @@ public enum DiscordGroup implements Roleable {
   DEVELOPER(7, "Developer", 1, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
   SOCIAL_MEDIA(8, "Social Media", 1, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
   PLAYER(9, "Spieler", 1, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  MENTOR(10, "Mentor", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  MENTOR(10, "Mentor", 1, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
   ANALYST(11, "Analyst", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  LANE_COACH(12, "Lane Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  MENTAL_COACH(13, "Mental Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  STRATEGIC_COACH(14, "Strategic Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  EVENT_LEAD(15, "Head of Event", 1, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  SOCIAL_MEDIA_LEAD(16, "Head of Social Media", 1, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  TEAM_CAPTAIN(17, "Captain", 1, GroupTier.LEADER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  TEAM_BUILDING(18, "Teamaufbau", 1, GroupTier.LEADER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  EVENT_MANAGER(19, "Event Management", 1, GroupTier.MANAGEMENT, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  COMMUNITY_MANAGER(20, "Community Management", 1, GroupTier.MANAGEMENT, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  COACHING_MANAGER(21, "Team Management", 1, GroupTier.MANAGEMENT, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  ORGA_LEADER(22, "Leitung Community", 1, GroupTier.ORGA_LEADER, Department.ALL, GroupType.PINGABLE, Set.of()),
-  TEAM_ROLE_PLACEHOLDER(23, "", -1, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  DRAFT_COACH(12, "Draft Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  LANE_COACH(13, "Lane Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  MENTAL_COACH(14, "Mental Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  STRATEGIC_COACH(15, "Strategic Coach", 1, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  EVENT_LEAD(16, "Head of Event", 1, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  SOCIAL_MEDIA_LEAD(17, "Head of Social Media", 1, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  TEAM_CAPTAIN(18, "Captain", 1, GroupTier.LEADER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  TEAM_BUILDING(19, "Teamaufbau", 1, GroupTier.LEADER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  EVENT_MANAGER(20, "Event Management", 1, GroupTier.MANAGEMENT, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  COMMUNITY_MANAGER(21, "Community Management", 1, GroupTier.MANAGEMENT, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  COACHING_MANAGER(22, "Team Management", 1, GroupTier.MANAGEMENT, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  ORGA_LEADER(23, "Leitung Community", 1, GroupTier.ORGA_LEADER, Department.ALL, GroupType.PINGABLE, Set.of()),
+  TEAM_ROLE_PLACEHOLDER(24, "", -1, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
   TOP(50, "", -1, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
   JUNGLE(51, "", -1, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
   MIDDLE(52, "", -1, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
@@ -83,9 +84,9 @@ public enum DiscordGroup implements Roleable {
         .findFirst().orElse(null);
   }
 
-  public static DiscordGroup of(long id) {
+  public static DiscordGroup of(Role role) {
     final Stream<DiscordGroup> groups = Arrays.stream(DiscordGroup.values());
-    return groups.filter(group -> group.getDiscordId() == id)
+    return groups.filter(group -> group.getDiscordId() == role.getIdLong())
         .findFirst().orElse(null);
   }
 

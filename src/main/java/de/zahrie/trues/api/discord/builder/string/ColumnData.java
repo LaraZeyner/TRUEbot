@@ -7,9 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-/**
- * Created by Lara on 13.02.2023 for TRUEbot
- */
 @Getter
 @EqualsAndHashCode
 @ToString

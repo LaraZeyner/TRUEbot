@@ -9,7 +9,7 @@ import org.hibernate.Session;
 public final class EntityFactory {
 
   static <T> String getName(Class<T> entityClass) {
-    final Session session = Database.connection().session();
+    final Session session = Database.connection().getSession();
     final EntityType<T> storedEntity = session.getMetamodel().entity(entityClass);
     return storedEntity.getName();
   }

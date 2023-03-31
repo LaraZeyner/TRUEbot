@@ -10,17 +10,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class Time extends GregorianCalendar {
   @Serial
   private static final long serialVersionUID = -5477941385614028550L;
+
+  public static Time of(String text) {
+    //TODO (Abgie) 27.03.2023:
+  }
 
   public static Time of() {
     return new Time();
@@ -94,7 +98,11 @@ public class Time extends GregorianCalendar {
     return new Day(this);
   }
 
-  public Chain chain(TimeFormat timeFormat) {
+  public int epoch() {
+    return (int) (this.getTimeInMillis() / 1000L);
+  }
+
+  public String text(TimeFormat timeFormat) {
     return timeFormat.of(this);
   }
 }

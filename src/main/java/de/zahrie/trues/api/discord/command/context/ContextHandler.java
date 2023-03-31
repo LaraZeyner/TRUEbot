@@ -3,7 +3,7 @@ package de.zahrie.trues.api.discord.command.context;
 import java.util.List;
 
 import de.zahrie.trues.discord.context.ContextRegisterer;
-import de.zahrie.trues.discord.Nunu;
+import de.zahrie.trues.api.discord.util.Nunu;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -14,7 +14,7 @@ public class ContextHandler extends ListenerAdapter {
   private static final List<ContextCommand> commands = new ContextRegisterer().register();
 
   public static void handleCommands() {
-    Nunu.client.updateCommands().addCommands(
+    Nunu.getInstance().getClient().updateCommands().addCommands(
         commands.stream().map(contextCommand -> Commands.context(contextCommand.getType(), contextCommand.getName())).toList()
     ).queue();
   }

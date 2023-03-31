@@ -11,28 +11,28 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString
 public enum MatchLogAction {
-  change_score(null, false),
-  change_status(EventStatus.lineup_submit, true),
-  change_time(EventStatus.scheduling_suggest, false),
-  create(EventStatus.created, false),
-  disqualify(EventStatus.played, false),
-  hosting_request(EventStatus.hosting_request, false),
-  hosting_submit(EventStatus.hosting_request, false),
-  lineup_fail(EventStatus.played, false),
-  lineup_missing(EventStatus.played, false),
-  lineup_notready(EventStatus.played, false),
-  lineup_player_ready(null, false),
-  lineup_submit(EventStatus.lineup_submit, false),
-  played(EventStatus.played, false),
-  report(EventStatus.score_report, false),
-  scheduling_autoconfirm(EventStatus.scheduling_confirm, false),
-  scheduling_confirm(EventStatus.scheduling_confirm, false),
-  scheduling_suggest(EventStatus.scheduling_suggest, false),
-  scheduling_expired(EventStatus.created, false),
-  score_report(EventStatus.score_report, false),
-  team_added(null, false);
+  CHANGE_SCORE(null, false, "Ergebnis geändert"),
+  CHANGE_STATUS(EventStatus.LINEUP_SUBMIT, true, "Status geändert"),
+  CHANGE_TIME(EventStatus.SCHEDULING_SUGGEST, false, "Matchzeit geändert"),
+  CREATE(EventStatus.CREATED, false, "Spiel erstellt"),
+  DISQUALIFY(EventStatus.PLAYED, false, "Team disqualifiziert"),
+  HOSTING_REQUEST(EventStatus.HOSTING_REQUEST, false, null),
+  HOSTING_SUBMIT(EventStatus.HOSTING_REQUEST, false, null),
+  LINEUP_FAIL(EventStatus.PLAYED, false, "Lineup fehlerhaft"),
+  LINEUP_MISSING(EventStatus.PLAYED, false, null),
+  LINEUP_NOTREADY(EventStatus.PLAYED, false, "Lineup fehlerhaft"),
+  LINEUP_PLAYER_READY(null, false, null),
+  LINEUP_SUBMIT(EventStatus.LINEUP_SUBMIT, false, "Lineup eingetragen"),
+  PLAYED(EventStatus.PLAYED, false, "Spiel beendet"),
+  REPORT(EventStatus.SCORE_REPORT, false, "Ergebnis gemeldet"),
+  SCHEDULING_AUTOCONFIRM(EventStatus.SCHEDULING_CONFIRM, false, "Termin bestätigt"),
+  SCHEDULING_CONFIRM(EventStatus.SCHEDULING_CONFIRM, false, "Termin bestätigt"),
+  SCHEDULING_EXPIRED(EventStatus.CREATED, false, "Vorschlag ausgelaufen"),
+  SCHEDULING_SUGGEST(EventStatus.SCHEDULING_SUGGEST, false, "neuer Vorschlag"),
+  SCORE_REPORT(EventStatus.SCORE_REPORT, false, "Ergebnis gemeldet"),
+  TEAM_ADDED(null, false, null);
 
   private final EventStatus status;
   private final boolean force;
-
+  private final String output;
 }

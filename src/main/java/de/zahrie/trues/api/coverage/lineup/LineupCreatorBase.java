@@ -6,9 +6,6 @@ import java.util.Map;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 
-/**
- * Created by Lara on 24.02.2023 for TRUEbot
- */
 public class LineupCreatorBase {
   protected final Map<Lane, LaneLineup> laneLineups = new HashMap<>();
 
