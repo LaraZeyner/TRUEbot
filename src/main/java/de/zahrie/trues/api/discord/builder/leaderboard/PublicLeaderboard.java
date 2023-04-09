@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -40,17 +39,17 @@ public class PublicLeaderboard extends Leaderboard {
     }
     final EmbedWrapper data = super.getData(List.of());
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
-    final List<Chain> merge = data.merge();
+    final List<String> merge = data.merge();
     for (int i = 0; i < merge.size(); i++) {
-      final Chain chain = merge.get(i);
+      final String str = merge.get(i);
       final Long messageId = messageIds.get(i);
-      messageChannel.retrieveMessageById(messageId).queue(message -> message.editMessage(chain.toString()).queue());
+      messageChannel.retrieveMessageById(messageId).queue(message -> message.editMessage(str).queue());
     }
     for (int i = 0; i < messageIds.size(); i++) {
       final Long messageId = messageIds.get(i);
       final int finalI = i;
       messageChannel.retrieveMessageById(messageId).queue(message -> {
-        if (merge.size() > finalI) message.editMessage(merge.get(finalI).toString()).queue();
+        if (merge.size() > finalI) message.editMessage(merge.get(finalI)).queue();
         fromTo(finalI, messageIds.size(), wrapperEmbeds, message);
       });
     }

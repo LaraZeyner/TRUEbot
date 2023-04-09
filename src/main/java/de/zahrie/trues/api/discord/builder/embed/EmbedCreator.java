@@ -4,15 +4,16 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
+@ExtensionMethod(StringUtils.class)
 public class EmbedCreator {
   private final boolean enumerated;
   private final String title;
@@ -35,7 +36,6 @@ public class EmbedCreator {
   }
 
   public EmbedCreator(boolean enumerated, String title, String description, Color color) {
-    // TODO (Abgie) 15.03.2023: never used
     this.enumerated = enumerated;
     this.title = title;
     this.description = description;
@@ -51,16 +51,16 @@ public class EmbedCreator {
   }
 
   private void getBaseBuilder() {
-    final Chain footer = Chain.of("zuletzt aktualisiert ").add(Time.of().text(TimeFormat.DEFAULT));
-    this.currentBuilder = new EmbedBuilder().setFooter(footer.toString());
+    final String footer = "zuletzt aktualisiert " + TimeFormat.DEFAULT.now();
+    this.currentBuilder = new EmbedBuilder().setFooter(footer);
     this.totalDataLength = footer.length();
 
-    final Chain titleStripped = Chain.of(title).strip(MessageEmbed.TITLE_MAX_LENGTH);
-    this.currentBuilder.setTitle(titleStripped.toString());
+    final String titleStripped = title.keep(MessageEmbed.TITLE_MAX_LENGTH);
+    this.currentBuilder.setTitle(titleStripped);
     this.totalDataLength += titleStripped.length();
 
-    final Chain descriptionStripped = Chain.of(description).strip(MessageEmbed.DESCRIPTION_MAX_LENGTH);
-    this.currentBuilder.setDescription(descriptionStripped.toString());
+    final String descriptionStripped = description.keep(MessageEmbed.DESCRIPTION_MAX_LENGTH);
+    this.currentBuilder.setDescription(descriptionStripped);
     this.totalDataLength += descriptionStripped.length();
 
     if (this.color != null) {
@@ -113,7 +113,7 @@ public class EmbedCreator {
     List<Integer> cols = new ArrayList<>();
     for (int i = 0; i < waitingColumns.get(0).value().split("\n").length / 5; i++) {
       final int j = enumerated ? i * 5 : i;
-      final List<Integer> cls = waitingColumns.stream().map(c -> Chain.of(c.value()).ordinalIndexOf("\n", j)).toList();
+      final List<Integer> cls = waitingColumns.stream().map(c -> c.value().ordinalIndexOf("\n", j)).toList();
       if (cls.stream().reduce(0, Integer::sum) > space) {
         splitFields(cols);
         break;
@@ -162,8 +162,8 @@ public class EmbedCreator {
 
   private void addAllColumns() {
     for (EmbedColumn column : this.waitingColumns) {
-      final Chain name = Chain.of(column.name()).strip(MessageEmbed.TITLE_MAX_LENGTH);
-      this.currentBuilder.addField(name.toString(), column.value(), column.inline());
+      final String name = column.name().keep(MessageEmbed.TITLE_MAX_LENGTH);
+      this.currentBuilder.addField(name, column.value(), column.inline());
     }
     this.waitingColumns.clear();
   }

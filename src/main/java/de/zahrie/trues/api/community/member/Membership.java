@@ -2,13 +2,14 @@ package de.zahrie.trues.api.community.member;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,14 +22,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -42,8 +42,7 @@ import org.jetbrains.annotations.NotNull;
 @ToString
 @Entity(name = "Membership")
 @Table(name = "orga_member", indexes = {@Index(name = "idx_app", columnList = "discord_user, orga_team", unique = true)})
-@NamedQuery(name = "Membership.ofUser", query = "FROM Membership WHERE user = :user AND active = true")
-@NamedQuery(name = "Membership.ofUserCaptain", query = "FROM Membership WHERE user = :user AND active = true AND captain = true")
+@ExtensionMethod(StringUtils.class)
 public class Membership implements Serializable, Comparable<Membership> {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
@@ -72,9 +71,8 @@ public class Membership implements Serializable, Comparable<Membership> {
   @Column(name = "position", length = 15)
   private TeamPosition position;
 
-  @Type(TimeCoverter.class)
   @Column(name = "timestamp")
-  private Time timestamp = new Time();
+  private LocalDateTime timestamp = LocalDateTime.now();
 
   @Column(name = "captain")
   private boolean captain = false;
@@ -91,13 +89,16 @@ public class Membership implements Serializable, Comparable<Membership> {
     this.orgaTeam = orgaTeam;
     this.role = role;
     this.position = position;
-    this.timestamp = new Time();
-    this.active = true;
-    this.captain = false;
+  }
+
+  public String getPositionString() {
+    return (role.equals(TeamRole.MAIN) ? "" : role.name().capitalizeFirst() + " ") + position.name().capitalizeFirst();
   }
 
   @Override
   public int compareTo(@NotNull Membership o) {
-    return o.getRole().ordinal() - role.ordinal();
+    return Comparator.comparing(Membership::isActive)
+        .thenComparing(Membership::getRole)
+        .thenComparing(Membership::getPosition).compare(this, o);
   }
 }

@@ -1,7 +1,5 @@
 package de.zahrie.trues.discord.modal.models;
 
-import java.util.Objects;
-
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -9,6 +7,7 @@ import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
+import de.zahrie.trues.util.Util;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
@@ -26,7 +25,7 @@ public class RoleEditModal extends ModalImpl {
   @Override
   @Msg("Die Rollen wurden bearbeitet.")
   public boolean execute(ModalInteractionEvent event) {
-    final DiscordUser invoker = DiscordUserFactory.getDiscordUser(Objects.requireNonNull(event.getMember()));
+    final DiscordUser invoker = DiscordUserFactory.getDiscordUser(Util.nonNull(event.getMember()));
     new RoleGranter(invoker, getInvoker()).add(getGroup(), getDays());
     return sendMessage();
   }

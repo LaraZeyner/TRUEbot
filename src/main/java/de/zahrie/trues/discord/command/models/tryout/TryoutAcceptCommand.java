@@ -8,7 +8,7 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.community.application.ApplicationFactory;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;

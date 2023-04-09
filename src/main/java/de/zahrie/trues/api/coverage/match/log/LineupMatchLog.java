@@ -9,21 +9,23 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.util.StringUtils;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("lineup_submit")
+@ExtensionMethod(StringUtils.class)
 public class LineupMatchLog extends MatchLog implements Serializable {
   @Serial
   private static final long serialVersionUID = -1511303287998292492L;
 
   public List<Player> determineLineup() {
     return Arrays.stream(getDetails().split(", "))
-        .map(playerString -> Chain.of(playerString).between(null, ":").intValue())
+        .map(playerString -> playerString.between(null, ":").intValue())
         .mapToInt(Integer::intValue)
         .mapToObj(PrimePlayerFactory::getPlayer)
         .filter(Objects::nonNull)

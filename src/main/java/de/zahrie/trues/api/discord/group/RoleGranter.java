@@ -25,6 +25,7 @@ public class RoleGranter extends RoleGranterBase {
     TeamLogFactory.create(invoker, target, "**" + team.getName() + "** -> " + target.getMember().getAsMention() + " ist neuer " + role.name() + " - " + position.name(), TeamLog.TeamLogAction.LINEUP_JOIN, team);
     addTeam(team);
     if (role.equals(TeamRole.TRYOUT)) target.take(role, position);
+    if (role.equals(TeamRole.STANDIN)) new RoleGranter(target).add(DiscordGroup.SUBSTITUDE, 1);
     target.updateApplicationStatus();
     updateBasedOnGivenRolesAndMembers();
   }

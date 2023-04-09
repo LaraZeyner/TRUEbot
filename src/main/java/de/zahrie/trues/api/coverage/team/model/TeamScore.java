@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.util.Format;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
@@ -44,19 +45,14 @@ public class TeamScore implements Serializable, Comparable<TeamScore> {
   }
 
   TeamDestination getDestination() {
-    // TODO (Abgie) 15.03.2023: never used
-    if (this.place < 3) {
-      return TeamDestination.PROMOTION;
-    }
-    if (this.place > 6) {
-      return TeamDestination.DEMOTION;
-    }
+    if (this.place < 3) return TeamDestination.PROMOTION;
+    if (this.place > 6) return TeamDestination.DEMOTION;
     return TeamDestination.STAY;
   }
 
   @Override
   public String toString() {
-    return this.place + ". (" + this.getWins() + "/" + this.getLosses() + ")";
+    return this.place + ". " + getStanding().format(Format.ADDITIONAL);
   }
 
   @Override

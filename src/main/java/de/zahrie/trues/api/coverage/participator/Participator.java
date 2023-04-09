@@ -22,7 +22,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -44,8 +43,6 @@ import org.jetbrains.annotations.NotNull;
 @Table(name = "coverage_team", indexes = {
         @Index(name = "idx_coverage_team_2", columnList = "coverage, team", unique = true),
         @Index(name = "idx_coverage_team", columnList = "coverage, first", unique = true) })
-@NamedQuery(name = "Participator.nextForTeam", query = "FROM Participator WHERE team = :team AND coverage.result = '-:-' ORDER BY coverage")
-@NamedQuery(name = "Participator.lastForTeam", query = "FROM Participator WHERE team = :team AND coverage.result <> '-:-' ORDER BY coverage desc")
 public class Participator implements Serializable, Comparable<Participator> {
   @Serial
   private static final long serialVersionUID = 738958738264529474L;

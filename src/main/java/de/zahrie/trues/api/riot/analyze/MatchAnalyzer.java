@@ -4,11 +4,12 @@ import java.util.Arrays;
 
 import com.merakianalytics.orianna.types.common.Map;
 import com.merakianalytics.orianna.types.core.match.Match;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
 import de.zahrie.trues.api.riot.matchhistory.game.MatchExtension;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -23,7 +24,7 @@ public class MatchAnalyzer {
   private boolean requiresSelection;
 
   public MatchAnalyzer(Match match) {
-    this(match, Database.Find.find(Game.class, match.getMatchId()) != null);
+    this(match, QueryBuilder.hql(Game.class, "FROM PRMMatch WHERE matchId = " + match.getMatchId()).single() != null);
   }
 
   public Game analyze() {

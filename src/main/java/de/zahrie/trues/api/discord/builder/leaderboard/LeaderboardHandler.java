@@ -1,7 +1,11 @@
 package de.zahrie.trues.api.discord.builder.leaderboard;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +17,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class LeaderboardHandler {
-  private static final Map<PublicLeaderboard, Calendar> leaderboards;
+  private static final Map<PublicLeaderboard, LocalDateTime> leaderboards;
 
   static {
-    final Calendar calendar = Calendar.getInstance();
-    calendar.set(2000, Calendar.JANUARY, 1);
-    leaderboards = load().stream().collect(HashMap::new, (m, v) -> m.put(v, calendar), HashMap::putAll);
+    final LocalDateTime dateTime = LocalDate.of(2000, Month.JANUARY, 1).atTime(LocalTime.MIN);
+    leaderboards = load().stream().collect(HashMap::new, (m, v) -> m.put(v, dateTime), HashMap::putAll);
   }
 
   private static List<PublicLeaderboard> load() {
@@ -27,19 +30,19 @@ public class LeaderboardHandler {
   }
 
   public static void handleLeaderboards() {
-    final Date date = new Date();
+    final LocalDateTime dateTime = LocalDateTime.now();
     leaderboards.forEach((leaderboard, last) -> {
       final int frequency = leaderboard.getCustomQuery().getCustomQuery().getFrequencyInMinutes();
       if (frequency == 0) return;
-      if (date.getTime() - last.getTimeInMillis() >= (frequency - 1) * 60_000L) {
+      if (Duration.between(last, dateTime).get(ChronoUnit.MINUTES) >= frequency - 1) {
         leaderboard.updateData();
-        leaderboards.replace(leaderboard, Calendar.getInstance());
+        leaderboards.replace(leaderboard, LocalDateTime.now());
       }
     });
   }
 
   public static void add(PublicLeaderboard leaderboard) {
-    leaderboards.put(leaderboard, Calendar.getInstance());
+    leaderboards.put(leaderboard, LocalDateTime.now());
     write();
   }
 

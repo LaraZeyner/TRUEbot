@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 public class MembersEditModal extends ModalImpl {
   @Override
   protected Modal getModal(boolean value) {
-    Modal.Builder builder = create(getTargetMember().getNickname() + " als Mitglied hinzufügen (nicht Spieler)");
+    final Modal.Builder builder = create(getTargetMember().getNickname() + " als Mitglied hinzufügen (nicht Spieler)");
     return builder.addComponents(getTargetUser(), getApplicationRoleField2(), getMemberGroups()).build();
   }
 

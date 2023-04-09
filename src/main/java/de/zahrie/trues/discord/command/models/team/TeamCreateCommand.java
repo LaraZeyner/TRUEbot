@@ -2,7 +2,7 @@
 package de.zahrie.trues.discord.command.models.team;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "kurz", description = "Abkürzung", required = false),
     @Option(name = "id", description = "PRM TeamId (sofern vorhanden)", required = false, type = OptionType.INTEGER)
 })
-@ExtensionMethod(StringExtention.class)
+@ExtensionMethod(StringUtils.class)
 public class TeamCreateCommand extends SlashCommand {
   @Override
   @Msg("Das Team wurde erfolgreich erstellt.")

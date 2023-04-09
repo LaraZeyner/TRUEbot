@@ -8,21 +8,22 @@ import de.zahrie.trues.discord.listener.models.MemberEvent;
 import de.zahrie.trues.discord.listener.models.MessageEvent;
 import de.zahrie.trues.discord.listener.models.PermissionEvent;
 import de.zahrie.trues.discord.listener.models.RoleEvent;
+import de.zahrie.trues.discord.listener.models.VoiceEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
- * @see net.dv8tion.jda.api.events.channel
+ * @see net.dv8tion.jda.api.events.channel ChannelEvent
  * @see net.dv8tion.jda.api.events.emoji
  * @see net.dv8tion.jda.api.events.guild
  * @see net.dv8tion.jda.api.events.guild.invite
- * @see net.dv8tion.jda.api.events.guild.member
+ * @see net.dv8tion.jda.api.events.guild.member MemberEvent
  * @see net.dv8tion.jda.api.events.guild.override PermissionEvent
  * @see net.dv8tion.jda.api.events.guild.scheduledevent
  * @see net.dv8tion.jda.api.events.guild.update
- * @see net.dv8tion.jda.api.events.guild.voice
+ * @see net.dv8tion.jda.api.events.guild.voice VoiceEvent
  * @see net.dv8tion.jda.api.events.interaction
- * @see net.dv8tion.jda.api.events.message
- * @see net.dv8tion.jda.api.events.role
+ * @see net.dv8tion.jda.api.events.message MessageEvent
+ * @see net.dv8tion.jda.api.events.role RoleEvent
  * @see net.dv8tion.jda.api.events.self
  * @see net.dv8tion.jda.api.events.session
  * @see net.dv8tion.jda.api.events.stage
@@ -37,6 +38,7 @@ public class EventRegisterer implements Registerer<List<ListenerAdapter>> {
         new ChannelEvent(), // 11 Events
         new MemberEvent(), // 12 Events
         new PermissionEvent(), // 4 Events
+        new VoiceEvent(), // 12 Events
         new MessageEvent(), // 11 Events
         new RoleEvent() // 11 Events
     );

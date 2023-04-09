@@ -2,6 +2,7 @@ package de.zahrie.trues.discord.context.models;
 
 import java.util.List;
 
+import de.zahrie.trues.api.community.orgateam.OrgaTeamImpl;
 import de.zahrie.trues.api.discord.command.context.Context;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
 import de.zahrie.trues.api.discord.command.context.UseView;
@@ -11,9 +12,11 @@ import de.zahrie.trues.discord.modal.ModalRegisterer;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.community.member.MembershipFactory;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
 @Context("Teammember entfernen")
+@ExtensionMethod(OrgaTeamImpl.class)
 public class TeamRemoveContext extends ContextCommand {
   @Override
   @Msg(value = "Der Nutzer wurde entfernt.")

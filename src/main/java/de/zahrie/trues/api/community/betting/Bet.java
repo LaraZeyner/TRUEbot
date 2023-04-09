@@ -15,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,10 +29,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @ToString
-@Entity(name = "Bet")
-@Table(name = "bet", indexes = {
-    @Index(name = "idx_bet", columnList = "coverage, discord_user", unique = true)})
-@NamedQuery(name = "Bet.findByUserAndMatch", query = "FROM Bet WHERE user = :user AND match = :match")
+@Entity
+@Table(name = "bet", indexes = @Index(name = "idx_bet", columnList = "coverage, discord_user", unique = true))
 public class Bet implements Serializable {
 
   @Serial

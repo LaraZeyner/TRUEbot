@@ -1,7 +1,8 @@
 package de.zahrie.trues.discord.context.models;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.discord.command.context.Context;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
@@ -37,10 +38,11 @@ public class ProfileContext extends ContextCommand {
   private void handleTeamData(Team team) {
     String divisionName = "keine Daten";
     String score = "keine Daten";
-    if (team instanceof final PrimeTeam primeTeam) {
-      if (primeTeam.getCurrentLeague() != null) {
-        divisionName = primeTeam.getCurrentLeague().getName();
-        score = primeTeam.getScore().toString();
+    if (team instanceof final PRMTeam prmTeam) {
+      final LeagueTeam currentLeague = prmTeam.getCurrentLeague();
+      if (currentLeague != null) {
+        divisionName = currentLeague.getLeague().getName();
+        score = currentLeague.getScore().toString();
       }
     }
     addEmbedData("prm-team",

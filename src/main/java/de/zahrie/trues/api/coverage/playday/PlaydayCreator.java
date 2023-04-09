@@ -1,10 +1,9 @@
 package de.zahrie.trues.api.coverage.playday;
 
 import de.zahrie.trues.api.coverage.league.model.LeagueTier;
-import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduleHandler;
 import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -20,8 +19,8 @@ public class PlaydayCreator {
   }
 
   public Playday create() {
-    final PlaydayScheduler scheduler = new PlaydayScheduleHandler(stage, index, tier).create();
-    final Playday playday = new Playday(stage, (short) index, scheduler.playday().start(), scheduler.playday().end());
+    final PlaydayScheduler scheduler = PlaydayScheduler.create(stage, index, tier);
+    final Playday playday = new Playday(stage, (short) index, scheduler.playday().getStartTime(), scheduler.playday().getEndTime());
     Database.save(playday);
     return playday;
   }

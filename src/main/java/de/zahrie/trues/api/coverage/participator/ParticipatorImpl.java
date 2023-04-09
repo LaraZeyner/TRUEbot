@@ -10,7 +10,7 @@ import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +31,7 @@ public class ParticipatorImpl {
   }
 
   public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<Player> players) {
-    String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split("%2C");
+    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split("%2C");
     for (int i = 0; i < split.length; i++) {
       if (i > 4) break;
 

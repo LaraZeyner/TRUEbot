@@ -12,10 +12,10 @@ import de.zahrie.trues.discord.scouting.Scouting;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @Command(name = "scout", descripion = "Scouting", perm = @Perm(PermissionRole.ORGA_MEMBER),
-    options = @Option(name = "typ", description = "Art des Scoutings", choices = {"Übersicht", "Lineup", "Games", "Champions", "Matchups", "Schedule"})
+    options = @Option(name = "typ", description = "Art des Scoutings", choices = {"Übersicht", "Lineup", "Games", "Champions", "Matchups", "Schedule", "Player History"})
 )
 @UseView({ModalRegisterer.SCOUT_CHAMPIONS, ModalRegisterer.SCOUT_HISTORY, ModalRegisterer.SCOUT_LINEUP,
-    ModalRegisterer.SCOUT_MATCHUPS, ModalRegisterer.SCOUT_OVERVIEW, ModalRegisterer.SCOUT_SCHEDULE})
+    ModalRegisterer.SCOUT_MATCHUPS, ModalRegisterer.SCOUT_OVERVIEW, ModalRegisterer.SCOUT_SCHEDULE, ModalRegisterer.SCOUT_PLAYER_HISTORY})
 public class ScoutCommand extends SlashCommand {
   @Override
   public boolean execute(SlashCommandInteractionEvent event) {

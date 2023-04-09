@@ -21,7 +21,7 @@ public class ScoutMatchupsModal extends ModalImpl {
 
   @Override
   public boolean execute(ModalInteractionEvent event) {
-    ScoutingManager.custom(getTeamIdOrName(), event, Scouting.ScoutingType.MATCHUPS, getScoutingGameType(), getDuration());
+    ScoutingManager.custom(getTeamIdOrName(), event, Scouting.ScoutingType.PLAYER_HISTORY, getScoutingGameType(), getDuration());
     return true;
   }
 }

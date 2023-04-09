@@ -3,9 +3,10 @@ package de.zahrie.trues.api.riot.matchhistory.performance;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 
 public class PerformanceFactory {
   public static List<Object[]> getLastPlayerGames(GameType gameType, Player player) {
@@ -13,6 +14,6 @@ public class PerformanceFactory {
   }
 
   public static Performance getPerformanceByPlayerAndTeamPerformance(Player player, TeamPerf teamPerformance) {
-    return Database.Find.find(Performance.class, new String[]{"player", "teamPerformance"}, new Object[]{player, teamPerformance}, "fromPlayerAndTPerf");
+    return QueryBuilder.hql(Performance.class, "FROM Performance WHERE player = " + player + " AND teamPerformance = " + teamPerformance).single();
   }
 }

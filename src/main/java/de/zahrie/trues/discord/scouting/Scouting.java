@@ -5,16 +5,15 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.community.orgateam.TeamChannel;
-import de.zahrie.trues.api.community.orgateam.TeamChannelType;
-import de.zahrie.trues.api.coverage.match.MatchFactory;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.util.Const;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -33,29 +32,21 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   private static ThreadChannel determineThreadChannel(OrgaTeam orgaTeam, Participator participator, Match match) {
+    final AtomicReference<ThreadChannel> thread = new AtomicReference<>();
     final TeamChannel scoutingChannel = orgaTeam.getTeamChannels().stream().filter(teamChannel -> teamChannel.getTeamChannelType().equals(TeamChannelType.SCOUTING)).findFirst().orElse(null);
     if (scoutingChannel == null) return null;
     final Team team = participator.getTeam();
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
-    final AtomicReference<ThreadChannel> channel = new AtomicReference<>(textChannel.getThreadChannels().stream()
-        .filter(threadChannel -> threadChannel.getName().contains(String.valueOf(team.getId())))
-        .findFirst().orElse(null));
-    final Participator orgaParticipator = match.getOpponent(team);
-
-    if (channel.get() == null) {
+    if (participator.getMessageId() == null) {
       textChannel.sendMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog())
           .queue(message -> {
-            textChannel.createThreadChannel(Const.THREAD_CHANNEL_START + team.getAbbreviation() + " (" + team.getId() + ")", message.getIdLong()).queue(channel::set);
-            orgaParticipator.setMessageId(message.getIdLong());
+            textChannel.createThreadChannel(Const.THREAD_CHANNEL_START + team.getAbbreviation() + " (" + team.getId() + ")", message.getIdLong()).queue();
+            participator.setMessageId(message.getIdLong());
           });
-    } else if (orgaParticipator.getMessageId() == null) {
-      final Long matchOf = MatchFactory.getMatchOf(orgaTeam.getTeam(), team);
-      textChannel.retrieveMessageById(matchOf)
-          .queue(message -> message.replyEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog())
-              .queue(messageSent -> orgaParticipator.setMessageId(messageSent.getIdLong())));
+      Database.save(participator);
     }
-    Database.save(orgaParticipator);
-    return channel.get();
+    textChannel.retrieveMessageById(participator.getMessageId()).queue(message -> thread.set(message.getStartedThread()));
+    return thread.get();
   }
 
   public void sendCustom(IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
@@ -73,8 +64,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   public void sendLog() {
-    final Participator orgaParticipator = match.getOpponent(participator.getTeam());
-    thread.getParentChannel().asGuildMessageChannel().retrieveMessageById(orgaParticipator.getMessageId())
+    thread.getParentChannel().asGuildMessageChannel().retrieveMessageById(participator.getMessageId())
         .queue(message -> message.editMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog()).queue());
   }
 
@@ -102,8 +92,8 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
 
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(type.getTitleStart() + participator.getTeam().getName())
-        .setDescription("Datum: " + Time.of().text(TimeFormat.DEFAULT) + "\nWinchance: coming soon\nErwartetes Lineup: opgg und porofessor coming soon\nTyp: ")
-        .setFooter("zuletzt aktualisiert " + Time.of().text(TimeFormat.DEFAULT));
+        .setDescription("Datum: " + TimeFormat.DEFAULT.of(match.getStart()) + "\nWinchance: coming soon\nErwartetes Lineup: opgg und porofessor coming soon\nTyp: ")
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     new ScoutingEmbedHandler(participator, gameType, days, page).get(type).forEach(builder::addField);
     final MessageEmbed embed = builder.build();
 
@@ -132,6 +122,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     LINEUP("Lineup von "),
     MATCHUPS("Natchups von "),
     OVERVIEW("Übersicht von "),
+    PLAYER_HISTORY("Matchhistory von "),
     SCHEDULE("Schedule von ");
     private final String titleStart;
 
@@ -142,13 +133,4 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     }
   }
 
-  @RequiredArgsConstructor
-  @Getter
-  public enum ScoutingGameType {
-    PRM_ONLY("nur Prime League"),
-    PRM_CLASH("PRM & Clash"),
-    TEAM_GAMES("Team Games"),
-    MATCHMADE("alle Games");
-    private final String displayName;
-  }
 }

@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 
 public record StringQueryBuilder(StringCreator creator, List<CustomQuery> queries, List<CustomEmbedData> embedData) {
   public StringCreator build() {

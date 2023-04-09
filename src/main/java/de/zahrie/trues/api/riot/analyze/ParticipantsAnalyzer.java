@@ -6,17 +6,24 @@ import com.merakianalytics.orianna.types.core.match.ParticipantStats;
 import com.merakianalytics.orianna.types.core.match.Team;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.KDA;
+import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.api.riot.matchhistory.performance.ParticipantExtension;
 import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
 import de.zahrie.trues.api.riot.matchhistory.performance.PerformanceFactory;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
+import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 
+@Data
 @ExtensionMethod(ParticipantExtension.class)
-public record ParticipantsAnalyzer(Match match, TeamPerf teamPerformance, Team team, Participant participant) {
+public class ParticipantsAnalyzer {
+  private final Match match;
+  private final TeamPerf teamPerformance;
+  private final Team team;
+  private final Participant participant;
+
   public Performance analyze() {
     final Player player = PlayerFactory.getPlayerFromPuuid(participant.getSummoner().getPuuid());
     final Performance performance = PerformanceFactory.getPerformanceByPlayerAndTeamPerformance(player, teamPerformance);

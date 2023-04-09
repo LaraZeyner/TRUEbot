@@ -4,18 +4,21 @@ import java.util.List;
 
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.util.Util;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;
 
 @Log
 public final class PlayerFactory {
   public static List<Player> registeredPlayers() {
-    return Database.Find.findList(Player.class, "registered");
+    return QueryBuilder.hql(Player.class, "FROM Player WHERE discordUser is not null").list();
   }
   public static Player findPlayer(String puuid) {
-    return puuid == null ? null : Database.Find.find(Player.class, new String[]{"puuid"}, new Object[]{puuid}, "fromPuuid");
+    return Util.avoidNull(puuid, null,
+        puuidStr -> QueryBuilder.hql(Player.class, "FROM Player WHERE puuid = " + puuidStr).single());
   }
 
   @Nullable
@@ -56,6 +59,7 @@ public final class PlayerFactory {
   }
 
   private static Player determineExistingPlayerFromName(String summonerName) {
-    return summonerName == null ? null : Database.Find.find(Player.class, new String[]{"name"}, new Object[]{summonerName}, "fromName");
+    return Util.avoidNull(summonerName, null,
+        nameStr -> QueryBuilder.hql(Player.class, "FROM Player WHERE summonerName = " + nameStr).single());
   }
 }

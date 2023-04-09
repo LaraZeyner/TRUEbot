@@ -1,22 +1,23 @@
 package de.zahrie.trues.api.coverage.player;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
-import de.zahrie.trues.api.coverage.player.model.PrimePlayer;
+import de.zahrie.trues.api.coverage.Loader;
+import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.api.coverage.Loader;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.URLType;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod(StringUtils.class)
 public class PlayerLoader extends GamesportsLoader implements Loader {
   public static int idFromURL(String url) {
-    // TODO (Abgie) 15.03.2023: never used
-    return Chain.of(url).between("/users/", "-").intValue();
+    return url.between("/users/", "-").intValue();
   }
 
-  private final PrimePlayer player;
+  private final PRMPlayer player;
 
   public PlayerLoader(int primeId, String summonerName) {
     super(URLType.PLAYER, primeId);
@@ -33,7 +34,7 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
         .find("li")
         .find("a")
         .getAttribute("href"));
-    final PrimeTeam team = TeamFactory.getTeam(teamId);
+    final PRMTeam team = TeamFactory.getTeam(teamId);
     player.setTeam(team);
     Database.save(player);
     Database.save(team);

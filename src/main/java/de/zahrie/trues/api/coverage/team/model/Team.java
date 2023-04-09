@@ -2,17 +2,18 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.database.types.TimeCoverter;
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.coverage.season.signup.SeasonSignup;
+import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
+import de.zahrie.trues.api.database.Database;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,15 +24,13 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DiscriminatorFormula;
-import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,7 +38,7 @@ import org.hibernate.annotations.Type;
 @Setter
 @ToString
 @Entity
-@Table(name = "team", schema = "prm", indexes = {@Index(name = "idx_channel", columnList = "orga_team", unique = true)})
+@Table(name = "team", indexes = {@Index(name = "idx_channel", columnList = "orga_team", unique = true)})
 @DiscriminatorFormula("IF(team_id IS NULL, '0', '1')")
 @NamedQuery(name = "Team.OrgaTeams.str", query = "SELECT name FROM Team WHERE orgaTeam IS NOT NULL")
 public class Team implements Serializable {
@@ -74,10 +73,9 @@ public class Team implements Serializable {
     this.abbreviation = abbreviation;
   }
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "refresh", nullable = false)
-  private Time refresh;
+  @Setter(AccessLevel.NONE)
+  private LocalDateTime refresh;
 
   @OneToOne(mappedBy = "team")
   @ToString.Exclude
@@ -91,6 +89,14 @@ public class Team implements Serializable {
   @OneToMany(mappedBy = "team")
   @ToString.Exclude
   private Set<Participator> participators = new LinkedHashSet<>();
+
+  @OneToMany(mappedBy = "team")
+  @ToString.Exclude
+  private Set<LeagueTeam> leagues = new LinkedHashSet<>();
+
+  @OneToMany(mappedBy = "team")
+  @ToString.Exclude
+  private Set<SeasonSignup> signups = new LinkedHashSet<>();
 
   @OneToMany(mappedBy = "team")
   @ToString.Exclude
@@ -108,20 +114,12 @@ public class Team implements Serializable {
     return this.id == ((Team) obj).getId();
   }
 
-  public void refresh(Time start) {
-    final Time time = new Time(start).plus(Time.DATE, 70);
-    this.setRefresh(time);
-  }
-
-  public void setRefresh(Time refresh) {
-    if (refresh.after(this.refresh)) {
-      this.refresh = refresh;
+  public void refresh(LocalDateTime start) {
+    final LocalDateTime refreshUntil = orgaTeam == null ? start.plusDays(70) : LocalDateTime.MAX;
+    if (refreshUntil.isAfter(this.refresh)) {
+      this.refresh = refreshUntil;
       Database.save(this);
     }
-  }
-
-  public boolean isNotOrgaTeam() {
-    return this.orgaTeam == null;
   }
 
   public void highlight() {
@@ -140,6 +138,6 @@ public class Team implements Serializable {
 
   public Match nextOrLastMatch() {
     final List<Match> matches = participators.stream().map(Participator::getCoverage).filter(Match::isActive).sorted().toList();
-    return matches.stream().filter(match -> match.getStart().after(new Time())).findFirst().orElse(matches.get(matches.size() - 1));
+    return matches.stream().filter(match -> match.getStart().isAfter(LocalDateTime.now())).findFirst().orElse(matches.get(matches.size() - 1));
   }
 }

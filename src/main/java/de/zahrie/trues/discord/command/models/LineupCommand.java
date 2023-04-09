@@ -12,7 +12,8 @@ import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import de.zahrie.trues.discord.scouting.Scouting;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -20,7 +21,7 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
 import de.zahrie.trues.util.Util;
 import lombok.experimental.ExtensionMethod;
@@ -36,7 +37,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "support", description = "ID oder Summonername", required = false),
     @Option(name = "matchId", description = "ID des Matches", required = false, type = OptionType.INTEGER)
 })
-@ExtensionMethod({StringExtention.class, LineupFactory.class})
+@ExtensionMethod({StringUtils.class, LineupFactory.class})
 public class LineupCommand extends SlashCommand {
   @Override
   @Msg(value = "Das Lineup wurde eingetragen.", error = "Der Channel ist keinem Team zugewiesen.")
@@ -57,7 +58,8 @@ public class LineupCommand extends SlashCommand {
       if (!orderedLineup) {
         return reply("Das Lineup ist nicht vollständig.");
       }
-      ScoutingManager.forTeam(locatedTeam).update();
+      final Scouting scouting = ScoutingManager.forTeam(locatedTeam);
+      if (scouting != null) scouting.update();
       return sendMessage();
     }
     // TODO (Abgie) 27.03.2023: update Scout-pages

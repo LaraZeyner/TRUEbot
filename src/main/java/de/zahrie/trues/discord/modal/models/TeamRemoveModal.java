@@ -1,12 +1,15 @@
 package de.zahrie.trues.discord.modal.models;
 
+import de.zahrie.trues.api.community.orgateam.OrgaTeamImpl;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
+@ExtensionMethod(OrgaTeamImpl.class)
 @View(ModalRegisterer.TEAM_REMOVE)
 public class TeamRemoveModal extends ModalImpl {
   @Override

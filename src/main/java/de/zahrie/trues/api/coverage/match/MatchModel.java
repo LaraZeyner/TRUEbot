@@ -5,8 +5,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.ModelBase;
-import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.coverage.match.model.PRMMatch;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.util.io.request.HTML;
 import lombok.Getter;
 
@@ -19,11 +19,11 @@ public class MatchModel extends ModelBase implements Serializable {
   private static final long serialVersionUID = -6308081229468669808L;
 
   protected String url;
-  protected PrimeMatch match;
+  protected PRMMatch match;
   protected List<HTML> logs;
-  protected List<PrimeTeam> teams;
+  protected List<PRMTeam> teams;
 
-  public MatchModel(HTML html, String url, PrimeMatch match, List<HTML> logs, List<PrimeTeam> teams) {
+  public MatchModel(HTML html, String url, PRMMatch match, List<HTML> logs, List<PRMTeam> teams) {
     super(html);
     this.url = url;
     this.match = match;

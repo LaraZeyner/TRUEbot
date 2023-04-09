@@ -6,10 +6,11 @@ import de.zahrie.trues.api.Registerer;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.discord.command.models.BetCommand;
 import de.zahrie.trues.discord.command.models.BewerbenCommand;
+import de.zahrie.trues.discord.command.models.FollowMeCommand;
 import de.zahrie.trues.discord.command.models.LimitCommand;
 import de.zahrie.trues.discord.command.models.LineupCommand;
 import de.zahrie.trues.discord.command.models.MoveCommand;
-import de.zahrie.trues.discord.command.models.RegisterCommand;
+import de.zahrie.trues.discord.command.models.SettingsCommand;
 import de.zahrie.trues.discord.command.models.ScoutCommand;
 import de.zahrie.trues.discord.command.models.ScrimCommand;
 import de.zahrie.trues.discord.command.models.channel.ChannelCommand;
@@ -25,10 +26,11 @@ public class CommandRegisterer implements Registerer<List<SlashCommand>> {
         new BetCommand(),
         new BewerbenCommand(),
         new ChannelCommand(),
+        new FollowMeCommand(),
         new LimitCommand(),
         new LineupCommand(),
         new MoveCommand(),
-        new RegisterCommand(),
+        new SettingsCommand(),
         new ScoutCommand(),
         new ScrimCommand(),
         new StatsCommand(),

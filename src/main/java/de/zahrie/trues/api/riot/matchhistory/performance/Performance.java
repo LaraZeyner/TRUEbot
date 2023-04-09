@@ -39,7 +39,6 @@ import org.jetbrains.annotations.NotNull;
 @Table(name = "performance", indexes = @Index(name = "performance_idx_t_perf_champion", columnList = "t_perf, champion"))
 @NamedQuery(name = "Performance.prmOfPlayer",
     query = "SELECT teamPerformance.game.start || ' - ' || lane, champion.name || ' vs ' || opponent.name, kda.kills || kda.deaths || kda.assists FROM Performance WHERE teamPerformance.game.type = :gameType AND player.summonerName = :player ORDER BY teamPerformance.game.start DESC LIMIT 10")
-@NamedQuery(name = "Performance.fromPlayerAndTPerf", query = "FROM Performance WHERE player = :player AND teamPerformance = :teamPerformance")
 public class Performance implements Serializable, Comparable<Performance> {
   @Serial
   private static final long serialVersionUID = -6819821644121738377L;

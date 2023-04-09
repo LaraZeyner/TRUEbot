@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.coverage.player;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,17 +10,18 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Standing;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.discord.scouting.Scouting;
+import de.zahrie.trues.api.riot.matchhistory.performance.PlayerMatchHistoryPerformanceDTO;
+import de.zahrie.trues.api.scouting.ScoutingGameType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public record PlayerAnalyzer(Player player, Scouting.ScoutingGameType type, Team team, int days) {
-
+public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, int days) {
   public List<MessageEmbed.Field> analyzePicks(Lane lane) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
     fields.add(getPlayerHeadField(lane));
@@ -29,6 +31,15 @@ public record PlayerAnalyzer(Player player, Scouting.ScoutingGameType type, Team
         .add("Alle Games", PlayerAnalyzer.PlayerAnalyzerData::getMatchmadeString);
     fields.addAll(data.build());
     return fields;
+  }
+
+  public List<MessageEmbed.Field> analyzeGamesWith(@Nullable Champion champion, @Nullable Lane lane) {
+    final List<List<String>> entries = PlayerMatchHistoryPerformanceDTO.get(player, type, lane, champion).list(25).stream().map(PlayerMatchHistoryPerformanceDTO::getData).toList();
+    final var data = new EmbedFieldBuilder<>(entries)
+        .add("Zeitpunkt", entry -> entry.get(0))
+        .add("Matchup", entry -> entry.get(1))
+        .add("KDA", entry -> entry.get(2));
+    return new ArrayList<>(data.build());
   }
 
   public List<MessageEmbed.Field> analyzeMatchups(Lane lane) {
@@ -43,29 +54,31 @@ public record PlayerAnalyzer(Player player, Scouting.ScoutingGameType type, Team
   }
 
   private MessageEmbed.Field getPlayerHeadField(Lane lane) {
-    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player.getSummonerName() + "(" + getGames() + " Games - " + player.getElo() + ")", "KDA: TBD - Gold: TBD - Damage: TBD - CS/VS: TBD", false);
+    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player.getSummonerName() + "(" + getGames() + " Games - " + player.getLastRank().toString() + ")", "KDA: TBD - Gold: TBD - Damage: TBD - CS/VS: TBD", false);
     //TODO (Abgie) 30.03.2023: Playerstats
   }
 
   private List<PlayerMatchupData> handleMatchups() {
-    final List<Object[]> matchupList = getData("Matchups");
+    final List<Object[]> matchupList = type.playerQuery(player, days).performance("opponent, count(p), avg(teamPerformance.win)", "GROUP BY champion HAVING count(p) > 4 ORDER BY avg(teamPerformance.win)");
     return matchupList.stream().map(objects -> new PlayerMatchupData((Champion) objects[0],
         new Standing((int) ((int) objects[1] * (double) objects[2]), (int) ((int) objects[1] * (1 - ((double) objects[2])))))).toList();
   }
 
   private List<PlayerAnalyzerData> handlePicks() {
-    final var time = new Time(days * -1);
-    List<Object[]> presentPicks = getData("Presence");
+    final var time = LocalDateTime.now().minusDays(days);
+    List<Object[]> presentPicks = type.playerQuery(player, days).selection("champion, count(s)", "GROUP BY champion ORDER BY count(s) desc");
     if (presentPicks.isEmpty())
-      presentPicks = Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getPresenceMatchmade");
-    final List<Object[]> picksList = getData("Picks");
+      presentPicks = QueryBuilder.hql(Object[].class, "SELECT champion, count(s) FROM Selection s WHERE game IN (SELECT teamPerformance FROM Performance p WHERE player = " + player + " AND teamPerformance.game.start > " + time + " GROUP BY lane ORDER BY count(p)) GROUP BY champion ORDER BY count(s) desc").list();
+
+
+    final List<Object[]> picksList = type.playerQuery(player, days).performance("champion, count(p)", "GROUP BY champion ORDER BY count(p) desc");
     final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
     final List<Object[]> mmList = Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getGamesMatchmade");
     final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
     final List<Object[]> winsList = Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getWinsMatchmade");
     final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
 
-    final List<Object[]> games = getData("Games");
+    final List<Object[]> games = type.playerQuery(player, days).performance("count(p)");
     final Integer amountOfGames = (Integer) games.get(0)[0];
     final Map<Champion, PlayerAnalyzerData> data = new HashMap<>();
     for (final Object[] presentPick : presentPicks) {
@@ -89,22 +102,8 @@ public record PlayerAnalyzer(Player player, Scouting.ScoutingGameType type, Team
   }
 
   public int getGames() {
-    final List<Object[]> games = getData("Games");
-    return (int) games.get(0)[0];
-  }
-
-  private List<Object[]> getData(String key) {
-    final var time = new Time(days * -1);
-    return switch (type) {
-      case PRM_ONLY ->
-          Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.get" + key + "PRM");
-      case PRM_CLASH ->
-          Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.get" + key + "PRMClash");
-      case TEAM_GAMES ->
-          Database.Find.findObjectList(new String[]{"player", "start", "team"}, new Object[]{player, time, team}, "Player.get" + key + "TeamGames");
-      case MATCHMADE ->
-          Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.get" + key + "Matchmade");
-    };
+    final List<Integer> games = type.playerQuery(Integer.class, player, days).performance("count(p)");
+    return games.get(0);
   }
 
   public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames, int matchMadeWins) {

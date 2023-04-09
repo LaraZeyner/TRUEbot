@@ -2,7 +2,7 @@ package de.zahrie.trues.api.discord.channel;
 
 import java.util.Map;
 
-import de.zahrie.trues.api.community.orgateam.TeamChannelType;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.util.Util;
 import lombok.Getter;

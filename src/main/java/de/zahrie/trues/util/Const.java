@@ -17,6 +17,8 @@ public class Const {
   public static final String THREAD_CHANNEL_START = "Scouting vs. ";
   public static final int PLAYER_MMR_DEFAULT_VALUE = 1200; // Silver I 0 LP
 
+  public static final double PREDICTION_FACTOR = .03;
+
   public static boolean check() {
     return true;
   }

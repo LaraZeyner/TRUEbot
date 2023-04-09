@@ -12,7 +12,7 @@ import com.merakianalytics.orianna.types.core.match.Participant;
 import com.merakianalytics.orianna.types.core.match.Team;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.performance.ParticipantExtension;
@@ -21,7 +21,6 @@ import de.zahrie.trues.api.riot.matchhistory.selection.SelectionType;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamExtension;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerfFactory;
-import de.zahrie.trues.database.Database;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 
@@ -56,28 +55,27 @@ public class MatchSideAnalyzer {
       final int creeps = team.getParticipants().stream().map(part -> part.getStats().getCreepScore()).mapToInt(Integer::intValue).sum();
       teamPerformance = new TeamPerf(game, blueSide, team.isWinner(), kills, deaths, assists, gold, damage, vision, creeps, (short) team.getTowerKills(), (short) team.getDragonKills(), (short) team.getInhibitorKills(), (short) team.getRiftHeraldKills(), (short) team.getBaronKills());
     }
-    handlePrmTeam(teamPerformance);
+    handleTeamOfTeamPerf(teamPerformance);
     final TeamPerf finalTeamPerformance = teamPerformance;
     validParticipants.stream().map(participant -> new ParticipantsAnalyzer(match, finalTeamPerformance, team, participant).analyze())
         .filter(Objects::nonNull).forEach(Database::save);
     return teamPerformance;
   }
 
-  private void handlePrmTeam(TeamPerf teamPerformance) {
-    if (teamPerformance.getPrmTeam() == null) {
-      final Map<PrimeTeam, Long> teams = team.getParticipants().stream().map(p -> PlayerFactory.findPlayer(p.getSummoner().getPuuid()))
+  private void handleTeamOfTeamPerf(TeamPerf teamPerformance) {
+    if (teamPerformance.getTeam() == null) {
+      final Map<de.zahrie.trues.api.coverage.team.model.Team, Long> teams = team.getParticipants().stream().map(p -> PlayerFactory.findPlayer(p.getSummoner().getPuuid()))
           .filter(Objects::nonNull)
           .map(Player::getTeam)
           .filter(Objects::nonNull)
-          .map(t -> (PrimeTeam) t)
           .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-      final Map.Entry<PrimeTeam, Long> maxEntry = Collections.max(teams.entrySet(), Map.Entry.comparingByValue());
+      final Map.Entry<de.zahrie.trues.api.coverage.team.model.Team, Long> maxEntry = Collections.max(teams.entrySet(), Map.Entry.comparingByValue());
       if (maxEntry.getValue() > 2) {
-        final PrimeTeam prmTeam = maxEntry.getKey();
+        final de.zahrie.trues.api.coverage.team.model.Team prmTeam = maxEntry.getKey();
         if (prmTeam.getOrgaTeam() != null) {
           game.setOrgagame(true);
         }
-        teamPerformance.setPrmTeam(prmTeam);
+        teamPerformance.setTeam(prmTeam);
       }
     }
   }

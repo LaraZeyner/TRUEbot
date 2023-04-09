@@ -1,12 +1,13 @@
 package de.zahrie.trues.discord.modal.models;
 
+import de.zahrie.trues.api.community.application.Application;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
+import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
-import de.zahrie.trues.api.community.application.Application;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -27,7 +28,7 @@ public class ApplyModal extends ModalImpl {
   public boolean execute(ModalInteractionEvent event) {
     final DiscordUser target = getTarget() == null ? DiscordUserFactory.getDiscordUser(getMember()) : getTarget();
     final Application application = target.apply(getTeamRole(), getTeamPosition(), getDescription());
-    // TODO (Abgie) 10.03.2023: Admin-Message
+    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerber " + getInvoker().getMention() + ": " + application.toString()).queue();
     return sendMessage();
   }
 }

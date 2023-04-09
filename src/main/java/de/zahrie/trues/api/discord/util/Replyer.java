@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.api.discord.builder.InfoPanelBuilder;
 import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
@@ -19,6 +18,7 @@ import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.util.Const;
 import lombok.Data;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
 @Data
+@ExtensionMethod(StringUtils.class)
 public abstract class Replyer {
   private final Class<? extends IReplyCallback> clazz;
   private final List<CustomEmbedData> customEmbedData = new ArrayList<>();
@@ -97,51 +98,51 @@ public abstract class Replyer {
   }
 
   private boolean performMsg(boolean error, Msg annotation, Object[] data) {
-    Chain output = Chain.of(error ? annotation.error() : annotation.value());
+    String output = error ? annotation.error() : annotation.value();
     if (annotation.embeds().length == 0) {
-      return reply(output.format(data).toString(), annotation.ephemeral());
+      return reply(output.format(data), annotation.ephemeral());
     }
     final List<EmbedWrapper> wrappers = new ArrayList<>();
     for (Embed embed : annotation.embeds()) {
       if (!embed.value().equals("")) {
-        output = Chain.of(embed.value());
+        output = embed.value();
       }
-      final Chain title = output.format(data);
-      final Chain description = Chain.of(embed.description()).format(output.count("{}"), data);
-      final var builder = new InfoPanelBuilder(title.toString(), description.toString(), Arrays.stream(embed.queries()).map(CustomQuery::fromDBQuery).toList(), customEmbedData);
+      final String title = output.format(data);
+      final String description = embed.description().format(output.count("{}"), data);
+      final var builder = new InfoPanelBuilder(title, description, Arrays.stream(embed.queries()).map(CustomQuery::fromDBQuery).toList(), customEmbedData);
       wrappers.add(builder.build());
     }
 
-    final List<Chain> wrapperChains = new ArrayList<>();
-    Chain out = Chain.of();
+    final List<String> wrapperChains = new ArrayList<>();
+    StringBuilder out = new StringBuilder();
     for (EmbedWrapper wrapper : wrappers) {
-      for (Chain t : wrapper.merge()) {
+      for (String t : wrapper.merge()) {
         if (out.length() + t.length() > Const.DISCORD_MESSAGE_MAX_CHARACTERS) {
-          wrapperChains.add(out);
-          out = t;
+          wrapperChains.add(out.toString());
+          out = new StringBuilder(t);
         } else {
-          out.add(t);
+          out.append(t);
         }
-        out.add("\n\n\n\n");
+        out.append("\n\n\n\n");
       }
     }
 
-    out.add("zuletzt aktualisiert ").add(Time.of().text(TimeFormat.DEFAULT));
-    wrapperChains.add(out);
+    out.append("zuletzt aktualisiert ").append(TimeFormat.DEFAULT.now());
+    wrapperChains.add(out.toString());
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();
 
     ReplyCallbackAction message;
     if (!wrapperChains.isEmpty()) {
 
-      message = event.reply(wrapperChains.get(0).toString());
+      message = event.reply(wrapperChains.get(0));
       if (!wrapperEmbeds.isEmpty()) {
         message = message.setEmbeds(wrapperEmbeds);
       }
       if (wrapperChains.size() > 1 && !annotation.ephemeral()) {
         for (int i = 1; i < wrapperChains.size(); i++) {
-          final Chain msg = wrapperChains.get(i);
-          ((SlashCommandInteractionEvent) event).getChannel().sendMessage(msg.toString()).queue();
+          final String msg = wrapperChains.get(i);
+          ((SlashCommandInteractionEvent) event).getChannel().sendMessage(msg).queue();
 
         }
       }

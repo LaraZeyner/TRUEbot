@@ -4,7 +4,7 @@ package de.zahrie.trues.api.logging;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.util.Nunu;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 
 public class TeamLogFactory {
   public static void create(DiscordUser invoker, DiscordUser target, String details, TeamLog.TeamLogAction action, OrgaTeam team) {

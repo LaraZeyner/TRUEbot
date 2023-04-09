@@ -19,9 +19,4 @@ import lombok.ToString;
 public class OrgaCupSeason extends Season implements Serializable {
   @Serial
   private static final long serialVersionUID = 3498814029985658723L;
-
-  @Override
-  public CoverageDepartment type() {
-    return CoverageDepartment.Orga_Cup;
-  }
 }

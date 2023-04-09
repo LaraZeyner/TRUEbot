@@ -2,12 +2,15 @@ package de.zahrie.trues.api.discord.user;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.GroupAssignReason;
-import de.zahrie.trues.database.types.TimeCoverter;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,16 +20,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,7 +34,6 @@ import org.hibernate.annotations.Type;
 @ToString
 @Entity
 @Table(name = "discord_user_group")
-@NamedQuery(name = "DiscordUserGroup.toRemove", query = "FROM DiscordUserGroup WHERE isActive = true AND permissionEnd is not null AND permissionEnd > NOW()")
 public class DiscordUserGroup implements Serializable {
   @Serial
   private static final long serialVersionUID = -763378764697829834L;
@@ -55,15 +53,15 @@ public class DiscordUserGroup implements Serializable {
   @Enumerated(EnumType.STRING)
   private DiscordGroup discordGroup;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
-  @Column(name = "assign_time", nullable = false)
-  private Time start = new Time();
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "startTime", column = @Column(name = "assign_time", nullable = false)),
+      @AttributeOverride(name = "endTime", column = @Column(name = "permission_end", nullable = false))
+  })
+  private TimeRange range;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "permission_end", nullable = false)
-  private Time permissionEnd;
+  private LocalDateTime permissionEnd;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "reason", nullable = false, length = 8)
@@ -72,10 +70,9 @@ public class DiscordUserGroup implements Serializable {
   @Column(name = "active", nullable = false)
   private boolean isActive = false;
 
-  public DiscordUserGroup(DiscordUser user, DiscordGroup discordGroup, Time permissionStart, Time permissionEnd) {
+  public DiscordUserGroup(DiscordUser user, DiscordGroup discordGroup, TimeRange range) {
     this.user = user;
     this.discordGroup = discordGroup;
-    this.start = permissionStart;
-    this.permissionEnd = permissionEnd;
+    this.range = range;
   }
 }

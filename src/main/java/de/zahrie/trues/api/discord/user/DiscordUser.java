@@ -2,26 +2,26 @@ package de.zahrie.trues.api.discord.user;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import de.zahrie.trues.api.calendar.ApplicationCalendar;
 import de.zahrie.trues.api.calendar.UserCalendar;
 import de.zahrie.trues.api.community.application.Application;
 import de.zahrie.trues.api.community.betting.Bet;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.datatypes.calendar.Day;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.database.types.DayConverter;
-import de.zahrie.trues.database.types.TimeCoverter;
 import de.zahrie.trues.api.discord.util.Nunu;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -33,8 +33,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,8 +40,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeRegistration;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,8 +48,7 @@ import org.hibernate.annotations.TypeRegistration;
 @ToString
 @Entity
 @Table(name = "discord_user", indexes = {@Index(name = "discord_id", columnList = "discord_id", unique = true)})
-@TypeRegistration(basicClass = Time.class, userType = TimeCoverter.class)
-@ExtensionMethod({DiscordUserFactory.class, Nunu.DiscordMessager.class})
+@ExtensionMethod({DiscordUserFactory.class})
 public class DiscordUser implements Serializable {
   @Serial
   private static final long serialVersionUID = -2575760126811506041L;
@@ -79,15 +74,12 @@ public class DiscordUser implements Serializable {
   @Column(name = "seconds_online", nullable = false)
   private int secondsOnline = 0;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "joined")
-  private Time lastTimeJoined;
+  private LocalDateTime lastTimeJoined;
+  //TODO (Abgie) 08.04.2023: joined
 
-  @Temporal(TemporalType.DATE)
-  @Convert(converter = DayConverter.class)
   @Column(name = "birthday")
-  private Day birthday;
+  private LocalDate birthday;
 
   @Column(name = "points", nullable = false)
   private int points = 1000;
@@ -103,7 +95,7 @@ public class DiscordUser implements Serializable {
   private boolean isAccepted;
 
   @Column(name = "notification", columnDefinition = "SMALLINT UNSIGNED")
-  private Integer notification = 0;
+  private short notification = 0;
 
   @OneToMany(mappedBy = "user")
   @ToString.Exclude
@@ -116,6 +108,10 @@ public class DiscordUser implements Serializable {
   @OneToMany(mappedBy = "user")
   @ToString.Exclude
   private Set<Application> applications = new LinkedHashSet<>();
+
+  @OneToMany(mappedBy = "user")
+  @ToString.Exclude
+  private Set<UserCalendar> calendarEntries = new LinkedHashSet<>();
 
   @OneToMany(mappedBy = "user")
   @ToString.Exclude
@@ -135,7 +131,7 @@ public class DiscordUser implements Serializable {
 
   public void addTempGroups() {
     for (DiscordUserGroup discordUserGroup : groups) {
-      if (!discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().after(new Time())) {
+      if (!discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().isAfter(LocalDateTime.now())) {
         addGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(true);
         Database.save(discordUserGroup);
@@ -145,16 +141,16 @@ public class DiscordUser implements Serializable {
   }
 
   public void addGroup(DiscordGroup group) {
-    addGroup(group, new Time(), 0);
+    addGroup(group, LocalDateTime.now(), 0);
   }
 
-  public void addGroup(DiscordGroup group, Time start, int days) {
+  public void addGroup(DiscordGroup group, LocalDateTime start, int days) {
     new RoleGranter(this).add(group, start, days);
   }
 
   public void removeTempGroups() {
     for (DiscordUserGroup discordUserGroup : groups) {
-      if (discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().after(new Time())) {
+      if (discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().isAfter(LocalDateTime.now())) {
         removeGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(false);
         Database.save(discordUserGroup);
@@ -175,10 +171,17 @@ public class DiscordUser implements Serializable {
     return getActiveGroups().contains(group) || getActiveGroups().stream().anyMatch(group::isAbove);
   }
 
-  public void schedule(Time time, DiscordUser invoker) {
+  public void dm(String content) {
+    getMember().getUser().openPrivateChannel()
+        .flatMap(privateChannel -> privateChannel.sendMessage(content))
+        .queue();
+  }
+
+  public void schedule(LocalDateTime dateTime, DiscordUser invoker) {
     this.acceptedBy = invoker;
-    final UserCalendar calendar = new UserCalendar(time, time.plus(Time.MINUTE, 30), "by " + id + " - " + mention, UserCalendar.UserCalendarType.APPLICATION, this);
-    Database.save(calendar);
-    this.dm("Neuer Termin für Vorstellungsgespräch: " + time.text(TimeFormat.DISCORD));
+    final var timeRange = new TimeRange(dateTime, 30, ChronoUnit.MINUTES);
+    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention()).queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember()
+        .getNickname()).queue(threadChannel -> Database.save(new ApplicationCalendar(timeRange, "by " + id + " - " + mention, this, threadChannel.getIdLong()))));
+    dm("Neuer Termin für Vorstellungsgespräch: " + TimeFormat.DISCORD.of(dateTime));
   }
 }

@@ -5,18 +5,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.util.StringUtils;
 import lombok.NonNull;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
+@ExtensionMethod(StringUtils.class)
 public class HTML {
-  private final Chain html;
+  private final String html;
 
   HTML() {
-    this(Chain.of());
+    this("");
   }
 
-  HTML(Chain html) {
+  HTML(String html) {
     this.html = html;
   }
 
@@ -58,8 +60,8 @@ public class HTML {
   }
 
   @NotNull
-  private List<Chain> findTags(@NonNull String tag) {
-    final List<Chain> split = new LinkedList<>(Arrays.asList(html.split("<" + tag)));
+  private List<String> findTags(@NonNull String tag) {
+    final List<String> split = new LinkedList<>(Arrays.asList(html.split("<" + tag)));
     if (!html.startsWith("<" + tag)) {
       split.remove(0);
     }
@@ -69,7 +71,7 @@ public class HTML {
   private int findClosingIndex(@NonNull String tag, int index) {
     int opened = 1;
     for (int i = index; i < html.length(); i++) {
-      final Chain s = html.substring(i);
+      final String s = html.substring(i);
       if (s.startsWith("<" + tag)) {
         opened++;
       }
@@ -85,24 +87,24 @@ public class HTML {
 
 
 
-  public Chain text() {
+  public String text() {
     if (html.isEmpty()) {
       return null;
     }
-    final Chain output = Chain.of();
+    final StringBuilder output = new StringBuilder();
     int tagsOpened = 0;
     for (int i = 0; i < html.length(); i++) {
       if (html.startsWith("<", i) && html.charAt(i+1) != ' ') {
         tagsOpened++;
       }
       if (tagsOpened == 0) {
-        output.add(html.charAt(i));
+        output.append(html.charAt(i));
       }
       if (tagsOpened > 0 && html.startsWith(">", i) && html.charAt(i-1) != ' ') {
         tagsOpened--;
       }
     }
-    return output;
+    return output.toString();
   }
 
   public List<Attribute> getAttributes() {
@@ -110,13 +112,13 @@ public class HTML {
       return List.of();
     }
 
-    Chain attrSection = html.between("<", ">");
-    if (attrSection.isEmpty() || !attrSection.contains(" ")) {
+    String attrSection = html.between("<", ">");
+    if (attrSection.isBlank() || !attrSection.contains(" ")) {
       return List.of();
     }
 
     attrSection = attrSection.substring(attrSection.indexOf(" ") + 1);
-    final Chain[] tagStrings = attrSection.split("\" ");
+    final String[] tagStrings = attrSection.split("\" ");
     if (tagStrings.length == 0) {
       if (attrSection.contains("=")) {
         final var attribute = new Attribute(attrSection.split("=\"")[0], attrSection.split("=\"")[1]);
@@ -127,13 +129,15 @@ public class HTML {
         .map(str -> new Attribute(str.split("=\"")[0], str.split("=\"")[1].replace("\"", ""))).toList();
   }
 
-  public Chain getAttribute(@NonNull String key) {
-    return getAttributes().stream().filter(attribute -> attribute.key().equalsCase(key))
+  public String getAttribute(@NonNull String key) {
+    return getAttributes().stream().filter(attribute -> attribute.key().equalsIgnoreCase(key))
         .map(Attribute::value).findFirst().orElse(null);
   }
 
   @Override
   public String toString() {
-    return this.html.toString();
+    return this.html;
   }
+
+  public record Attribute(String key, String value) { }
 }

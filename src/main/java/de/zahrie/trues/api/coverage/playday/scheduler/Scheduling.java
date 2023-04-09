@@ -3,8 +3,8 @@ package de.zahrie.trues.api.coverage.playday.scheduler;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.league.model.LeagueTier;
-import de.zahrie.trues.api.coverage.playday.config.RelativeTimeRange;
-import de.zahrie.trues.api.datatypes.calendar.TimeOffset;
+import de.zahrie.trues.api.datatypes.calendar.WeekdayTime;
+import de.zahrie.trues.api.datatypes.calendar.WeekdayTimeRange;
 
 public class Scheduling {
   private final List<SchedulingOption> options;
@@ -13,12 +13,12 @@ public class Scheduling {
     this.options = options;
   }
 
-  public RelativeTimeRange range(LeagueTier tier) {
+  public WeekdayTimeRange range(LeagueTier tier) {
     return options.stream().filter(option -> option.divisionRange().isInside(tier))
         .map(SchedulingOption::range).findFirst().orElse(null);
   }
 
-  public TimeOffset defaultTime(LeagueTier tier) {
+  public WeekdayTime defaultTime(LeagueTier tier) {
     return options.stream().filter(option -> option.divisionRange().isInside(tier))
         .map(SchedulingOption::defaultTime).findFirst().orElse(null);
   }

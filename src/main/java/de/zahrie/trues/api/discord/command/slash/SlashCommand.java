@@ -1,18 +1,18 @@
 package de.zahrie.trues.api.discord.command.slash;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
-import de.zahrie.trues.api.discord.util.Replyer;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.PermissionCheck;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.api.discord.util.Replyer;
 import de.zahrie.trues.util.Util;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-@ExtensionMethod(StringExtention.class)
+@ExtensionMethod(StringUtils.class)
 public abstract class SlashCommand extends Replyer {
   private String description;
   private PermissionCheck permissionCheck;
@@ -92,7 +92,7 @@ public abstract class SlashCommand extends Replyer {
     if (fullCommandName.startsWith(name)) {
       if (!defered) {
         final var annotation = getMessage();
-        event.deferReply(annotation == null || annotation.ephemeral()).queue(); // TODO ephemeral
+        event.deferReply(annotation == null || annotation.ephemeral()).queue();
         defered = true;
       }
 
@@ -193,13 +193,13 @@ public abstract class SlashCommand extends Replyer {
       return option == null ? defaultValue : option.getAsMember();
     }
 
-    public Time time() {
+    public LocalDateTime time() {
       return time(null);
     }
 
-    public Time time(Time defaultValue) {
+    public LocalDateTime time(LocalDateTime defaultValue) {
       final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
-      return option == null ? defaultValue : option.getAsString().getTime();
+      return option == null ? defaultValue : option.getAsString().getDateTime();
     }
 
     public <T extends Enum<T>> T toEnum(Class<T> clazz) {
@@ -207,8 +207,7 @@ public abstract class SlashCommand extends Replyer {
     }
 
     public <T extends Enum<T>> T toEnum(Class<T> clazz, T defaultValue) {
-      final String string = string();
-      return string == null ? defaultValue : string.toEnum(clazz);
+      return string().toEnum(clazz, defaultValue);
     }
   }
 

@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -15,6 +17,12 @@ public final class Nunu extends Willump {
 
   public static Nunu getInstance() {
     return instance;
+  }
+
+  public static class DcMember {
+    public static Member getMember(User user) {
+      return getInstance().getGuild().getMember(user);
+    }
   }
 
   public static class DiscordRole {
@@ -28,7 +36,6 @@ public final class Nunu extends Willump {
     }
 
     public static Role getRole(long id) {
-      // TODO (Abgie) 15.03.2023: never used
       return Nunu.getInstance().getGuild().getRoleById(id);
     }
 
@@ -43,6 +50,10 @@ public final class Nunu extends Willump {
 
   public static class DiscordChannel {
 
+    public static TextChannel getAdminChannel() {
+      return Nunu.DiscordChannel.getTextChannel("admin-chat");
+    }
+
     public static AudioChannel getVoiceChannel(Member member) {
       final GuildVoiceState voiceState = member.getVoiceState();
       return voiceState == null ? null : voiceState.getChannel();
@@ -53,6 +64,11 @@ public final class Nunu extends Willump {
 
     public static GuildChannel getChannel(long id) {
       return Nunu.getInstance().getGuild().getGuildChannelById(id);
+    }
+
+    public static TextChannel getTextChannel(String name) {
+      return Nunu.getInstance().getGuild().getTextChannelCache().stream()
+          .filter(voiceChannel -> voiceChannel.getName().toLowerCase().contains(name.toLowerCase())).findFirst().orElse(null);
     }
 
     public static boolean limitTo(VoiceChannel voiceChannel, int amount) {
@@ -68,7 +84,6 @@ public final class Nunu extends Willump {
     }
 
     public static VoiceChannel getChannelLike(String regex, Member invoker) {
-      // TODO (Abgie) 15.03.2023: never used
       return Nunu.getInstance().getGuild().getVoiceChannelCache().stream()
           .filter(voiceChannel -> voiceChannel.getName().toLowerCase().contains(regex.toLowerCase()))
           .filter(voiceChannel -> invoker.getPermissions(voiceChannel).contains(Permission.VOICE_CONNECT))

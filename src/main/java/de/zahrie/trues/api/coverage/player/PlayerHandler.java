@@ -11,7 +11,7 @@ import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.RankFactory;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -21,7 +21,7 @@ public class PlayerHandler extends PlayerModel implements Serializable {
   private static final long serialVersionUID = -3900511589414972005L;
 
   @Builder
-  public PlayerHandler(@Deprecated String url, Player player) {
+  public PlayerHandler(String url, Player player) {
     super(url, player);
   }
 

@@ -3,7 +3,6 @@ package de.zahrie.trues.api.discord.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.util.Const;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -29,24 +28,23 @@ public class EmbedWrapper {
     return this;
   }
 
-  public List<Chain> merge() {
-    if (this.content.isEmpty()) {
-      return List.of(Chain.of());
-    }
-    final List<Chain> data = new ArrayList<>();
-    Chain out = Chain.of();
+  public List<String> merge() {
+    if (this.content.isEmpty()) return List.of("");
+
+    final List<String> data = new ArrayList<>();
+    StringBuilder out = new StringBuilder();
     for (List<String> texts : this.content) {
       for (String text : texts) {
         if (out.length() + text.length() > Const.DISCORD_MESSAGE_MAX_CHARACTERS) {
-          data.add(out);
-          out = Chain.of(text);
+          data.add(out.toString());
+          out = new StringBuilder(text);
         } else {
-          out.add(text);
+          out.append(text);
         }
       }
-      out.add("\n\n");
+      out.append("\n\n");
     }
-    data.add(out);
+    data.add(out.toString());
 
     return data;
   }

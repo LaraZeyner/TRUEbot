@@ -1,15 +1,20 @@
 package de.zahrie.trues.discord.listener.models;
 
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.discord.Settings;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
  * Events, die sich auf Member beziehen
+ *
  * @see net.dv8tion.jda.api.events.guild.member.GenericGuildMemberEvent
  * @see GuildMemberJoinEvent
  * @see net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent
@@ -31,8 +36,19 @@ public class MemberEvent extends ListenerAdapter {
     user.setDiscordId(event.getMember().getIdLong());
     user.setMention(event.getMember().getAsMention());
     Database.save(user);
-
-    // TODO send Hello-message
+    final String settings = Arrays.stream(Settings.RegistrationAction.values()).map(registrationAction -> registrationAction.name().toLowerCase()).collect(Collectors.joining(", "));
+    user.getMember().getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
+        Herzlich Willkommen auf dem Discord von **TRUEsports**.
+        _Ich bin dein persönlicher Begleiter und werde deine Fragen beantworten. Sollte also etwas unklar sein schreibe mir gerne eine Frage._
+                
+        Als nächstes solltest du dich registrieren. Dies kannst du mit
+        `lol_name: DiesistmeinName`
+        machen. Weiterhin gibt es noch weitere Einstellungsmöglichkeiten: `
+        """ + settings + """
+        `
+        
+        Unsere Regeln sowie Rollenauswahl findest du auf unserem Server. Viel Spaß!
+        """).queue());
   }
 
   @Override
@@ -41,4 +57,5 @@ public class MemberEvent extends ListenerAdapter {
     user.setMention(event.getMember().getAsMention());
     Database.save(user);
   }
+
 }

@@ -6,10 +6,10 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString
 public enum StageType {
-  Anmeldung,
-  Kalibrierungsphase,
-  Auslosung_Gruppen,
-  Gruppenphase,
-  Playoffs
+  SIGNUP,
+  CALIBRATION,
+  CREATION,
+  GROUPS,
+  PLAYOFFS
 
 }

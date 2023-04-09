@@ -4,8 +4,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.coverage.league.model.PRMLeague;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,8 +16,8 @@ public class LeagueModel implements Serializable {
   private static final long serialVersionUID = 2667181184120392512L;
 
   protected String url;
-  protected League league;
-  protected List<PrimeTeam> teams;
+  protected PRMLeague league;
+  protected List<PRMTeam> teams;
   protected List<LeaguePlayday> playdays;
 
 }

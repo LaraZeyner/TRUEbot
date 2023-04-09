@@ -2,30 +2,25 @@ package de.zahrie.trues.api.riot.matchhistory.game;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import de.zahrie.trues.database.types.TimeCoverter;
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,27 +28,24 @@ import org.hibernate.annotations.Type;
 @Setter
 @ToString
 @Entity
-@Table(name = "game",
-    indexes = {@Index(name = "game_idx_orgagame", columnList = "orgagame")})
+@Table(name = "game", indexes = @Index(name = "game_idx_orgagame", columnList = "orgagame"))
 public class Game implements Serializable {
   @Serial
   private static final long serialVersionUID = -2880626253889374458L;
 
 
   @Id
-  @Column(name = "game_id", nullable = false, length = 16)
+  @Column(name = "game_id", nullable = false, length = 16, unique = true)
   private String id;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "start_time", nullable = false)
-  private Time start;
+  private LocalDateTime start;
 
   @Column(name = "duration", columnDefinition = "SMALLINT UNSIGNED not null")
   private int durationInSeconds;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "game_type", nullable = false, length = 12)
+  @Enumerated
+  @Column(name = "game_type", nullable = false)
   private GameType type;
 
   @Column(name = "orgagame", nullable = false)
@@ -67,11 +59,11 @@ public class Game implements Serializable {
   @ToString.Exclude
   private Set<Selection> selections = new LinkedHashSet<>();
 
-  public Game(String id, Time start, int durationInSeconds, GameType type) {
+  public Game(String id, LocalDateTime start, int durationInSeconds, GameType type) {
     this(id, start, durationInSeconds, type, false);
   }
 
-  public Game(String id, Time start, int durationInSeconds, GameType type, boolean isOrgagame) {
+  public Game(String id, LocalDateTime start, int durationInSeconds, GameType type, boolean isOrgagame) {
     this.id = id;
     this.start = start;
     this.durationInSeconds = durationInSeconds;

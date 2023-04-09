@@ -1,7 +1,8 @@
 package de.zahrie.trues.discord.command.models.tryout;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import java.time.LocalDateTime;
+
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -19,7 +20,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "nutzer", description = "Bewerbungsdings", type = OptionType.USER),
     @Option(name = "zeitpunkt", description = "Zeitpunkt")
 })
-@ExtensionMethod({StringExtention.class, DiscordUserFactory.class})
+@ExtensionMethod({StringUtils.class, DiscordUserFactory.class})
 public class TryoutCustomCommand extends SlashCommand {
   @Override
   @Msg(value = "Der Termin wurde gespeichert.", error = "Der Nutzer wurde nicht gefunden.")
@@ -27,9 +28,8 @@ public class TryoutCustomCommand extends SlashCommand {
     final Member member = find("nutzer").member();
     if (member == null) return errorMessage();
     final DiscordUser discordUser = member.getDiscordUser();
-    final String timeString = find("zeitpunkt").string();
-    final Time time = timeString.getTime();
-    discordUser.schedule(time, getInvoker());
+    final LocalDateTime dateTime = find("zeitpunkt").time();
+    discordUser.schedule(dateTime, getInvoker());
     return sendMessage();
   }
 }

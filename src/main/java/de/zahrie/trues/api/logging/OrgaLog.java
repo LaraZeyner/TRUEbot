@@ -2,10 +2,9 @@ package de.zahrie.trues.api.logging;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -19,14 +18,11 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -47,10 +43,8 @@ public class OrgaLog implements Serializable {
   @Column(name = "log_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "log_time", nullable = false)
-  private Time timestamp = new Time();
+  private LocalDateTime timestamp = LocalDateTime.now();
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "invoking_user")

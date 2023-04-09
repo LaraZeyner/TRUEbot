@@ -3,6 +3,7 @@ package de.zahrie.trues.api.coverage.team.model;
 import java.io.Serial;
 import java.io.Serializable;
 
+import de.zahrie.trues.util.Format;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -27,8 +28,11 @@ public class TeamRecord implements Serializable {
   private Short losses;
 
   public Standing getStanding() {
-    // TODO (Abgie) 15.03.2023: never used
     return new Standing(wins, losses);
   }
 
+  @Override
+  public String toString() {
+    return getStanding().format(Format.SHORT) + " - " + seasons + " Seasons";
+  }
 }

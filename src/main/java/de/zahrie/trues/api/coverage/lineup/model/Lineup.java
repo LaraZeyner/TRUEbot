@@ -18,7 +18,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +35,6 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "coverage_lineup", indexes = {@Index(name = "idx_coverage_lineup", columnList = "coverage_team, player", unique = true)})
-@NamedQuery(name = "Lineup.fromParticipatorAndPlayer", query = "FROM Lineup WHERE participator = :participator AND player = :player")
 public class Lineup implements Serializable {
   @Serial
   private static final long serialVersionUID = -4332018463378754999L;

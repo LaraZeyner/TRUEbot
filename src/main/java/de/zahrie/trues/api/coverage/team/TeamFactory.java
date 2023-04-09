@@ -1,17 +1,16 @@
 package de.zahrie.trues.api.coverage.team;
 
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import org.jetbrains.annotations.Nullable;
 
 public class TeamFactory {
 
   @Nullable
-  public static PrimeTeam getTeam(int teamId) {
-    PrimeTeam team = Database.Find.find(PrimeTeam.class, new String[]{""}, new Object[]{}, "fromPrmId");
-    if (team != null) {
-      return team;
-    }
+  public static PRMTeam getTeam(int teamId) {
+    PRMTeam team = QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE prmId = " + teamId).single();
+    if (team != null) return team;
 
     final TeamLoader teamLoader = new TeamLoader(teamId).create();
     if (teamLoader == null) return null;
@@ -21,11 +20,9 @@ public class TeamFactory {
   }
 
 
-  public static PrimeTeam getTeam(int prmId, String name, String abbreviation) {
-    PrimeTeam team = Database.Find.find(PrimeTeam.class, prmId);
-    if (team != null) {
-      return team;
-    }
+  public static PRMTeam getTeam(int prmId, String name, String abbreviation) {
+    PRMTeam team = Database.Find.find(PRMTeam.class, prmId);
+    if (team != null) return team;
 
     team = fromName(name, abbreviation);
     if (team != null) {
@@ -33,21 +30,21 @@ public class TeamFactory {
       return team;
     }
 
-    return new PrimeTeam(prmId, name, abbreviation);
+    return new PRMTeam(prmId, name, abbreviation);
   }
 
   @Nullable
-  public static PrimeTeam fromName(String name, String abbreviation) {
-    return Database.Find.find(PrimeTeam.class, new String[]{"name", "abbr"}, new Object[]{name, abbreviation}, "fromNameAbbr");
+  public static PRMTeam fromName(String name, String abbreviation) {
+    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE name = " + name + " and abbreviation = " + abbreviation).single();
   }
 
   @Nullable
-  public static PrimeTeam fromAbbreviation(String abbreviation) {
-    return Database.Find.find(PrimeTeam.class, new String[]{"abbr"}, new Object[]{abbreviation}, "fromAbbr");
+  public static PRMTeam fromAbbreviation(String abbreviation) {
+    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE abbreviation = " + abbreviation).single();
   }
 
   @Nullable
-  public static PrimeTeam fromName(String name) {
-    return Database.Find.find(PrimeTeam.class, new String[]{"name"}, new Object[]{name}, "fromName");
+  public static PRMTeam fromName(String name) {
+    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE name = " + name).single();
   }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomColumn;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
-import de.zahrie.trues.database.CellEntry;
+import de.zahrie.trues.api.database.CellEntry;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -1,25 +1,29 @@
 package de.zahrie.trues.api.discord.builder.modal;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.message.Emote;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.discord.scouting.Scouting;
+import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
+import de.zahrie.trues.api.riot.matchhistory.champion.ChampionFactory;
+import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.util.Util;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,11 +37,13 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ExtensionMethod(StringExtention.class)
+@ExtensionMethod(StringUtils.class)
 public abstract class ModalImpl extends ModalBase {
   private DiscordUser target;
 
@@ -56,7 +62,7 @@ public abstract class ModalImpl extends ModalBase {
 
   @NotNull
   public ActionRow getTeams() {
-    final List<OrgaTeam> orgaTeams = Database.Find.findList(OrgaTeam.class);
+    final List<OrgaTeam> orgaTeams = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list();
     return ActionRow.of(StringSelectMenu.create("team-name").setPlaceholder("Teamname")
         .addOptions(orgaTeams.stream().map(team -> SelectOption.of(team.getName(), String.valueOf(team.getId()))).toList())
         .build());
@@ -65,6 +71,7 @@ public abstract class ModalImpl extends ModalBase {
   @NotNull
   public ActionRow getApplicationRoleField() {
     return ActionRow.of(StringSelectMenu.create("app-role").setPlaceholder("Rolle im Team")
+        .addOption("Standin", "STANDIN", "Tryout erhält für 1 Tag Zugriff")
         .addOption("Tryout", "TRYOUT", "Tryout erhält für 14 Tage Zugriff")
         .addOption("Substitude", "SUBSTITUDE", "Spieler erhält permanenten Zugriff")
         .addOption("Mainspieler", "MAIN", "Spieler erhält permanenten Zugriff")
@@ -106,6 +113,25 @@ public abstract class ModalImpl extends ModalBase {
         .addOption("Mentor", "MENTOR", "Begleiter für das Team")
         .addOption("andere", "OTHER")
         .build());
+  }
+
+  @NotNull
+  public ActionRow getLolPositionField() {
+    return ActionRow.of(StringSelectMenu.create("lol-position").setPlaceholder("Lane")
+        .addOption("Toplane", "TOP", Emote.TOP.getEmoji())
+        .addOption("Jungle", "JUNGLE", Emote.JUNGLE.getEmoji())
+        .addOption("Middle", "MIDDLE", Emote.MIDDLE.getEmoji())
+        .addOption("Bottom", "BOTTOM", Emote.BOTTOM.getEmoji())
+        .addOption("Support", "UTILITY", Emote.SUPPORT.getEmoji())
+        .setRequiredRange(0, 1)
+        .build());
+  }
+
+  @NotNull
+  public ActionRow getLolPositionOrNameField() {
+    return ActionRow.of(TextInput.create("lane-or-name", "Lane/Summonername", TextInputStyle.SHORT)
+        .setPlaceholder("Lane/Name ...")
+        .setRequiredRange(1, 16).build());
   }
 
   @NotNull
@@ -202,66 +228,87 @@ public abstract class ModalImpl extends ModalBase {
         .setRequired(false)
         .build());
   }
+
+  public ActionRow getChampionField() {
+    return ActionRow.of(TextInput.create("champion", "gespielter Champiom", TextInputStyle.SHORT)
+        .setPlaceholder("keine Auswahl")
+        .setMaxLength(20)
+        .setRequired(false)
+        .build());
+  }
   //</editor-fold>
 
   //<editor-fold desc="objects">
   @NotNull
   protected TeamPosition getTeamPosition() {
-    final String positionString = Objects.requireNonNull(modalEvent().getValue("app-position")).getAsString();
+    final String positionString = Util.nonNull(modalEvent().getValue("app-position")).getAsString();
     return TeamPosition.valueOf(positionString);
   }
 
+  @Nullable
+  protected Lane getLolPosition() {
+    final String positionString = Util.nonNull(modalEvent().getValue("lol-position")).getAsString();
+    return positionString.toEnum(Lane.class);
+  }
+
+  @Nullable
+  protected Object getLolPositionOrSummonername() {
+    final String nameOrLane = Util.avoidNull(modalEvent().getValue("lol-position"), null, ModalMapping::getAsString);
+    if (nameOrLane == null) return null;
+    final Lane lane = nameOrLane.toEnum(Lane.class);
+    return lane != null ? lane : PlayerFactory.getPlayerFromName(nameOrLane);
+  }
 
   @NotNull
-  protected Scouting.ScoutingGameType getScoutingGameType() {
-    final String positionString = Objects.requireNonNull(modalEvent().getValue("scouting-game-type")).getAsString();
-    return Scouting.ScoutingGameType.valueOf(positionString);
+  protected ScoutingGameType getScoutingGameType() {
+    final String positionString = Util.nonNull(modalEvent().getValue("scouting-game-type")).getAsString();
+    return ScoutingGameType.valueOf(positionString);
   }
 
   @NotNull
   protected TeamRole getTeamRole() {
-    final String roleString = Objects.requireNonNull(modalEvent().getValue("app-role")).getAsString();
+    final String roleString = Util.nonNull(modalEvent().getValue("app-role")).getAsString();
     return TeamRole.valueOf(roleString);
   }
 
   protected boolean getBoolValue() {
-    final String boolString = Objects.requireNonNull(modalEvent().getValue("bool")).getAsString();
+    final String boolString = Util.nonNull(modalEvent().getValue("bool")).getAsString();
     return boolString.equals("true");
   }
 
   protected OrgaTeam getTeam() {
-    final String teamIdString = Objects.requireNonNull(modalEvent().getValue("team-name")).getAsString();
+    final String teamIdString = Util.nonNull(modalEvent().getValue("team-name")).getAsString();
     return Database.Find.find(OrgaTeam.class, Long.parseLong(teamIdString));
   }
 
   @Override
   protected DiscordUser getInvoker() {
-    final String targetIdString = Objects.requireNonNull(modalEvent().getValue("target-name")).getAsString();
+    final String targetIdString = Util.nonNull(modalEvent().getValue("target-name")).getAsString();
     return Database.Find.find(DiscordUser.class, Integer.parseInt(targetIdString));
   }
 
   protected DiscordGroup getGroup() {
-    final String groupName = Objects.requireNonNull(modalEvent().getValue("group-name")).getAsString();
+    final String groupName = Util.nonNull(modalEvent().getValue("group-name")).getAsString();
     return DiscordGroup.valueOf(groupName);
   }
 
   protected TeamPosition getMemberGroup() {
-    final String groupName = Objects.requireNonNull(modalEvent().getValue("staff-group-name")).getAsString();
+    final String groupName = Util.nonNull(modalEvent().getValue("staff-group-name")).getAsString();
     return TeamPosition.valueOf(groupName);
   }
 
   protected int getDays() {
-    final String daysString = Objects.requireNonNull(modalEvent().getValue("days-text")).getAsString();
+    final String daysString = Util.nonNull(modalEvent().getValue("days-text")).getAsString();
     return Integer.parseInt(daysString);
   }
 
   protected String getDescription() {
-    return Objects.requireNonNull(modalEvent().getValue("description")).getAsString();
+    return Util.nonNull(modalEvent().getValue("description")).getAsString();
   }
 
   protected Team getTeamIdOrName() {
-    final String asString = Objects.requireNonNull(modalEvent().getValue("team-id")).getAsString();
-    PrimeTeam team;
+    final String asString = Util.nonNull(modalEvent().getValue("team-id")).getAsString();
+    PRMTeam team;
     if (asString.intValue() == -1) {
       team = TeamFactory.fromAbbreviation(asString);
       if (team == null) team = TeamFactory.fromName(asString);
@@ -273,8 +320,8 @@ public abstract class ModalImpl extends ModalBase {
     return team;
   }
 
-  protected Time getTime() {
-    return Time.of(Objects.requireNonNull(modalEvent().getValue("date")).getAsString());
+  protected LocalDateTime getTime() {
+    return Util.avoidNull(modalEvent().getValue("date"), null, mapping -> mapping.getAsString().getDateTime());
   }
 
   protected Integer getDuration() {
@@ -285,8 +332,12 @@ public abstract class ModalImpl extends ModalBase {
     return Util.avoidNull(modalEvent().getValue("page"), 1, modalMapping -> modalMapping.getAsString().intValue());
   }
 
+  protected Champion getChampion() {
+    return Util.avoidNull(modalEvent().getValue("champion"), null, modalMapping -> ChampionFactory.getChampion(modalMapping.getAsString()));
+  }
+
   protected boolean handleTeamsLineup(Participator participator) {
-    final String opGg = Objects.requireNonNull(modalEvent().getValue("op- " + (participator.isFirstPick() ? "home" : "guest"))).getAsString();
+    final String opGg = Util.nonNull(modalEvent().getValue("op- " + (participator.isFirstPick() ? "home" : "guest"))).getAsString();
     return !participator.get().setOrderedLineup(opGg);
   }
 

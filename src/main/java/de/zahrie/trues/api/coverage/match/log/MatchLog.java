@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.match.log;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -11,12 +12,9 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
-import de.zahrie.trues.database.Database;
-import de.zahrie.trues.database.types.TimeCoverter;
+import de.zahrie.trues.util.StringUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -29,15 +27,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
-import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
@@ -48,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Table(name = "coverage_log")
 @DiscriminatorColumn(name = "action")
-@ExtensionMethod(StringExtention.class)
+@ExtensionMethod(StringUtils.class)
 public class MatchLog implements Serializable, Comparable<MatchLog> {
   @Serial
   private static final long serialVersionUID = 7775661777098550144L;
@@ -58,10 +53,8 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   @Column(name = "log_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Type(TimeCoverter.class)
   @Column(name = "log_time", nullable = false)
-  private Time timestamp = new Time();
+  private LocalDateTime timestamp = LocalDateTime.now();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "coverage")
@@ -83,14 +76,14 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   @Column(name = "to_send", nullable = false)
   private boolean toSend = true;
 
-  public MatchLog(Time timestamp, MatchLogAction action, Match match, String details) {
+  public MatchLog(LocalDateTime timestamp, MatchLogAction action, Match match, String details) {
     this.timestamp = timestamp;
     this.action = action;
     this.match = match;
     this.details = details;
   }
 
-  public MatchLog handleTeam(Chain content) {
+  public MatchLog handleTeam(String content) {
     final MatchLog log = LogFactory.handleUserWithTeam(this, content);
     if (this.participator != null) Database.save(this.participator);
     return log;
@@ -98,10 +91,6 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
 
   public Participator getParticipator() {
     return participator != null ? participator : new Participator(false, new Team("Administration", "Admin"));
-  }
-
-  public Time getTimestamp() {
-    return new Time(timestamp);
   }
 
   @Override
@@ -128,7 +117,7 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   }
 
   public String actionOutput() {
-    return timestamp.text(TimeFormat.DISCORD) + " - " + action.getOutput() + "\n".repeat(extralinesRequired());
+    return TimeFormat.DISCORD.of(timestamp) + " - " + action.getOutput() + "\n".repeat(extralinesRequired());
   }
 
   public String teamOutput() {
@@ -143,6 +132,6 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
     return match.getLogs().stream()
         .filter(matchLog -> matchLog.getAction().equals(MatchLogAction.LINEUP_SUBMIT))
         .filter(matchLog -> matchLog.getParticipator().equals(participator))
-        .noneMatch(matchLog -> matchLog.getTimestamp().after(timestamp));
+        .noneMatch(matchLog -> matchLog.getTimestamp().isAfter(timestamp));
   }
 }

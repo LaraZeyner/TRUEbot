@@ -2,10 +2,10 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @DiscriminatorValue("prm")
-@NamedQuery(name = "PrimeMatch.fromMatchId", query = "FROM PrimeMatch WHERE matchId = :matchId")
+@NamedQuery(name = "PrimeMatch.fromMatchId", query = "FROM PRMMatch WHERE matchId = :matchId")
 public class InternMatch extends ScheduleableMatch implements Serializable {
   @Serial
   private static final long serialVersionUID = -6145053153275706756L;
@@ -31,7 +31,7 @@ public class InternMatch extends ScheduleableMatch implements Serializable {
   @Column(name = "match_id")
   private Integer matchId;
 
-  public InternMatch(Playday matchday, Time start, League league, Time schedulingStart, Time schedulingEnd, Integer matchId) {
+  public InternMatch(Playday matchday, LocalDateTime start, League league, LocalDateTime schedulingStart, LocalDateTime schedulingEnd, Integer matchId) {
     super(matchday, start, league, schedulingStart, schedulingEnd);
     this.matchId = matchId;
   }

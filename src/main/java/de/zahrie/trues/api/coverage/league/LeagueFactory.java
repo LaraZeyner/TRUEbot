@@ -1,18 +1,15 @@
 package de.zahrie.trues.api.coverage.league;
 
-import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.season.PrimeSeason;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.coverage.league.model.PRMLeague;
+import de.zahrie.trues.api.coverage.season.PRMSeason;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 
-/**
- * Created by Lara on 15.02.2023 for TRUEbot
- */
 public final class LeagueFactory {
-
-  public static League getGroup(PrimeSeason season, String divisionName, int stageId) {
-    League league =  Database.Find.find(League.class, new String[]{"name", "season"}, new Object[]{divisionName, season}, "fromNameAndSeason");
+  public static PRMLeague getGroup(PRMSeason season, String divisionName, int stageId) {
+    PRMLeague league = QueryBuilder.hql(PRMLeague.class, "FROM PRMLeague WHERE name = " + divisionName + " AND stage.season = " + season).single();
     if (league == null) {
-      league = new League();
+      league = new PRMLeague();
       league.setName(divisionName);
       league.setStage(season.getStageOfId(stageId));
       Database.save(league);

@@ -11,32 +11,28 @@ import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.database.Database;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.discord.scouting.Scouting;
+import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
+import lombok.experimental.ExtensionMethod;
 
 @Getter
+@ExtensionMethod(StringUtils.class)
 public class LineupCreator extends LineupCreatorBase {
   private final Participator participator;
   private final Set<Player> players;
   private final Set<Player> blacklist = new LinkedHashSet<>();
 
   public LineupCreator(Participator participator) {
-    this(participator, Scouting.ScoutingGameType.TEAM_GAMES);
+    this(participator, ScoutingGameType.TEAM_GAMES);
   }
 
-  public LineupCreator(Participator participator, int days) {
-    this(participator, Scouting.ScoutingGameType.TEAM_GAMES, 180);
-  }
-
-  public LineupCreator(Participator participator, Scouting.ScoutingGameType gameType) {
+  public LineupCreator(Participator participator, ScoutingGameType gameType) {
     this(participator, gameType, 180);
   }
 
-  public LineupCreator(Participator participator, Scouting.ScoutingGameType gameType, int days) {
+  public LineupCreator(Participator participator, ScoutingGameType gameType, int days) {
     super();
     this.participator = participator;
     this.players = determinePlayers();
@@ -56,17 +52,11 @@ public class LineupCreator extends LineupCreatorBase {
     return players;
   }
 
-  private void handleLineup(Player player, Participator participator, Scouting.ScoutingGameType gameType, int days) {
-    final Time time = new Time(days * -1);
+  private void handleLineup(Player player, Participator participator, ScoutingGameType gameType, int days) {
     final Team team = participator.getTeam();
-    final List<Object[]> list = switch (gameType) {
-      case PRM_ONLY -> Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getLanePlayedPRM");
-      case PRM_CLASH -> Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getLanePlayedPRMClash");
-      case TEAM_GAMES -> Database.Find.findObjectList(new String[]{"player", "team", "start"}, new Object[]{player, team, time}, "Player.getLanePlayedTeamGames");
-      case MATCHMADE -> Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getLanePlayedMatchmade");
-    };
+    final List<Object[]> list = gameType.playerQuery(player, days).performance("lane, count(p)");
     for (Object[] o : list) {
-      final Lane lane = Chain.of(o[0]).toEnum(Lane.class);
+      final Lane lane = (o[0].toString()).toEnum(Lane.class);
       final Lineup atPosition = LineupFactory.determineLineup(participator, lane);
       if (atPosition == null || (atPosition.getPlayer().equals(player) && !blacklist.contains(atPosition.getPlayer()))) {
         final int amount = (int) o[1];
@@ -76,7 +66,7 @@ public class LineupCreator extends LineupCreatorBase {
     }
   }
 
-  public List<Lineup> handleLineup() {
+  List<Lineup> handleLineup() {
     final List<Player> determineLineup = determineLineup();
     return Arrays.stream(Lane.values()).filter(lane -> lane.ordinal() > 0)
         .map(lane -> determineLineup(lane, determineLineup.get(lane.ordinal() - 1)))

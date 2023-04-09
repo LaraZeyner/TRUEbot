@@ -2,9 +2,11 @@ package de.zahrie.trues.api.discord.channel;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.community.orgateam.TeamChannel;
-import de.zahrie.trues.api.community.orgateam.TeamChannelType;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.util.Util;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -20,7 +22,8 @@ public class DiscordChannelFactory {
    */
   @NonNull
   public static DiscordChannel getDiscordChannel(@NonNull GuildChannel channel) {
-    final DiscordChannel discordChannel = Database.Find.find(DiscordChannel.class, new String[]{"discordId"}, new Object[]{channel.getIdLong()}, "fromDiscordId");
+    final DiscordChannel discordChannel = QueryBuilder.hql(DiscordChannel.class,
+        "FROM DiscordChannel WHERE discordId = " + channel.getIdLong()).single();
     return Util.avoidNull(discordChannel, createChannel(channel));
   }
 
@@ -53,22 +56,19 @@ public class DiscordChannelFactory {
   }
 
   public static void removeTeamChannel(@NonNull GuildChannel channel) {
-    final TeamChannel teamChannel = OrgaTeamFactory.getTeamChannelFromChannel(channel);
-    if (teamChannel != null) {
-      Database.removeAndCommit(teamChannel);
-    }
+    final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(channel);
+    if (teamChannel != null) Database.removeAndCommit(teamChannel);
   }
 
   private static PermissionChannelType determineChannelType(GuildChannel initialChannel) {
-    if (!(initialChannel instanceof final ICategorizableChannel channel)) {
-      return PermissionChannelType.PUBLIC;
-    }
+    if (!(initialChannel instanceof final ICategorizableChannel channel)) return PermissionChannelType.PUBLIC;
+
     final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(channel);
-    if (team != null) {
-      return initialChannel instanceof AudioChannel ? PermissionChannelType.TEAM_VOICE : PermissionChannelType.TEAM_CHAT;
-    }
+    if (team != null) return initialChannel instanceof AudioChannel ? PermissionChannelType.TEAM_VOICE : PermissionChannelType.TEAM_CHAT;
+
     final Category category = channel.getParentCategory();
     if (category == null) return PermissionChannelType.PUBLIC;
+
     return switch (category.getName()) {
       case "Social Media" -> PermissionChannelType.SOCIALS;
       case "Events" -> PermissionChannelType.EVENTS;

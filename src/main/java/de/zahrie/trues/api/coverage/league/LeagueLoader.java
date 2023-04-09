@@ -6,48 +6,49 @@ import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchLoader;
-import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
+import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.playday.PlaydayFactory;
-import de.zahrie.trues.api.coverage.season.PrimeSeason;
+import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
+@ExtensionMethod(StringUtils.class)
 public class LeagueLoader extends GamesportsLoader {
-  public static League season(Chain url, Chain name) {
-    final int seasonId = Integer.parseInt(url.between("/prm/", "-").toString());
-    final int stageId = Integer.parseInt(url.between("/group/", "-").toString());
-    final PrimeSeason season = SeasonFactory.getSeason(seasonId);
-    return LeagueFactory.getGroup(season, name.toString(), stageId);
+  public static League season(String url, String name) {
+    final int seasonId = Integer.parseInt(url.between("/prm/", "-"));
+    final int stageId = Integer.parseInt(url.between("/group/", "-"));
+    final PRMSeason season = SeasonFactory.getSeason(seasonId);
+    return LeagueFactory.getGroup(season, name, stageId);
   }
 
   public static String divisionNameFromURL(String url) {
-    Chain section = Chain.of(url).between("/", null, -1).between("-").replace("-", " ");
-    if (section.startsWith("division ")) {
-      section = section.replace(".", section.lastIndexOf(" "));
-    }
-    return section.capitalizeFirst().toString();
+    String section = url.between("/", null, -1).between("-").replace("-", " ");
+    if (section.startsWith("division ")) section = section.replaces(".", section.lastIndexOf(" "));
+    return section.capitalizeFirst();
   }
 
   public static Integer stageIdFromUrl(String url) {
-    return Chain.of(url).between("/group/", "-").intValue();
+    return url.between("/group/", "-").intValue();
   }
 
-  private final League league;
+  private final PRMLeague league;
   private final String url;
 
   public LeagueLoader(@NotNull String url) {
-    super(URLType.LEAGUE, Chain.of(url).between("/prm/", "-").intValue(), Chain.of(url).between("/group/", "-").intValue(),
-        Chain.of(url).between("/", "-", -1).intValue());
-    final PrimeSeason season = SeasonFactory.getSeason(Chain.of(url).between("/prm/", "-").intValue());
+    super(URLType.LEAGUE, url.between("/prm/", "-").intValue(), url.between("/group/", "-").intValue(),
+        url.between("/", "-", -1).intValue());
+    final PRMSeason season = SeasonFactory.getSeason(url.between("/prm/", "-").intValue());
     this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url), stageIdFromUrl(url));
     this.url = url;
   }
@@ -62,7 +63,7 @@ public class LeagueLoader extends GamesportsLoader {
   }
 
   @NotNull
-  private List<PrimeTeam> getTeams() {
+  private List<PRMTeam> getTeams() {
     return html.find("tbody")
         .findAll("tr").stream()
         .map(row -> row.findAll("td").get(1))
@@ -74,9 +75,9 @@ public class LeagueLoader extends GamesportsLoader {
 
   @NotNull
   private List<LeaguePlayday> getPlaydays() {
-    final Chain leagueName = html.find("h1").text().between(":");
+    final String leagueName = html.find("h1").text().between(":");
 
-    if (leagueName.toString().equals(Const.Gamesports.STARTER_NAME)) {
+    if (leagueName.equals(Const.Gamesports.STARTER_NAME)) {
       return List.of();
     }
 
@@ -84,7 +85,7 @@ public class LeagueLoader extends GamesportsLoader {
     final List<HTML> findAllByClass = html.findAll("div", "widget-ticker");
     for (int i = 0; i < findAllByClass.size(); i++) {
       final HTML playdayHTML = findAllByClass.get(i);
-      final List<PrimeMatch> primeMatches = playdayHTML.findAll("tr").stream()
+      final List<PRMMatch> primeMatches = playdayHTML.findAll("tr").stream()
           .map(match -> match.find("a").getAttribute("href"))
           .map(MatchLoader::idFromURL)
           .map(MatchFactory::getMatch)

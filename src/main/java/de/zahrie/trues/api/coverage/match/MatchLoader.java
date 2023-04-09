@@ -1,37 +1,40 @@
 package de.zahrie.trues.api.coverage.match;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.league.LeagueFactory;
 import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
+import de.zahrie.trues.api.coverage.league.model.PRMLeague;
+import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.PlaydayFactory;
 import de.zahrie.trues.api.coverage.playday.config.SchedulingRange;
-import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduleHandler;
 import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
-import de.zahrie.trues.api.coverage.season.PrimeSeason;
+import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
 import lombok.Getter;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
+@ExtensionMethod(StringUtils.class)
 public class MatchLoader extends GamesportsLoader {
-  public static Integer idFromURL(Chain url) {
+  public static Integer idFromURL(String url) {
     return url.between("/matches/", "-").intValue();
   }
 
-  private PrimeMatch match;
+  private PRMMatch match;
 
-  public MatchLoader(@NotNull PrimeMatch match) {
+  public MatchLoader(@NotNull PRMMatch match) {
     super(URLType.MATCH, match.getId());
     this.match = match;
   }
@@ -41,16 +44,16 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   MatchLoader create() {
-    final Chain seasonName = html.find("h1").text().between(null, ":");
-    final PrimeSeason primeSeason = SeasonFactory.getSeason(seasonName.toString());
+    final String seasonName = html.find("h1").text().between(null, ":");
+    final PRMSeason PRMSeason = SeasonFactory.getSeason(seasonName);
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
-    final Chain divisionName = division.text();
+    final String divisionName = division.text();
     final int urlString = division.find("a").getAttribute("href").between("/group/", "-").intValue();
-    final League league = LeagueFactory.getGroup(primeSeason, divisionName.toString(), urlString);
+    final PRMLeague league = LeagueFactory.getGroup(PRMSeason, divisionName, urlString);
     final Playday playday = getPlayday(league);
-    final PlaydayScheduler playdayScheduler = new PlaydayScheduleHandler(league.getStage(), playday.getIdx(), league.getTier()).create();
+    final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
     final SchedulingRange scheduling = playdayScheduler.scheduling();
-    this.match = new PrimeMatch(playday, getMatchtime(), league, scheduling.start(), scheduling.end(), this.id);
+    this.match = new PRMMatch(playday, getMatchtime(), league, scheduling.getStartTime(), scheduling.getEndTime(), this.id);
     return this;
   }
 
@@ -69,17 +72,17 @@ public class MatchLoader extends GamesportsLoader {
     if (data.size() < 2) {
       return PlaydayFactory.fromMatchtime(league.getStage(), getMatchtime());
     }
-    final Chain playdayName = data.get(1).text();
-    final int index = playdayName.toString().equals("Tiebreaker") ? 8 : playdayName.split(" ")[1].intValue();
+    final String playdayName = data.get(1).text();
+    final int index = playdayName.equals("Tiebreaker") ? 8 : playdayName.split(" ")[1].intValue();
     return PlaydayFactory.getPlayday(league.getStage(), index);
   }
 
-  private Time getMatchtime() {
+  private LocalDateTime getMatchtime() {
     final int matchTimeEpoch = html.findId("div", "league-match-time").getAttribute("data-time").intValue();
-    return Time.fromEpoch(matchTimeEpoch);
+    return DateTimeUtils.fromEpoch(matchTimeEpoch);
   }
 
-  private List<PrimeTeam> getTeams() {
+  private List<PRMTeam> getTeams() {
     return html.findAll("div", "content-match-head-team-top").stream()
         .map(team -> team.getAttribute("href"))
         .map(TeamLoader::idFromURL)

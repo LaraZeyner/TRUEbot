@@ -1,8 +1,9 @@
 package de.zahrie.trues.api.community.betting;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.util.Util;
 
 public class BetFactory {
@@ -20,6 +21,6 @@ public class BetFactory {
   }
 
   public static Bet getBet(DiscordUser user, Match match) {
-    return Database.Find.find(Bet.class, new String[]{"user", "match"}, new Object[]{user, match}, "findByUserAndMatch");
+    return QueryBuilder.hql(Bet.class, "FROM Bet WHERE user = " + user + " AND match = " + match).single();
   }
 }

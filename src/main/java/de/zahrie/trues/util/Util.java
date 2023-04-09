@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.Objects;
 import java.util.function.Function;
 
 public final class Util {
@@ -57,7 +56,7 @@ public final class Util {
   }
 
   public static <T> T nonNull(T obj) {
-    return Objects.requireNonNull(obj);
+    return Util.nonNull(obj);
   }
 
   public static <T, R> R avoidNull(T obj, R other, Function<T, R> consumer) {
@@ -68,7 +67,7 @@ public final class Util {
   }
 
   public static <T> T nonNull(T obj, String message) {
-    return Objects.requireNonNull(obj, message);
+    return Util.nonNull(obj, message);
   }
 
   public static <T> T avoidNull(T obj, T other) {

@@ -10,10 +10,6 @@ public class TrueNumber extends Calculateable<TrueNumber> {
     super(TrueNumber.class, value);
   }
 
-  public TrueNumber(int value) {
-    this((double) value);
-  }
-
   @Override
   public String toString() {
     return hasDigits() ? String.valueOf(value) : String.valueOf(value.longValue());
@@ -21,11 +17,6 @@ public class TrueNumber extends Calculateable<TrueNumber> {
 
   public boolean hasDigits() {
     return value % 1 != 0;
-  }
-
-  public String round() {
-    // TODO (Abgie) 15.03.2023: never used
-    return hasDigits() && value <= 1 ? percentValue() : "" + round(0).intValue();
   }
 
   public String percentValue() {

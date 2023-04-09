@@ -5,7 +5,7 @@ import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
 import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.DiscordRoleFactory;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.role.RoleCreateEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;

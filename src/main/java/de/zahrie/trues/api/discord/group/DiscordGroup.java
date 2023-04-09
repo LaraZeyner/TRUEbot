@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.api.discord.util.Nunu;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -90,9 +89,9 @@ public enum DiscordGroup implements Roleable {
         .findFirst().orElse(null);
   }
 
-  public static DiscordGroup of(Chain name) {
+  public static DiscordGroup of(String name) {
     final Stream<DiscordGroup> groups = Arrays.stream(DiscordGroup.values());
-    return groups.filter(group -> name.equalsCase(group.getName()))
+    return groups.filter(group -> name.equalsIgnoreCase(group.getName()))
         .findFirst().orElse(null);
   }
 

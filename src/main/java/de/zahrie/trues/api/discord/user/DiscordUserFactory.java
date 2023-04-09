@@ -5,11 +5,18 @@ import de.zahrie.trues.api.community.application.ApplicationFactory;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.group.RoleGranter;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import net.dv8tion.jda.api.entities.Member;
+import org.jetbrains.annotations.Nullable;
 
 public class DiscordUserFactory {
+  @Nullable
+  public static DiscordUser fromId(int id) {
+    return QueryBuilder.hql(DiscordUser.class, "FROM DiscordUser WHERE id = " + id).single();
+  }
+
   public static DiscordUser getDiscordUser(Member member) {
     final long memberId = member.getIdLong();
     return Database.Find.find(DiscordUser.class, memberId);
@@ -21,11 +28,11 @@ public class DiscordUserFactory {
 
   public static void addOrgaRole(DiscordUser user, TeamRole role, TeamPosition position) {
     role = (role.equals(TeamRole.TRYOUT)) ? TeamRole.ORGA_TRYOUT : TeamRole.ORGA;
-    getMember(user, role, position);
+    getMembership(user, role, position);
     new RoleGranter(user).addOrgaRole(role, position);
   }
 
-  public static Membership getMember(DiscordUser user, TeamRole role, TeamPosition position) {
+  public static void getMembership(DiscordUser user, TeamRole role, TeamPosition position) {
     Membership membership = user.getMemberships().stream().filter(msp -> msp.getPosition().equals(position)).findFirst().orElse(null);
     if (membership == null) {
       membership = new Membership(user, position);
@@ -34,6 +41,5 @@ public class DiscordUserFactory {
     membership.setPosition(position);
     membership.setActive(true);
     Database.save(membership);
-    return membership;
   }
 }

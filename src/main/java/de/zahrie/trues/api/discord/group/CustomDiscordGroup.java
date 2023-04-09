@@ -3,8 +3,8 @@ package de.zahrie.trues.api.discord.group;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.discord.util.Nunu;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +12,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,9 +27,8 @@ import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 @Getter
 @Setter
 @ToString
-@Entity(name = "CustomDiscordRole")
-@Table(name = "discord_role")
-@NamedQuery(name = "CustomDiscordRole.fromDiscordId", query = "FROM CustomDiscordRole WHERE discordId = :discordId")
+@Entity
+@Table(name = "discord_group")
 public class CustomDiscordGroup implements Serializable {
   @Serial
   private static final long serialVersionUID = -2307398301886813719L;

@@ -3,8 +3,8 @@ package de.zahrie.trues.api.calendar;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -42,10 +42,14 @@ public class TeamCalendar extends CalendarBase implements Serializable {
   @ToString.Exclude
   private OrgaTeam orgaTeam;
 
-  public TeamCalendar(Time start, Time end, String details, TeamCalendarType type, OrgaTeam orgaTeam) {
-    super(start, end, details);
+  @Column(name = "thread_id")
+  private Long threadId;
+
+  public TeamCalendar(TimeRange timeRange, String details, TeamCalendarType type, OrgaTeam orgaTeam, long threadId) {
+    super(timeRange, details);
     this.type = type;
     this.orgaTeam = orgaTeam;
+    this.threadId = threadId;
   }
 
   public enum TeamCalendarType {

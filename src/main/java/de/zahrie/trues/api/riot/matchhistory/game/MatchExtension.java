@@ -1,7 +1,10 @@
 package de.zahrie.trues.api.riot.matchhistory.game;
 
+import java.time.LocalDateTime;
+
 import com.merakianalytics.orianna.types.core.match.Match;
-import de.zahrie.trues.api.datatypes.calendar.Time;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 public class MatchExtension {
   public static GameType getGameQueue(Match match) {
@@ -13,7 +16,8 @@ public class MatchExtension {
     return match.getPlatform().getTag() + "_" + match.getId();
   }
 
-  public static Time getCreation(Match match) {
-    return Time.of(match.getCreationTime().toDate());
+  public static LocalDateTime getCreation(Match match) {
+    final DateTime dateTime = match.getCreationTime().withZone(DateTimeZone.getDefault());
+    return LocalDateTime.of(dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
   }
 }

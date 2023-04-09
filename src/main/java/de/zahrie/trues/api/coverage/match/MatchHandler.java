@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.match;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,26 +13,28 @@ import de.zahrie.trues.api.coverage.lineup.LineupManager;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
-import de.zahrie.trues.api.coverage.match.model.PrimeMatch;
+import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.team.model.PrimeTeam;
-import de.zahrie.trues.api.datatypes.calendar.Time;
-import de.zahrie.trues.api.datatypes.symbol.Chain;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.HTML;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
 
 @Getter
 @Log
+@ExtensionMethod(StringUtils.class)
 public class MatchHandler extends MatchModel implements Serializable {
   @Serial
   private static final long serialVersionUID = -2773996422897802404L;
 
   @Builder
   @SuppressWarnings("unused")
-  public MatchHandler(HTML html, String url, PrimeMatch match, List<HTML> logs, List<PrimeTeam> teams) {
+  public MatchHandler(HTML html, String url, PRMMatch match, List<HTML> logs, List<PRMTeam> teams) {
     super(html, url, match, logs, teams);
   }
 
@@ -52,15 +55,15 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   private void updateMatchtime() {
-    final int epoch = html.find("span", "tztime").getAttribute("data-time").intValue();
-    final Time time = Time.fromEpoch(epoch);
-    match.setStart(time);
+    final int epochSeconds = html.find("span", "tztime").getAttribute("data-time").intValue();
+    final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
+    match.setStart(dateTime);
   }
 
   public void updateResult() {
-    final Chain result = html.find("span", "league-match-result").text();
+    final String result = html.find("span", "league-match-result").text();
     if (result != null && !result.isEmpty()) {
-      match.setResult(result.toString());
+      match.updateResult(result);
     }
   }
 
@@ -68,7 +71,7 @@ public class MatchHandler extends MatchModel implements Serializable {
     final List<Participator> participators = new LinkedList<>(Arrays.asList(match.getHome(), match.getGuest()));
     for (int i = 0; i < teams.size(); i++) {
       final boolean isHome = i == 0;
-      final PrimeTeam selected = teams.get(i);
+      final PRMTeam selected = teams.get(i);
       if (participators.get(i) == null) {
         participators.set(i, new Participator(isHome, selected));
       }
@@ -81,11 +84,12 @@ public class MatchHandler extends MatchModel implements Serializable {
     Collections.reverse(logs);
     for ( HTML html : logs) {
       final List<HTML> cells = html.findAll("td");
-      final Time timestamp = determineTimestamp(cells.get(0));
-      final Chain userWithTeam = cells.get(1).text();
-      final var action = MatchLogAction.valueOf(cells.get(2).text().upper().toString());
-      final String details = cells.get(3).text().toString();
-      updated = match.get().updateLogs(timestamp, userWithTeam, action, details) || updated;
+      final int epochSeconds = html.find("span", "itime ").getAttribute("data-time").intValue();
+      final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
+      final String userWithTeam = cells.get(1).text();
+      final var action = MatchLogAction.valueOf(cells.get(2).text().upper());
+      final String details = cells.get(3).text();
+      updated = match.get().updateLogs(dateTime, userWithTeam, action, details) || updated;
     }
     return updated;
   }
@@ -96,26 +100,16 @@ public class MatchHandler extends MatchModel implements Serializable {
     }
     EventStatus status = EventStatus.CREATED;
     boolean expired = false;
-    for ( MatchLog log : match.getLogs().stream().sorted(Comparator.comparing(MatchLog::getTimestamp).reversed()).toList()) {
+    for (MatchLog log : match.getLogs().stream().sorted(Comparator.reverseOrder()).toList()) {
       final EventStatus eventStatus = log.getAction().getStatus();
-      if (eventStatus == null) {
-        continue;
-      }
-      if (log.getAction().equals(MatchLogAction.SCHEDULING_EXPIRED)) {
-        expired = true;
-      }
+      if (eventStatus == null) continue;
+
+      if (log.getAction().equals(MatchLogAction.SCHEDULING_EXPIRED)) expired = true;
       if ((eventStatus.ordinal() > status.ordinal() || log.getAction().isForce()) &&
           (!expired || !status.equals(EventStatus.SCHEDULING_SUGGEST))) {
         status = eventStatus;
       }
-
     }
     return status;
   }
-
-  private Time determineTimestamp(HTML html) {
-    final int stamp = html.find("span", "itime ").getAttribute("data-time").intValue();
-    return Time.fromEpoch(stamp);
-  }
-
 }

@@ -2,10 +2,9 @@ package de.zahrie.trues.api.community.application;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.types.TimeCoverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,7 +23,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,7 +32,6 @@ import org.hibernate.annotations.Type;
 @Table(name = "application", indexes = {@Index(name = "idx_app", columnList = "discord_user, lineup_role, lane", unique = true)})
 @NamedQuery(name = "Application.current", query = "SELECT user.mention, role || ' - ' || position, isWaiting FROM Application WHERE isWaiting is not null ORDER BY appTimestamp")
 @NamedQuery(name = "Application.pending", query = "SELECT id || '. - ' || user.mention || ' (' || role || ' - ' || position || ')' FROM Application WHERE isWaiting = true ORDER BY appTimestamp")
-@NamedQuery(name = "Application.byUserRolePosition", query = "FROM Application WHERE user = :user AND position = :position")
 public class Application implements Serializable {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
@@ -58,9 +55,8 @@ public class Application implements Serializable {
   @Column(name = "lane", length = 15)
   private TeamPosition position;
 
-  @Type(TimeCoverter.class)
   @Column(name = "app_timestamp")
-  private Time appTimestamp = new Time();
+  private LocalDateTime appTimestamp = LocalDateTime.now();
 
   /**
    * Kann drei Werte annehmen <br>
@@ -78,5 +74,10 @@ public class Application implements Serializable {
     this.user = user;
     this.role = role;
     this.position = position;
+  }
+
+  @Override
+  public String toString() {
+    return role.name() + " - " + position.name();
   }
 }

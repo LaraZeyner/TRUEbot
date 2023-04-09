@@ -3,8 +3,8 @@ package de.zahrie.trues.api.discord.group;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.discord.Nunu;
-import de.zahrie.trues.models.community.OrgaTeam;
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.discord.util.Nunu;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

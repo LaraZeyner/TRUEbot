@@ -2,10 +2,10 @@ package de.zahrie.trues.discord.listener.models;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.community.orgateam.TeamChannel;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
-import de.zahrie.trues.database.Database;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;

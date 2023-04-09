@@ -2,10 +2,10 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.datatypes.calendar.Time;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,7 +33,7 @@ public class TournamentMatch extends Match implements Serializable {
   @ToString.Exclude
   private League league;
 
-  public TournamentMatch(Playday matchday, Time start, League league) {
+  public TournamentMatch(Playday matchday, LocalDateTime start, League league) {
     super(matchday, start);
     this.league = league;
   }

@@ -1,6 +1,6 @@
 package de.zahrie.trues.discord.command.models.tryout;
 
-import de.zahrie.trues.api.datatypes.symbol.StringExtention;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "bewerbung", description = "Bewerbungsdings", completion = "Application.pending"),
     @Option(name = "zeitpunkt", description = "Zeitpunkt", type = OptionType.STRING)
 })
-@ExtensionMethod({StringExtention.class, Nunu.DiscordMessager.class})
+@ExtensionMethod({StringUtils.class, Nunu.DiscordMessager.class})
 public class TryoutCommand extends SlashCommand {
 
   public TryoutCommand() {

@@ -17,7 +17,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,7 +39,6 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 @Table(name = "discord_channel")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "orga_team")
-@NamedQuery(name = "DiscordChannel.fromDiscordId", query = "FROM DiscordChannel WHERE discordId = :discordId")
 public class DiscordChannel implements Serializable {
   @Serial
   private static final long serialVersionUID = -2307398301886813719L;

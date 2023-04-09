@@ -5,8 +5,9 @@ import java.util.List;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 
 public class MembershipFactory {
 
@@ -22,7 +23,7 @@ public class MembershipFactory {
     return membership;
   }
   public static List<Membership> getCurrentTeams(DiscordUser user) {
-    return Database.Find.findList(Membership.class, new String[]{"user"}, new Object[]{user}, "ofUser");
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = " + user + " AND active = true").list();
   }
 
   public static Membership getMostImportantTeam(DiscordUser user) {
@@ -43,11 +44,6 @@ public class MembershipFactory {
   }
 
   public static List<Membership> getCaptainRoles(DiscordUser user) {
-    return Database.Find.findList(Membership.class, new String[]{"user"}, new Object[]{user}, "ofUserCaptain");
-  }
-
-  public static Membership getCaptainsOfTeam(DiscordUser user, TeamRole role) {
-    // TODO (Abgie) 15.03.2023: never used
-    return user.getMemberships().stream().filter(app -> app.getRole().equals(role)).findFirst().orElse(null);
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = " + user + " AND active = true AND captain = true").list();
   }
 }

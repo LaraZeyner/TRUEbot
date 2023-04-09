@@ -1,10 +1,10 @@
 package de.zahrie.trues.api.riot.matchhistory.teamperformance;
 
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
-import de.zahrie.trues.database.Database;
 
 public class TeamPerfFactory {
   public static TeamPerf getTeamPerfBySide(Game game, boolean blueSide) {
-    return Database.Find.find(TeamPerf.class, new String[]{"game", "first"}, new Object[]{game, blueSide}, "fromGameAndSide");
+    return QueryBuilder.hql(TeamPerf.class, "FROM TeamPerf WHERE game = " + game + " and first = " + blueSide).single();
   }
 }

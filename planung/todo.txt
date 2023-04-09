@@ -2,13 +2,17 @@ TODO: LOGGING
  commands
  events
 
-TODO: Datenstrukturen
- TRUEList, TRUENumber, Time, Chain entfernen
- "Object"Impl.class - "Object"Factory.class aufteilen
+ TODO:
+  signup -> result pre, main, po
+  groups only
 
-TODO: Player
- Seasons mit Ranks
 
-TODO: new Match Found
- Dropdown
- Reevaluate
+  DTO Transformation
+
+
+
+  whats default time zone
+
+
+TODO:
+ how does the signup work

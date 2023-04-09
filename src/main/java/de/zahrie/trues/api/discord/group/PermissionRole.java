@@ -9,41 +9,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class PermissionRole {
-  public static final Integer NO_ROLES = null;
-  public static final Integer EVERYONE = 0;
-  public static final Integer REGISTERED = 1;
-  public static final Integer APPLICANT = 2;
-  public static final Integer TRYOUT = 3;
-  public static final Integer SUBSTITUDE = 4;
-  public static final Integer EVENT_PLANNING = 5;
-  public static final Integer CASTER = 6;
-  public static final Integer DEVELOPER = 7;
-  public static final Integer SOCIAL_MEDIA = 8;
-  public static final Integer PLAYER = 9;
-  public static final Integer MENTOR = 10;
-  public static final Integer ANALYST = 11;
-  public static final Integer LANE_COACH = 12;
-  public static final Integer MENTAL_COACH = 13;
-  public static final Integer STRATEGIC_COACH = 14;
-  public static final Integer EVENT_LEAD = 15;
-  public static final Integer SOCIAL_MEDIA_LEAD = 16;
-  public static final Integer TEAM_CAPTAIN = 17;
-  public static final Integer TEAM_BUILDING = 18;
-  public static final Integer EVENT_MANAGER = 19;
-  public static final Integer COMMUNITY_MANAGER = 20;
-  public static final Integer COACHING_MANAGER = 21;
-  public static final Integer ORGA_LEADER = 22;
+  public static final int NO_ROLES = -1;
+  public static final int EVERYONE = 0;
+  public static final int REGISTERED = 1;
+  public static final int APPLICANT = 2;
+  public static final int TRYOUT = 3;
+  public static final int SUBSTITUDE = 4;
+  public static final int EVENT_PLANNING = 5;
+  public static final int CASTER = 6;
+  public static final int DEVELOPER = 7;
+  public static final int SOCIAL_MEDIA = 8;
+  public static final int PLAYER = 9;
+  public static final int MENTOR = 10;
+  public static final int ANALYST = 11;
+  public static final int LANE_COACH = 12;
+  public static final int MENTAL_COACH = 13;
+  public static final int STRATEGIC_COACH = 14;
+  public static final int EVENT_LEAD = 15;
+  public static final int SOCIAL_MEDIA_LEAD = 16;
+  public static final int TEAM_CAPTAIN = 17;
+  public static final int TEAM_BUILDING = 18;
+  public static final int EVENT_MANAGER = 19;
+  public static final int COMMUNITY_MANAGER = 20;
+  public static final int COACHING_MANAGER = 21;
+  public static final int ORGA_LEADER = 22;
 
-
-  public static final Integer ORGA_MEMBER = 105;
-  public static final Integer LEADER = 106;
-  public static final Integer MANAGEMENT = 107;
-
-  public static final Integer NOT_IN_ORGA = 200;
-  public static final Integer EVENT = 201;
-  public static final Integer TEAMS = 202;
-  public static final Integer COACHING = 203;
-  public static final Integer ALL_DEPARTMENTS = 204;
+  public static final int ORGA_MEMBER = 105;
+  public static final int LEADER = 106;
+  public static final int MANAGEMENT = 107;
+  public static final int NOT_IN_ORGA = 200;
+  public static final int EVENT = 201;
+  public static final int TEAMS = 202;
+  public static final int COACHING = 203;
+  public static final int ALL_DEPARTMENTS = 204;
 
   public static Set<DiscordGroup> of(Integer id, boolean recursive) {
     if (!recursive || id >= 200) {

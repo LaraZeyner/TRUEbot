@@ -6,11 +6,12 @@ import java.util.function.Predicate;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.community.member.MembershipFactory;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
-import de.zahrie.trues.database.Database;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +23,7 @@ public class ApplicationFactory {
    * @return neue Bewerbung
    */
   public static Application create(DiscordUser user, TeamRole role, TeamPosition position, @Nullable String appNotes, Boolean isWaiting) {
-    Application application = Database.Find.find(Application.class, new String[]{"user", "position"}, new Object[]{user, position}, "byUserRolePosition");
+    Application application = QueryBuilder.hql(Application.class, "FROM Application WHERE user = :user AND position = :position").single();
     if (application == null) application = new Application(user, role, position);
     if (appNotes != null) application.setAppNotes(appNotes);
     application.setIsWaiting(isWaiting);
@@ -80,7 +81,7 @@ public class ApplicationFactory {
   public static void updateOrgaTeamRole(DiscordUser user) {
     final List<Membership> currentTeams = MembershipFactory.getCurrentTeams(user);
     final RoleGranter granter = new RoleGranter(user);
-    final List<OrgaTeam> orgaTeams = Database.Find.findList(OrgaTeam.class);
+    final List<OrgaTeam> orgaTeams = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list();
     final List<OrgaTeam> currentOrgaTeams = currentTeams.stream().map(Membership::getOrgaTeam).toList();
     for (OrgaTeam orgaTeam : orgaTeams) {
       if (currentOrgaTeams.contains(orgaTeam) && !user.getMember().getRoles().contains(orgaTeam.getGroup().getRole())) {

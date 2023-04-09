@@ -2,7 +2,6 @@ package de.zahrie.trues.api.discord.builder.leaderboard;
 
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.symbol.Chain;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.api.discord.builder.InfoPanelBuilder;
 import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
@@ -22,9 +21,7 @@ public class Leaderboard {
 
     final EmbedWrapper data = getData(customEmbedData);
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
-    for (Chain chain : data.merge()) {
-      eventChannel.sendMessage(chain.toString()).queue(publicLeaderboard::add);
-    }
+    for (String chain : data.merge()) eventChannel.sendMessage(chain).queue(publicLeaderboard::add);
     if (!wrapperEmbeds.isEmpty()) eventChannel.sendMessageEmbeds(wrapperEmbeds).queue(publicLeaderboard::add);
 
     LeaderboardHandler.add(publicLeaderboard);
@@ -33,14 +30,14 @@ public class Leaderboard {
   public void buildNew(List<CustomEmbedData> customEmbedData, SlashCommandInteractionEvent event) {
     final EmbedWrapper data = getData(customEmbedData);
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
-    final List<Chain> merge = data.merge();
+    final List<String> merge = data.merge();
     for (int i = 0; i < merge.size(); i++) {
-      final Chain chain = merge.get(i);
+      final String chain = merge.get(i);
       if (i == 0) {
-        event.reply(chain.toString()).setEphemeral(false).queue();
+        event.reply(chain).setEphemeral(false).queue();
         continue;
       }
-      event.getChannel().sendMessage(chain.toString()).queue();
+      event.getChannel().sendMessage(chain).queue();
     }
     if (!wrapperEmbeds.isEmpty()) event.getChannel().sendMessageEmbeds(wrapperEmbeds.subList(0, Math.min(wrapperEmbeds.size(), 10))).queue();
   }

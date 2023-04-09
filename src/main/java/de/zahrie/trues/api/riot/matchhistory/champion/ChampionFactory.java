@@ -1,7 +1,8 @@
 package de.zahrie.trues.api.riot.matchhistory.champion;
 
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
 import org.jetbrains.annotations.NotNull;
 
 public class ChampionFactory {
@@ -35,7 +36,7 @@ public class ChampionFactory {
   }
 
   public static Champion getChampion(String name) {
-    Champion champion = Database.Find.find(Champion.class, new String[]{"name"}, new Object[]{name}, "fromName");
+    Champion champion = QueryBuilder.hql(Champion.class, "FROM Champion WHERE name = " + name).single();
     if (champion == null) {
       final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion = Xayah.championNamed(name).get();
       if (riotChampion != null) {

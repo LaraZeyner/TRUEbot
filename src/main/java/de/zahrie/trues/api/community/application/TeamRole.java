@@ -2,6 +2,10 @@ package de.zahrie.trues.api.community.application;
 
 public enum TeamRole {
   /**
+   * hilft für einen Tag aus
+   */
+  STANDIN,
+  /**
    * Bewerbungsgespräch angenommen <br>
    * Wenn Tryout für Team dann ist dies die Auswahlrolle
    */

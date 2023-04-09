@@ -25,13 +25,13 @@ public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) 
 
   private String getDescription() {
     if (matchLogs.isEmpty()) {
-      return "Match erstellt - Ausweichtermin am: **" + match.getStart().text(TimeFormat.DEFAULT) + "**";
+      return "Match erstellt - Ausweichtermin am: **" + TimeFormat.DEFAULT.of(match.getStart()) + "**";
     }
     final MatchLog log = matchLogs.get(0);
     return log.getAction().getOutput() + "( von " + log.getParticipator().getTeam().getName() + " )\n" + log.detailsOutput();
   }
 
-  private List<MessageEmbed.Field> getFields() {
+  public List<MessageEmbed.Field> getFields() {
     return new EmbedFieldBuilder<>(matchLogs.subList(1, matchLogs.size()))
         .add("Action", MatchLog::actionOutput)
         .add("Team", MatchLog::teamOutput)

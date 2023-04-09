@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.discord.group;
 
-import de.zahrie.trues.database.Database;
+import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,7 @@ public class DiscordRoleFactory {
   }
 
   private static CustomDiscordGroup determineCustomGroup(Role role) {
-    return Database.Find.find(CustomDiscordGroup.class, new String[]{"discordId"}, new Object[]{role.getIdLong()}, "fromDiscordId");
+    return QueryBuilder.hql(CustomDiscordGroup.class, "FROM CustomDiscordGroup WHERE discordId = " + role.getIdLong()).single();
   }
 
   private static CustomDiscordGroup createCustomGroup(Role role) {
