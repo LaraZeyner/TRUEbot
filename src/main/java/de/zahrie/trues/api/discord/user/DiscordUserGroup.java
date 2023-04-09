@@ -2,7 +2,6 @@ package de.zahrie.trues.api.discord.user;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
@@ -59,9 +58,6 @@ public class DiscordUserGroup implements Serializable {
       @AttributeOverride(name = "endTime", column = @Column(name = "permission_end", nullable = false))
   })
   private TimeRange range;
-
-  @Column(name = "permission_end", nullable = false)
-  private LocalDateTime permissionEnd;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "reason", nullable = false, length = 8)

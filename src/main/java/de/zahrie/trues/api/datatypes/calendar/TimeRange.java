@@ -31,8 +31,16 @@ public class TimeRange implements Comparable<TimeRange> {
     return new TimeRange(startTime.plusWeeks(weeks), endTime.plusWeeks(weeks));
   }
 
+  public boolean hasStarted() {
+    return startTime.isAfter(LocalDateTime.now());
+  }
+
+  public boolean hasRunning() {
+    return hasStarted() && !hasEnded();
+  }
+
   public boolean hasEnded() {
-    return LocalDateTime.now().isAfter(endTime);
+    return endTime.isAfter(LocalDateTime.now());
   }
 
   public static List<TimeRange> reduce(List<TimeRange> from, List<TimeRange> minus) {

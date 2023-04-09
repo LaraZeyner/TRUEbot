@@ -45,7 +45,7 @@ public class OrgaTeam implements Serializable {
   private short id;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "team")
+  @JoinColumn(name = "team", unique = true)
   @ToString.Exclude
   private Team team;
 

@@ -2,7 +2,6 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -99,8 +98,8 @@ public class Season implements Betable, Serializable, Comparable<Season> {
   public String getSignupStatusForTeam(Team team) {
     if (team.getSignups().stream().anyMatch(signup -> signup.getSeason().equals(this))) return "angemeldet";
     return stages.stream().filter(stage -> stage instanceof SignupStage).findFirst()
-        .map(stage -> stage.getStart().isBefore(LocalDateTime.now()) ? "Anmeldung gestartet" : "Anmeldung " +
-            TimeFormat.DISCORD.of(stage.getStart()))
+        .map(stage -> stage.getRange().hasStarted() ? "Anmeldung gestartet" : "Anmeldung " +
+            TimeFormat.DISCORD.of(stage.getRange().getStartTime()))
         .orElse("keine Anmeldung eingerichtet");
   }
 }

@@ -41,7 +41,7 @@ public final class WeekdayTimeRange {
 
   private LocalDate determineDateOfWeekday(PlayStage stage, int index) {
     final PlaydayConfig config = stage.playdayConfig();
-    LocalDateTime startTime = stage.getStart();
+    LocalDateTime startTime = stage.getRange().getStartTime();
     if (config.customDays() == null) {
       final RepeatType repeatType = config.repeater().type();
       startTime = startTime.plusDays((long) repeatType.getDays() * (index - 1));

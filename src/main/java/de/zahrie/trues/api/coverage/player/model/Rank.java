@@ -46,7 +46,7 @@ public class Rank extends AbstractRank implements Serializable {
   private int id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "player_player_id", nullable = false)
+  @JoinColumn(name = "player", nullable = false)
   private Player player;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

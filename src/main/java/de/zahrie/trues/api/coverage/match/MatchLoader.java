@@ -53,7 +53,7 @@ public class MatchLoader extends GamesportsLoader {
     final Playday playday = getPlayday(league);
     final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
     final SchedulingRange scheduling = playdayScheduler.scheduling();
-    this.match = new PRMMatch(playday, getMatchtime(), league, scheduling.getStartTime(), scheduling.getEndTime(), this.id);
+    this.match = new PRMMatch(playday, getMatchtime(), league, scheduling, this.id);
     return this;
   }
 

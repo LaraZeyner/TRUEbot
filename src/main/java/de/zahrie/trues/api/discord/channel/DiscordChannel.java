@@ -8,7 +8,7 @@ import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import org.hibernate.annotations.DiscriminatorFormula;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,7 +39,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 @Entity(name = "DiscordChannel")
 @Table(name = "discord_channel")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "orga_team")
+@DiscriminatorFormula("IF(orga_team IS NULL, 'null', 'not null')")
+@DiscriminatorValue("null")
 public class DiscordChannel implements Serializable {
   @Serial
   private static final long serialVersionUID = -2307398301886813719L;

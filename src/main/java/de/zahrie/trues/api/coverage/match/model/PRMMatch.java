@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.coverage.playday.config.SchedulingRange;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -29,8 +30,8 @@ public class PRMMatch extends ScheduleableMatch implements Serializable {
   @Column(name = "match_id")
   private Integer matchId;
 
-  public PRMMatch(Playday matchday, LocalDateTime start, League league, LocalDateTime schedulingStart, LocalDateTime schedulingEnd, Integer matchId) {
-    super(matchday, start, league, schedulingStart, schedulingEnd);
+  public PRMMatch(Playday matchday, LocalDateTime start, League league, SchedulingRange schedulingRange, Integer matchId) {
+    super(matchday, start, league, schedulingRange);
     this.matchId = matchId;
   }
 

@@ -19,7 +19,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -38,7 +37,7 @@ import org.hibernate.annotations.DiscriminatorFormula;
 @Setter
 @ToString
 @Entity
-@Table(name = "team", indexes = {@Index(name = "idx_channel", columnList = "orga_team", unique = true)})
+@Table(name = "team")
 @DiscriminatorFormula("IF(team_id IS NULL, '0', '1')")
 @NamedQuery(name = "Team.OrgaTeams.str", query = "SELECT name FROM Team WHERE orgaTeam IS NOT NULL")
 public class Team implements Serializable {

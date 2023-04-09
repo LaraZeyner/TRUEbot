@@ -15,7 +15,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("Auslosung Gruppen")
+@DiscriminatorValue("Auslosung")
 public class CreationStage extends WaitingStage implements Serializable {
   @Serial
   private static final long serialVersionUID = -1317304037038810292L;

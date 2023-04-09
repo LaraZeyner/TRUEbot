@@ -37,6 +37,8 @@ public class VoiceEvent extends ListenerAdapter {
   @Override
   public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
     final DiscordUser discordUser = DiscordUserFactory.getDiscordUser(event.getMember());
+    discordUser.addSeconds(event.getChannelJoined() != null);
+
     if (!usersToFollow.containsKey(discordUser)) return;
 
     usersToFollow.remove(discordUser);

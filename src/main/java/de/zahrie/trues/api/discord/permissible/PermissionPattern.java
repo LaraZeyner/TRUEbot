@@ -2,6 +2,7 @@ package de.zahrie.trues.api.discord.permissible;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -124,7 +125,8 @@ public class PermissionPattern {
   }
 
   public PermissionPattern remove(PermissionPattern pattern) {
-    this.permissions.keySet().stream().filter(permission -> pattern.getPermissions().containsKey(permission)).forEach(this.permissions::remove);
+    final List<Permission> permissionList = permissions.keySet().stream().filter(permission -> pattern.getPermissions().containsKey(permission)).toList();
+    permissionList.forEach(permissions::remove);
     return this;
   }
 

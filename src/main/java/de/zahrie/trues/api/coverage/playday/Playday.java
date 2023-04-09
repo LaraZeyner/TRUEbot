@@ -2,13 +2,17 @@ package de.zahrie.trues.api.coverage.playday;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.coverage.playday.config.PlaydayRange;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -50,25 +54,25 @@ public class Playday implements Serializable, Comparable<Playday> {
   @Column(name = "playday_index", columnDefinition = "TINYINT UNSIGNED not null")
   private short idx;
 
-  @Column(name = "playday_start", nullable = false)
-  private LocalDateTime startTime;
-
-  @Column(name = "playday_end", nullable = false)
-  private LocalDateTime endTime;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "startTime", column = @Column(name = "playday_start", nullable = false)),
+      @AttributeOverride(name = "endTime", column = @Column(name = "playday_end", nullable = false))
+  })
+  private TimeRange range;
 
   @OneToMany(mappedBy = "playday")
   @ToString.Exclude
   private Set<Match> matches;
 
-  public Playday(PlayStage stage, short index, LocalDateTime startTime, LocalDateTime endTime) {
+  public Playday(PlayStage stage, short index, PlaydayRange playdayRange) {
     this.stage = stage;
     this.idx = index;
-    this.startTime = startTime;
-    this.endTime = endTime;
+    this.range = playdayRange;
   }
 
   @Override
   public int compareTo(@NotNull Playday o) {
-    return Comparator.comparing(Playday::getStartTime).compare(this, o);
+    return Comparator.comparing(Playday::getRange).compare(this, o);
   }
 }

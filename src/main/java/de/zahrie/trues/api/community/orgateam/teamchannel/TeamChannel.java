@@ -45,7 +45,7 @@ public class TeamChannel extends DiscordChannel implements Serializable {
   private OrgaTeam orgaTeam;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "channel_type")
+  @Column(name = "teamchannel_type")
   private TeamChannelType teamChannelType;
 
   public TeamChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {

@@ -2,6 +2,7 @@ package de.zahrie.trues.api.discord.user;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +34,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -66,17 +68,20 @@ public class DiscordUser implements Serializable {
   private String mention;
 
   @Column(name = "msg_count", columnDefinition = "SMALLINT UNSIGNED not null")
+  @Setter(AccessLevel.NONE)
   private int messagesSent = 0;
 
   @Column(name = "msg_digits", nullable = false)
+  @Setter(AccessLevel.NONE)
   private int digitsWritten = 0;
 
   @Column(name = "seconds_online", nullable = false)
+  @Setter(AccessLevel.NONE)
   private int secondsOnline = 0;
 
   @Column(name = "joined")
+  @Setter(AccessLevel.NONE)
   private LocalDateTime lastTimeJoined;
-  //TODO (Abgie) 08.04.2023: joined
 
   @Column(name = "birthday")
   private LocalDate birthday;
@@ -131,7 +136,7 @@ public class DiscordUser implements Serializable {
 
   public void addTempGroups() {
     for (DiscordUserGroup discordUserGroup : groups) {
-      if (!discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().isAfter(LocalDateTime.now())) {
+      if (!discordUserGroup.isActive() && discordUserGroup.getRange().getEndTime().isAfter(LocalDateTime.now())) {
         addGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(true);
         Database.save(discordUserGroup);
@@ -150,7 +155,7 @@ public class DiscordUser implements Serializable {
 
   public void removeTempGroups() {
     for (DiscordUserGroup discordUserGroup : groups) {
-      if (discordUserGroup.isActive() && discordUserGroup.getPermissionEnd().isAfter(LocalDateTime.now())) {
+      if (discordUserGroup.isActive() && !discordUserGroup.getRange().hasEnded()) {
         removeGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(false);
         Database.save(discordUserGroup);
@@ -183,5 +188,20 @@ public class DiscordUser implements Serializable {
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention()).queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember()
         .getNickname()).queue(threadChannel -> Database.save(new ApplicationCalendar(timeRange, "by " + id + " - " + mention, this, threadChannel.getIdLong()))));
     dm("Neuer Termin für Vorstellungsgespräch: " + TimeFormat.DISCORD.of(dateTime));
+  }
+
+  public void addSeconds(boolean stillOnline) {
+    if (lastTimeJoined != null) {
+      final Duration duration = Duration.between(lastTimeJoined, LocalDateTime.now());
+      this.secondsOnline += duration.getSeconds();
+      this.points += Math.round(duration.getSeconds() / 60.);
+    }
+    if (stillOnline) this.lastTimeJoined = LocalDateTime.now();
+  }
+
+  public void addMessage(String content) {
+    this.messagesSent++;
+    this.digitsWritten += content.length();
+    this.points += content.length();
   }
 }

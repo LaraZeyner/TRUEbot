@@ -56,17 +56,20 @@ import org.jetbrains.annotations.NotNull;
 public class MessageEvent extends ListenerAdapter {
   @Override
   public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    if (event.getChannelType().equals(ChannelType.PRIVATE)) {
+      handleSettings(event);
+      return;
+    }
+    final DiscordUser user = DiscordUserFactory.getDiscordUser(Util.nonNull(event.getMember()));
+    user.addMessage(event.getMessage().getContentDisplay());
+
+
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannelId(event.getChannel().getIdLong());
     if (teamChannel != null) handleSchedulingEntry(event, event.getMessage());
 
     if (event.getChannel() instanceof ThreadChannel threadChannel) {
       final String channelName = threadChannel.getName();
       if (channelName.startsWith(Const.THREAD_CHANNEL_START)) handleEditMatchData(event, threadChannel);
-    }
-
-    if (event.getChannelType().equals(ChannelType.PRIVATE)) {
-      handleSettings(event);
-
     }
 
     if (event.getChannel().getId().equals(Nunu.DiscordChannel.getAdminChannel().getId())) {

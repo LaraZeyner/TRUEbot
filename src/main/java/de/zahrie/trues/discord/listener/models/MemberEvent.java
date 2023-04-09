@@ -7,8 +7,11 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
+import de.zahrie.trues.api.logging.ServerLog;
 import de.zahrie.trues.discord.Settings;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -17,7 +20,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  *
  * @see net.dv8tion.jda.api.events.guild.member.GenericGuildMemberEvent
  * @see GuildMemberJoinEvent
- * @see net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent
+ * @see GuildMemberRemoveEvent
  * @see net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent
  * @see net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent
  * @see net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent
@@ -36,6 +39,10 @@ public class MemberEvent extends ListenerAdapter {
     user.setDiscordId(event.getMember().getIdLong());
     user.setMention(event.getMember().getAsMention());
     Database.save(user);
+
+    final ServerLog serverLog = new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_JOIN);
+    Database.save(serverLog);
+
     final String settings = Arrays.stream(Settings.RegistrationAction.values()).map(registrationAction -> registrationAction.name().toLowerCase()).collect(Collectors.joining(", "));
     user.getMember().getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
         Herzlich Willkommen auf dem Discord von **TRUEsports**.
@@ -58,4 +65,13 @@ public class MemberEvent extends ListenerAdapter {
     Database.save(user);
   }
 
+  @Override
+  public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
+    final Member member = event.getMember();
+    if (member != null) {
+      final DiscordUser user = DiscordUserFactory.getDiscordUser(member);
+      final ServerLog serverLog = new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_LEAVE);
+      Database.save(serverLog);
+    }
+  }
 }

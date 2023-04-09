@@ -12,18 +12,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum GroupTier {
-  EVERYONE(10, Set.of()),
-  REGISTERED(20, Set.of()),
-  APPLICANT(30, Set.of()),
-  TRYOUT(40, Set.of()),
-  SUBSTITUDE(50, Set.of()),
-  ORGA_MEMBER(60, Set.of(DiscordGroup.FRIEND)),
-  LEADER(70, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER)),
-  MANAGEMENT(80, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH)),
-  ORGA_LEADER(90, Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH));
+  EVERYONE(10),
+  REGISTERED(20),
+  APPLICANT(30),
+  TRYOUT(40),
+  SUBSTITUDE(50),
+  ORGA_MEMBER(60),
+  LEADER(70),
+  MANAGEMENT(80),
+  ORGA_LEADER(90);
 
   private final int permissionId;
-  private final Set<DiscordGroup> assignable;
+
+  public Set<DiscordGroup> getAssignable() {
+    return switch (this) {
+      case ORGA_MEMBER -> Set.of(DiscordGroup.FRIEND);
+      case LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER);
+      case MANAGEMENT, ORGA_LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH);
+      default -> Set.of();
+    };
+  }
 
   public boolean isOrga() {
     return permissionId >= SUBSTITUDE.getPermissionId();

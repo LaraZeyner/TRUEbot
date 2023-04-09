@@ -6,8 +6,11 @@ import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,21 +24,20 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("intern")
 public class ScheduleableMatch extends TournamentMatch implements Serializable {
   @Serial
   private static final long serialVersionUID = -2453759856557325436L;
 
-  @Column(name = "scheduling_start")
-  private LocalDateTime schedulingStart;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "startTime", column = @Column(name = "scheduling_start", nullable = false)),
+      @AttributeOverride(name = "endTime", column = @Column(name = "scheduling_end", nullable = false))
+  })
+  private TimeRange range;
 
-  @Column(name = "scheduling_end")
-  private LocalDateTime schedulingEnd;
-
-  public ScheduleableMatch(Playday matchday, LocalDateTime start, League league, LocalDateTime schedulingStart, LocalDateTime schedulingEnd) {
+  public ScheduleableMatch(Playday matchday, LocalDateTime start, League league, TimeRange timeRange) {
     super(matchday, start, league);
-    this.schedulingStart = schedulingStart;
-    this.schedulingEnd = schedulingEnd;
+    this.range = timeRange;
   }
 
 }
