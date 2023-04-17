@@ -18,7 +18,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@DiscriminatorValue("prime_league")
+@DiscriminatorValue("prime")
 public class PRMSeason extends Season implements Serializable {
   @Serial
   private static final long serialVersionUID = 3498814029985658723L;

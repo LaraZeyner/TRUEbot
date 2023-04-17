@@ -4,11 +4,13 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
+import de.zahrie.trues.api.database.QueryBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorValue;
@@ -57,13 +59,12 @@ public class League implements Serializable, Comparable<League> {
   @Column(name = "group_name", nullable = false, length = 25)
   private String name;
 
-  @OneToMany(mappedBy = "league")
-  @ToString.Exclude
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "league")
   private Set<TournamentMatch> matches = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "league")
-  @ToString.Exclude
-  private Set<LeagueTeam> signups = new LinkedHashSet<>();
+  public List<LeagueTeam> getSignups() {
+    return QueryBuilder.hql(LeagueTeam.class, "FROM LeagueTeam WHERE league = :league").addParameter("league", this).list();
+  }
 
   public LeagueTier getTier() {
     return LeagueTier.fromName(name);

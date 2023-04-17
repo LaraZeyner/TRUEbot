@@ -19,7 +19,7 @@ public record MatchOfTeamDTO(Match match, Team team) implements DTO {
     return QueryBuilder.hql(MatchOfTeamDTO.class,
         "SELECT coverage, team " +
             "FROM Participator " +
-            "WHERE team = " + team + " " +
+            "WHERE team = " + team.getId() + " " +
             "and (coverage.start >= " + start + " or coverage.status <>" + EventStatus.PLAYED + ") " +
             "ORDER BY coverage.start");
   }

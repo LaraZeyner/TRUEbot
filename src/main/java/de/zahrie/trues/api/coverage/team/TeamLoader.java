@@ -26,7 +26,7 @@ public class TeamLoader extends GamesportsLoader {
   private PRMTeam team;
 
   public TeamLoader(@NotNull PRMTeam team) {
-    super(URLType.TEAM, team.getId());
+    super(URLType.TEAM, team.getPrmId());
     this.team = team;
   }
 
@@ -39,7 +39,7 @@ public class TeamLoader extends GamesportsLoader {
       return null;
     }
     final String teamTitle = html.find("h1").text();
-    final String name = teamTitle.between(null, " (", -1);
+    final String name = teamTitle.before(" (", -1);
     final String abbreviation = teamTitle.between("(", ")", -1);
     this.team = TeamFactory.getTeam(id, name, abbreviation);
     return this;
@@ -47,7 +47,7 @@ public class TeamLoader extends GamesportsLoader {
 
   public TeamHandler load() {
     final String teamTitle = html.find("h1").text();
-    team.setName(teamTitle.between(null, " (", -1));
+    team.setName(teamTitle.before(" (", -1));
     team.setAbbreviation(teamTitle.between("(", ")", -1));
 
     return TeamHandler.builder()
@@ -59,6 +59,11 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   private List<PRMPlayer> getPlayers() {
+    List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li").stream()
+        .map(HTML::text).map(str -> str.after(":")).toList();
+    teamInfos = teamInfos.subList(3, teamInfos.size());
+    if (teamInfos.size() == 4) return List.of();
+
     final var players = new ArrayList<PRMPlayer>();
     for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();

@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +36,12 @@ import lombok.ToString;
 public class Application implements Serializable {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
+
+  public static Application build(DiscordUser user, TeamRole role, TeamPosition position) {
+    final var application = new Application(user, role, position);
+    Database.insert(application);
+    return application;
+  }
 
 
   @Id
@@ -70,7 +77,7 @@ public class Application implements Serializable {
   @Column(name = "app_notes", length = 2048)
   private String appNotes;
 
-  public Application(DiscordUser user, TeamRole role, TeamPosition position) {
+  private Application(DiscordUser user, TeamRole role, TeamPosition position) {
     this.user = user;
     this.role = role;
     this.position = position;

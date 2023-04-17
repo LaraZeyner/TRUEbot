@@ -36,6 +36,8 @@ public class ParticipantsAnalyzer {
     final Participant opponent = participant.getOpponent(match);
     final Champion opposingChampion = opponent == null ? null : opponent.getSelectedChampion();
     final KDA kda = participant.getKDA();
-    return new Performance(teamPerformance, player, lane, selectedChampion, opposingChampion, kda, stats.getGoldEarned(), stats.getDamageDealt(), stats.getVisionScore(), stats.getCreepScore());
+    final Performance performance1 = new Performance(player, lane, selectedChampion, opposingChampion, kda, stats.getGoldEarned(), stats.getDamageDealt(), stats.getVisionScore(), stats.getCreepScore());
+    teamPerformance.addPerformance(performance1);
+    return performance1;
   }
 }

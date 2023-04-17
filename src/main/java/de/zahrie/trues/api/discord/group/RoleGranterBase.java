@@ -102,24 +102,19 @@ public class RoleGranterBase {
   public RoleGranterBase add(DiscordGroup group, LocalDateTime start, int days) {
     if (days > 0) {
       final var timeRange = new TimeRange(start, days, ChronoUnit.DAYS);
-      final var userGroup = new DiscordUserGroup(target, group, timeRange);
-      target.getGroups().add(userGroup);
-      Database.save(userGroup);
-      Database.save(this);
+      DiscordUserGroup.build(target, group, timeRange);
     }
     target.getGroups().stream().filter(DiscordUserGroup::isActive)
         .filter(discordUserGroup -> discordUserGroup.getDiscordGroup().equals(group)).findFirst().ifPresent(discordUserGroup -> {
           if (days > 0) {
             final LocalDateTime end = discordUserGroup.getRange().getEndTime();
             final var timeRange = new TimeRange(start, days, ChronoUnit.DAYS);
-            if (timeRange.getEndTime().isAfter(end)) {
-              discordUserGroup.setRange(timeRange);
-            }
+            if (timeRange.getEndTime().isAfter(end)) discordUserGroup.setRange(timeRange);
           } else {
             discordUserGroup.setActive(false);
             discordUserGroup.getRange().setEndTime(LocalDateTime.now());
           }
-          Database.save(discordUserGroup);
+          Database.update(discordUserGroup);
         });
 
     updateRelatedRolesOnAdd(group);
@@ -177,7 +172,7 @@ public class RoleGranterBase {
   }
 
   public void addTeam(OrgaTeam team) {
-    addRole(team.getGroup().getRole());
+    addRole(team.getRoleManager().getRole());
   }
 
   public void addOrga(TeamPosition position) {
@@ -186,7 +181,7 @@ public class RoleGranterBase {
   }
 
   public void removeTeam(OrgaTeam team) {
-    removeRole(team.getGroup().getRole());
+    removeRole(team.getRoleManager().getRole());
   }
 
   public void removeOrga(TeamPosition position) {

@@ -6,7 +6,6 @@ import java.io.Serializable;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.channel.PermissionChannelType;
-import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,7 +37,7 @@ public class TeamChannel extends DiscordChannel implements Serializable {
   @Serial
   private static final long serialVersionUID = -6665003217262393566L;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "orga_team")
   @ToString.Exclude
@@ -56,8 +55,8 @@ public class TeamChannel extends DiscordChannel implements Serializable {
 
   @Override
   public boolean updatePermission(Role role) {
-    final CustomDiscordGroup group = orgaTeam.getGroup();
-    if (group.getRole().equals(role)) {
+    final Role teamRole = orgaTeam.getRoleManager().getRole();
+    if (teamRole.equals(role)) {
       updateForGroup(DiscordGroup.TEAM_ROLE_PLACEHOLDER);
       return true;
     }
@@ -66,7 +65,7 @@ public class TeamChannel extends DiscordChannel implements Serializable {
 
   @Override
   protected void updateForGroup(DiscordGroup group) {
-    final Role role = orgaTeam.getGroup().getRole();
+    final Role role = orgaTeam.getRoleManager().getRole();
     uFr(role, group);
   }
 

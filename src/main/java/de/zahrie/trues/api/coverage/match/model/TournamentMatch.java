@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,10 +29,14 @@ public class TournamentMatch extends Match implements Serializable {
   @Serial
   private static final long serialVersionUID = 6103645801571452429L;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "coverage_group")
   @ToString.Exclude
   private League league;
+
+  @Column(name = "coverage_index", columnDefinition = "SMALLINT UNSIGNED")
+  private Integer groupIndex;
+
 
   public TournamentMatch(Playday matchday, LocalDateTime start, League league) {
     super(matchday, start);

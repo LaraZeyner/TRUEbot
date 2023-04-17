@@ -51,7 +51,7 @@ public class MatchHandler extends MatchModel implements Serializable {
     if (!match.getStatus().equals(EventStatus.PLAYED)) {
       LineupManager.getMatch(match).update();
     }
-    Database.save(match);
+    Database.update(match);
   }
 
   private void updateMatchtime() {
@@ -95,9 +95,7 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   private EventStatus determineStatus() {
-    if (!match.getResult().equals("-:-")) {
-      return EventStatus.PLAYED;
-    }
+    if (!match.isRunning()) return EventStatus.PLAYED;
     EventStatus status = EventStatus.CREATED;
     boolean expired = false;
     for (MatchLog log : match.getLogs().stream().sorted(Comparator.reverseOrder()).toList()) {

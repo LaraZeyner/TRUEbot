@@ -81,7 +81,7 @@ public final class MatchResultHandler implements Comparable<MatchResultHandler> 
     if (resultString.equals("-:-")) {
       return new MatchResultHandler((short) 0, (short) 0, false);
     } else if (resultString.matches("\\d+:\\d+")) {
-      return new MatchResultHandler(resultString.between(null, ":").intValue().shortValue(), resultString.between(":").intValue().shortValue(), true);
+      return new MatchResultHandler(resultString.before(":").intValue().shortValue(), resultString.after(":").intValue().shortValue(), true);
     } else {
       throw new IllegalArgumentException("Das Ergebnis ist nicht gültig!");
     }
@@ -91,17 +91,17 @@ public final class MatchResultHandler implements Comparable<MatchResultHandler> 
     final Participator home = match.getHome();
     if (home != null) {
       home.setWins(homeScore);
-      Database.save(home);
+      Database.update(home);
     }
 
     final Participator guest = match.getGuest();
     if (guest != null) {
       guest.setWins(guestScore);
-      Database.save(guest);
+      Database.update(guest);
     }
 
     match.setResult(toString());
-    Database.save(match);
+    Database.update(match);
   }
 
   @Override

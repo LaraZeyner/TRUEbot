@@ -25,8 +25,7 @@ public final class LogFactory {
       }
     }
     matchLog.setParticipator(team);
-    team.getLogs().add(matchLog);
-    Database.save(matchLog);
+    Database.update(matchLog);
     return matchLog;
   }
 

@@ -26,9 +26,9 @@ public class DiscordRoleFactory {
   }
 
   private static CustomDiscordGroup createCustomGroup(Role role) {
-    final var customGroup = new CustomDiscordGroup(role.getIdLong(), role.getName(), GroupType.PINGABLE, false, null);
+    final var customGroup = CustomDiscordGroup.build(role.getIdLong(), role.getName(), GroupType.PINGABLE, false);
     role.getManager().setMentionable(true).setPermissions().queue();
-    Database.saveAndCommit(customGroup);
+    Database.insertAndCommit(customGroup);
     return customGroup;
   }
 

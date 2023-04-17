@@ -27,7 +27,7 @@ public class ScheduleComparer {
 
   private boolean check(TemporalField field, String value) {
     final int currentValue = now.get(field);
-    final Integer every = value.between("%").intValue(null);
+    final Integer every = value.after("%").intValue(null);
     return value.equals("*") || (value.contains("%") && every != null && currentValue % every == 0) || value.equals(String.valueOf(currentValue));
   }
 }

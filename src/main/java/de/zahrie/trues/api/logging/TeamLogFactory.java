@@ -9,7 +9,7 @@ import de.zahrie.trues.api.database.Database;
 public class TeamLogFactory {
   public static void create(DiscordUser invoker, DiscordUser target, String details, TeamLog.TeamLogAction action, OrgaTeam team) {
     final TeamLog teamLog = new TeamLog(invoker, target, details, action, team);
-    Database.saveAndCommit(teamLog);
+    Database.insertAndCommit(teamLog);
     Nunu.getInstance().getGuild().getTextChannelsByName("\uD83D\uDCBE︱team-log", true).stream()
         .findFirst().ifPresent(textChannel -> textChannel.sendMessage(details).queue());
   }

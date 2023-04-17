@@ -1,11 +1,16 @@
 package de.zahrie.trues.api.coverage.match.model;
 
-/**
- * Created by Lara on 28.02.2023 for TRUEbot
- */
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum MatchFormat {
-  ONE_GAME,
-  TWO_GAMES,
-  BEST_OF_THREE,
-  BEST_OF_FIVE
+  NO_GAMES(0),
+  ONE_GAME(43),
+  TWO_GAMES(90),
+  BEST_OF_THREE(138),
+  FOUR_GAMES(185),
+  BEST_OF_FIVE(233);
+  private final int duration;
 }

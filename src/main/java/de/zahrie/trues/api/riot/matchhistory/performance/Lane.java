@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.riot.matchhistory.performance;
 
+import java.util.List;
+
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.Roleable;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -16,6 +18,8 @@ public enum Lane implements Roleable {
   MIDDLE("Middle"),
   BOTTOM("Bottom"),
   UTILITY("Support");
+
+  public static final List<Lane> ITERATE = List.of(TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY);
   private final String displayName;
 
   public Role getRole() {

@@ -27,9 +27,9 @@ public final class Settings {
   private Map<RegistrationAction, String> getActions() {
     final String contentDisplay = message.getContentDisplay();
     return Arrays.stream(contentDisplay.split("\n"))
-        .filter(line -> line.between(null, ":").upper().toEnum(RegistrationAction.class) != null)
-        .collect(Collectors.toMap(line -> line.between(null, ":").toEnum(RegistrationAction.class),
-            line -> line.between(":"), (a, b) -> b));
+        .filter(line -> line.before(":").upper().toEnum(RegistrationAction.class) != null)
+        .collect(Collectors.toMap(line -> line.before(":").toEnum(RegistrationAction.class),
+            line -> line.after(":"), (a, b) -> b));
   }
 
   public boolean validate() {
@@ -60,7 +60,7 @@ public final class Settings {
       if (birthdate == null) return "Das Format ist fehlerhaft.";
 
       user.setBirthday(birthdate);
-      Database.save(user);
+      Database.update(user);
       return "Dein Geburtstag wurde für den " + birthday + " eingetragen";
     }),
     NOTIFY((user, minutes) -> {

@@ -9,7 +9,7 @@ import de.zahrie.trues.api.discord.group.PermissionRole;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-@Command(name = "team", descripion = "Ein Leaderboard für Team erzeugen", perm = @Perm(PermissionRole.ORGA_MEMBER), options = {
+@Command(name = "teamstats", descripion = "Ein Leaderboard für Team erzeugen", perm = @Perm(PermissionRole.ORGA_MEMBER), options = {
     @Option(name = "name", description = "Name des Leaderboards", choices = {"Champions"}),
     @Option(name = "parameters", description = "Parameter (durch Komma getrennt)", required = false),
     @Option(name = "public", description = "öffentliches Leaderboard", required = false, type = OptionType.BOOLEAN)

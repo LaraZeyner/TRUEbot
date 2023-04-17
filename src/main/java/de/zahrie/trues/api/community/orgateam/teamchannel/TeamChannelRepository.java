@@ -13,7 +13,8 @@ public class TeamChannelRepository {
 
   @Nullable
   public static TeamChannel getTeamChannelFromChannelId(long channelId) {
-    return QueryBuilder.hql(TeamChannel.class, "FROM TeamChannel WHERE discordId = " + channelId).single();
+    return QueryBuilder.hql(TeamChannel.class, "FROM TeamChannel WHERE discordId = :channelId")
+        .addParameter("channelId", channelId).single();
   }
 
 }

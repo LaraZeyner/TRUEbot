@@ -10,7 +10,7 @@ public class ChampionFactory {
     for (final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion : Xayah.getChampions()) {
       final var champion = getChampion(riotChampion);
       champion.setName(riotChampion.getName());
-      Database.save(champion);
+      Database.update(champion);
     }
   }
 
@@ -18,19 +18,7 @@ public class ChampionFactory {
     Champion champion = Database.Find.find(Champion.class, riotChampion.getId());
     if (champion == null) {
       champion = new Champion(riotChampion.getId(), riotChampion.getName());
-      Database.save(champion);
-    }
-    return champion;
-  }
-
-  public static Champion getChampion(int id) {
-    Champion champion = Database.Find.find(Champion.class, id);
-    if (champion == null) {
-      final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion = Xayah.championWithId(id).get();
-      if (riotChampion != null) {
-        champion = new Champion(id, riotChampion.getName());
-        Database.save(champion);
-      }
+      Database.insert(champion);
     }
     return champion;
   }
@@ -41,7 +29,7 @@ public class ChampionFactory {
       final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion = Xayah.championNamed(name).get();
       if (riotChampion != null) {
         champion = new Champion(riotChampion.getId(), riotChampion.getName());
-        Database.save(champion);
+        Database.insert(champion);
       }
     }
     return champion;

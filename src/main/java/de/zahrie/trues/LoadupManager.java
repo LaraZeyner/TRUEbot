@@ -1,5 +1,10 @@
 package de.zahrie.trues;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.riot.Xayah;
@@ -30,6 +35,10 @@ public final class LoadupManager implements Connectable {
   @Override
   public void connect() {
     if (!Const.check()) System.exit(1);
+
+    final Handler consoleHandler = new ConsoleHandler();
+    consoleHandler.setLevel(Level.FINE);
+    Logger.getAnonymousLogger().addHandler(consoleHandler);
 
     Database.Connector.connect();
     log.info("Datenbank geladen");

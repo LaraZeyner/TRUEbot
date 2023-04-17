@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.player;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Standing;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
@@ -68,45 +68,47 @@ public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, in
     final var time = LocalDateTime.now().minusDays(days);
     List<Object[]> presentPicks = type.playerQuery(player, days).selection("champion, count(s)", "GROUP BY champion ORDER BY count(s) desc");
     if (presentPicks.isEmpty())
-      presentPicks = QueryBuilder.hql(Object[].class, "SELECT champion, count(s) FROM Selection s WHERE game IN (SELECT teamPerformance FROM Performance p WHERE player = " + player + " AND teamPerformance.game.start > " + time + " GROUP BY lane ORDER BY count(p)) GROUP BY champion ORDER BY count(s) desc").list();
+      presentPicks = QueryBuilder.hql(Object[].class, "SELECT champion, count(s) FROM Selection s WHERE game IN (SELECT teamPerformance FROM Performance p WHERE player = :player AND teamPerformance.game.start > :start GROUP BY lane ORDER BY count(p)) GROUP BY champion ORDER BY count(s) desc")
+          .addParameters(Map.of("player", player, "start", time)).list();
 
 
     final List<Object[]> picksList = type.playerQuery(player, days).performance("champion, count(p)", "GROUP BY champion ORDER BY count(p) desc");
-    final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
-    final List<Object[]> mmList = Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getGamesMatchmade");
-    final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
-    final List<Object[]> winsList = Database.Find.findObjectList(new String[]{"player", "start"}, new Object[]{player, time}, "Player.getWinsMatchmade");
-    final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> (Integer) objects[1], (a, b) -> b));
+    final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
+    final List<Object[]> mmList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance("champion, count(p)", "GROUP BY champion ORDER BY count(p) desc");
+    final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
+    final List<Object[]> winsList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance("champion, count(p)", "AND teamPerformance.win = true GROUP BY champion ORDER BY count(p) desc");
+    final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
 
     final List<Object[]> games = type.playerQuery(player, days).performance("count(p)");
-    final Integer amountOfGames = (Integer) games.get(0)[0];
+    final Long amountOfGames = ((Long)games.get(0)[0]);
     final Map<Champion, PlayerAnalyzerData> data = new HashMap<>();
     for (final Object[] presentPick : presentPicks) {
       final Champion champion = (Champion) presentPick[0];
-      final int occurrences = (int) presentPick[1];
-      final int picks = pickMap.get(champion);
-      final int mmGames = mmMap.get(champion);
-      final int wins = winsMap.get(champion);
+      final int occurrences = ((Long) presentPick[1]).intValue();
+      final int picks = pickMap.getOrDefault(champion, 0);
+      final int mmGames = mmMap.getOrDefault(champion, 0);
+      final int wins = winsMap.getOrDefault(champion, 0);
       if (picks > 0 || mmGames >= 10) {
         data.put(champion, new PlayerAnalyzerData(champion, occurrences * 1. / amountOfGames, picks, mmGames, wins));
       }
     }
     for (Object[] objects : picksList) {
       final Champion champion = (Champion) objects[0];
-      final int amount = (int) objects[1];
+      final int amount = ((Long) (objects[1])).intValue();
       if (!data.containsKey(champion) && amount >= 10) {
         data.put(champion, new PlayerAnalyzerData(champion, 0, 0, amount, winsMap.get(champion)));
       }
     }
-    return data.values().stream().toList();
+    final List<PlayerAnalyzerData> outputList = data.values().stream().sorted(Comparator.reverseOrder()).toList();
+    return outputList.subList(0, Math.min(8, outputList.size()));
   }
 
   public int getGames() {
-    final List<Integer> games = type.playerQuery(Integer.class, player, days).performance("count(p)");
-    return games.get(0);
+    final List<Long> games = type.playerQuery(Long.class, player, days).performance("count(p)");
+    return games.get(0).intValue();
   }
 
-  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames, int matchMadeWins) {
+  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames, int matchMadeWins) implements Comparable<PlayerAnalyzerData> {
     public String getChampionString() {
       return champion.getName();
     }
@@ -117,6 +119,11 @@ public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, in
 
     public String getMatchmadeString() {
       return matchMadeGames + " - " + Math.round(matchMadeWins * 100.0 / matchMadeGames) + "%";
+    }
+
+    @Override
+    public int compareTo(@NotNull PlayerAnalyzerData o) {
+      return Comparator.comparing(PlayerAnalyzerData::presence).compare(this, o);
     }
   }
 

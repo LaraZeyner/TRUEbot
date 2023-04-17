@@ -173,7 +173,7 @@ public final class DateTimeStringConverter {
     }
     final DayOfWeek dayOfWeek = determineDayOfWeek(section);
     if (dayOfWeek == null) return null;
-    final int repeated = section.between("+").intValue(section.contains("+") ? 1 : 0);
+    final int repeated = section.after("+").intValue(section.contains("+") ? 1 : 0);
     final LocalDate date = LocalDate.now().with(TemporalAdjusters.nextOrSame(dayOfWeek));
     return date.plusWeeks(repeated);
   }

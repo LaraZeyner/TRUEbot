@@ -5,8 +5,11 @@ import java.io.Serializable;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
+import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
+import de.zahrie.trues.api.coverage.stage.model.PlayoffStage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
+import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeamFactory;
 import de.zahrie.trues.api.database.QueryBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -17,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,15 +45,17 @@ public class PRMTeam extends Team implements Serializable {
   }
 
   public LeagueTeam getCurrentLeague() {
+    final PRMSeason lastPRMSeason = SeasonFactory.getLastPRMSeason();
+    if (lastPRMSeason == null) return null;
     return QueryBuilder.hql(LeagueTeam.class,
-        "FROM LeagueTeam WHERE team = " + this + " AND league.stage.season = " + SeasonFactory.getLastPRMSeason() +
-            " ORDER BY league.stage.start desc").list().stream().findFirst().orElse(null);
+        "FROM LeagueTeam WHERE team = " + getId() + " AND league.stage.season = " + lastPRMSeason.getId() +
+            " ORDER BY league.stage.range.startTime desc").list().stream().findFirst().orElse(null);
   }
 
+  @Nullable
   public PRMLeague getLastLeague() {
-    return QueryBuilder.hql(League.class,
-            "SELECT league FROM LeagueTeam WHERE team = " + this + " ORDER BY league.stage.start desc").list().stream()
-        .filter(l -> l instanceof PRMLeague).map(l -> (PRMLeague) l).findFirst().orElse(null);
+    return QueryBuilder.hql(PRMLeague.class,
+            "SELECT league FROM LeagueTeam WHERE team = " + getId() + " ORDER BY league.stage.range.startTime desc").list().stream().filter(l -> !(l.getStage() instanceof PlayoffStage)).findFirst().orElse(null);
   }
 
   public void setScore(League division, String score) {
@@ -59,8 +65,8 @@ public class PRMTeam extends Team implements Serializable {
     final short winsInteger = Short.parseShort(wins);
     final String losses = score.split("/")[1].split("\\)")[0];
     final short lossesInteger = Short.parseShort(losses);
-    final TeamScore teamScore = new TeamScore(division, placeInteger, winsInteger, lossesInteger);
-    getCurrentLeague().setScore(teamScore);
+    final TeamScore teamScore = new TeamScore(placeInteger, winsInteger, lossesInteger);
+    LeagueTeamFactory.create(division, this, teamScore);
   }
 
   public void setRecord(String record, short seasons) {

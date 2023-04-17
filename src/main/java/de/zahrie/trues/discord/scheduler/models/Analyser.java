@@ -8,7 +8,6 @@ import de.zahrie.trues.api.coverage.match.UpcomingDataFactory;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
-import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamHandler;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
@@ -42,19 +41,17 @@ public class Analyser extends ScheduledTask {
   private static void loadPRMData() {
     for (OrgaTeam orgaTeam : QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list()) {
       final Team team = orgaTeam.getTeam();
-      if (team != null && ((PRMTeam) team).getPrmId() != null) {
+      if (team == null) continue;
+      final PRMTeam prmTeam = Database.Find.find(PRMTeam.class, team.getId());
+      if (prmTeam != null) {
         Database.connection().commit(false);
-        final Integer teamId = ((PRMTeam) team).getPrmId();
-        final PRMTeam prmTeam = TeamFactory.getTeam(teamId);
-        if (prmTeam != null) {
-          final TeamLoader teamLoader = new TeamLoader(prmTeam);
-          final TeamHandler teamHandler = teamLoader.load();
-          teamHandler.loadDivision();
-        }
+        final TeamLoader teamLoader = new TeamLoader(prmTeam);
+        final TeamHandler teamHandler = teamLoader.load();
+        teamHandler.loadDivision();
         Database.connection().commit(true);
       }
-      if (team == null) continue;
-      final Match nextMatch = team.getNextMatch();
+
+      final Match nextMatch = team.getMatches().getNextMatch(true);
       if (nextMatch != null) {
         final Participator opponent = nextMatch.getOpponent(team);
         ScoutingManager.addForTeam(orgaTeam, opponent, nextMatch);

@@ -25,13 +25,14 @@ public class PrimeMatchImpl {
     final LocalDateTime lastLogTime = getLastLogTime();
     if (timestamp.isBefore(lastLogTime) || action.equals(MatchLogAction.LINEUP_PLAYER_READY)) return false;
 
-    var log = new MatchLog(timestamp, action, match, details);
+    var log = new MatchLog(timestamp, action, details);
+    match.addLog(log);
     log = log.handleTeam(userWithTeam);
     final Participator participator = log.getParticipator();
     final Team team = participator.getTeam();
     final String lastMessage = team.getAbbreviation() + " : " + details;
     match.setLastMessage(lastMessage);
-    Database.save(log);
+    Database.insert(log);
 
     if (log.getAction().equals(MatchLogAction.LINEUP_SUBMIT)) {
       final List<Player> newLineup = ((LineupMatchLog) log).determineLineup();

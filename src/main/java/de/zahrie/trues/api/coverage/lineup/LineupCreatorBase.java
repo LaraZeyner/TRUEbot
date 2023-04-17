@@ -18,6 +18,16 @@ public class LineupCreatorBase {
     laneLineup.getPlayers().add(laneGames);
   }
 
+  protected void only(Lane lane, Player player) {
+    final LaneLineup laneLineup = laneLineups.get(lane);
+    LaneGames games = null;
+    if (laneLineup != null) {
+      games = laneLineup.getPlayers().stream().filter(laneGames -> laneGames.player().equals(player)).findFirst().orElse(null);
+      laneLineups.remove(lane);
+    }
+    add(lane, player, games != null ? games.amount() : 0);
+  }
+
   protected void sort() {
     laneLineups.forEach((a, b) -> b.sort());
   }

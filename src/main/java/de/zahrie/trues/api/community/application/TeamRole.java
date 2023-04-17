@@ -22,5 +22,6 @@ public enum TeamRole {
    * Teil als Staffmember
    */
   ORGA,
-  ORGA_TRYOUT
+  ORGA_TRYOUT,
+  REMOVE
 }

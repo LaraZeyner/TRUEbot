@@ -6,12 +6,14 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
 import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
 import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
@@ -51,13 +53,25 @@ public class Game implements Serializable {
   @Column(name = "orgagame", nullable = false)
   private boolean isOrgagame = false;
 
-  @OneToMany(mappedBy = "game")
-  @ToString.Exclude
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
   private Set<TeamPerf> teamPerformances = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "game")
-  @ToString.Exclude
+  public void addTeamPerformance(TeamPerf teamPerf) {
+    teamPerf.setGame(this);
+    teamPerformances.add(teamPerf);
+    Database.update(this);
+    Database.update(teamPerf);
+  }
+
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
   private Set<Selection> selections = new LinkedHashSet<>();
+
+  public void addSelection(Selection selection) {
+    selection.setGame(this);
+    selections.add(selection);
+    Database.update(selection);
+    Database.update(this);
+  }
 
   public Game(String id, LocalDateTime start, int durationInSeconds, GameType type) {
     this(id, start, durationInSeconds, type, false);

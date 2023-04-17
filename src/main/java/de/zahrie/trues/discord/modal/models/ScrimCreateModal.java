@@ -37,8 +37,8 @@ public class ScrimCreateModal extends ModalImpl {
     final var guest = new Participator(false, getTeamIdOrName());
     if (handleTeamsLineup(guest)) return errorMessage();
 
+    Database.insert(scrimmage);
     scrimmage.addParticipators(home, guest);
-    Database.save(scrimmage);
     return sendMessage();
   }
 }

@@ -14,9 +14,9 @@ import de.zahrie.trues.api.coverage.playday.config.PlaydayConfig;
 import de.zahrie.trues.api.coverage.playday.config.TimeRepeater;
 import de.zahrie.trues.api.coverage.playday.scheduler.SchedulingOption;
 import de.zahrie.trues.api.coverage.stage.Scheduleable;
-import de.zahrie.trues.api.coverage.stage.StageType;
 import de.zahrie.trues.api.datatypes.calendar.WeekdayTime;
 import de.zahrie.trues.api.datatypes.calendar.WeekdayTimeRange;
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -35,8 +35,8 @@ public class GroupStage extends PlayStage implements Scheduleable, Serializable 
   private static final long serialVersionUID = -8729614783748936462L;
 
   @Override
-  public int pageId() {
-    return 509;
+  public Integer pageId() {
+    return Util.avoidNull(StageType.fromClass(getClass()), null, StageType::getPrmId);
   }
 
 
@@ -47,7 +47,7 @@ public class GroupStage extends PlayStage implements Scheduleable, Serializable 
 
   public PlaydayConfig playdayConfig() {
     return PlaydayConfig.builder()
-        .stageType(StageType.GROUPS)
+        .stageType(StageType.GROUP_STAGE)
         .format(MatchFormat.TWO_GAMES)
         .dayRange(new WeekdayTimeRange(WeekdayTime.min(DayOfWeek.MONDAY), WeekdayTime.max(DayOfWeek.SUNDAY)))
         .options(List.of(

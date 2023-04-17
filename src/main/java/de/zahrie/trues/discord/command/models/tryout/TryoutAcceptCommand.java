@@ -26,7 +26,7 @@ public class TryoutAcceptCommand extends SlashCommand {
     if (member == null) return errorMessage();
     final DiscordUser discordUser = member.getDiscordUser();
     discordUser.setAcceptedBy(getInvoker());
-    Database.save(discordUser);
+    Database.update(discordUser);
     discordUser.updateApplicationStatus();
     return sendMessage();
   }

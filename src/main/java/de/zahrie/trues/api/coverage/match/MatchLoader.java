@@ -44,16 +44,20 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   MatchLoader create() {
-    final String seasonName = html.find("h1").text().between(null, ":");
-    final PRMSeason PRMSeason = SeasonFactory.getSeason(seasonName);
+    final String seasonName = html.find("h1").text().before(":");
+    final PRMSeason season = SeasonFactory.getSeason(seasonName);
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
     final String divisionName = division.text();
-    final int urlString = division.find("a").getAttribute("href").between("/group/", "-").intValue();
-    final PRMLeague league = LeagueFactory.getGroup(PRMSeason, divisionName, urlString);
+    final String divisionURL = division.find("a").getAttribute("href");
+    final int stageId = divisionURL.between("/group/", "-").intValue();
+    final int divisionId = divisionURL.between("/", "-", 8).intValue();
+    final PRMLeague league = LeagueFactory.getGroup(season, divisionName, stageId, divisionId);
+
     final Playday playday = getPlayday(league);
     final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
     final SchedulingRange scheduling = playdayScheduler.scheduling();
-    this.match = new PRMMatch(playday, getMatchtime(), league, scheduling, this.id);
+    final LocalDateTime matchtime = getMatchtime();
+    this.match = PRMMatch.build(playday, matchtime, league, scheduling, this.id);
     return this;
   }
 

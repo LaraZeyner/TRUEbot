@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.database;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.NoResultException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -16,7 +19,7 @@ public final class QueryBuilder<T> {
   private final Query<T> query;
 
   public static <T> QueryBuilder<T> named(Class<T> entityClass, String subQuery) {
-    final var entityClassName = Database.Find.getEntityName(entityClass);
+    final var entityClassName = entityClass.getSimpleName();
     final var query = Database.connection().getSession().createNamedQuery(entityClassName + "." + subQuery, entityClass);
     return new QueryBuilder<>(query);
   }
@@ -42,11 +45,43 @@ public final class QueryBuilder<T> {
   }
 
   public T single() {
-    return query.setMaxResults(1).getSingleResult();
+    return doSingle(0);
+  }
+
+  private T doSingle(int repeat) {
+    try {
+      return query.setMaxResults(1).getSingleResult();
+    } catch (NoResultException | NoSuchElementException exception) {
+      return null;
+    } /*catch (Exception exception) {
+      LogFiles.log(exception);
+      if (repeat == 10) {
+        exception.printStackTrace();
+        return null;
+      }
+      repeat += 1;
+      return doList(repeat);
+    }*/
   }
 
   public List<T> list() {
-    return query.list();
+    return doList(0);
+  }
+
+  private List<T> doList(int repeat) {
+    try {
+      return new ArrayList<>(query.list());
+    } catch (NoResultException | NoSuchElementException exception) {
+      return List.of();
+    } /*catch (Exception exception) {
+      LogFiles.log(exception);
+      if (repeat == 10) {
+        exception.printStackTrace();
+        return null;
+      }
+      repeat += 1;
+      return doList(repeat);
+    }*/
   }
 
   public List<T> list(int amount) {

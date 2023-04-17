@@ -1,14 +1,15 @@
 package de.zahrie.trues.api.discord.channel;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.community.orgateam.OrgaTeamChannelHandler;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
-import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.database.QueryBuilder;
-import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.StringUtils;
 import lombok.NonNull;
+import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -16,42 +17,40 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 @Log
+@ExtensionMethod(StringUtils.class)
 public class DiscordChannelFactory {
   /**
-   * Erhalte {@link DiscordChannel} vom GuildChannel
+   * Erhalte {@link DiscordChannel} vom GuildChannel <br>
+   * Wenn noch nicht vorhanden erstelle Datenbankeintrag
    */
   @NonNull
   public static DiscordChannel getDiscordChannel(@NonNull GuildChannel channel) {
+    final TeamChannel teamChannel = QueryBuilder.hql(TeamChannel.class,
+        "FROM TeamChannel WHERE discordId = :discordId").addParameter("discordId", channel.getIdLong()).single();
+    if (teamChannel != null) return teamChannel;
+
     final DiscordChannel discordChannel = QueryBuilder.hql(DiscordChannel.class,
-        "FROM DiscordChannel WHERE discordId = " + channel.getIdLong()).single();
-    return Util.avoidNull(discordChannel, createChannel(channel));
+        "FROM DiscordChannel WHERE discordId = :discordId").addParameter("discordId", channel.getIdLong()).single();
+    if (discordChannel != null) return discordChannel;
+
+    return createChannel(channel);
   }
 
   /**
-   * Erstelle Datenbankeintrag für Channel
+   * Erstelle Channeleintrag in Datenbank, sofern noch nicht vorhanden
    */
   @NonNull
-  public static DiscordChannel createChannel(@NonNull GuildChannel channel) {
-    if (channel instanceof ICategorizableChannel categorizableChannel) {
-      final OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(categorizableChannel);
-      if (orgaTeam != null) return createTeamChannel(channel, orgaTeam);
+  private static DiscordChannel createChannel(@NonNull GuildChannel channel) {
+    OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(channel);
+    if (orgaTeam == null && channel.getName().contains(" (")) {
+      final String categoryAbbr = channel.getName().between(" (", ")");
+      orgaTeam = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam WHERE abbreviationCreation = :abbr").addParameter("abbr", categoryAbbr).single();
     }
 
-    final PermissionChannelType permissionChannelType = determineChannelType(channel);
-    final var discordChannel = new DiscordChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType());
-    Database.saveAndCommit(discordChannel);
-    return discordChannel;
-  }
+    if (orgaTeam != null) return OrgaTeamChannelHandler.createTeamChannelEntity(channel, orgaTeam);
 
-  /**
-   * Erstelle einen Teamchannel automatisch
-   */
-  @NonNull
-  public static TeamChannel createTeamChannel(@NonNull GuildChannel channel, @NonNull OrgaTeam team) {
-    final TeamChannelType channelType = TeamChannelType.fromChannel(channel);
-    final PermissionChannelType permissionChannelType = channelType.getPermissionType();
-    final var discordChannel = new TeamChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType(), team, channelType);
-    Database.saveAndCommit(discordChannel);
+    final var discordChannel = new DiscordChannel(channel.getIdLong(), channel.getName(), determineChannelType(channel), channel.getType());
+    Database.insertAndCommit(discordChannel);
     return discordChannel;
   }
 

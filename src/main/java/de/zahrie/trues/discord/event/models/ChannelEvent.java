@@ -1,12 +1,12 @@
-package de.zahrie.trues.discord.listener.models;
+package de.zahrie.trues.discord.event.models;
 
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
 import lombok.experimental.ExtensionMethod;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
@@ -53,13 +53,13 @@ public class ChannelEvent extends ListenerAdapter {
   @Override
   public void onChannelCreate(ChannelCreateEvent event) {
     final GuildChannel channel = event.getChannel().asGuildChannel();
-    final OrgaTeam team = channel.getTeamFromChannel();
-    if (team == null) {
-      final DiscordChannel discordChannel = channel.getDiscordChannel();
-      discordChannel.updatePermissions();
-    } else {
-      final TeamChannel teamChannel = channel.createTeamChannel(team);
+    if (event.getChannelType().equals(ChannelType.GUILD_NEWS_THREAD) || event.getChannelType().equals(ChannelType.GUILD_PRIVATE_THREAD) || event.getChannelType().equals(ChannelType.GUILD_PUBLIC_THREAD)) return;
+
+    final DiscordChannel discordChannel = channel.getDiscordChannel();
+    if (discordChannel instanceof TeamChannel teamChannel) {
       teamChannel.updatePermissions();
+    } else {
+      discordChannel.updatePermissions();
     }
   }
 
@@ -74,6 +74,6 @@ public class ChannelEvent extends ListenerAdapter {
     final GuildChannel channel = event.getChannel().asGuildChannel();
     final DiscordChannel discordChannel = DiscordChannelFactory.getDiscordChannel(channel);
     discordChannel.setName(event.getNewValue());
-    Database.saveAndCommit(discordChannel);
+    Database.updateAndCommit(discordChannel);
   }
 }

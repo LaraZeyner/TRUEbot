@@ -7,6 +7,7 @@ import java.util.Properties;
 import de.zahrie.trues.api.Registerer;
 import de.zahrie.trues.api.calendar.ApplicationCalendar;
 import de.zahrie.trues.api.calendar.CalendarBase;
+import de.zahrie.trues.api.calendar.EventCalendar;
 import de.zahrie.trues.api.calendar.scheduling.SchedulingCalendar;
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.calendar.UserCalendar;
@@ -19,7 +20,7 @@ import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.match.log.LineupMatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
-import de.zahrie.trues.api.coverage.match.model.InternMatch;
+import de.zahrie.trues.api.coverage.match.model.OrgaCupMatch;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.match.model.ScheduleableMatch;
@@ -78,9 +79,10 @@ public class DatabaseEntityRegisterer implements Registerer<SessionFactory> {
         DiscordChannel.class,
         DiscordUser.class,
         DiscordUserGroup.class,
+        EventCalendar.class,
         Game.class,
         GroupStage.class,
-        InternMatch.class,
+        OrgaCupMatch.class,
         League.class,
         LeagueTeam.class,
         Lineup.class,

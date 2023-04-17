@@ -14,16 +14,17 @@ public class MembershipFactory {
   public static Membership getMember(OrgaTeam team, DiscordUser user, TeamRole role, TeamPosition position) {
     Membership membership = getMember(team, user);
     if (membership == null) {
-      membership = new Membership(user, role, position, team);
+      membership = Membership.build(user, team, role, position);
     }
     membership.setRole(role);
     membership.setPosition(position);
     membership.setActive(true);
-    Database.save(membership);
+    Database.update(membership);
     return membership;
   }
   public static List<Membership> getCurrentTeams(DiscordUser user) {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = " + user + " AND active = true").list();
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user AND active = true")
+        .addParameter("user", user).list();
   }
 
   public static Membership getMostImportantTeam(DiscordUser user) {
@@ -39,11 +40,19 @@ public class MembershipFactory {
         .filter(member -> member.getPosition().equals(position)).findFirst().orElse(null);
   }
 
+  public static List<Membership> getOfPosition(TeamPosition position) {
+
+    return QueryBuilder.hql(Membership.class,
+        "FROM Membership WHERE position = :position and active = true")
+        .addParameter("position", position).list();
+  }
+
   public static Membership getMember(OrgaTeam orgaTeam, DiscordUser user) {
     return orgaTeam.getMemberships().stream().filter(membership -> membership.getUser().equals(user)).findFirst().orElse(null);
   }
 
   public static List<Membership> getCaptainRoles(DiscordUser user) {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = " + user + " AND active = true AND captain = true").list();
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user AND active = true AND captain = true")
+        .addParameter("user", user).list();
   }
 }

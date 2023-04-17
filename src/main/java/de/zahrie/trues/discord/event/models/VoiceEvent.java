@@ -1,4 +1,4 @@
-package de.zahrie.trues.discord.listener.models;
+package de.zahrie.trues.discord.event.models;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +45,7 @@ public class VoiceEvent extends ListenerAdapter {
     if (event.getChannelJoined() == null || event.getChannelLeft() == null) return;
 
     final Membership currentTeam = MembershipFactory.getMostImportantTeam(discordUser);
-    final List<DiscordUser> membersOfTeam = currentTeam.getOrgaTeam().getMemberships().stream().map(Membership::getUser).toList();
+    final List<DiscordUser> membersOfTeam = currentTeam.getOrgaTeam().getActiveMemberships().stream().map(Membership::getUser).toList();
     final List<Member> validMembers = switch (usersToFollow.get(discordUser)) {
       case ALLE -> event.getChannelLeft().getMembers();
       case TEAM -> event.getChannelLeft().getMembers().stream().filter(member -> membersOfTeam.contains(DiscordUserFactory.getDiscordUser(member))).toList();

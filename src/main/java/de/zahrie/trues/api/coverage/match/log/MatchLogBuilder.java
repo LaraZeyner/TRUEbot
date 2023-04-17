@@ -19,7 +19,7 @@ public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) 
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Match " + match.getId() + " gegen " + team.getName() + " (" + team.getId() + ")")
         .setDescription(getDescription());
-    if (matchLogs.size() > 1) getFields().forEach(builder::addField);
+    getFields().forEach(builder::addField);
     return builder.build();
   }
 
@@ -32,6 +32,7 @@ public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) 
   }
 
   public List<MessageEmbed.Field> getFields() {
+    if (matchLogs.size() <= 1) return List.of();
     return new EmbedFieldBuilder<>(matchLogs.subList(1, matchLogs.size()))
         .add("Action", MatchLog::actionOutput)
         .add("Team", MatchLog::teamOutput)

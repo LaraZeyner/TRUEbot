@@ -36,8 +36,8 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
         .getAttribute("href"));
     final PRMTeam team = TeamFactory.getTeam(teamId);
     player.setTeam(team);
-    Database.save(player);
-    Database.save(team);
+    Database.update(player);
+    Database.update(team);
   }
 
 }

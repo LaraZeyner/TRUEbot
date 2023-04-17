@@ -4,18 +4,20 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.merakianalytics.orianna.types.common.Division;
 import com.merakianalytics.orianna.types.common.Tier;
-import de.zahrie.trues.api.coverage.lineup.model.Lineup;
+import de.zahrie.trues.api.coverage.season.PRMSeason;
+import de.zahrie.trues.api.coverage.season.Season;
+import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
-import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
 import de.zahrie.trues.api.riot.matchhistory.performance.PerformanceFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +29,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -69,7 +70,7 @@ public class Player implements Serializable {
   @Column(name = "lol_name", nullable = false, length = 16, unique = true)
   private String summonerName;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "discord_user", unique = true)
   @ToString.Exclude
   private DiscordUser discordUser;
@@ -85,29 +86,30 @@ public class Player implements Serializable {
   @Column(name = "played", nullable = false)
   private boolean played = false;
 
-  @OneToMany(mappedBy = "player")
-  @ToString.Exclude
-  private Set<Rank> ranks;
+  public List<Rank> getRanks() {
+    return QueryBuilder.hql(Rank.class, "FROM Rank WHERE player = :player").addParameter("player", this).list();
+  }
 
-  @OneToMany(mappedBy = "player")
-  @ToString.Exclude
-  private Set<Performance> performances = new LinkedHashSet<>();
+  public Rank getRankInSeason() {
+    final PRMSeason lastSeason = SeasonFactory.getLastPRMSeason();
+    if (lastSeason == null) throw new NoSuchElementException("Die letzte Season wurde nicht gefunden.");
+    return getRankInSeason(lastSeason);
+  }
 
-  @OneToMany(mappedBy = "player")
-  @ToString.Exclude
-  private Set<Lineup> lineups = new LinkedHashSet<>();
+  public Rank getRankInSeason(Season season) {
+    return QueryBuilder.hql(Rank.class, "FROM Rank WHERE player = :player AND season = :season").addParameters(Map.of("player", this, "season", season)).single();
+  }
 
   public Rank getLastRank() {
     return getLastRank(Tier.UNRANKED, Division.IV);
   }
 
   public Rank getLastRank(Tier tier, Division division) {
-    return ranks.stream().max(Comparator.naturalOrder())
-        .orElse(new Rank(this, tier, division, (byte) 0, 0, 0));
+    return getRanks().stream().max(Comparator.naturalOrder()).orElse(new Rank(this, tier, division, (byte) 0, 0, 0));
   }
 
   public Rank getLastRelevantRank() {
-    return ranks.stream().sorted(Comparator.reverseOrder())
+    return getRanks().stream().sorted(Comparator.reverseOrder())
         .filter(rank -> rank.getWinrate().getGames() >= 50)
         .findFirst().orElse(getLastRank(Tier.SILVER, Division.I));
   }
@@ -120,11 +122,11 @@ public class Player implements Serializable {
   public void setDiscordUser(DiscordUser discordUser) {
     if (this.discordUser != null && !this.discordUser.equals(discordUser)) {
       this.discordUser.setPlayer(null);
-      Database.save(this.discordUser);
+      Database.update(this.discordUser);
     }
     this.discordUser = discordUser;
-    Database.save(this);
-    Database.save(discordUser);
+    Database.update(this);
+    Database.update(discordUser);
   }
 
   @Override

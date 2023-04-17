@@ -32,7 +32,7 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
 
   public List<MessageEmbed.Field> getOverview(Participator participator, ScoutingGameType gameType, int days) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup :  LineupFinder.getLineup(participator, gameType, days)) {
+    for (Lineup lineup : LineupFinder.getLineup(participator, gameType, days)) {
       final Player player = lineup.getPlayer();
       final var analyzer = new PlayerAnalyzer(player, gameType, player.getTeam(), days);
       fields.addAll(analyzer.analyzePicks(lineup.getLane()));

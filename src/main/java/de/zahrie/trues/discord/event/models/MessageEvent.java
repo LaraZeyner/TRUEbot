@@ -1,4 +1,4 @@
-package de.zahrie.trues.discord.listener.models;
+package de.zahrie.trues.discord.event.models;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -87,11 +87,11 @@ public class MessageEvent extends ListenerAdapter {
     final String content = event.getMessage().getContentDisplay();
     if (!content.contains(":")) return;
 
-    final Integer userId = content.between(null, ":").intValue();
+    final Integer userId = content.before(":").intValue();
     final DiscordUser discordUser = DiscordUserFactory.fromId(userId);
     if (discordUser == null) return;
 
-    final String answer = content.between(":");
+    final String answer = content.after(":");
     Nunu.DiscordMessager.dm(discordUser, answer);
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Die Antwort wurde gesendet.").queue();
   }
@@ -143,13 +143,13 @@ public class MessageEvent extends ListenerAdapter {
     if (match != null) {
       boolean executed = false;
       final String content = event.getMessage().getContentDisplay();
-      final String value = content.between(":").strip();
+      final String value = content.after(":").strip();
       if (content.startsWith("Result:")) executed = handleResult(threadChannel, match, value);
       else if (content.startsWith("Start:")) executed = handleStart(threadChannel, match, value);
       else if (content.startsWith("Lineup 1:")) executed = handleLineup(threadChannel, match, value, true);
       else if (content.startsWith("Lineup 2:")) executed = handleLineup(threadChannel, match, value, false);
       if (executed) {
-        Database.saveAndCommit(match);
+        Database.updateAndCommit(match);
         event.getMessage().delete().queue();
         ScoutingManager.updateThread(threadChannel);
       }
@@ -159,7 +159,7 @@ public class MessageEvent extends ListenerAdapter {
   private static boolean handleLineup(@NotNull ThreadChannel threadChannel, Match match, String value, boolean home) {
     final Participator participator = home ? match.getHome() : match.getGuest();
     participator.get().setOrderedLineup(value);
-    Database.saveAndCommit(participator);
+    Database.updateAndCommit(participator);
     if (value.equals("-:-") || Pattern.compile("\\d+:\\d+").matcher(value).matches()) {
       threadChannel.sendMessage("Neues Lineup festgelegt.").queue();
     }

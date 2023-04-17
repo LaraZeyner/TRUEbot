@@ -23,14 +23,14 @@ import lombok.ToString;
 @ToString
 @Entity
 @DiscriminatorValue("intern")
-public class InternMatch extends ScheduleableMatch implements Serializable {
+public class OrgaCupMatch extends ScheduleableMatch implements Serializable {
   @Serial
   private static final long serialVersionUID = -6145053153275706756L;
 
   @Column(name = "match_id")
   private Integer internId;
 
-  public InternMatch(Playday matchday, LocalDateTime start, League league, TimeRange timeRange, Integer matchId) {
+  public OrgaCupMatch(Playday matchday, LocalDateTime start, League league, TimeRange timeRange, Integer matchId) {
     super(matchday, start, league, timeRange);
     this.internId = matchId;
   }

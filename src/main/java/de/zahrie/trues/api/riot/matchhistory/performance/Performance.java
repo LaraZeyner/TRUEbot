@@ -49,7 +49,7 @@ public class Performance implements Serializable, Comparable<Performance> {
   @Column(name = "perf_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "t_perf", nullable = false)
   @ToString.Exclude
   private TeamPerf teamPerformance;
@@ -89,8 +89,7 @@ public class Performance implements Serializable, Comparable<Performance> {
   @Column(name = "creeps", columnDefinition = "SMALLINT UNSIGNED not null")
   private int creeps;
 
-  public Performance(TeamPerf teamPerformance, Player player, Lane lane, Champion champion, Champion opponent, KDA kda, int gold, Integer damage, Integer vision, int creeps) {
-    this.teamPerformance = teamPerformance;
+  public Performance(Player player, Lane lane, Champion champion, Champion opponent, KDA kda, int gold, Integer damage, Integer vision, int creeps) {
     this.player = player;
     this.lane = lane;
     this.champion = champion;

@@ -35,14 +35,6 @@ public class StringUtils {
 
   /**
    * @param start Wenn <code>start = null oder nicht in value</code>, dann startindex immer 0
-   * @return Sequenz zwischen entsprechenden Werten
-   */
-  public static String between(@NonNull String value, @NonNull String start) {
-    return between(value, start, null, 1);
-  }
-
-  /**
-   * @param start Wenn <code>start = null oder nicht in value</code>, dann startindex immer 0
    * @param end Wenn <code>end = null oder nicht in value</code>, dann max length
    * @return Sequenz zwischen entsprechenden Werten
    */
@@ -50,11 +42,28 @@ public class StringUtils {
     return between(value, start, end, 1);
   }
 
+  public static String before(@NonNull String value, @NonNull String end) {
+    return before(value, end, 1);
+  }
+
+
+  public static String before(@NonNull String value, @NonNull String end, int occurrence) {
+    return between(value, null, end, occurrence);
+  }
+
   /**
    * @param start Wenn <code>start = null oder nicht in value</code>, dann startindex immer 0
    * @return Sequenz zwischen entsprechenden Werten
    */
-  public static String between(@NonNull String value, @NonNull String start, int occurrence) {
+  public static String after(@NonNull String value, @NonNull String start) {
+    return after(value, start, 1);
+  }
+
+  /**
+   * @param start Wenn <code>start = null oder nicht in value</code>, dann startindex immer 0
+   * @return Sequenz zwischen entsprechenden Werten
+   */
+  public static String after(@NonNull String value, @NonNull String start, int occurrence) {
     return between(value, start, null, occurrence);
   }
 
@@ -135,7 +144,7 @@ public class StringUtils {
   }
 
   public static String capitalizeFirst(String value) {
-    return value.substring(0, 1).toUpperCase() + value.substring(1).toLowerCase();
+    return value.isBlank() ? "" : value.substring(0, 1).toUpperCase() + value.substring(1).toLowerCase();
   }
 
   public static int count(String value, String substring) {

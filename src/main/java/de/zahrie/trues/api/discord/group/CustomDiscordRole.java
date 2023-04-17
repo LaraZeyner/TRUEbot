@@ -3,7 +3,6 @@ package de.zahrie.trues.api.discord.group;
 import java.io.Serial;
 import java.io.Serializable;
 
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.discord.util.Nunu;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +27,7 @@ import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 @Setter
 @ToString
 @Entity(name = "CustomDiscordRole")
-@Table(name = "discord_role")
+@Table(name = "discord_group")
 @NamedQuery(name = "CustomDiscordRole.fromDiscordId", query = "FROM CustomDiscordRole WHERE discordId = :discordId")
 public class CustomDiscordRole implements Serializable {
   @Serial
@@ -37,7 +35,7 @@ public class CustomDiscordRole implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", columnDefinition = "TINYINT UNSIGNED not null")
+  @Column(name = "role_id", columnDefinition = "TINYINT UNSIGNED not null")
   private short id;
 
   @Column(name = "discord_id", nullable = false)
@@ -52,9 +50,6 @@ public class CustomDiscordRole implements Serializable {
 
   @Column(name = "fixed", nullable = false)
   private boolean fixed;
-
-  @OneToOne(mappedBy = "role")
-  private OrgaTeam team;
 
 
   public Role getRole() {

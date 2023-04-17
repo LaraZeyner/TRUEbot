@@ -25,7 +25,7 @@ public class LineupMatchLog extends MatchLog implements Serializable {
 
   public List<Player> determineLineup() {
     return Arrays.stream(getDetails().split(", "))
-        .map(playerString -> playerString.between(null, ":").intValue())
+        .map(playerString -> playerString.before(":").intValue())
         .mapToInt(Integer::intValue)
         .mapToObj(PrimePlayerFactory::getPlayer)
         .filter(Objects::nonNull)

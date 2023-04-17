@@ -16,13 +16,13 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
   public static QueryBuilder<PlayerMatchHistoryPerformanceDTO> get(Player player, ScoutingGameType gameType, @Nullable Lane lane, @Nullable Champion champion) {
     String whereClause = "FROM performance WHERE ";
     if (lane != null) whereClause += " lane = " + lane;
-    if (champion != null) whereClause += " champion " + champion;
+    if (champion != null) whereClause += " champion " + champion.getId();
     whereClause += (lane == null && champion == null) ? " " : " AND";
 
     final String hqlStatementString = whereClause + switch (gameType) {
       case PRM_ONLY -> "teamPerformance.game.type <= 1";
       case PRM_CLASH -> "teamPerformance.game.type <= 2";
-      case TEAM_GAMES -> "player.team = " + player.getTeam() + " AND teamPerformance.game.type <= 4 GROUP BY teamPerformance, player.team HAVING COUNT(p1) > 2 ORDER BY COUNT(p1) DESC) OR teamPerformance IN (SELECT teamPerformance FROM Performance p2 WHERE player = " + player + " AND (teamPerformance.game.type <= 1) GROUP BY teamPerformance ORDER BY count(p2) DESC)) AND player = " + player;
+      case TEAM_GAMES -> "player.team = " + player.getTeam().getId() + " AND teamPerformance.game.type <= 4 GROUP BY teamPerformance, player.team HAVING COUNT(p1) > 2 ORDER BY COUNT(p1) DESC) OR teamPerformance IN (SELECT teamPerformance FROM Performance p2 WHERE player = " + player.getId() + " AND (teamPerformance.game.type <= 1) GROUP BY teamPerformance ORDER BY count(p2) DESC)) AND player = " + player.getId();
       case MATCHMADE -> "";
     };
     return QueryBuilder.hql(PlayerMatchHistoryPerformanceDTO.class, hqlStatementString);

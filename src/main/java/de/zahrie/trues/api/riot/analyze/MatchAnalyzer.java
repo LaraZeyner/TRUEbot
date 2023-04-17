@@ -28,9 +28,7 @@ public class MatchAnalyzer {
   }
 
   public Game analyze() {
-    if (match.getParticipants().size() != 10 || !match.getMap().equals(Map.SUMMONERS_RIFT)) {
-      return null;
-    }
+    if (match.getParticipants().size() != 10 || !match.getMap().equals(Map.SUMMONERS_RIFT)) return null;
 
     this.game = createGame();
     final MatchSideAnalyzer blueSide = new MatchSideAnalyzer(match, game, alreadyInserted, true);
@@ -43,24 +41,18 @@ public class MatchAnalyzer {
 
   private boolean requiresSelection(MatchSideAnalyzer... sides) {
     final GameType queue = match.getGameQueue();
-    if (queue.equals(GameType.CUSTOM) || queue.equals(GameType.TOURNAMENT)) {
-      return true;
-    }
+    if (queue.equals(GameType.CUSTOM) || queue.equals(GameType.TOURNAMENT)) return true;
+
     final int max = Arrays.stream(sides).map(side -> side.getValidParticipants().size()).max(Integer::compareTo).orElse(0);
     return max > 2 || (queue.equals(GameType.CLASH) && max > 0);
   }
 
   private void handleSide(MatchSideAnalyzer analyzer) {
-    if (requiresSelection && !game.hasSelections()) {
-      analyzer.analyzeSelections();
-    }
-
-    if (analyzer.getValidParticipants().isEmpty()) {
-      return;
-    }
+    if (requiresSelection && !game.hasSelections()) analyzer.analyzeSelections();
+    if (analyzer.getValidParticipants().isEmpty()) return;
 
     final TeamPerf side = analyzer.analyze();
-    Database.save(side);
+    Database.update(side);
   }
 
   private Game createGame() {

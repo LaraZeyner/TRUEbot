@@ -3,6 +3,7 @@ package de.zahrie.trues.api.discord.user;
 import java.io.Serial;
 import java.io.Serializable;
 
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.GroupAssignReason;
@@ -37,6 +38,12 @@ public class DiscordUserGroup implements Serializable {
   @Serial
   private static final long serialVersionUID = -763378764697829834L;
 
+  public static DiscordUserGroup build(DiscordUser user, DiscordGroup discordGroup, TimeRange range) {
+    final var userGroup = new DiscordUserGroup(user, discordGroup, range);
+    Database.insert(userGroup);
+    return userGroup;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "usergroup_id", nullable = false)
@@ -66,7 +73,7 @@ public class DiscordUserGroup implements Serializable {
   @Column(name = "active", nullable = false)
   private boolean isActive = false;
 
-  public DiscordUserGroup(DiscordUser user, DiscordGroup discordGroup, TimeRange range) {
+  private DiscordUserGroup(DiscordUser user, DiscordGroup discordGroup, TimeRange range) {
     this.user = user;
     this.discordGroup = discordGroup;
     this.range = range;

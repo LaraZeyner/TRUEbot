@@ -5,15 +5,12 @@ import java.util.Comparator;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.community.member.MembershipFactory;
-import de.zahrie.trues.api.community.orgateam.OrgaTeamImpl;
 import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
-import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod(OrgaTeamImpl.class)
 @Schedule(minute = "0")
 public class CheckSubstitudeStatus extends ScheduledTask {
   @Override
@@ -24,7 +21,7 @@ public class CheckSubstitudeStatus extends ScheduledTask {
       MembershipFactory.getCurrentTeams(toRemove.getUser()).stream()
           .filter(om -> om.isActive() && om.getRole().equals(TeamRole.TRYOUT))
           .min(Comparator.comparing(Membership::getTimestamp))
-          .ifPresent(om -> om.getOrgaTeam().removeRole(toRemove.getUser()));
+          .ifPresent(om -> om.getOrgaTeam().getRoleManager().removeRole(toRemove.getUser()));
     }
   }
 }

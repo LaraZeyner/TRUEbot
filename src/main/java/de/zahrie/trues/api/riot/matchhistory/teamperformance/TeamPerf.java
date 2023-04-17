@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.riot.matchhistory.KDA;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
@@ -47,7 +48,7 @@ public class TeamPerf implements Serializable {
   @Column(name = "t_perf_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "game", nullable = false)
   @ToString.Exclude
   private Game game;
@@ -93,12 +94,17 @@ public class TeamPerf implements Serializable {
   @ToString.Exclude
   private Team team;
 
-  @OneToMany(mappedBy = "teamPerformance")
-  @ToString.Exclude
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "teamPerformance")
   private Set<Performance> performances = new LinkedHashSet<>();
 
-  public TeamPerf(Game game, boolean first, boolean win, Integer totalKills, Integer totalDeaths, Integer totalAssists, Integer totalGold, Integer totalDamage, Integer totalVision, Integer totalCreeps, short turrets, short drakes, short inhibs, short heralds, short barons) {
-    this.game = game;
+  public void addPerformance(Performance performance) {
+    performance.setTeamPerformance(this);
+    performances.add(performance);
+    Database.update(performance);
+    Database.update(this);
+  }
+
+  public TeamPerf(boolean first, boolean win, Integer totalKills, Integer totalDeaths, Integer totalAssists, Integer totalGold, Integer totalDamage, Integer totalVision, Integer totalCreeps, short turrets, short drakes, short inhibs, short heralds, short barons) {
     this.first = first;
     this.win = win;
     this.kda = new KDA(totalKills.shortValue(), totalDeaths.shortValue(), totalAssists.shortValue());

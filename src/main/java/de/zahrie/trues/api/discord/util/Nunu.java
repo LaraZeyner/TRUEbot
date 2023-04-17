@@ -27,8 +27,7 @@ public final class Nunu extends Willump {
 
   public static class DiscordRole {
     public static Role getRole(OrgaTeam team) {
-      final String name = team.getTeam().getName();
-      return getRole(name);
+      return getRole(team.getRoleManager().getRoleName());
     }
 
     public static Role getRole(String name) {

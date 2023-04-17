@@ -32,7 +32,7 @@ public class TeamLinkCommand extends SlashCommand {
     if (orgaTeam == null) return errorMessage();
     final PRMTeam team = TeamFactory.getTeam(id);
     orgaTeam.setTeam(team);
-    Database.save(orgaTeam);
+    Database.update(orgaTeam);
     return sendMessage();
   }
 }

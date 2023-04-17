@@ -9,7 +9,6 @@ import de.zahrie.trues.discord.context.models.MembersEditContext;
 import de.zahrie.trues.discord.context.models.ProfileContext;
 import de.zahrie.trues.discord.context.models.RoleEditContext;
 import de.zahrie.trues.discord.context.models.TeamEditContext;
-import de.zahrie.trues.discord.context.models.TeamRemoveContext;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class ContextRegisterer extends ListenerAdapter implements Registerer<List<ContextCommand>> {
@@ -20,8 +19,8 @@ public class ContextRegisterer extends ListenerAdapter implements Registerer<Lis
         new MembersEditContext(),
         new ProfileContext(),
         new RoleEditContext(),
-        new TeamEditContext(),
-        new TeamRemoveContext()
+        new TeamEditContext()
+        //new TeamRemoveContext()
     );
   }
 }

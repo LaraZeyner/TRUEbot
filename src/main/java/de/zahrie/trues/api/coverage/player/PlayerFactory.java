@@ -28,7 +28,7 @@ public final class PlayerFactory {
       final Summoner summoner = Xayah.summonerWithPuuid(puuid).get();
       if (summoner != null) {
         player = new Player(summoner.getName(), puuid);
-        Database.save(player);
+        Database.insert(player);
       }
     }
     return player;
@@ -44,7 +44,7 @@ public final class PlayerFactory {
         return null;
       }
       player = new Player(summoner.getName(), summoner.getPuuid());
-      Database.save(player);
+      Database.insert(player);
     }
     return player;
   }

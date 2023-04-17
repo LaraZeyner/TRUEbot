@@ -2,8 +2,6 @@ package de.zahrie.trues.api.database;
 
 import java.util.List;
 
-import jakarta.persistence.metamodel.EntityType;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
@@ -15,26 +13,48 @@ public final class Database {
     return connection;
   }
 
-  public static void save(Object object) {
-    connection.getSession().merge(object);
+  public static Object insert(Object object) {
+    connection().getSession().insert(object);
+    return object;
+  }
+
+  public static Object update(Object object) {
+    try {
+      connection().getSession().update(object);
+    } catch (Exception exception) {
+      insert(object);
+    }
+    return object;
   }
 
   public static void remove(Object object) {
-    connection.getSession().remove(object);
+    connection.getSession().delete(object);
   }
 
-  public static void saveAndCommit(Object object) {
-    save(object);
-    connection.commit();
+  /**
+   * Speichere Entity und commite, sofern zulässig
+   */
+  public static Object insertAndCommit(Object object) {
+    insert(object);
+    connection.getTransaction().commit();
+    return object;
   }
 
+  /**
+   * Speichere Entity und commite, sofern zulässig
+   */
+  public static Object updateAndCommit(Object object) {
+    update(object);
+    connection.getTransaction().commit();
+    return object;
+  }
+
+  /**
+   * Entferne Entity und commite, sofern zulässig
+   */
   public static void removeAndCommit(Object object) {
     remove(object);
     connection.commit();
-  }
-
-  public static void flush() {
-    connection.getSession().flush();
   }
 
   public static class Connector {
@@ -42,7 +62,7 @@ public final class Database {
       if (connection != null) return;
 
       final SessionFactory sessionFactory = new DatabaseEntityRegisterer().register();
-      final var session = sessionFactory.openSession();
+      final var session = sessionFactory.openStatelessSession();
       final var transaction = session.beginTransaction();
       connection = new DatabaseConnection(sessionFactory, session, transaction);
     }
@@ -56,14 +76,13 @@ public final class Database {
 
 
   public static class Find {
-    public static <T> String getEntityName(Class<T> entityClass) {
-      final Session session = connection().getSession();
-      final EntityType<T> storedEntity = session.getMetamodel().entity(entityClass);
-      return storedEntity.getName();
-    }
-
     public static <T> T find(Class<T> entityClass, long id) {
-      return connection.getSession().get(entityClass, id);
+      try {
+        return connection.getSession().get(entityClass, id);
+      } catch (ClassCastException exception) {
+        return connection.getSession().get(entityClass, ((Long) id).intValue());
+      }
+
     }
 
     public static List<Object[]> findObjectList(String[] params, Object[] values, String query) {
@@ -72,6 +91,20 @@ public final class Database {
 
     private static Query<Object[]> performWithNamedQuery(String[] params, Object[] values, String queryName) {
       final var query = Database.connection().getSession().getNamedQuery(queryName);
+      for (int i = 0; i < params.length; i++) {
+        final String param = params[i];
+        final Object value = values[i];
+        query.setParameter(param, value);
+      }
+      return query;
+    }
+
+    public static List<Object[]> findObjectListByQuery(String[] params, Object[] values, String query) {
+      return performWithNamedQueryByQuery(params, values, query).list();
+    }
+
+    private static Query<Object[]> performWithNamedQueryByQuery(String[] params, Object[] values, String queryName) {
+      final var query = Database.connection().getSession().createQuery(queryName);
       for (int i = 0; i < params.length; i++) {
         final String param = params[i];
         final Object value = values[i];

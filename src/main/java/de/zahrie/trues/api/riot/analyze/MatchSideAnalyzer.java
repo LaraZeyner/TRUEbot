@@ -53,12 +53,14 @@ public class MatchSideAnalyzer {
       final int damage = team.getParticipants().stream().map(part -> part.getStats().getDamageDealt()).mapToInt(Integer::intValue).sum();
       final int vision = team.getParticipants().stream().map(part -> part.getStats().getVisionScore()).mapToInt(Integer::intValue).sum();
       final int creeps = team.getParticipants().stream().map(part -> part.getStats().getCreepScore()).mapToInt(Integer::intValue).sum();
-      teamPerformance = new TeamPerf(game, blueSide, team.isWinner(), kills, deaths, assists, gold, damage, vision, creeps, (short) team.getTowerKills(), (short) team.getDragonKills(), (short) team.getInhibitorKills(), (short) team.getRiftHeraldKills(), (short) team.getBaronKills());
+      teamPerformance = new TeamPerf(blueSide, team.isWinner(), kills, deaths, assists, gold, damage, vision, creeps, (short) team.getTowerKills(), (short) team.getDragonKills(), (short) team.getInhibitorKills(), (short) team.getRiftHeraldKills(), (short) team.getBaronKills());
+      Database.insert(teamPerformance);
+      game.addTeamPerformance(teamPerformance);
     }
     handleTeamOfTeamPerf(teamPerformance);
     final TeamPerf finalTeamPerformance = teamPerformance;
     validParticipants.stream().map(participant -> new ParticipantsAnalyzer(match, finalTeamPerformance, team, participant).analyze())
-        .filter(Objects::nonNull).forEach(Database::save);
+        .filter(Objects::nonNull).forEach(Database::insert);
     return teamPerformance;
   }
 
@@ -89,8 +91,9 @@ public class MatchSideAnalyzer {
   private void handleSelectionType(Game game, boolean first, List<Champion> collection, SelectionType type) {
     for (int i = 0; i < collection.size(); i++) {
       final Champion champion = collection.get(i);
-      final Selection selection = new Selection(game, first, (byte) (i + 1), type, champion);
-      Database.save(selection);
+      final Selection selection = new Selection(first, (byte) (i + 1), type, champion);
+      Database.insert(selection);
+      game.addSelection(selection);
     }
   }
 }

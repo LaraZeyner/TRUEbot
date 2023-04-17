@@ -3,24 +3,23 @@ package de.zahrie.trues.api.coverage.team.model;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.season.signup.SeasonSignup;
-import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,7 +28,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -56,9 +57,10 @@ public class Team implements Serializable {
   public void setName(String name) {
     if (orgaTeam != null && !orgaTeam.getNameCreation().equals(name)) {
       orgaTeam.setNameCreation(name);
-      Database.saveAndCommit(orgaTeam);
+      Database.update(orgaTeam);
     }
     this.name = name;
+    Database.updateAndCommit(this);
   }
 
   @Column(name = "team_abbr", nullable = false, length = 50)
@@ -67,7 +69,7 @@ public class Team implements Serializable {
   public void setAbbreviation(String abbreviation) {
     if (orgaTeam != null && !orgaTeam.getAbbreviation().equals(abbreviation)) {
       orgaTeam.setAbbreviationCreation(abbreviation);
-      Database.saveAndCommit(orgaTeam);
+      Database.updateAndCommit(orgaTeam);
     }
     this.abbreviation = abbreviation;
   }
@@ -85,21 +87,23 @@ public class Team implements Serializable {
 
   @Column(name = "last_team_mmr")
   private Integer lastMMR;
-  @OneToMany(mappedBy = "team")
-  @ToString.Exclude
-  private Set<Participator> participators = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "team")
-  @ToString.Exclude
-  private Set<LeagueTeam> leagues = new LinkedHashSet<>();
+  public List<Participator> getParticipators() {
+    return QueryBuilder.hql(Participator.class, "FROM Participator WHERE team = :team").addParameter("team", this).list();
+  }
 
-  @OneToMany(mappedBy = "team")
-  @ToString.Exclude
-  private Set<SeasonSignup> signups = new LinkedHashSet<>();
+  public List<SeasonSignup> getSignups() {
+    return QueryBuilder.hql(SeasonSignup.class, "FROM SeasonSignup WHERE team = :team").addParameter("team", this).list();
+  }
 
-  @OneToMany(mappedBy = "team")
-  @ToString.Exclude
-  private Set<Player> players = new LinkedHashSet<>();
+  @Nullable
+  public SeasonSignup getSignupForSeason(Season season) {
+    return QueryBuilder.hql(SeasonSignup.class, "FROM SeasonSignup WHERE season = :season and team = :team").addParameters(Map.of("season", season, "team", this)).single();
+  }
+
+  public List<Player> getPlayers() {
+    return QueryBuilder.hql(Player.class, "FROM Player WHERE team = :team").addParameter("team", this).list();
+  }
 
   public Team(String name, String abbreviation) {
     this.name = name;
@@ -117,18 +121,17 @@ public class Team implements Serializable {
     final LocalDateTime refreshUntil = orgaTeam == null ? start.plusDays(70) : LocalDateTime.MAX;
     if (refreshUntil.isAfter(this.refresh)) {
       this.refresh = refreshUntil;
-      Database.save(this);
+      Database.update(this);
     }
   }
 
   public void highlight() {
-    this.highlight = !this.highlight;
-    Database.save(this);
+    setHighlight(!this.highlight);
   }
 
   public void setHighlight(boolean highlight) {
     this.highlight = highlight;
-    Database.save(this);
+    Database.update(this);
   }
 
   public String getFullName() {
@@ -136,7 +139,15 @@ public class Team implements Serializable {
   }
 
   public Match nextOrLastMatch() {
-    final List<Match> matches = participators.stream().map(Participator::getCoverage).filter(Match::isActive).sorted().toList();
+    final List<Match> matches = QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = :team and coverage.active = true ORDER BY coverage.start").addParameter("team", this).list();
     return matches.stream().filter(match -> match.getStart().isAfter(LocalDateTime.now())).findFirst().orElse(matches.get(matches.size() - 1));
+  }
+
+  public MatchManager getMatches() {
+    return new MatchManager(this);
+  }
+
+  public PRMTeam getPRMTeam() {
+    return (PRMTeam) Hibernate.unproxy(this);
   }
 }

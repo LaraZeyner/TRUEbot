@@ -16,3 +16,5 @@ TODO: LOGGING
 
 TODO:
  how does the signup work
+
+Signup für Internes Turnier

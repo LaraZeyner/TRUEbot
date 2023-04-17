@@ -2,15 +2,18 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
+import de.zahrie.trues.api.coverage.EventDTO;
+import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.stage.model.SignupStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.util.Util;
@@ -27,7 +30,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -37,6 +39,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -77,13 +80,24 @@ public class Season implements Betable, Serializable, Comparable<Season> {
   @Column(name = "active", nullable = false)
   private boolean active = true;
 
-  @OneToMany(mappedBy = "season")
-  @ToString.Exclude
-  private Set<Stage> stages = new LinkedHashSet<>();
+  public List<Stage> getStages() {
+    return QueryBuilder.hql(Stage.class, "FROM Stage WHERE season = :season").addParameter("season", this).list();
+  }
+
+  @NonNull
+  public Stage getStage(@NonNull Stage.StageType stageType) {
+    return getStages().stream().filter(stage -> stageType.getEntityClass().isInstance(stage)).findFirst().orElseThrow();
+  }
+
+  @Nullable
+  public PlayStage getStage(int prmId) {
+    final Stage.StageType stageType = Stage.StageType.fromPrmId(prmId);
+    return (PlayStage) Util.avoidNull(stageType, null, this::getStage);
+  }
 
   @NonNull
   public PlayStage getStageOfId(int id) {
-    for (Stage stage : this.stages) {
+    for (Stage stage : this.getStages()) {
       final var playStage = (PlayStage) stage;
       if ((playStage.pageId() == id)) return Util.nonNull(playStage);
     }
@@ -96,10 +110,20 @@ public class Season implements Betable, Serializable, Comparable<Season> {
   }
 
   public String getSignupStatusForTeam(Team team) {
-    if (team.getSignups().stream().anyMatch(signup -> signup.getSeason().equals(this))) return "angemeldet";
-    return stages.stream().filter(stage -> stage instanceof SignupStage).findFirst()
+    if (team.getSignupForSeason(this) != null) return "angemeldet";
+    return getStages().stream().filter(stage -> stage instanceof SignupStage).findFirst()
         .map(stage -> stage.getRange().hasStarted() ? "Anmeldung gestartet" : "Anmeldung " +
             TimeFormat.DISCORD.of(stage.getRange().getStartTime()))
         .orElse("keine Anmeldung eingerichtet");
+  }
+
+  @NonNull
+  public List<EventDTO> getEvents() {
+    final List<Stage> stagesEvents = QueryBuilder.hql(Stage.class, "FROM Stage WHERE season = :season").addParameter("season", this).list();
+    final List<EventDTO> events = new ArrayList<>(stagesEvents.stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList());
+    final List<Playday> playdaysEvents = QueryBuilder.hql(Playday.class, "FROM Playday WHERE stage.season = :season").addParameter("season", this).list();
+    final List<EventDTO> pdEvents = playdaysEvents.stream().map(playday -> new EventDTO(playday.getRange(), "Spieltag " + playday.getIdx(), true)).toList();
+    if (!pdEvents.isEmpty()) events.addAll(pdEvents);
+    return events.stream().sorted().toList();
   }
 }

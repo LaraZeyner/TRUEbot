@@ -9,7 +9,6 @@ import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -44,13 +43,13 @@ public class Lineup implements Serializable {
   @Column(name = "coverage_lineup_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "coverage_team", nullable = false)
   @ToString.Exclude
   private Participator participator;
 
   @Column(name = "lineup_id")
-  @Enumerated(EnumType.ORDINAL)
+  @Enumerated
   private Lane lane = Lane.UNKNOWN;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -58,8 +57,7 @@ public class Lineup implements Serializable {
   @ToString.Exclude
   private Player player;
 
-  public Lineup(Participator participator, Lane lane, Player player) {
-    this.participator = participator;
+  public Lineup(Lane lane, Player player) {
     this.lane = lane;
     this.player = player;
   }

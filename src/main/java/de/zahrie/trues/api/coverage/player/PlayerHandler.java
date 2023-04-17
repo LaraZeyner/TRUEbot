@@ -27,7 +27,7 @@ public class PlayerHandler extends PlayerModel implements Serializable {
 
   public void update() {
     updateName();
-    Database.save(player);
+    Database.update(player);
   }
 
   public void updateName() {

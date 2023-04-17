@@ -8,6 +8,7 @@ import java.util.Comparator;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import jakarta.persistence.CascadeType;
@@ -47,6 +48,15 @@ public class Membership implements Serializable, Comparable<Membership> {
   @Serial
   private static final long serialVersionUID = -6006729315935528279L;
 
+  public static Membership build(DiscordUser user, TeamPosition position) {
+    return build(user, null, TeamRole.ORGA, position);
+  }
+
+  public static Membership build(DiscordUser user, OrgaTeam team, TeamRole role, TeamPosition position) {
+    final Membership membership = new Membership(user, team, role, position);
+    Database.insert(membership);
+    return membership;
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,12 +91,12 @@ public class Membership implements Serializable, Comparable<Membership> {
   private boolean active = true;
 
   public Membership(DiscordUser user, TeamPosition position) {
-    this(user, TeamRole.ORGA, position, null);
+    this(user, null, TeamRole.ORGA, position);
   }
 
-  public Membership(DiscordUser user, TeamRole role, TeamPosition position, OrgaTeam orgaTeam) {
+  private Membership(DiscordUser user, OrgaTeam team, TeamRole role, TeamPosition position) {
     this.user = user;
-    this.orgaTeam = orgaTeam;
+    this.orgaTeam = team;
     this.role = role;
     this.position = position;
   }
@@ -98,7 +108,7 @@ public class Membership implements Serializable, Comparable<Membership> {
   @Override
   public int compareTo(@NotNull Membership o) {
     return Comparator.comparing(Membership::isActive)
-        .thenComparing(Membership::getRole)
+        .thenComparing(Membership::getRole, Comparator.reverseOrder())
         .thenComparing(Membership::getPosition).compare(this, o);
   }
 }

@@ -8,9 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
-import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.Database;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -53,7 +53,7 @@ public class Participator implements Serializable, Comparable<Participator> {
   @Column(name = "coverage_team_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "coverage", nullable = false)
   @ToString.Exclude
   private Match coverage;
@@ -69,9 +69,6 @@ public class Participator implements Serializable, Comparable<Participator> {
   @Column(name = "wins", columnDefinition = "TINYINT UNSIGNED not null")
   private short wins = 0;
 
-  @Column(name = "lineup_fixed", nullable = false)
-  private boolean lineupFixed = false;
-
   @Embedded
   private ParticipatorRoute route;
 
@@ -81,17 +78,31 @@ public class Participator implements Serializable, Comparable<Participator> {
   @Column(name = "discord_message")
   private Long messageId;
 
-  @OneToMany(mappedBy = "participator")
-  @ToString.Exclude
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "participator")
   private Set<Lineup> lineups = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "participator")
-  @ToString.Exclude
-  private Set<MatchLog> logs = new LinkedHashSet<>();
+  public void addLineup(Lineup lineup) {
+    lineup.setParticipator(this);
+    lineups.add(lineup);
+    Database.update(lineup);
+    Database.update(this);
+  }
+
+  public void removeLineup(Lineup lineup) {
+    lineup.setParticipator(null);
+    lineups.remove(lineup);
+    Database.remove(lineup);
+    Database.update(this);
+  }
 
   public Participator(boolean isFirstPick, Team team) {
     this.isFirstPick = isFirstPick;
     this.team = team;
+  }
+
+  public String getAbbreviation() {
+    if (team == null) return route.toString();
+    return team.getAbbreviation();
   }
 
   public ParticipatorImpl get() {

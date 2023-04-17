@@ -21,8 +21,8 @@ public class PlaydayCreator {
   public Playday create() {
     final PlaydayScheduler scheduler = PlaydayScheduler.create(stage, index, tier);
 
-    final Playday playday = new Playday(stage, (short) index, scheduler.playday());
-    Database.save(playday);
+    final Playday playday = new Playday(stage, (short) index, scheduler.playday(), stage.playdayConfig().format());
+    Database.insert(playday);
     return playday;
   }
 

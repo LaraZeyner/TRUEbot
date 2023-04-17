@@ -33,6 +33,6 @@ public class PRMPlayer extends Player implements Serializable {
 
   @Override
   public boolean equals(Object other) {
-    return super.equals(other) || (other instanceof PRMPlayer && this.prmUserId.equals(((PRMPlayer) other).prmUserId));
+    return super.equals(other) || (other instanceof Player && this.getId() == ((Player) other).getId());
   }
 }

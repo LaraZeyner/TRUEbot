@@ -3,9 +3,8 @@ package de.zahrie.trues.api.coverage.playday;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Set;
 
-import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.coverage.match.model.MatchFormat;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayRange;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
@@ -14,6 +13,7 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +21,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -61,14 +60,15 @@ public class Playday implements Serializable, Comparable<Playday> {
   })
   private TimeRange range;
 
-  @OneToMany(mappedBy = "playday")
-  @ToString.Exclude
-  private Set<Match> matches;
+  @Enumerated
+  @Column(name = "format")
+  private MatchFormat format;
 
-  public Playday(PlayStage stage, short index, PlaydayRange playdayRange) {
+  public Playday(PlayStage stage, short index, PlaydayRange playdayRange, MatchFormat format) {
     this.stage = stage;
     this.idx = index;
     this.range = playdayRange;
+    this.format = format;
   }
 
   @Override

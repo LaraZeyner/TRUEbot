@@ -7,23 +7,23 @@ import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.PermissionCheck;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.discord.util.Replyer;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import lombok.extern.java.Log;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @ExtensionMethod(StringUtils.class)
+@Log
 public abstract class SlashCommand extends Replyer {
   private String description;
   private PermissionCheck permissionCheck;
@@ -123,21 +124,22 @@ public abstract class SlashCommand extends Replyer {
       final boolean hasAutoComplete = completions.stream().anyMatch(autoCompletion -> autoCompletion.optionName().equals(option.getName()));
       option.setAutoComplete(hasAutoComplete);
     }
+    log.info("Registriere " + name);
     return Commands.slash(name, description)
         .setGuildOnly(true)
         .addOptions(options)
-        .setDefaultPermissions(DefaultMemberPermissions.DISABLED) //TODO (Abgie) 04.03.2023: remove later
+        //.setDefaultPermissions(DefaultMemberPermissions.DISABLED)
         .addSubcommands(subCmds.stream().map(SlashCommand::getSubCommand).toList())
         .addSubcommandGroups(subCmdGroups.stream().map(SlashCommand::getSubCommandGroup).toList());
   }
 
   private SubcommandData getSubCommand() {
-    final String commandName = name.contains(" ") ? name.between(" ", null, -1) : name;
+    final String commandName = name.contains(" ") ? name.after(" ", -1) : name;
     return new SubcommandData(commandName, description).addOptions(this.options);
   }
 
   private SubcommandGroupData getSubCommandGroup() {
-    final String commandName = name.contains(" ") ? name.between(" ", null, -1) : name;
+    final String commandName = name.contains(" ") ? name.after(" ", -1) : name;
     return new SubcommandGroupData(commandName, description).addSubcommands(subCommands.stream().map(SlashCommand::getSubCommand).toList());
   }
 

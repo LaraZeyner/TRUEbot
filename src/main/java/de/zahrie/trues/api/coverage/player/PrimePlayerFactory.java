@@ -28,7 +28,7 @@ public final class PrimePlayerFactory {
     final PRMPlayer p = determinePlayer(summonerName, primeId);
     if (p != null) {
       p.setPrmUserId(primeId);
-      Database.save(p);
+      Database.update(p);
     }
     return p;
   }
@@ -39,7 +39,7 @@ public final class PrimePlayerFactory {
     if (!player.getPuuid().equals(puuid) && puuid != null) {
       player.setPuuid(puuid);
       player.setSummonerName(summoner.getName());
-      Database.save(player);
+      Database.update(player);
     }
   }
 
@@ -55,14 +55,14 @@ public final class PrimePlayerFactory {
 
   @Nullable
   private static PRMPlayer performNoPuuid(String summonerName) {
-    final PRMPlayer PRMPlayer = determineExistingPlayerFromName(summonerName);
-    if (PRMPlayer == null) {
+    final PRMPlayer player = determineExistingPlayerFromName(summonerName);
+    if (player == null) {
       log.config("Der Spieler existiert nicht");
       return null;
     }
 
-    new PlayerHandler(null, PRMPlayer).updateName();
-    Database.save(PRMPlayer);
+    new PlayerHandler(null, player).updateName();
+    Database.update(player);
 
     return determineExistingPlayerFromName(summonerName);
   }

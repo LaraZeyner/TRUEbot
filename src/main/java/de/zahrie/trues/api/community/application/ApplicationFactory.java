@@ -23,11 +23,11 @@ public class ApplicationFactory {
    * @return neue Bewerbung
    */
   public static Application create(DiscordUser user, TeamRole role, TeamPosition position, @Nullable String appNotes, Boolean isWaiting) {
-    Application application = QueryBuilder.hql(Application.class, "FROM Application WHERE user = :user AND position = :position").single();
-    if (application == null) application = new Application(user, role, position);
+    Application application = QueryBuilder.hql(Application.class, "FROM Application WHERE user = " + user.getId() + " AND position = " + position).single();
+    if (application == null) application = Application.build(user, role, position);
     if (appNotes != null) application.setAppNotes(appNotes);
     application.setIsWaiting(isWaiting);
-    Database.save(application);
+    Database.update(application);
     updateApplicationStatus(user);
     return application;
   }
@@ -84,11 +84,11 @@ public class ApplicationFactory {
     final List<OrgaTeam> orgaTeams = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list();
     final List<OrgaTeam> currentOrgaTeams = currentTeams.stream().map(Membership::getOrgaTeam).toList();
     for (OrgaTeam orgaTeam : orgaTeams) {
-      if (currentOrgaTeams.contains(orgaTeam) && !user.getMember().getRoles().contains(orgaTeam.getGroup().getRole())) {
+      if (currentOrgaTeams.contains(orgaTeam) && !user.getMember().getRoles().contains(orgaTeam.getRoleManager().getRole())) {
         granter.addTeam(orgaTeam);
         continue;
       }
-      if (!currentOrgaTeams.contains(orgaTeam) && user.getMember().getRoles().contains(orgaTeam.getGroup().getRole())) {
+      if (!currentOrgaTeams.contains(orgaTeam) && user.getMember().getRoles().contains(orgaTeam.getRoleManager().getRole())) {
         granter.removeTeam(orgaTeam);
       }
     }

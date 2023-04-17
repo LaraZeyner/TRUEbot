@@ -47,22 +47,17 @@ public class ParticipatorImpl {
   }
 
   private void setLineup(List<Player> newLineup, boolean ordered) {
-    for (Lineup lineup : participator.getLineups()) {
-      if (!newLineup.contains(lineup.getPlayer())) {
-        participator.getLineups().remove(lineup);
-        lineup.setParticipator(null);
-        Database.remove(lineup);
-      }
-    }
+    participator.getLineups().stream().filter(lineup -> !newLineup.contains(lineup.getPlayer())).forEach(participator::removeLineup);
 
     for (Player player : newLineup) {
       final Lane lane = determineLane(newLineup, ordered, player);
       if (LineupFactory.determineLineup(participator, player) == null) {
-        final var lineup = new Lineup(participator, lane, player);
-        Database.save(lineup);
+        final var lineup = new Lineup(lane, player);
+        Database.insert(lineup);
+        participator.addLineup(lineup);
       }
     }
-    Database.save(this);
+    Database.update(this);
     LineupManager.getMatch(participator.getCoverage()).update();
   }
 

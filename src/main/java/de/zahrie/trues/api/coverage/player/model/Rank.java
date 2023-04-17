@@ -8,6 +8,7 @@ import com.merakianalytics.orianna.types.common.Tier;
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.model.Standing;
+import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.util.Format;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,6 +35,12 @@ import lombok.Setter;
 public class Rank extends AbstractRank implements Serializable {
   @Serial
   private static final long serialVersionUID = -3473800152212072760L;
+
+  public static Rank build(Player player, Tier tier, Division division, byte points, int wins, int losses) {
+    final var rank = new Rank(player, tier, division, points, wins, losses);
+    Database.insert(rank);
+    return rank;
+  }
 
   public static AbstractRank fromMMR(int mmr) {
     return new AbstractRank(mmr);
@@ -74,13 +81,12 @@ public class Rank extends AbstractRank implements Serializable {
   }
 
   Rank(Player player, Tier tier, Division division, byte points, int wins, int losses) {
-    this(SeasonFactory.getLastPRMSeason(), player, tier, division, points, wins, losses);
+    this(player, SeasonFactory.getLastPRMSeason(), tier, division, points, wins, losses);
   }
 
-  Rank(Season season, Player player, Tier tier, Division division, byte points, int wins, int losses) {
+  Rank(Player player, Season season, Tier tier, Division division, byte points, int wins, int losses) {
     super(tier, division, points);
     this.season = season;
-    this.player = player;
     this.wins = wins;
     this.losses = losses;
   }

@@ -24,7 +24,7 @@ public class BetCommand extends SlashCommand {
   @Msg(value = "Die Wette wurde abgegeben", error = "Du hast nicht genügend TRUEs")
   public boolean execute(SlashCommandInteractionEvent event) {
     final String matchString = find("match").string();
-    final Integer matchId = matchString.between(null, ":").intValue();
+    final Integer matchId = matchString.before(":").intValue();
     final Match match = Database.Find.find(Match.class, matchId);
     final String result = find("ergebnis").string();
     final Integer amount = find("menge").integer();

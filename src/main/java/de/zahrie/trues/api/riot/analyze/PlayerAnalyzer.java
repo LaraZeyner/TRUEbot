@@ -33,11 +33,11 @@ public record PlayerAnalyzer(Player player) {
       final MatchAnalyzer matchAnalyzer = new MatchAnalyzer(match);
       final Game game = matchAnalyzer.analyze();
       if (game.getType().equals(GameType.RANKED_SOLO)) hasPlayedRanked = true;
-      Database.save(game);
+      Database.update(game);
     }
     if (hasPlayedRanked) new PlayerHandler(null, player).updateElo();
     player.setUpdated(currentTime);
-    Database.save(player);
+    Database.update(player);
     Database.connection().commit(null);
   }
 }

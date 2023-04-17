@@ -14,8 +14,9 @@ public class TeamFactory {
 
     final TeamLoader teamLoader = new TeamLoader(teamId).create();
     if (teamLoader == null) return null;
+
     team = teamLoader.getTeam();
-    Database.save(team);
+    Database.update(team);
     return team;
   }
 

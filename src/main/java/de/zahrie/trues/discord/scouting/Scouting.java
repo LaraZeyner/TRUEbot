@@ -14,6 +14,7 @@ import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
 import de.zahrie.trues.util.Const;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,9 @@ import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
+import org.jetbrains.annotations.Nullable;
 
-public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match, ThreadChannel thread) {
+public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match, @Nullable ThreadChannel thread) {
 
   public Scouting(OrgaTeam orgaTeam, Participator participator, Match match) {
     this(orgaTeam, participator, match, determineThreadChannel(orgaTeam, participator, match));
@@ -33,7 +35,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
 
   private static ThreadChannel determineThreadChannel(OrgaTeam orgaTeam, Participator participator, Match match) {
     final AtomicReference<ThreadChannel> thread = new AtomicReference<>();
-    final TeamChannel scoutingChannel = orgaTeam.getTeamChannels().stream().filter(teamChannel -> teamChannel.getTeamChannelType().equals(TeamChannelType.SCOUTING)).findFirst().orElse(null);
+    final TeamChannel scoutingChannel = orgaTeam.getChannels().getChannelOf(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return null;
     final Team team = participator.getTeam();
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
@@ -43,7 +45,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
             textChannel.createThreadChannel(Const.THREAD_CHANNEL_START + team.getAbbreviation() + " (" + team.getId() + ")", message.getIdLong()).queue();
             participator.setMessageId(message.getIdLong());
           });
-      Database.save(participator);
+      Database.update(participator);
     }
     textChannel.retrieveMessageById(participator.getMessageId()).queue(message -> thread.set(message.getStartedThread()));
     return thread.get();
@@ -58,12 +60,23 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   public void update() {
+    forceUpdate();
+    final Participator opponent = match.getOpponent(participator.getTeam());
+    if (opponent != null && opponent.getTeam().getOrgaTeam() != null) {
+      final Scouting opponentScouting = ScoutingManager.forTeam(opponent.getTeam().getOrgaTeam());
+      if (opponentScouting != null) opponentScouting.forceUpdate();
+    }
+  }
+
+  private void forceUpdate() {
     sendLog();
     send(Scouting.ScoutingType.LINEUP);
     send(Scouting.ScoutingType.OVERVIEW);
+    TeamInfoManager.fromTeam(orgaTeam).updateAll();
   }
 
   public void sendLog() {
+    if (thread == null) return;
     thread.getParentChannel().asGuildMessageChannel().retrieveMessageById(participator.getMessageId())
         .queue(message -> message.editMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog()).queue());
   }
@@ -73,7 +86,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   public void send(ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
-    final TeamChannel scoutingChannel = orgaTeam.getTeamChannels().stream().filter(teamChannel -> teamChannel.getTeamChannelType().equals(TeamChannelType.SCOUTING)).findFirst().orElse(null);
+    final TeamChannel scoutingChannel = orgaTeam.getChannels().getChannelOf(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return;
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
     final ScoutingGameType finalGameType = gameType;

@@ -12,15 +12,20 @@ public class BetFactory {
     final int remainingPoints = user.getPoints() + Util.avoidNull(currentBet, 0, Bet::getAmount) - amount;
     if (remainingPoints < 0) return false;
     user.setPoints(remainingPoints);
-    if (currentBet == null) currentBet = new Bet(match, user, outcome, amount);
-    currentBet.setAmount(amount);
-    currentBet.setOutcome(outcome);
-    Database.save(currentBet);
-    Database.save(user);
+    if (currentBet == null) {
+      currentBet = new Bet(match, user, outcome, amount);
+      Database.insert(currentBet);
+    } else {
+      currentBet.setAmount(amount);
+      currentBet.setOutcome(outcome);
+      Database.update(currentBet);
+    }
+    Database.update(user);
+
     return true;
   }
 
   public static Bet getBet(DiscordUser user, Match match) {
-    return QueryBuilder.hql(Bet.class, "FROM Bet WHERE user = " + user + " AND match = " + match).single();
+    return QueryBuilder.hql(Bet.class, "FROM Bet WHERE user = " + user.getId() + " AND match = " + match.getId()).single();
   }
 }

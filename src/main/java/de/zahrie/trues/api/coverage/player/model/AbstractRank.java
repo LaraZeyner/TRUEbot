@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Setter
 @MappedSuperclass
+@Log
 public class AbstractRank implements Serializable, Comparable<AbstractRank> {
   @Serial
   private static final long serialVersionUID = 7228597517124074472L;
@@ -45,8 +47,19 @@ public class AbstractRank implements Serializable, Comparable<AbstractRank> {
 
   AbstractRank(int mmr) {
     this.tier = mmr / 500 > 9 ? RankTier.CHALLENGER : RankTier.values()[mmr / 500];
-    this.division = this.tier.ordinal() >= RankTier.MASTER.ordinal() ? Division.I : Division.values()[3 - ((mmr / 100) % 5)];
-    this.points = (byte) (this.tier.ordinal() >= RankTier.MASTER.ordinal() ? mmr - (RankTier.MASTER.ordinal() * 500) : (mmr % 100));
+    if (this.tier.ordinal() < RankTier.MASTER.ordinal() && mmr % 500 > 400) {
+      if (mmr % 500 < 450) {
+        this.division = Division.I;
+        this.points = 100;
+      } else {
+        this.division = Division.IV;
+        this.tier = RankTier.values()[tier.ordinal()+1];
+        this.points = 0;
+      }
+    } else {
+      this.division = this.tier.ordinal() >= RankTier.MASTER.ordinal() || mmr % 500 == 400 ? Division.I : Division.values()[3 - ((mmr / 100) % 5)];
+      this.points = (byte) (this.tier.ordinal() >= RankTier.MASTER.ordinal() ? mmr - (RankTier.MASTER.ordinal() * 500) : (mmr % 100));
+    }
   }
 
   AbstractRank(Tier tier, Division division, byte points) {
@@ -56,7 +69,7 @@ public class AbstractRank implements Serializable, Comparable<AbstractRank> {
   }
 
   public int getMMR() {
-    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 500 : tier.ordinal() * 500 + 400 - division.ordinal() * 100) + points;
+    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 500 : tier.ordinal() * 500 + 300 - division.ordinal() * 100) + points;
   }
 
   @Override

@@ -14,7 +14,6 @@ import lombok.ToString;
 @Embeddable
 @Getter
 public class ParticipatorRoute {
-  // TODO (Abgie) 01.03.2023: never used
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "route_group")
   @ToString.Exclude
@@ -27,4 +26,21 @@ public class ParticipatorRoute {
   @Column(name = "route_value", columnDefinition = "TINYINT UNSIGNED")
   private Short value;
 
+  @Override
+  public String toString() {
+    if (type == null) return "n.A.";
+    return switch (type) {
+      case LOSER -> "Loser M" + value;
+      case PLACE -> value + ". " + league.getName();
+      case SEEDED -> "Seed " + value;
+      case WINNER -> "WInner M" + value;
+    };
+  }
+
+  public enum RouteType {
+    LOSER,
+    PLACE,
+    SEEDED,
+    WINNER
+  }
 }

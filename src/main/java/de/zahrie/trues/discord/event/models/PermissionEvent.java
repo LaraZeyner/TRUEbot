@@ -1,4 +1,4 @@
-package de.zahrie.trues.discord.listener.models;
+package de.zahrie.trues.discord.event.models;
 
 
 import de.zahrie.trues.api.discord.channel.DiscordChannel;

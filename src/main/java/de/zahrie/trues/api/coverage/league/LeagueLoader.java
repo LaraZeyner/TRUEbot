@@ -26,14 +26,15 @@ import org.jetbrains.annotations.NotNull;
 @ExtensionMethod(StringUtils.class)
 public class LeagueLoader extends GamesportsLoader {
   public static League season(String url, String name) {
-    final int seasonId = Integer.parseInt(url.between("/prm/", "-"));
-    final int stageId = Integer.parseInt(url.between("/group/", "-"));
+    final int seasonId = url.between("/prm/", "-").intValue();
+    final int stageId = url.between("/group/", "-").intValue();
+    final int divisionId = url.between("/", "-", 8).intValue();
     final PRMSeason season = SeasonFactory.getSeason(seasonId);
-    return LeagueFactory.getGroup(season, name, stageId);
+    return LeagueFactory.getGroup(season, name, stageId, divisionId);
   }
 
   public static String divisionNameFromURL(String url) {
-    String section = url.between("/", null, -1).between("-").replace("-", " ");
+    String section = url.after("/", -1).after("-").replace("-", " ");
     if (section.startsWith("division ")) section = section.replaces(".", section.lastIndexOf(" "));
     return section.capitalizeFirst();
   }
@@ -49,7 +50,8 @@ public class LeagueLoader extends GamesportsLoader {
     super(URLType.LEAGUE, url.between("/prm/", "-").intValue(), url.between("/group/", "-").intValue(),
         url.between("/", "-", -1).intValue());
     final PRMSeason season = SeasonFactory.getSeason(url.between("/prm/", "-").intValue());
-    this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url), stageIdFromUrl(url));
+    final int divisionId = url.between("/", "-", 8).intValue();
+    this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url), stageIdFromUrl(url), divisionId);
     this.url = url;
   }
 
@@ -75,7 +77,7 @@ public class LeagueLoader extends GamesportsLoader {
 
   @NotNull
   private List<LeaguePlayday> getPlaydays() {
-    final String leagueName = html.find("h1").text().between(":");
+    final String leagueName = html.find("h1").text().after(":");
 
     if (leagueName.equals(Const.Gamesports.STARTER_NAME)) {
       return List.of();

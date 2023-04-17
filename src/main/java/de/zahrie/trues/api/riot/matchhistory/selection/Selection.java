@@ -41,7 +41,7 @@ public class Selection implements Serializable {
   @Column(name = "draft_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "game", nullable = false)
   @ToString.Exclude
   private Game game;
@@ -61,8 +61,7 @@ public class Selection implements Serializable {
   @ToString.Exclude
   private Champion champion;
 
-  public Selection(Game game, boolean isFirstPick, byte selectOrder, SelectionType type, Champion champion) {
-    this.game = game;
+  public Selection(boolean isFirstPick, byte selectOrder, SelectionType type, Champion champion) {
     this.isFirstPick = isFirstPick;
     this.selectOrder = selectOrder;
     this.type = type;

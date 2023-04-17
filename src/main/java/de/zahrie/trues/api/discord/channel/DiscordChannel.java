@@ -6,7 +6,6 @@ import java.util.Set;
 
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
-import de.zahrie.trues.util.Util;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -23,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.java.Log;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
@@ -41,6 +41,7 @@ import org.hibernate.annotations.DiscriminatorFormula;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorFormula("IF(orga_team IS NULL, 'null', 'not null')")
 @DiscriminatorValue("null")
+@Log
 public class DiscordChannel implements Serializable {
   @Serial
   private static final long serialVersionUID = -2307398301886813719L;
@@ -94,7 +95,12 @@ public class DiscordChannel implements Serializable {
 
   protected void uFr(Role role, DiscordGroup group) {
     final ChannelRolePattern rolePattern = permissionType.getPattern().getData().get(group);
-    final PermissionOverride permissionOverride = Util.nonNull(getChannel().getPermissionOverride(role), "Fehler mit Channel oder User");
+    final PermissionOverride override = getChannel().getPermissionOverride(role);
+    if (override == null) {
+      getChannel().getManager().putPermissionOverride(role, rolePattern.getAllowed(), rolePattern.getDenied()).queue();
+      log.info("Override für " + role.getName() + " in " + name + " nicht vorhanden.");
+      return;
+    }
     final Set<Permission> allowed = rolePattern.getAllowed();
     final Set<Permission> pattern = permissionType.getPattern().getData().get(DiscordGroup.EVERYONE).getDenied();
     if (!rolePattern.isRevokeAll()) {
@@ -107,6 +113,6 @@ public class DiscordChannel implements Serializable {
       allowed.remove(Permission.VIEW_CHANNEL);
       denied.remove(Permission.VIEW_CHANNEL);
     }
-    permissionOverride.getManager().setPermissions(allowed, denied).queue();
+    override.getManager().setPermissions(allowed, denied).queue();
   }
 }

@@ -2,23 +2,19 @@ package de.zahrie.trues.api.coverage.stage.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayConfig;
 import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.stage.IdAble;
+import de.zahrie.trues.api.database.QueryBuilder;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -29,17 +25,13 @@ public class PlayStage extends Stage implements Betable, IdAble, Playable, Seria
   private static final long serialVersionUID = 7394534903088339480L;
 
 
-  @OneToMany(mappedBy = "stage")
-  @ToString.Exclude
-  private Set<League> leagues = new LinkedHashSet<>();
-
-  @OneToMany(mappedBy = "stage")
-  @ToString.Exclude
-  private Set<Playday> playdays = new LinkedHashSet<>();
+  public List<League> leagues() {
+    return QueryBuilder.hql(League.class, "FROM League WHERE stage = :stage").addParameter("stage", this).list();
+  }
 
   @Override
-  public int pageId() {
-    return 0;
+  public Integer pageId() {
+    return null;
   }
 
   @Override

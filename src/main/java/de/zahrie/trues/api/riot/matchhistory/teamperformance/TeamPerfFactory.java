@@ -5,6 +5,6 @@ import de.zahrie.trues.api.riot.matchhistory.game.Game;
 
 public class TeamPerfFactory {
   public static TeamPerf getTeamPerfBySide(Game game, boolean blueSide) {
-    return QueryBuilder.hql(TeamPerf.class, "FROM TeamPerf WHERE game = " + game + " and first = " + blueSide).single();
+    return QueryBuilder.hql(TeamPerf.class, "FROM TeamPerf WHERE game = " + game.getId() + " and first = " + blueSide).single();
   }
 }

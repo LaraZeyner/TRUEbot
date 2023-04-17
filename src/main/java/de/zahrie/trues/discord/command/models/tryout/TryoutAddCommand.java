@@ -24,7 +24,7 @@ public class TryoutAddCommand extends SlashCommand {
   @Msg(value = "Der Termin wurde gespeichert.")
   public boolean execute(SlashCommandInteractionEvent event) {
     final String applicationString = find("bewerbung").string();
-    final int applicationId = applicationString.between(null, ".").intValue();
+    final int applicationId = applicationString.before(".").intValue();
     final LocalDateTime dateTime = find("zeitpunkt").time();
     final Application application = Database.Find.find(Application.class, applicationId);
     application.getUser().schedule(dateTime, getInvoker());

@@ -45,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode(callSuper = true)
 @ExtensionMethod(StringUtils.class)
 public abstract class ModalImpl extends ModalBase {
-  private DiscordUser target;
+  protected DiscordUser target;
 
   public ModalImpl() {
     super();
@@ -75,6 +75,7 @@ public abstract class ModalImpl extends ModalBase {
         .addOption("Tryout", "TRYOUT", "Tryout erhält für 14 Tage Zugriff")
         .addOption("Substitude", "SUBSTITUDE", "Spieler erhält permanenten Zugriff")
         .addOption("Mainspieler", "MAIN", "Spieler erhält permanenten Zugriff")
+        .addOption("entfernen", "REMOVE", "Spieler wird aus dem Team entfernt")
         .build());
   }
 

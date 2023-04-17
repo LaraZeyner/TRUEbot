@@ -56,7 +56,7 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   @Column(name = "log_time", nullable = false)
   private LocalDateTime timestamp = LocalDateTime.now();
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "coverage")
   @ToString.Exclude
   private Match match;
@@ -76,16 +76,15 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   @Column(name = "to_send", nullable = false)
   private boolean toSend = true;
 
-  public MatchLog(LocalDateTime timestamp, MatchLogAction action, Match match, String details) {
+  public MatchLog(LocalDateTime timestamp, MatchLogAction action, String details) {
     this.timestamp = timestamp;
     this.action = action;
-    this.match = match;
     this.details = details;
   }
 
   public MatchLog handleTeam(String content) {
     final MatchLog log = LogFactory.handleUserWithTeam(this, content);
-    if (this.participator != null) Database.save(this.participator);
+    if (this.participator != null) Database.update(this.participator);
     return log;
   }
 
@@ -121,7 +120,7 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   }
 
   public String teamOutput() {
-    return participator == null ? "Admin" : participator.getTeam().getAbbreviation() + "\n".repeat(extralinesRequired());
+    return participator == null ? "Admin" : participator.getAbbreviation() + "\n".repeat(extralinesRequired());
   }
 
   private int extralinesRequired() {

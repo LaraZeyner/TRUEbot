@@ -19,7 +19,14 @@ public class DiscordUserFactory {
 
   public static DiscordUser getDiscordUser(Member member) {
     final long memberId = member.getIdLong();
-    return Database.Find.find(DiscordUser.class, memberId);
+    final DiscordUser user = QueryBuilder.hql(DiscordUser.class, "FROM DiscordUser WHERE discordId = :discordId").addParameter("discordId", memberId).single();
+    return user == null ? createDiscordUser(member) : user;
+  }
+
+  public static DiscordUser createDiscordUser(Member member) {
+    final var user = new DiscordUser(member.getIdLong(), member.getAsMention());
+    Database.insert(user);
+    return user;
   }
 
   public static Application apply(DiscordUser user, TeamRole role, TeamPosition position, String appNotes) {
@@ -35,11 +42,11 @@ public class DiscordUserFactory {
   public static void getMembership(DiscordUser user, TeamRole role, TeamPosition position) {
     Membership membership = user.getMemberships().stream().filter(msp -> msp.getPosition().equals(position)).findFirst().orElse(null);
     if (membership == null) {
-      membership = new Membership(user, position);
+      membership = Membership.build(user, position);
     }
     membership.setRole(role);
     membership.setPosition(position);
     membership.setActive(true);
-    Database.save(membership);
+    Database.update(membership);
   }
 }

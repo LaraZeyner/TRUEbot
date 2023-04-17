@@ -14,6 +14,6 @@ public class PerformanceFactory {
   }
 
   public static Performance getPerformanceByPlayerAndTeamPerformance(Player player, TeamPerf teamPerformance) {
-    return QueryBuilder.hql(Performance.class, "FROM Performance WHERE player = " + player + " AND teamPerformance = " + teamPerformance).single();
+    return QueryBuilder.hql(Performance.class, "FROM Performance WHERE player = " + player.getId() + " AND teamPerformance = " + teamPerformance.getId()).single();
   }
 }

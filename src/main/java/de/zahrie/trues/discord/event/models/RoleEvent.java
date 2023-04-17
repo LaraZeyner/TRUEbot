@@ -1,4 +1,4 @@
-package de.zahrie.trues.discord.listener.models;
+package de.zahrie.trues.discord.event.models;
 
 
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
@@ -47,7 +47,7 @@ public class RoleEvent extends ListenerAdapter {
       event.getRole().getManager().setName(group.getName()).queue();
     } else {
       customRole.setName(event.getNewName());
-      Database.save(customRole);
+      Database.update(customRole);
     }
   }
 

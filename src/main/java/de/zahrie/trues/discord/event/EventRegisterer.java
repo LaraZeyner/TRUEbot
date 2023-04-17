@@ -1,14 +1,14 @@
-package de.zahrie.trues.discord.listener;
+package de.zahrie.trues.discord.event;
 
 import java.util.List;
 
 import de.zahrie.trues.api.Registerer;
-import de.zahrie.trues.discord.listener.models.ChannelEvent;
-import de.zahrie.trues.discord.listener.models.MemberEvent;
-import de.zahrie.trues.discord.listener.models.MessageEvent;
-import de.zahrie.trues.discord.listener.models.PermissionEvent;
-import de.zahrie.trues.discord.listener.models.RoleEvent;
-import de.zahrie.trues.discord.listener.models.VoiceEvent;
+import de.zahrie.trues.discord.event.models.ChannelEvent;
+import de.zahrie.trues.discord.event.models.MemberEvent;
+import de.zahrie.trues.discord.event.models.MessageEvent;
+import de.zahrie.trues.discord.event.models.PermissionEvent;
+import de.zahrie.trues.discord.event.models.RoleEvent;
+import de.zahrie.trues.discord.event.models.VoiceEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**

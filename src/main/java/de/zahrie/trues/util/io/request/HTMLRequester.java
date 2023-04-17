@@ -11,6 +11,7 @@ import lombok.extern.java.Log;
 public record HTMLRequester(URL url) {
 
   public HTML html() {
+    System.out.println("Request " + url.getPath());
     String content = determineContent();
     if (content.contains("webmaster has already been notified")) {
       content = determineContent();

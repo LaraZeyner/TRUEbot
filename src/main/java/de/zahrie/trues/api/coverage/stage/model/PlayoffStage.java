@@ -10,8 +10,8 @@ import de.zahrie.trues.api.coverage.match.model.MatchFormat;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayConfig;
 import de.zahrie.trues.api.coverage.season.OrgaCupSeason;
 import de.zahrie.trues.api.coverage.stage.Scheduleable;
-import de.zahrie.trues.api.coverage.stage.StageType;
 import de.zahrie.trues.api.datatypes.calendar.WeekdayTimeRange;
+import de.zahrie.trues.util.Util;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -30,8 +30,8 @@ public class PlayoffStage extends PlayStage implements Scheduleable, Serializabl
   private static final long serialVersionUID = -5748214049845502578L;
 
   @Override
-  public int pageId() {
-    return 512;
+  public Integer pageId() {
+    return Util.avoidNull(StageType.fromClass(getClass()), null, StageType::getPrmId);
   }
 
   @Override
@@ -42,7 +42,7 @@ public class PlayoffStage extends PlayStage implements Scheduleable, Serializabl
   @Override
   public PlaydayConfig playdayConfig() {
     return PlaydayConfig.builder()
-        .stageType(StageType.PLAYOFFS)
+        .stageType(StageType.PLAYOFF_STAGE)
         .format(MatchFormat.BEST_OF_THREE)
         .customDays(List.of(
             new WeekdayTimeRange(DayOfWeek.SATURDAY, LocalTime.of(14, 0), 139),

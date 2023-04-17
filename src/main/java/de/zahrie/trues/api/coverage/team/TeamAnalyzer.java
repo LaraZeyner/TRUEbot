@@ -55,7 +55,7 @@ public record TeamAnalyzer(Team team, ScoutingGameType type, int days) {
 
   public List<Match> getMatches() {
     final LocalDateTime startTime = LocalDateTime.now().minusDays(days);
-    return QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = " + team + " AND (coverage.start >= " +
+    return QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = " + team.getId() + " AND (coverage.start >= " +
         startTime + " OR coverage.result = '-:-') ORDER BY coverage.start").list();
   }
 

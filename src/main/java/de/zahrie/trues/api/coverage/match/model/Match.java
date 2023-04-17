@@ -3,13 +3,13 @@ package de.zahrie.trues.api.coverage.match.model;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import de.zahrie.trues.api.community.betting.Bet;
 import de.zahrie.trues.api.coverage.match.MatchResultHandler;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
@@ -18,6 +18,8 @@ import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.stage.Betable;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.discord.notify.NotificationManager;
 import de.zahrie.trues.util.Util;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -77,33 +79,62 @@ public class Match implements Betable, Serializable, Comparable<Match> {
   private String lastMessage = "keine Infos";
 
   @Column(name = "active", nullable = false)
-  private boolean isActive = true;
+  private boolean active = true;
 
   @Column(name = "result", nullable = false, length = 200)
   private String result = "-:-";
 
-  @OneToMany(mappedBy = "coverage")
-  @ToString.Exclude
+  @Enumerated
+  @Column(name = "format")
+  private MatchFormat format;
+
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "coverage")
   private Set<Participator> participators = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "match")
-  @ToString.Exclude
-  private Set<Bet> bets = new LinkedHashSet<>();
+  public void addParticipator(Participator participator) {
+    participator.setCoverage(this);
+    participators.add(participator);
+    Database.update(participator);
+    Database.update(this);
+  }
 
-  @OneToMany(mappedBy = "match")
-  @ToString.Exclude
-  private Set<MatchLog> logs = new LinkedHashSet<>();
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "match")
+  private Set<MatchLog> logs;
+
+  public void addLog(MatchLog log) {
+    log.setMatch(this);
+    logs.add(log);
+    Database.update(log);
+    Database.update(this);
+  }
+
+  public void setStart(LocalDateTime start) {
+    if (this.start.equals(start)) return;
+    this.start = start;
+    handleNotifications();
+  }
+
+  public void handleNotifications() {
+    if (start.isBefore(LocalDateTime.now().plusDays(1))) {
+      participators.stream().filter(participator -> participator.getTeam() != null)
+          .filter(participator -> participator.getTeam().getOrgaTeam() != null).forEach(NotificationManager::addNotifiersFor);
+    }
+  }
 
   public Participator getHome() {
     return participators.stream().filter(Participator::isFirstPick).findFirst().orElse(null);
   }
 
   public String getHomeAbbr() {
-    return Util.avoidNull(getHome(), "TBD", participator -> participator.getTeam().getAbbreviation());
+    return Util.avoidNull(getHome(), "TBD", Participator::getAbbreviation);
   }
 
   public String getHomeName() {
     return Util.avoidNull(getHome(), "TBD", participator -> participator.getTeam().getName());
+  }
+
+  public String getMatchup() {
+    return getHomeName() + " vs. " + getGuestName();
   }
 
   public Participator getGuest() {
@@ -111,7 +142,7 @@ public class Match implements Betable, Serializable, Comparable<Match> {
   }
 
   public String getGuestAbbr() {
-    return Util.avoidNull(getGuest(), "TBD", participator -> participator.getTeam().getAbbreviation());
+    return Util.avoidNull(getGuest(), "TBD", Participator::getAbbreviation);
   }
 
   public String getGuestName() {
@@ -119,7 +150,7 @@ public class Match implements Betable, Serializable, Comparable<Match> {
   }
 
   public String getExpectedResult() {
-    return getResultHandler().expectResultOf(this) + (result.equals("-:-") ? "*" : "");
+    return getResultHandler().expectResultOf(this) + (isRunning() ? "*" : "");
   }
 
   public Participator getOpponent(Team team) {
@@ -135,6 +166,7 @@ public class Match implements Betable, Serializable, Comparable<Match> {
   public Match(Playday playday, LocalDateTime start) {
     this.playday = playday;
     this.start = start;
+    this.format = playday.getFormat();
   }
 
   public Team getOpponentOf(Team team) {
@@ -155,29 +187,21 @@ public class Match implements Betable, Serializable, Comparable<Match> {
   }
 
   public void addParticipators(Participator home, Participator guest) {
+    if (getParticipators().contains(home) && getParticipators().contains(guest)) return;
+
     if (this instanceof PRMMatch) {
       Stream.of(home, guest).map(Participator::getTeam).forEach(team -> team.setHighlight(true));
     }
 
     if (isOrgagame()) {
-      Stream.of(home, guest).filter(Objects::nonNull)
+      Stream.of(home, guest)
           .map(Participator::getTeam)
           .forEach(team -> team.refresh(getStart()));
     }
+    if (!home.getTeam().equals(getHome().getTeam())) addParticipator(home);
+    if (!guest.getTeam().equals(getGuest().getTeam())) addParticipator(guest);
 
-    if (!home.getTeam().equals(getHome().getTeam())) {
-      home.setCoverage(this);
-      this.getParticipators().add(home);
-      Database.save(home);
-    }
-
-    if (!guest.getTeam().equals(getGuest().getTeam())) {
-      guest.setCoverage(this);
-      this.getParticipators().add(guest);
-      Database.save(guest);
-    }
-
-    Database.save(this);
+    handleNotifications();
   }
 
   @Override
@@ -199,10 +223,17 @@ public class Match implements Betable, Serializable, Comparable<Match> {
 
   public String getTypeString() {
     if (this instanceof Scrimmage) return "Scrimmage";
-    if (this instanceof InternMatch) return "TRUE-Cup";
+    if (this instanceof OrgaCupMatch) return "TRUE-Cup";
     if (this instanceof PRMMatch) return "Prime League";
    else return "Sportwette";
   }
 
+  public boolean isRunning() {
+    return result.equals("-:-");
+  }
+
+  public TimeRange getExpectedTimeRange() {
+    return new TimeRange(start, format.getDuration(), ChronoUnit.MINUTES);
+  }
 
 }

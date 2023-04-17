@@ -6,22 +6,24 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.ApplicationCalendar;
-import de.zahrie.trues.api.calendar.UserCalendar;
 import de.zahrie.trues.api.community.application.Application;
-import de.zahrie.trues.api.community.betting.Bet;
+import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.discord.notify.NotificationManager;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,7 +33,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -97,34 +98,40 @@ public class DiscordUser implements Serializable {
   @ToString.Exclude
   private DiscordUser acceptedBy;
 
-  private boolean isAccepted;
-
   @Column(name = "notification", columnDefinition = "SMALLINT UNSIGNED")
   private short notification = 0;
 
-  @OneToMany(mappedBy = "user")
-  @ToString.Exclude
-  private Set<DiscordUserGroup> groups;
+  public void setNotification(short notification) {
+    final Integer difference = notification == -1 ? null : this.notification - notification;
+    if (difference != null && difference.equals(0)) return;
+    this.notification = notification;
+    NotificationManager.addNotifiersFor(this,difference);
+  }
 
-  @OneToMany(mappedBy = "user")
-  @ToString.Exclude
-  private Set<Membership> memberships = new LinkedHashSet<>();
+  public List<DiscordUserGroup> getGroups() {
+    return QueryBuilder.hql(DiscordUserGroup.class, "FROM DiscordUserGroup WHERE user = :user").addParameter("user", this).list();
+  }
 
-  @OneToMany(mappedBy = "user")
-  @ToString.Exclude
-  private Set<Application> applications = new LinkedHashSet<>();
+  public List<Membership> getMemberships() {
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user").addParameter("user", this).list();
+  }
 
-  @OneToMany(mappedBy = "user")
-  @ToString.Exclude
-  private Set<UserCalendar> calendarEntries = new LinkedHashSet<>();
+  public List<Membership> getMainMemberships() {
+    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user and role = :role").addParameters(Map.of("user", this, "role", TeamRole.MAIN)).list();
+  }
 
-  @OneToMany(mappedBy = "user")
-  @ToString.Exclude
-  private Set<Bet> bets = new LinkedHashSet<>();
+  public List<Application> getApplications() {
+    return QueryBuilder.hql(Application.class, "FROM Application WHERE user = :user").addParameter("user", this).list();
+  }
 
   @ToString.Exclude
   @OneToOne(mappedBy = "discordUser")
   private Player player;
+
+  public DiscordUser(long discordId, String mention) {
+    this.discordId = discordId;
+    this.mention = mention;
+  }
 
   public Member getMember() {
     return Nunu.getInstance().getGuild().getMemberById(discordId);
@@ -135,12 +142,12 @@ public class DiscordUser implements Serializable {
   }
 
   public void addTempGroups() {
-    for (DiscordUserGroup discordUserGroup : groups) {
+    for (DiscordUserGroup discordUserGroup : getGroups()) {
       if (!discordUserGroup.isActive() && discordUserGroup.getRange().getEndTime().isAfter(LocalDateTime.now())) {
         addGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(true);
-        Database.save(discordUserGroup);
-        Database.save(this);
+        Database.update(discordUserGroup);
+        Database.update(this);
       }
     }
   }
@@ -154,12 +161,12 @@ public class DiscordUser implements Serializable {
   }
 
   public void removeTempGroups() {
-    for (DiscordUserGroup discordUserGroup : groups) {
+    for (DiscordUserGroup discordUserGroup : getGroups()) {
       if (discordUserGroup.isActive() && !discordUserGroup.getRange().hasEnded()) {
         removeGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(false);
-        Database.save(discordUserGroup);
-        Database.save(this);
+        Database.update(discordUserGroup);
+        Database.update(this);
       }
     }
   }
@@ -186,7 +193,7 @@ public class DiscordUser implements Serializable {
     this.acceptedBy = invoker;
     final var timeRange = new TimeRange(dateTime, 30, ChronoUnit.MINUTES);
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention()).queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember()
-        .getNickname()).queue(threadChannel -> Database.save(new ApplicationCalendar(timeRange, "by " + id + " - " + mention, this, threadChannel.getIdLong()))));
+        .getNickname()).queue(threadChannel -> Database.insert(new ApplicationCalendar(timeRange, "by " + id + " - " + mention, this, threadChannel.getIdLong()))));
     dm("Neuer Termin für Vorstellungsgespräch: " + TimeFormat.DISCORD.of(dateTime));
   }
 

@@ -10,7 +10,7 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Command(name = "list", descripion = "Liste aller offenen Bewerbungen", perm = @Perm(PermissionRole.ORGA_MEMBER))
+@Command(name = "tryouts", descripion = "Liste aller offenen Bewerbungen", perm = @Perm(PermissionRole.ORGA_MEMBER))
 public class TryoutListCommand extends SlashCommand {
   @Override
   @Msg(value = "List der Bewerbungen", embeds = @Embed(queries = @DBQuery(query = "Application.current",

@@ -2,7 +2,9 @@ package de.zahrie.trues.api.datatypes.calendar;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 public class DateTimeUtils {
@@ -11,12 +13,26 @@ public class DateTimeUtils {
     return daysBetween < 0 ? daysBetween + 7 : daysBetween;
   }
 
+  public static boolean isBetween(LocalDateTime localDateTime, LocalDate start, LocalDate end) {
+    final LocalDate date = localDateTime.toLocalDate();
+    if (date.isEqual(start) || date.isEqual(end)) return true;
+    return date.isAfter(start) && date.isBefore(end);
+  }
+
   public static boolean isAfterEqual(LocalDateTime localDateTime, LocalDateTime other) {
     return localDateTime.isAfter(other) || localDateTime.isEqual(other);
   }
 
   public static boolean isBeforeEqual(LocalDateTime localDateTime, LocalDateTime other) {
     return localDateTime.isBefore(other) || localDateTime.isEqual(other);
+  }
+
+  public static boolean isAfterEqual(LocalTime localDateTime, LocalTime other) {
+    return localDateTime.isAfter(other) || localDateTime.equals(other);
+  }
+
+  public static boolean isBeforeEqual(LocalTime localDateTime, LocalTime other) {
+    return localDateTime.isBefore(other) || localDateTime.equals(other);
   }
 
   public static LocalDateTime min(LocalDateTime localDateTime, LocalDateTime other) {

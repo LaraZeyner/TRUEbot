@@ -35,7 +35,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "middle", description = "ID oder Summonername", required = false),
     @Option(name = "bottom", description = "ID oder Summonername", required = false),
     @Option(name = "support", description = "ID oder Summonername", required = false),
-    @Option(name = "matchId", description = "ID des Matches", required = false, type = OptionType.INTEGER)
+    @Option(name = "matchid", description = "ID des Matches", required = false, type = OptionType.INTEGER)
 })
 @ExtensionMethod({StringUtils.class, LineupFactory.class})
 public class LineupCommand extends SlashCommand {
@@ -48,8 +48,8 @@ public class LineupCommand extends SlashCommand {
     final Team team = locatedTeam.getTeam();
     if (team == null) return reply("Dieses Orgateam hat kein Team.");
 
-    final Integer matchId = find("matchId").integer();
-    final Match mostRecentMatch = (matchId == null) ? team.nextOrLastMatch() : Database.Find.find(Match.class, matchId);
+    final Integer matchId = find("matchid").integer();
+    final Match mostRecentMatch = (matchId == null) ? team.getMatches().getNextMatch(true) : Database.Find.find(Match.class, matchId);
     if (mostRecentMatch == null) return reply("Es wurde kein Match gefunden.");
 
     for (Participator participator : mostRecentMatch.getParticipators()) {
@@ -62,6 +62,7 @@ public class LineupCommand extends SlashCommand {
       if (scouting != null) scouting.update();
       return sendMessage();
     }
+
     // TODO (Abgie) 27.03.2023: update Scout-pages
     return reply("Es wurde kein Team gefunden.");
   }

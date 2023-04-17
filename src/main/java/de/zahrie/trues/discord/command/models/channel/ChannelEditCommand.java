@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Command(name = "edit", descripion = "Channel bearbeiten", perm = @Perm(PermissionRole.ORGA_MEMBER), options = {
+@Command(name = "channeledit", descripion = "Channel bearbeiten", perm = @Perm(PermissionRole.ORGA_MEMBER), options = {
     @Option(name = "typ", description = "Typ des Channels", required = false, choices = {"Socials", "Event", "Leaderboard", "Orga Intern", "Staff Intern", "Content Intern"})
 })
 @ExtensionMethod(DiscordChannelFactory.class)
@@ -30,7 +30,7 @@ public class ChannelEditCommand extends SlashCommand {
       if (getInvokingMember().hasPermission(Util.nonNull(channel.getParentCategory()), Permission.MANAGE_PERMISSIONS)) {
         final DiscordChannel discordChannel = channel.getDiscordChannel();
         discordChannel.setPermissionType(type);
-        Database.save(type);
+        Database.update(type);
         discordChannel.updatePermissions();
       }
     }

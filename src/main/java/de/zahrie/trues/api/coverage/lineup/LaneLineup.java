@@ -6,9 +6,10 @@ import java.util.List;
 
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class LaneLineup {
+public class LaneLineup implements Comparable<LaneLineup> {
   private final Lane lane;
   private final List<LaneGames> players;
 
@@ -21,4 +22,8 @@ public class LaneLineup {
     players.sort(Comparator.comparing(LaneGames::amount).reversed());
   }
 
+  @Override
+  public int compareTo(@NotNull LaneLineup o) {
+    return Comparator.comparing(LaneLineup::getLane).compare(this, o);
+  }
 }

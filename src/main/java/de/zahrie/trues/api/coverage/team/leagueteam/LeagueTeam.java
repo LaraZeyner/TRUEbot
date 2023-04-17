@@ -13,6 +13,8 @@ import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.coverage.team.model.TeamScore;
+import de.zahrie.trues.api.database.Database;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -41,17 +43,23 @@ public class LeagueTeam implements Serializable, Comparable<LeagueTeam> {
   @Serial
   private static final long serialVersionUID = -763378764697829834L;
 
+  public static LeagueTeam build(League league, Team team) {
+    final var leagueTeam = new LeagueTeam(league, team);
+    Database.insert(leagueTeam);
+    return leagueTeam;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "leagueteam_id", nullable = false)
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "league", nullable = false)
   @ToString.Exclude
   private League league;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "team", nullable = false)
   @ToString.Exclude
   private Team team;
@@ -59,9 +67,16 @@ public class LeagueTeam implements Serializable, Comparable<LeagueTeam> {
   @Embedded
   private TeamScore score;
 
+  private LeagueTeam(League league, Team team) {
+    this.league = league;
+    this.team = team;
+    this.score = new TeamScore((short) 0, (short) 0, (short) 0);
+  }
+
   @Override
   public int compareTo(@NotNull LeagueTeam o) {
-    return Comparator.comparing(LeagueTeam::getLeague).compare(this, o);
+    return Comparator.comparing(LeagueTeam::getLeague)
+        .thenComparing(LeagueTeam::getScore).compare(this, o);
   }
 
   @Override
@@ -82,6 +97,6 @@ public class LeagueTeam implements Serializable, Comparable<LeagueTeam> {
     }
     final MatchResultHandler resultHandler = results.get(team);
     final TreeMap<Team, MatchResultHandler> sorted = new TreeMap<>(results);
-    return new TeamScore(league, (short) sorted.keySet().stream().toList().indexOf(team), resultHandler.getHomeScore(), resultHandler.getGuestScore());
+    return new TeamScore((short) sorted.keySet().stream().toList().indexOf(team), resultHandler.getHomeScore(), resultHandler.getGuestScore());
   }
 }
