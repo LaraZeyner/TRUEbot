@@ -8,14 +8,14 @@ import com.merakianalytics.orianna.types.core.match.Match;
 import com.merakianalytics.orianna.types.core.match.MatchHistory;
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.PlayerHandler;
-import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.riot.Xayah;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
 import org.joda.time.DateTime;
 
-public record PlayerAnalyzer(Player player) {
+public record PlayerAnalyzer(PlayerBase player) {
   public void analyze() {
     boolean hasPlayedRanked = false;
     final Summoner summoner = Xayah.summonerWithPuuid(player.getPuuid()).get();
@@ -33,11 +33,9 @@ public record PlayerAnalyzer(Player player) {
       final MatchAnalyzer matchAnalyzer = new MatchAnalyzer(match);
       final Game game = matchAnalyzer.analyze();
       if (game.getType().equals(GameType.RANKED_SOLO)) hasPlayedRanked = true;
-      Database.update(game);
     }
     if (hasPlayedRanked) new PlayerHandler(null, player).updateElo();
     player.setUpdated(currentTime);
-    Database.update(player);
     Database.connection().commit(null);
   }
 }

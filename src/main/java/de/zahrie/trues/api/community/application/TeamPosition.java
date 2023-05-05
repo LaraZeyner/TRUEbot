@@ -1,18 +1,20 @@
 package de.zahrie.trues.api.community.application;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.CAPITALIZE)
 public enum TeamPosition {
-  TOP(null),
-  JUNGLE(null),
-  MIDDLE(null),
-  BOTTOM(null),
-  SUPPORT(null),
-  MENTOR(null),
+  TOP(DiscordGroup.TOP),
+  JUNGLE(DiscordGroup.JUNGLE),
+  MIDDLE(DiscordGroup.MIDDLE),
+  BOTTOM(DiscordGroup.BOTTOM),
+  SUPPORT(DiscordGroup.SUPPORT),
+  MENTOR(DiscordGroup.MENTOR),
   EVENT_PLANNING(DiscordGroup.EVENT_PLANNING),
   CASTER(DiscordGroup.CASTER),
   SOCIAL_MEDIA(DiscordGroup.SOCIAL_MEDIA),
@@ -29,4 +31,5 @@ public enum TeamPosition {
   COACHING_MANAGER(DiscordGroup.COACHING_MANAGER);
 
   private final DiscordGroup discordGroup;
+
 }

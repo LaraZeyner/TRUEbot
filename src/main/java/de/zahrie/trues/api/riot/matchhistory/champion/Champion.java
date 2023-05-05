@@ -1,37 +1,42 @@
 package de.zahrie.trues.api.riot.matchhistory.champion;
 
 import java.io.Serial;
-import java.io.Serializable;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Table;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
 @ToString
-@Entity
-@Table(name = "champion")
-@NamedQuery(name = "Champion.fromName", query = "FROM Champion WHERE name = :name")
-public class Champion implements Serializable {
-
+@Table("champion")
+public class Champion implements Entity<Champion> {
   @Serial
-  private static final long serialVersionUID = -6533381080994832890L;
+  private static final long serialVersionUID = 6171714758229050668L;
 
+  private int id; // champion_id
+  private String name; // champion_name
 
-  @Id
-  @Column(name = "champion_id", nullable = false, columnDefinition = "SMALLINT UNSIGNED not null")
-  private int id;
+  public static Champion get(Object[] objects) {
+    return new Champion(
+        (int) objects[0],
+        (String) objects[1]
+    );
+  }
 
-  @Column(name = "champion_name", nullable = false, length = 16)
-  private String name;
+  @Override
+  public Champion create() {
+    return new Query<Champion>()
+        .key("champion_id", id)
+        .col("champion_name", name)
+        .insert(this);
+  }
+
+  @Override
+  public void setId(int id) {
+    this.id = id;
+  }
 }

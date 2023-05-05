@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.league.LeagueFactory;
-import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.playday.Playday;
@@ -46,6 +45,8 @@ public class MatchLoader extends GamesportsLoader {
   MatchLoader create() {
     final String seasonName = html.find("h1").text().before(":");
     final PRMSeason season = SeasonFactory.getSeason(seasonName);
+    if (season == null) throw new NullPointerException("Season nicht erstellt.");
+
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
     final String divisionName = division.text();
     final String divisionURL = division.find("a").getAttribute("href");
@@ -57,7 +58,7 @@ public class MatchLoader extends GamesportsLoader {
     final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
     final SchedulingRange scheduling = playdayScheduler.scheduling();
     final LocalDateTime matchtime = getMatchtime();
-    this.match = PRMMatch.build(playday, matchtime, league, scheduling, this.id);
+    this.match = new PRMMatch(playday, matchtime, league, scheduling, this.id).create();
     return this;
   }
 
@@ -70,7 +71,7 @@ public class MatchLoader extends GamesportsLoader {
         .logs(html.findAll("tr")).build();
   }
 
-  private Playday getPlayday(League league) {
+  private Playday getPlayday(PRMLeague league) {
     final List<HTML> data = html.find("div", "content-match-subtitles")
         .findAll("div", "txt-subtitle");
     if (data.size() < 2) {

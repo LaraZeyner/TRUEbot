@@ -2,23 +2,22 @@
 package de.zahrie.trues.discord.command.models.team;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.community.orgateam.OrgaTeamRepository;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.util.io.NamedQueries;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 @Command(name = "link", descripion = "Team erstellen", perm = @Perm(PermissionRole.MANAGEMENT), options = {
-    @Option(name = "team", description = "Name des Teams (ohne 'TRUE ')", completion = "OrgaTeam.OrgaTeams.str"),
+    @Option(name = "team", description = "Name des Teams (ohne 'TRUE ')", completion = NamedQueries.ORGA_TEAMS),
     @Option(name = "id", description = "PRM TeamId (sofern vorhanden)", type = OptionType.INTEGER)
 })
 @ExtensionMethod(StringUtils.class)
@@ -28,11 +27,13 @@ public class TeamLinkCommand extends SlashCommand {
   public boolean execute(SlashCommandInteractionEvent event) {
     final String name = find("name").string().replace("TRUE ", "");
     final Integer id = find("id").integer();
-    final OrgaTeam orgaTeam = OrgaTeamRepository.getTeamFromName(name);
+    final OrgaTeam orgaTeam = OrgaTeam.fromName(name);
     if (orgaTeam == null) return errorMessage();
+
     final PRMTeam team = TeamFactory.getTeam(id);
+    if (team == null) return errorMessage();
+
     orgaTeam.setTeam(team);
-    Database.update(orgaTeam);
     return sendMessage();
   }
 }

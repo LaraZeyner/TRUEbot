@@ -6,7 +6,6 @@ import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.URLType;
 import lombok.experimental.ExtensionMethod;
@@ -36,8 +35,6 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
         .getAttribute("href"));
     final PRMTeam team = TeamFactory.getTeam(teamId);
     player.setTeam(team);
-    Database.update(player);
-    Database.update(team);
   }
 
 }

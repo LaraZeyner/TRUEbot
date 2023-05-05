@@ -1,48 +1,71 @@
 package de.zahrie.trues.api.logging;
 
 import java.io.Serial;
-import java.io.Serializable;
+import java.time.LocalDateTime;
 
+import de.zahrie.trues.api.database.connector.Listing;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@DiscriminatorValue("member")
-public class ServerLog extends OrgaLog implements Serializable {
+@RequiredArgsConstructor
+@AllArgsConstructor
+@Table(value = "orga_log", department = "member")
+public class ServerLog implements Entity<ServerLog>, OrgaLog {
   @Serial
-  private static final long serialVersionUID = -5911622197578986648L;
+  private static final long serialVersionUID = -1495547582387523247L;
 
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "action", nullable = false, length = 50)
-  private ServerLogAction action;
-
-  public ServerLog(DiscordUser target, String details, ServerLogAction action) {
-    this(null, target, details, action);
-  }
+  private int id;
+  private final LocalDateTime timestamp;
+  private final DiscordUser invoker;
+  private final DiscordUser target;
+  private final String details;
+  private final ServerLogAction action;
 
   public ServerLog(DiscordUser invoker, DiscordUser target, String details, ServerLogAction action) {
-    super(invoker, target, details);
+    this.timestamp = LocalDateTime.now();
+    this.invoker = invoker;
+    this.target = target;
+    this.details = details;
     this.action = action;
   }
 
+  public ServerLog(DiscordUser target, String details, ServerLogAction action) {
+    this(LocalDateTime.now(), null, target, details, action);
+  }
+
+  public static ServerLog get(Object[] objects) {
+    return new ServerLog(
+        (int) objects[0],
+        (LocalDateTime) objects[2],
+        new Query<DiscordUser>().entity(objects[3]),
+        new Query<DiscordUser>().entity(objects[4]),
+        (String) objects[5],
+        new SQLEnum<ServerLogAction>().of(objects[6])
+    );
+  }
+
+  @Override
+  public ServerLog create() {
+    return new Query<ServerLog>().key("department", "member")
+        .key("log_time", getTimestamp()).key("target", getTarget()).key("details", getDetails()).key("action", action)
+        .insert(this);
+  }
+
+  @Listing(Listing.ListingType.LOWER)
   public enum ServerLogAction {
     APPLICATION_CREATED,
     SERVER_JOIN,
-    SERVER_LEAVE
+    SERVER_LEAVE,
+    COMMAND,
+    OTHER
   }
 }

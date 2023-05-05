@@ -1,7 +1,10 @@
 package de.zahrie.trues.api.scouting;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.riot.matchhistory.game.Selection;
+import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
 
 public abstract class AbstractScoutingQuery<T> {
   protected final Class<T> clazz;
@@ -14,25 +17,9 @@ public abstract class AbstractScoutingQuery<T> {
     this.start = LocalDateTime.now().minusDays(days);
   }
 
-  public List<T> performance() {
-    return performance("", null);
-  }
+  public abstract Query<Performance> performance();
 
-  public List<T> performance(String selectedColumns) {
-    return performance(selectedColumns, null);
-  }
-
-  public abstract List<T> performance(String selectedColumns, String suffix);
-
-  public List<T> selection() {
-    return selection("", null);
-  }
-
-  public List<T> selection(String selectedColumns) {
-    return selection(selectedColumns, null);
-  }
-
-  public abstract List<T> selection(String selectedColumns, String suffix);
+  public abstract Query<Selection> selection();
   
-  protected abstract String gameTypeString();
+  protected abstract Query<Performance> gameTypeString(Query<Performance> query);
 }

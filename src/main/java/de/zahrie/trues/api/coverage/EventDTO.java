@@ -3,7 +3,7 @@ package de.zahrie.trues.api.coverage;
 import java.util.Comparator;
 import java.util.List;
 
-import de.zahrie.trues.api.database.DTO;
+import de.zahrie.trues.api.database.connector.DTO;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import org.jetbrains.annotations.NotNull;
 

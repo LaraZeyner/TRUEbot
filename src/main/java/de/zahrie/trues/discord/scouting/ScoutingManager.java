@@ -7,8 +7,8 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerAnalyzer;
-import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
@@ -32,7 +32,7 @@ public class ScoutingManager {
   }
 
   public static void updateThread(ThreadChannel threadChannel) {
-    scoutings.values().stream().filter(scouting -> scouting.thread().equals(threadChannel)).findFirst().ifPresent(Scouting::update);
+    scoutings.values().stream().filter(scouting -> scouting.thread() != null).filter(scouting -> scouting.thread().equals(threadChannel)).findFirst().ifPresent(Scouting::update);
   }
 
   public static void addForTeam(OrgaTeam orgaTeam, Participator participator, Match match) {
@@ -44,19 +44,19 @@ public class ScoutingManager {
     scouting.update();
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type) {
+  public static void custom(TeamBase team, IReplyCallback event, Scouting.ScoutingType type) {
     custom(team, event, type, null, 365, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days) {
+  public static void custom(TeamBase team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days) {
     custom(team, event, type, gameType, days, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
-    new Scouting(null, new Participator(false, team), null, null).sendCustom(event, type, gameType, days, page);
+  public static void custom(TeamBase team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
+    new Scouting(null, new Participator(null, false, team), null, null).sendCustom(event, type, gameType, days, page);
   }
 
-  public static void handlePlayerHistory(IReplyCallback event, @NonNull Player player, @Nullable Champion champion, @NonNull ScoutingGameType gameType, @Nullable Lane lane) {
+  public static void handlePlayerHistory(IReplyCallback event, @NonNull PlayerBase player, @Nullable Champion champion, @NonNull ScoutingGameType gameType, @Nullable Lane lane) {
     final String championOutput = Util.avoidNull(champion, "alle", Champion::getName);
     final String laneOutput = Util.avoidNull(lane, "alle", Lane::getDisplayName);
     final EmbedBuilder builder = new EmbedBuilder()

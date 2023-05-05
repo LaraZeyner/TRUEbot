@@ -4,6 +4,7 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
@@ -29,7 +30,7 @@ public class ScoutMatchHistoryModal extends ModalImpl {
   @Override
   public boolean execute(ModalInteractionEvent event) {
     final Object positionOrName = getLolPositionOrSummonername();
-    Player player = null;
+    PlayerBase player = null;
     Lane lane = null;
     if (positionOrName instanceof Lane selectedLane) {
       final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(event.getGuildChannel());

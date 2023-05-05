@@ -1,8 +1,6 @@
 package de.zahrie.trues.discord.event.models;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
 import lombok.experimental.ExtensionMethod;
@@ -55,12 +53,7 @@ public class ChannelEvent extends ListenerAdapter {
     final GuildChannel channel = event.getChannel().asGuildChannel();
     if (event.getChannelType().equals(ChannelType.GUILD_NEWS_THREAD) || event.getChannelType().equals(ChannelType.GUILD_PRIVATE_THREAD) || event.getChannelType().equals(ChannelType.GUILD_PUBLIC_THREAD)) return;
 
-    final DiscordChannel discordChannel = channel.getDiscordChannel();
-    if (discordChannel instanceof TeamChannel teamChannel) {
-      teamChannel.updatePermissions();
-    } else {
-      discordChannel.updatePermissions();
-    }
+    channel.getDiscordChannel().updatePermissions();
   }
 
   @Override
@@ -74,6 +67,5 @@ public class ChannelEvent extends ListenerAdapter {
     final GuildChannel channel = event.getChannel().asGuildChannel();
     final DiscordChannel discordChannel = DiscordChannelFactory.getDiscordChannel(channel);
     discordChannel.setName(event.getNewValue());
-    Database.updateAndCommit(discordChannel);
   }
 }

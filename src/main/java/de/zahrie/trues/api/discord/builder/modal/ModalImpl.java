@@ -12,11 +12,8 @@ import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
-import de.zahrie.trues.api.scouting.ScoutingGameType;
-import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.message.Emote;
@@ -24,6 +21,8 @@ import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.champion.ChampionFactory;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
+import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,7 +61,7 @@ public abstract class ModalImpl extends ModalBase {
 
   @NotNull
   public ActionRow getTeams() {
-    final List<OrgaTeam> orgaTeams = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list();
+    final List<OrgaTeam> orgaTeams = new Query<OrgaTeam>().entityList();
     return ActionRow.of(StringSelectMenu.create("team-name").setPlaceholder("Teamname")
         .addOptions(orgaTeams.stream().map(team -> SelectOption.of(team.getName(), String.valueOf(team.getId()))).toList())
         .build());
@@ -279,13 +278,13 @@ public abstract class ModalImpl extends ModalBase {
 
   protected OrgaTeam getTeam() {
     final String teamIdString = Util.nonNull(modalEvent().getValue("team-name")).getAsString();
-    return Database.Find.find(OrgaTeam.class, Long.parseLong(teamIdString));
+    return new Query<OrgaTeam>().entity(teamIdString.intValue());
   }
 
   @Override
   protected DiscordUser getInvoker() {
     final String targetIdString = Util.nonNull(modalEvent().getValue("target-name")).getAsString();
-    return Database.Find.find(DiscordUser.class, Integer.parseInt(targetIdString));
+    return new Query<DiscordUser>().entity(targetIdString.intValue());
   }
 
   protected DiscordGroup getGroup() {
@@ -307,7 +306,7 @@ public abstract class ModalImpl extends ModalBase {
     return Util.nonNull(modalEvent().getValue("description")).getAsString();
   }
 
-  protected Team getTeamIdOrName() {
+  protected TeamBase getTeamIdOrName() {
     final String asString = Util.nonNull(modalEvent().getValue("team-id")).getAsString();
     PRMTeam team;
     if (asString.intValue() == -1) {
@@ -338,7 +337,7 @@ public abstract class ModalImpl extends ModalBase {
   }
 
   protected boolean handleTeamsLineup(Participator participator) {
-    final String opGg = Util.nonNull(modalEvent().getValue("op- " + (participator.isFirstPick() ? "home" : "guest"))).getAsString();
+    final String opGg = Util.nonNull(modalEvent().getValue("op- " + (participator.isHome() ? "home" : "guest"))).getAsString();
     return !participator.get().setOrderedLineup(opGg);
   }
 

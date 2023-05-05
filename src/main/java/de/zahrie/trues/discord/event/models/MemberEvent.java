@@ -4,7 +4,6 @@ package de.zahrie.trues.discord.event.models;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.logging.ServerLog;
@@ -36,8 +35,7 @@ public class MemberEvent extends ListenerAdapter {
   @Override
   public void onGuildMemberJoin(GuildMemberJoinEvent event) {
     final DiscordUser user = DiscordUserFactory.createDiscordUser(event.getMember());
-    final ServerLog serverLog = new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_JOIN);
-    Database.insert(serverLog);
+    new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_JOIN).create();
 
     final String settings = Arrays.stream(Settings.RegistrationAction.values()).map(registrationAction -> registrationAction.name().toLowerCase()).collect(Collectors.joining(", "));
     user.getMember().getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
@@ -58,7 +56,6 @@ public class MemberEvent extends ListenerAdapter {
   public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
     final DiscordUser user = DiscordUserFactory.getDiscordUser(event.getMember());
     user.setMention(event.getMember().getAsMention());
-    Database.update(user);
   }
 
   @Override
@@ -66,8 +63,7 @@ public class MemberEvent extends ListenerAdapter {
     final Member member = event.getMember();
     if (member != null) {
       final DiscordUser user = DiscordUserFactory.getDiscordUser(member);
-      final ServerLog serverLog = new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_LEAVE);
-      Database.insert(serverLog);
+      new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_LEAVE).create();
     }
   }
 }

@@ -1,75 +1,76 @@
 package de.zahrie.trues.api.calendar;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.DTO;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.connector.DTO;
+import de.zahrie.trues.api.database.connector.Listing;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.discord.notify.NotificationManager;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.jetbrains.annotations.Nullable;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@Entity
-@DiscriminatorValue("team")
+@Table(value = "calendar", department = "team")
 @ExtensionMethod(StringUtils.class)
-public class TeamCalendar extends CalendarBase implements Serializable, DTO {
+public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO {
   @Serial
-  private static final long serialVersionUID = 8384587779953917815L;
+  private static final long serialVersionUID = -8449986995823183145L;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "calendar_type", nullable = false, length = 11)
-  private TeamCalendarType type;
+  private TeamCalendarType type; // calendar_type
+  private OrgaTeam orgaTeam; // orga_team
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "orga_team")
-  @ToString.Exclude
-  private OrgaTeam orgaTeam;
-
-  @Column(name = "thread_id")
-  private Long threadId;
-
-  public static TeamCalendar create(TimeRange timeRange, String details, TeamCalendarType type, OrgaTeam orgaTeam, long threadId) {
-    final TeamCalendar calendar = new TeamCalendar(timeRange, details, type, orgaTeam, threadId);
-    if (timeRange.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
-      NotificationManager.addNotifiersFor(calendar);
-    }
-    Database.insert(calendar);
-    return calendar;
-  }
-
-  private TeamCalendar(TimeRange timeRange, String details, TeamCalendarType type, OrgaTeam orgaTeam, long threadId) {
-    super(timeRange, details);
+  public TeamCalendar(TimeRange timeRange, String details, TeamCalendarType type, OrgaTeam orgaTeam, long threadId) {
+    super(timeRange, details, threadId);
     this.type = type;
     this.orgaTeam = orgaTeam;
     this.threadId = threadId;
+  }
+
+  public TeamCalendar(int id, TimeRange range, String details, Long threadId, TeamCalendarType type, OrgaTeam orgaTeam) {
+    super(id, range, details, threadId);
+    this.type = type;
+    this.orgaTeam = orgaTeam;
+  }
+
+  public static TeamCalendar get(Object[] objects) {
+    return new TeamCalendar(
+        (int) objects[0],
+        new TimeRange((LocalDateTime) objects[2], (LocalDateTime) objects[3]),
+        (String) objects[4],
+        (Long) objects[5],
+        new SQLEnum<TeamCalendarType>().of(objects[5]),
+        new Query<OrgaTeam>().entity(objects[8])
+    );
+  }
+
+  @Override
+  public TeamCalendar create() {
+    final var calendar = new Query<TeamCalendar>().key("department", "team")
+        .col("calendar_start", range.getStartTime())
+        .col("calendar_end", range.getEndTime())
+        .col("details", details)
+        .col("thread_id", threadId)
+        .col("calendar_type", type)
+        .col("orga_team", orgaTeam)
+        .insert(this);
+    if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
+      NotificationManager.addNotifiersFor(calendar);
+    }
+    return calendar;
   }
 
   @Override
@@ -85,7 +86,7 @@ public class TeamCalendar extends CalendarBase implements Serializable, DTO {
   public Match getMatch() {
     final Integer matchId = getDetails().intValue();
     if (matchId == -1) return null;
-    return Database.Find.find(Match.class, matchId);
+    return new Query<Match>().entity(matchId);
   }
 
   @Override
@@ -94,7 +95,7 @@ public class TeamCalendar extends CalendarBase implements Serializable, DTO {
     return List.of(
         getRange().display(),
         match == null ? type.toString() : match.getTypeString(),
-        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(orgaTeam.getTeam()), "kein Gegner", Team::getName)
+        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(orgaTeam.getTeam()), "kein Gegner", TeamBase::getName)
     );
   }
 
@@ -104,6 +105,7 @@ public class TeamCalendar extends CalendarBase implements Serializable, DTO {
   }
 
   @ExtensionMethod(StringUtils.class)
+  @Listing(Listing.ListingType.UPPER)
   public enum TeamCalendarType {
     KALIBRIERUNG, COACHING, CLASH, MEETING, TRAINING, MATCH;
 

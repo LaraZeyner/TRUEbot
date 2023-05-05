@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.scheduling.DateTimeStringConverter;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
@@ -145,6 +146,11 @@ public class StringUtils {
 
   public static String capitalizeFirst(String value) {
     return value.isBlank() ? "" : value.substring(0, 1).toUpperCase() + value.substring(1).toLowerCase();
+  }
+
+  public static String capitalizeEnum(String value) {
+    return Arrays.stream(value.replace("_", " ").split(" "))
+        .map(StringUtils::capitalizeFirst).collect(Collectors.joining(" "));
   }
 
   public static int count(String value, String substring) {

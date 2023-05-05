@@ -3,7 +3,7 @@ package de.zahrie.trues.discord.context.models;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
 import de.zahrie.trues.api.discord.command.context.Context;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Column;
@@ -35,10 +35,10 @@ public class ProfileContext extends ContextCommand {
     return sendMessage(mention);
   }
 
-  private void handleTeamData(Team team) {
+  private void handleTeamData(TeamBase team) {
     String divisionName = "keine Daten";
     String score = "keine Daten";
-    if (team instanceof final PRMTeam prmTeam) {
+    if (team instanceof PRMTeam prmTeam) {
       final LeagueTeam currentLeague = prmTeam.getCurrentLeague();
       if (currentLeague != null) {
         divisionName = currentLeague.getLeague().getName();

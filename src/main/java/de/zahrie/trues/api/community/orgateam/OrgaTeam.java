@@ -1,100 +1,118 @@
 package de.zahrie.trues.api.community.orgateam;
 
 import java.io.Serial;
-import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
-import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "orga_team")
-@NamedQuery(name = "OrgaTeam.OrgaTeams.str", query = "SELECT nameCreation FROM OrgaTeam")
-public class OrgaTeam implements Serializable {
+@Table("orga_team")
+public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   @Serial
-  private static final long serialVersionUID = 4608926794336892138L;
-
-
-  @Id
-  @Column(name = "orga_team_id", columnDefinition = "TINYINT UNSIGNED not null")
-  private short id;
-
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "team", unique = true)
-  @ToString.Exclude
-  private Team team;
-
-  public void setTeam(Team team) {
-    team.setOrgaTeam(this);
-    this.team = team;
-    Database.update(team);
-  }
-
-  @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "team_role", nullable = false)
-  @ToString.Exclude
+  private static final long serialVersionUID = 5847570695211918386L;
+  private int id; // orga_team_id
+  private String nameCreation; // team_name_created
+  private String abbreviationCreation; // team_abbr_created
   @Getter(AccessLevel.PACKAGE)
-  private CustomDiscordGroup group;
-
-  @Column(name = "team_name_created", nullable = false, length = 100)
-  private String nameCreation;
-
-  public void setNameCreation(String nameCreation) {
-    getRoleManager().updateRoleName(nameCreation);
-    this.nameCreation = nameCreation;
-  }
-
-  @Column(name = "team_abbr_created", nullable = false, length = 25)
-  private String abbreviationCreation;
-
-  @Column(name = "orga_place", columnDefinition = "TINYINT UNSIGNED null")
-  private Short place = 0;
-
-  @Column(name = "stand_ins", columnDefinition = "TINYINT UNSIGNED null")
-  private Short standins = 4;
+  private CustomDiscordGroup group; // team_role
+  private TeamBase team; // team
+  private Byte place = 0; // orga_place
+  private Byte standins = 4; // stand_ins
 
   public OrgaTeam(String nameCreation, String abbreviationCreation) {
     this.nameCreation = nameCreation;
     this.abbreviationCreation = abbreviationCreation;
   }
 
-  public List<Membership> getMemberships() {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE orgaTeam = :team").addParameter("team", this).list();
+  public static OrgaTeam get(Object[] objects) {
+    return new OrgaTeam(
+        (int) objects[0],
+        (String) objects[1],
+        (String) objects[2],
+        new Query<CustomDiscordGroup>().entity( objects[3]),
+        new Query<TeamBase>().entity(objects[4]),
+        (Byte) objects[5],
+        (Byte) objects[6]
+    );
   }
 
-  public Set<Membership> getActiveMemberships() {
-    return getMemberships().stream().filter(Membership::isActive).collect(Collectors.toSet());
+  @Nullable
+  public static OrgaTeam fromName(@NonNull String name) {
+    return new Query<OrgaTeam>().where("team_name_created", name).entity();
   }
 
-  public Set<Membership> getMainMemberships() {
-    return getMemberships().stream().filter(Membership::isActive).filter(membership -> membership.getRole().equals(TeamRole.MAIN)).collect(Collectors.toSet());
+  @Override
+  public OrgaTeam create() {
+    final OrgaTeam orgaTeam = new Query<OrgaTeam>().key("orga_team_id", id)
+        .col("team_name_created", nameCreation).col("team_abbr_created", abbreviationCreation).col("team_role", group)
+        .col("team", team).col("orga_place", place).col("stand_ins", standins).insert(this);
+    team.setOrgaTeam(this);
+    return orgaTeam;
+  }
+
+  @Override
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setNameCreation(String nameCreation) {
+    final boolean updated = !this.nameCreation.equals(nameCreation);
+    this.nameCreation = nameCreation;
+    if (updated) {
+      getRoleManager().updateRoleName(nameCreation);
+      getChannels().updateChannels();
+      new Query<OrgaTeam>().col("team_name_created", nameCreation).update(id);
+    }
+  }
+
+  public void setAbbreviationCreation(String abbreviationCreation) {
+    final boolean updated = !this.abbreviationCreation.equals(abbreviationCreation);
+    this.abbreviationCreation = abbreviationCreation;
+    if (updated) {
+      getChannels().updateChannels();
+      new Query<OrgaTeam>().col("team_abbr_created", nameCreation).update(id);
+    }
+  }
+
+  public void setGroup(CustomDiscordGroup group) {
+    this.group = group;
+    new Query<OrgaTeam>().col("team_role", group).update(id);
+  }
+
+  public void setTeam(TeamBase team) {
+    team.setOrgaTeam(this);
+    this.team = team;
+    new Query<OrgaTeam>().col("team", team).update(id);
+  }
+
+  public List<Membership> getActiveMemberships() {
+    return new Query<Membership>().where("orga_team", this).and("active", true).entityList();
+  }
+
+  public List<Membership> getMainMemberships() {
+    return new Query<Membership>().where("orga_team", this).and("active", true).and("role", TeamRole.MAIN)
+        .entityList();
+  }
+
+  public Membership getMembership(TeamRole role, TeamPosition position) {
+    return new Query<Membership>().where("orga_team", team).and("active", true).and("role", role).and("position", position).entity();
   }
 
   public String getName() {
@@ -108,14 +126,9 @@ public class OrgaTeam implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof final OrgaTeam orgaTeam)) return false;
+    if (!(o instanceof OrgaTeam orgaTeam)) return false;
     if (team != null) return getTeam().equals((orgaTeam.getTeam()));
     return getId() == orgaTeam.getId();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId());
   }
 
   public OrgaTeamScheduler getScheduler() {
@@ -128,5 +141,11 @@ public class OrgaTeam implements Serializable {
 
   public OrgaTeamRoleHandler getRoleManager() {
     return new OrgaTeamRoleHandler(this);
+  }
+
+  @Override
+  public int compareTo(@NotNull OrgaTeam o) {
+    return Comparator.comparing(OrgaTeam::getPlace)
+        .thenComparing(OrgaTeam::getId).compare(this, o);
   }
 }

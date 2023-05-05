@@ -2,6 +2,7 @@ package de.zahrie.trues.api.community.orgateam.teamchannel;
 
 import java.util.Arrays;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.channel.PermissionChannelType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.LOWER)
 public enum TeamChannelType {
   CATEGORY(null, PermissionChannelType.TEAM_CHAT),
   CHAT("team-chat", PermissionChannelType.TEAM_CHAT),

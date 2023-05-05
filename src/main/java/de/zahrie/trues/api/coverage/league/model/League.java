@@ -1,77 +1,41 @@
 package de.zahrie.trues.api.coverage.league.model;
 
 import java.io.Serial;
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
-import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
-import de.zahrie.trues.api.coverage.stage.model.PlayStage;
-import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
-import de.zahrie.trues.api.database.QueryBuilder;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@DiscriminatorColumn(name = "prm_id")
-@DiscriminatorValue("null")
-@Table(name = "coverage_group", indexes = {@Index(name = "idx_coverage_group", columnList = "stage, group_name", unique = true) })
-public class League implements Serializable, Comparable<League> {
-
+@Table(value = "coverage_group", department = "other")
+public class League extends LeagueBase implements Entity<League> {
   @Serial
-  private static final long serialVersionUID = -4755609416246322480L;
+  private static final long serialVersionUID = -1878025702559463286L;
 
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "coverage_group_id", columnDefinition = "TINYINT UNSIGNED not null")
-  private short id;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "stage", nullable = false)
-  @ToString.Exclude
-  private PlayStage stage;
-
-  @Column(name = "group_name", nullable = false, length = 25)
-  private String name;
-
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "league")
-  private Set<TournamentMatch> matches = new LinkedHashSet<>();
-
-  public List<LeagueTeam> getSignups() {
-    return QueryBuilder.hql(LeagueTeam.class, "FROM LeagueTeam WHERE league = :league").addParameter("league", this).list();
+  public League(Stage stage, String name) {
+    super(stage, name);
   }
 
-  public LeagueTier getTier() {
-    return LeagueTier.fromName(name);
+  private League(int id, Stage stage, String name) {
+    super(id, stage, name);
+  }
+
+  public static League get(Object[] objects) {
+    return new League(
+        (int) objects[0],
+        new Query<Stage>().entity(objects[2]),
+        (String) objects[3]
+    );
   }
 
   @Override
-  public int compareTo(@NotNull League o) {
-    return Comparator.comparing(League::getStage).compare(this, o);
+  public League create() {
+    return new Query<League>()
+        .key("stage", stage).key("group_name", name)
+        .insert(this);
   }
 }

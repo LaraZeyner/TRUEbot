@@ -1,69 +1,50 @@
 package de.zahrie.trues.api.community.betting;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-@ToString
-@Entity
-@Table(name = "bet", indexes = @Index(name = "idx_bet", columnList = "coverage, discord_user", unique = true))
-public class Bet implements Serializable {
-
+@Table("bet")
+public final class Bet implements Entity<Bet> {
   @Serial
-  private static final long serialVersionUID = 1002640658346268833L;
+  private static final long serialVersionUID = -3029760281191504565L;
 
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "bet_id", nullable = false)
   private int id;
+  private final Match match; // coverage
+  private final DiscordUser user; // discord_user
+  private final String outcome; // bet_outcome
+  private final int amount; // bet_amount
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "coverage", nullable = false)
-  @ToString.Exclude
-  private Match match;
+  public static Bet get(Object[] objects) {
+    return new Bet(
+        (int) objects[0],
+        new Query<Match>().entity(objects[1]),
+        new Query<DiscordUser>().entity(objects[2]),
+        (String) objects[3],
+        (int) objects[4]
+    );
+  }
 
-  @ToString.Exclude
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "discord_user", nullable = false)
-  private DiscordUser user;
+  @Override
+  public Bet create() {
+    return new Query<Bet>()
+        .key("coverage", match).key("discord_user", user)
+        .col("bet_outcome", outcome).col("bet_amount", amount)
+        .insert(this);
+  }
 
-  @Column(name = "bet_outcome", nullable = false, length = 300)
-  private String outcome;
-
-  @Column(name = "bet_amount", nullable = false)
-  private int amount;
-
-  public Bet(Match match, DiscordUser user, String outcome, int amount) {
-    this.match = match;
-    this.user = user;
-    this.outcome = outcome;
-    this.amount = amount;
+  @Override
+  public void setId(int id) {
+    this.id = id;
   }
 }

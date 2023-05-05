@@ -9,9 +9,8 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.calendar.scheduling.DateTimeStringConverter;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.util.StringUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +59,6 @@ public final class Settings {
       if (birthdate == null) return "Das Format ist fehlerhaft.";
 
       user.setBirthday(birthdate);
-      Database.update(user);
       return "Dein Geburtstag wurde für den " + birthday + " eingetragen";
     }),
     NOTIFY((user, minutes) -> {

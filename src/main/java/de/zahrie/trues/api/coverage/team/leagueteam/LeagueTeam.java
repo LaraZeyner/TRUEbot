@@ -1,76 +1,58 @@
 package de.zahrie.trues.api.coverage.team.leagueteam;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.match.MatchResultHandler;
-import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
+import de.zahrie.trues.api.coverage.league.model.LeagueBase;
+import de.zahrie.trues.api.coverage.match.MatchResult;
+import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
 import de.zahrie.trues.api.coverage.team.model.TeamScore;
-import de.zahrie.trues.api.database.Database;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@Entity
-@Table(name = "league_team", indexes = @Index(name = "league_team_idx_league_team", columnList = "league, team", unique = true))
-public class LeagueTeam implements Serializable, Comparable<LeagueTeam> {
+@Table("league_team")
+public class LeagueTeam implements Entity<LeagueTeam>, Comparable<LeagueTeam> {
   @Serial
-  private static final long serialVersionUID = -763378764697829834L;
+  private static final long serialVersionUID = -2748540818479532130L;
+  private int id; // league_team_id
+  private final LeagueBase league; // league
+  private final TeamBase team; // team
+  private final TeamScore score; // current_place, current_wins, current_losses
 
-  public static LeagueTeam build(League league, Team team) {
-    final var leagueTeam = new LeagueTeam(league, team);
-    Database.insert(leagueTeam);
+  public LeagueTeam(LeagueBase league, TeamBase team, TeamScore score) {
+    this.league = league;
+    this.team = team;
+    this.score = score;
+  }
+
+  public static LeagueTeam get(Object[] objects) {
+    final LeagueTeam leagueTeam = new LeagueTeam(
+        (int) objects[0],
+        new Query<League>().entity(objects[1]),
+        new Query<TeamBase>().entity(objects[2]),
+        new TeamScore((short) objects[3], (short) objects[4], (short) objects[5])
+    );
+    leagueTeam.getLeague().getLeagueTeams().add(leagueTeam);
     return leagueTeam;
   }
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "leagueteam_id", nullable = false)
-  private int id;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "league", nullable = false)
-  @ToString.Exclude
-  private League league;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "team", nullable = false)
-  @ToString.Exclude
-  private Team team;
-
-  @Embedded
-  private TeamScore score;
-
-  private LeagueTeam(League league, Team team) {
-    this.league = league;
-    this.team = team;
-    this.score = new TeamScore((short) 0, (short) 0, (short) 0);
+  @Override
+  public LeagueTeam create() {
+    return new Query<LeagueTeam>().key("league", league).key("team", team)
+        .col("current_place", score.place()).col("current_wins", score.wins()).col("current_losses", score.losses()).insert(this, leagueTeam -> league.getLeagueTeams().add(this));
   }
 
   @Override
@@ -85,18 +67,19 @@ public class LeagueTeam implements Serializable, Comparable<LeagueTeam> {
   }
 
   public TeamScore getExpectedScore() {
-    final Map<Team, MatchResultHandler> results = new HashMap<>();
-    for (final TournamentMatch match : league.getMatches()) {
+    final Map<TeamBase, MatchResult> results = new TreeMap<>();
+    for (final LeagueMatch match : league.getMatches()) {
       for (final Participator participator : match.getParticipators()) {
-        final Team participatingTeam = participator.getTeam();
+        final TeamBase participatingTeam = participator.getTeam();
         if (participatingTeam == null) continue;
-        final MatchResultHandler resultHandler = results.containsKey(participatingTeam) ? results.get(participatingTeam) : new MatchResultHandler((short) 0, (short) 0, true);
-        final MatchResultHandler resultHandler2 = match.getResultHandler().ofTeam(match, participatingTeam);
-        results.put(participatingTeam, resultHandler.add(resultHandler2));
+
+        final MatchResult resultHandler = results.containsKey(participatingTeam) ? results.get(participatingTeam) :
+            new MatchResult(0, 0);
+        final MatchResult resultHandler2 = match.getResult().ofTeam(match, participatingTeam);
+        if (resultHandler2 != null) results.put(participatingTeam, resultHandler.add(resultHandler2));
       }
     }
-    final MatchResultHandler resultHandler = results.get(team);
-    final TreeMap<Team, MatchResultHandler> sorted = new TreeMap<>(results);
-    return new TeamScore((short) sorted.keySet().stream().toList().indexOf(team), resultHandler.getHomeScore(), resultHandler.getGuestScore());
+    final MatchResult resultHandler = results.get(team);
+    return new TeamScore((short) results.keySet().stream().toList().indexOf(team), (short) resultHandler.getHomeScore(), (short) resultHandler.getGuestScore());
   }
 }

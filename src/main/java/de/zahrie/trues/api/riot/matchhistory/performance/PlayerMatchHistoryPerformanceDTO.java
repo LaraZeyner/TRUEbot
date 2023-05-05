@@ -3,36 +3,53 @@ package de.zahrie.trues.api.riot.matchhistory.performance;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.database.DTO;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.database.connector.DTO;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLGroup;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
+import de.zahrie.trues.api.riot.matchhistory.game.Game;
+import de.zahrie.trues.api.riot.matchhistory.game.GameType;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 public record PlayerMatchHistoryPerformanceDTO(Performance performance) implements DTO {
 
-  public static QueryBuilder<PlayerMatchHistoryPerformanceDTO> get(Player player, ScoutingGameType gameType, @Nullable Lane lane, @Nullable Champion champion) {
-    String whereClause = "FROM performance WHERE ";
-    if (lane != null) whereClause += " lane = " + lane;
-    if (champion != null) whereClause += " champion " + champion.getId();
-    whereClause += (lane == null && champion == null) ? " " : " AND";
-
-    final String hqlStatementString = whereClause + switch (gameType) {
-      case PRM_ONLY -> "teamPerformance.game.type <= 1";
-      case PRM_CLASH -> "teamPerformance.game.type <= 2";
-      case TEAM_GAMES -> "player.team = " + player.getTeam().getId() + " AND teamPerformance.game.type <= 4 GROUP BY teamPerformance, player.team HAVING COUNT(p1) > 2 ORDER BY COUNT(p1) DESC) OR teamPerformance IN (SELECT teamPerformance FROM Performance p2 WHERE player = " + player.getId() + " AND (teamPerformance.game.type <= 1) GROUP BY teamPerformance ORDER BY count(p2) DESC)) AND player = " + player.getId();
-      case MATCHMADE -> "";
-    };
-    return QueryBuilder.hql(PlayerMatchHistoryPerformanceDTO.class, hqlStatementString);
+  public static Query<Performance> get(PlayerBase player, ScoutingGameType gameType, @Nullable Lane lane, @Nullable Champion champion) {
+    final var query = new Query<Performance>()
+        .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+        .where("player", player);
+    if (lane != null) query.where("lane", lane);
+    if (champion != null) query.where("champion", champion);
+    switch (gameType) {
+      case PRM_ONLY -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CUSTOM);
+      case PRM_CLASH -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
+      case TEAM_GAMES -> query.join(new JoinQuery<Performance, Player>())
+          .where("_player.team", player.getTeam())
+          .and(Condition.inSubquery("t_perf", new Query<Performance>().distinct("t_perf", Integer.class)
+                  .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+                  .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH).and("player", player)
+                  .with(new Query<Performance>().distinct("t_perf", Integer.class)
+                      .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+                      .join(new JoinQuery<Performance, Player>())
+                      .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.RANKED_FLEX).and("player", player)
+                      .groupBy(new SQLGroup("t_perf, _player.team").having("count(performance_id) > 2"))
+                  )
+              )
+          );
+    }
+    return query;
   }
 
   @Override
   public List<String> getData() {
     return List.of(
         performance.getTeamPerformance().getGame().getType().name().charAt(1) + ": " + TimeFormat.DISCORD.of(performance.getTeamPerformance().getGame().getStart()),
-        performance.getChampion().getName() + " vs. " + Util.avoidNull(performance.getOpponent(), "kein Gegner", Champion::getName),
+        performance.getMatchup().champion().getName() + " vs. " + Util.avoidNull(performance.getMatchup().opponent(), "kein Gegner", Champion::getName),
         (performance.getTeamPerformance().isWin() ? "W" : "L") + ": " + performance.getKda().toString()
     );
   }

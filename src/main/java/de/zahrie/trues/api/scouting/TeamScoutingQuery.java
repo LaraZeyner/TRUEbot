@@ -1,40 +1,69 @@
 package de.zahrie.trues.api.scouting;
 
-import java.util.List;
-import java.util.Map;
-
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.QueryBuilder;
-import de.zahrie.trues.util.Util;
+import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLGroup;
+import de.zahrie.trues.api.riot.matchhistory.game.Game;
+import de.zahrie.trues.api.riot.matchhistory.game.GameType;
+import de.zahrie.trues.api.riot.matchhistory.game.Selection;
+import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
+import de.zahrie.trues.api.riot.matchhistory.performance.TeamPerf;
 
 public class TeamScoutingQuery<T> extends AbstractScoutingQuery<T> {
-  protected final Team team;
+  protected final TeamBase team;
 
-  TeamScoutingQuery(Class<T> clazz, ScoutingGameType gameType, int days, Team team) {
+  TeamScoutingQuery(Class<T> clazz, ScoutingGameType gameType, int days, TeamBase team) {
     super(clazz, gameType, days);
     this.team = team;
   }
 
   @Override
-  public List<T> performance(String selectedColumns, String suffix) {
-    final String query = "SELECT " + selectedColumns + " FROM Performance p WHERE player.team = :team AND teamPerformance.game.start > :start " + gameTypeString() + Util.avoidNull(suffix, "", str -> " " + str);
-    return QueryBuilder.hql(clazz, query).addParameters(Map.of("team", team, "start", start)).list();
+  public Query<Performance> performance() {
+    return gameTypeString(new Query<Performance>().distinct("_teamperf.game", Integer.class)
+        .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+        .join(new JoinQuery<Performance, Player>())
+        .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", start));
   }
 
   @Override
-  public List<T> selection(String selectedColumns, String suffix) {
-    final String query = "SELECT " + selectedColumns + " FROM Selection s WHERE game IN (SELECT distinct teamPerformance.game FROM Performance p WHERE player.team = :team AND teamPerformance.game.start > :start " + gameTypeString() + ")" + Util.avoidNull(suffix, "", str -> " " + str);
-    return QueryBuilder.hql(clazz, query).addParameters(Map.of("team", team, "start", start)).list();
+  public Query<Selection> selection() {
+    final Query<Performance> performanceQuery = gameTypeString(new Query<Performance>().distinct("_teamperf.game", Integer.class)
+        .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+        .join(new JoinQuery<Performance, Player>())
+        .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", start));
+
+    return new Query<Selection>().where(Condition.inSubquery("game", performanceQuery));
   }
 
   @Override
-  protected String gameTypeString() {
-    return switch (gameType) {
-      case PRM_ONLY -> "AND teamPerformance.game.type <= 1";
-      case PRM_CLASH -> "AND teamPerformance.game.type <= 2";
-      case TEAM_GAMES -> team == null ? "AND teamPerformance.game.type <= 2" : "AND (teamPerformance IN (FROM TeamPerf WHERE team = " + team + " AND teamPerformance.game.type <= 3) OR teamPerformance IN (SELECT teamPerformance FROM Performance p2 WHERE player.team = " + team + " AND teamPerformance.game.type <= 2 GROUP BY teamPerformance ORDER BY count(p2) DESC))))";
-      case MATCHMADE -> "";
-    };
+  protected Query<Performance> gameTypeString(Query<Performance> query) {
+    switch (gameType) {
+      case PRM_ONLY -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CUSTOM);
+      case PRM_CLASH -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
+      case TEAM_GAMES -> {
+        if (team == null) query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
+        else {
+          query.join(new JoinQuery<Performance, Player>())
+              .where("_player.team", team)
+              .and(Condition.inSubquery("t_perf", new Query<Performance>().distinct("t_perf", Integer.class)
+                      .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+                      .join(new JoinQuery<Performance, Player>())
+                      .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH).and("_player.team", team)
+                      .with(new Query<Performance>().distinct("t_perf", Integer.class)
+                          .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+                          .join(new JoinQuery<Performance, Player>())
+                          .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.RANKED_FLEX).and("_player.team", team)
+                          .groupBy(new SQLGroup("t_perf, _player.team").having("count(performance_id) > 2"))
+                      )
+                  )
+              );
+        }
+      }
+    }
+    return query;
   }
 }
 

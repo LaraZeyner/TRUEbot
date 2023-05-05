@@ -11,9 +11,9 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.discord.scouting.Scouting;
-import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -21,8 +21,9 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.discord.scouting.Scouting;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -45,14 +46,14 @@ public class LineupCommand extends SlashCommand {
     final OrgaTeam locatedTeam = getLocatedTeam();
     if (locatedTeam == null) return errorMessage();
 
-    final Team team = locatedTeam.getTeam();
+    final TeamBase team = locatedTeam.getTeam();
     if (team == null) return reply("Dieses Orgateam hat kein Team.");
 
     final Integer matchId = find("matchid").integer();
-    final Match mostRecentMatch = (matchId == null) ? team.getMatches().getNextMatch(true) : Database.Find.find(Match.class, matchId);
-    if (mostRecentMatch == null) return reply("Es wurde kein Match gefunden.");
+    final Match mostRecentAMatch = (matchId == null) ? team.getMatches().getNextMatch(true) : new Query<Match>().entity(matchId);
+    if (mostRecentAMatch == null) return reply("Es wurde kein Match gefunden.");
 
-    for (Participator participator : mostRecentMatch.getParticipators()) {
+    for (Participator participator : mostRecentAMatch.getParticipators()) {
       if (participator.getTeam().equals(team)) continue;
       final boolean orderedLineup = determineOrderedLineup(participator);
       if (!orderedLineup) {
@@ -69,19 +70,19 @@ public class LineupCommand extends SlashCommand {
 
   private boolean determineOrderedLineup(Participator participator) {
     final String opGg = find("opgg").string();
-    final List<Player> players = new ArrayList<>(List.of(determinePlayerOfKey("top", participator),
+    final List<PlayerBase> players = new ArrayList<>(List.of(determinePlayerOfKey("top", participator),
         determinePlayerOfKey("jungle", participator), determinePlayerOfKey("middle", participator),
         determinePlayerOfKey("bottom", participator), determinePlayerOfKey("support", participator)));
     if (opGg == null) return false;
     return participator.get().setOrderedLineup(opGg, players);
   }
 
-  public Player determinePlayerOfKey(String key, Participator participator) {
+  public PlayerBase determinePlayerOfKey(String key, Participator participator) {
     final String data = find(key).string();
     if (data != null) {
       if (Pattern.compile("-?\\d+(\\.\\d+)?").matcher(data).matches()) {
         final int playerId = Integer.parseInt(data);
-        final Player player = Database.Find.find(Player.class, playerId);
+        final var player = new Query<PlayerBase>().entity(playerId);
         if (player != null) return player;
       }
 

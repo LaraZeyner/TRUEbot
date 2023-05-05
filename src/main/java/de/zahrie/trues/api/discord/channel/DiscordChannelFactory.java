@@ -5,8 +5,7 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeamChannelHandler;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.util.StringUtils;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
@@ -20,20 +19,13 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 @ExtensionMethod(StringUtils.class)
 public class DiscordChannelFactory {
   /**
-   * Erhalte {@link DiscordChannel} vom GuildChannel <br>
+   * Erhalte {@link DiscordChannelImpl} vom GuildChannel <br>
    * Wenn noch nicht vorhanden erstelle Datenbankeintrag
    */
   @NonNull
   public static DiscordChannel getDiscordChannel(@NonNull GuildChannel channel) {
-    final TeamChannel teamChannel = QueryBuilder.hql(TeamChannel.class,
-        "FROM TeamChannel WHERE discordId = :discordId").addParameter("discordId", channel.getIdLong()).single();
-    if (teamChannel != null) return teamChannel;
-
-    final DiscordChannel discordChannel = QueryBuilder.hql(DiscordChannel.class,
-        "FROM DiscordChannel WHERE discordId = :discordId").addParameter("discordId", channel.getIdLong()).single();
-    if (discordChannel != null) return discordChannel;
-
-    return createChannel(channel);
+    final DiscordChannel discordChannel = new Query<DiscordChannel>().where("discord_id", channel.getIdLong()).entity();
+    return discordChannel != null ? discordChannel : createChannel(channel);
   }
 
   /**
@@ -44,19 +36,16 @@ public class DiscordChannelFactory {
     OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(channel);
     if (orgaTeam == null && channel.getName().contains(" (")) {
       final String categoryAbbr = channel.getName().between(" (", ")");
-      orgaTeam = QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam WHERE abbreviationCreation = :abbr").addParameter("abbr", categoryAbbr).single();
+      orgaTeam = new Query<OrgaTeam>().where("team_abbr_created", categoryAbbr).entity();
     }
 
-    if (orgaTeam != null) return OrgaTeamChannelHandler.createTeamChannelEntity(channel, orgaTeam);
-
-    final var discordChannel = new DiscordChannel(channel.getIdLong(), channel.getName(), determineChannelType(channel), channel.getType());
-    Database.insertAndCommit(discordChannel);
-    return discordChannel;
+    return orgaTeam != null ? OrgaTeamChannelHandler.createTeamChannelEntity(channel, orgaTeam) :
+        new DiscordChannelImpl(channel.getIdLong(), channel.getName(), determineChannelType(channel), channel.getType()).forceCreate();
   }
 
   public static void removeTeamChannel(@NonNull GuildChannel channel) {
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(channel);
-    if (teamChannel != null) Database.removeAndCommit(teamChannel);
+    if (teamChannel != null) teamChannel.forceDelete();
   }
 
   private static PermissionChannelType determineChannelType(GuildChannel initialChannel) {

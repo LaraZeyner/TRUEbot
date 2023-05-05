@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.league.LeagueLoader;
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.LeagueBase;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchHandler;
@@ -15,7 +15,6 @@ import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.season.signup.SignupFactory;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.request.HTML;
@@ -40,13 +39,13 @@ public class TeamHandler extends TeamModel implements Serializable {
     updateResult(stages);
     updateRecordAndSeasons();
     handleStarterMatches(stages);
-    Database.update(team);
+    team.update();
   }
 
   public void loadDivision() {
-    final PRMLeague currentLeague = (PRMLeague) Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
-    if (currentLeague != null) {
-      final LeagueLoader leagueLoader = new LeagueLoader(currentLeague.getUrl());
+    final LeagueBase currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
+    if (currentLeague instanceof PRMLeague prmLeague) {
+      final LeagueLoader leagueLoader = new LeagueLoader(prmLeague.getUrl());
       leagueLoader.load().updateAll();
     }
   }
@@ -86,7 +85,7 @@ public class TeamHandler extends TeamModel implements Serializable {
     team.setScore(determineDivision(stages), result);
   }
 
-  private League determineDivision(List<HTML> stages) {
+  private PRMLeague determineDivision(List<HTML> stages) {
     final String divisionName = stages.get(stages.size() - 1)
         .find("ul", "content-icon-info")
         .find("li").find("a").text();

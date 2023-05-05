@@ -8,6 +8,7 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.api.logging.ServerLog;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -29,7 +30,8 @@ public class ApplyStaffModal extends ModalImpl {
   public boolean execute(ModalInteractionEvent event) {
     final DiscordUser target = getTarget() == null ? DiscordUserFactory.getDiscordUser(getMember()) : getTarget();
     final Application application = target.apply(TeamRole.ORGA, getTeamPosition(), getDescription());
-    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerber " + getInvoker().getMention() + ": " + application.toString()).queue();
+    new ServerLog(getInvoker(), target, application.toString(), ServerLog.ServerLogAction.APPLICATION_CREATED).create();
+    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerber " + getInvoker().getMention() + ": " + application).queue();
     return sendMessage();
   }
 }

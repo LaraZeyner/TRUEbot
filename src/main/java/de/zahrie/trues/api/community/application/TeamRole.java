@@ -1,5 +1,8 @@
 package de.zahrie.trues.api.community.application;
 
+import de.zahrie.trues.api.database.connector.Listing;
+
+@Listing(Listing.ListingType.CAPITALIZE)
 public enum TeamRole {
   /**
    * hilft für einen Tag aus
@@ -13,15 +16,15 @@ public enum TeamRole {
   /**
    * Substitude oder wenn temporär Tryout für dieses Team
    */
-  SUBSTITUDE,
+  SUBSTITUTE,
   /**
    * Stammspieler (max. 5 pro Team)
    */
   MAIN,
+  ORGA_TRYOUT,
   /**
    * Teil als Staffmember
    */
   ORGA,
-  ORGA_TRYOUT,
   REMOVE
 }

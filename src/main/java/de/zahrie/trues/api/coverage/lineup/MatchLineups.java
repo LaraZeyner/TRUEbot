@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.coverage.lineup;
 
+import java.util.Arrays;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
@@ -21,7 +22,7 @@ public class MatchLineups {
   }
 
   public void update() {
-    this.lineups = match.getParticipators().stream().map(MatchLineup::new).toList();
+    this.lineups = Arrays.stream(match.getParticipators()).map(MatchLineup::new).toList();
   }
 
 }

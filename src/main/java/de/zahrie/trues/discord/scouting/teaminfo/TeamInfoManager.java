@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Query;
 import lombok.extern.java.Log;
 
 @Log
@@ -39,7 +39,7 @@ public class TeamInfoManager {
   }
 
   public static void loadAllData() {
-    for (OrgaTeam fromOrgaTeam : QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list()) {
+    for (OrgaTeam fromOrgaTeam : new Query<OrgaTeam>().entityList()) {
       final TeamInfo info = fromTeam(fromOrgaTeam);
       if (Duration.between(info.getLastUpdate(), LocalDateTime.now()).get(ChronoUnit.SECONDS) >= 24*3600) toUpdate.add(fromOrgaTeam);
     }

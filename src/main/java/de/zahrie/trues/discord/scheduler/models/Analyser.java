@@ -11,9 +11,9 @@ import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.team.TeamHandler;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.connector.Database;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.analyze.PlayerAnalyzer;
 import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
@@ -39,10 +39,11 @@ public class Analyser extends ScheduledTask {
   }
 
   private static void loadPRMData() {
-    for (OrgaTeam orgaTeam : QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam").list()) {
-      final Team team = orgaTeam.getTeam();
+    for (OrgaTeam orgaTeam : new Query<OrgaTeam>().entityList()) {
+      final TeamBase team = orgaTeam.getTeam();
       if (team == null) continue;
-      final PRMTeam prmTeam = Database.Find.find(PRMTeam.class, team.getId());
+
+      final PRMTeam prmTeam = new Query<PRMTeam>().entity(team.getId());
       if (prmTeam != null) {
         Database.connection().commit(false);
         final TeamLoader teamLoader = new TeamLoader(prmTeam);

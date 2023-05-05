@@ -1,28 +1,23 @@
 package de.zahrie.trues.api.coverage.team;
 
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Query;
 import org.jetbrains.annotations.Nullable;
 
 public class TeamFactory {
 
   @Nullable
   public static PRMTeam getTeam(int teamId) {
-    PRMTeam team = QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE prmId = " + teamId).single();
+    final PRMTeam team = new Query<PRMTeam>().where("prm_id", teamId).entity();
     if (team != null) return team;
 
     final TeamLoader teamLoader = new TeamLoader(teamId).create();
-    if (teamLoader == null) return null;
-
-    team = teamLoader.getTeam();
-    Database.update(team);
-    return team;
+    return teamLoader == null ? null : teamLoader.getTeam();
   }
 
 
   public static PRMTeam getTeam(int prmId, String name, String abbreviation) {
-    PRMTeam team = Database.Find.find(PRMTeam.class, prmId);
+    PRMTeam team = new Query<PRMTeam>().where("prm_id", prmId).entity();
     if (team != null) return team;
 
     team = fromName(name, abbreviation);
@@ -36,16 +31,16 @@ public class TeamFactory {
 
   @Nullable
   public static PRMTeam fromName(String name, String abbreviation) {
-    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE name = " + name + " and abbreviation = " + abbreviation).single();
+    return new Query<PRMTeam>().where("team_name", name).and("team_abbr", abbreviation).entity();
   }
 
   @Nullable
   public static PRMTeam fromAbbreviation(String abbreviation) {
-    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE abbreviation = " + abbreviation).single();
+    return new Query<PRMTeam>().where("team_abbr", abbreviation).entity();
   }
 
   @Nullable
   public static PRMTeam fromName(String name) {
-    return QueryBuilder.hql(PRMTeam.class, "FROM PRMTeam WHERE name = " + name).single();
+    return new Query<PRMTeam>().where("team_name", name).entity();
   }
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
+import de.zahrie.trues.util.io.NamedQueries;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,9 @@ public class CustomQuery {
   @RequiredArgsConstructor
   @Getter
   public enum Queries {
-    ORGA_GAMES("", "", new CustomQuery("Orga.Games",
+    ORGA_GAMES("", "", new CustomQuery(NamedQueries.ORGA_GAMES,
         List.of(new CustomColumn("Championname", 16), new CustomColumn("Picks", 8)))),
-    TEAM_CHAMPIONS("", "", new CustomQuery("Team.Champions",
+    TEAM_CHAMPIONS("", "", new CustomQuery(NamedQueries.ORGA_CHAMPIONS,
         List.of(new CustomColumn("Championname", 16), new CustomColumn("Picks", 8))));
     private final String title;
     private final String description;

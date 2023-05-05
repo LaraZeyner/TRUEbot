@@ -1,8 +1,8 @@
 package de.zahrie.trues.api.coverage.match.log;
 
-import lombok.ToString;
+import de.zahrie.trues.api.database.connector.Listing;
 
-@ToString
+@Listing(Listing.ListingType.ORDINAL)
 public enum EventStatus {
   QUESTION,
   CREATED,

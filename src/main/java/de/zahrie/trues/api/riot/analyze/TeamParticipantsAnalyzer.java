@@ -7,25 +7,16 @@ import com.merakianalytics.orianna.types.core.match.Participant;
 import com.merakianalytics.orianna.types.core.match.Team;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
-import de.zahrie.trues.api.riot.matchhistory.game.MatchExtension;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import de.zahrie.trues.api.riot.matchhistory.game.MatchUtils;
 
-@Data
-@RequiredArgsConstructor
-@ExtensionMethod(MatchExtension.class)
-public class TeamParticipantsAnalyzer {
-  private final Match match;
-  private final Team team;
-
+public record TeamParticipantsAnalyzer(Match match, Team team) {
   public List<Participant> analyze() {
-    if (match.getGameQueue().equals(GameType.TOURNAMENT) || match.getGameQueue().equals(GameType.CUSTOM)) {
+    if (MatchUtils.getGameQueue(match).equals(GameType.TOURNAMENT) || MatchUtils.getGameQueue(match).equals(GameType.CUSTOM)) {
       return team.getParticipants();
     }
 
     final List<Participant> players = team.getParticipants().stream()
         .filter(matchParticipant -> PlayerFactory.findPlayer(matchParticipant.getSummoner().getPuuid()) != null).toList();
-    return match.getGameQueue().equals(GameType.CLASH) && !players.isEmpty() ? team.getParticipants() : players;
+    return MatchUtils.getGameQueue(match).equals(GameType.CLASH) && !players.isEmpty() ? team.getParticipants() : players;
   }
 }

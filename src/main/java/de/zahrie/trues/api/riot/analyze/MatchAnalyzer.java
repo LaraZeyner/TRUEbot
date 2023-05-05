@@ -4,35 +4,28 @@ import java.util.Arrays;
 
 import com.merakianalytics.orianna.types.common.Map;
 import com.merakianalytics.orianna.types.core.match.Match;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.riot.matchhistory.Side;
 import de.zahrie.trues.api.riot.matchhistory.game.Game;
 import de.zahrie.trues.api.riot.matchhistory.game.GameType;
-import de.zahrie.trues.api.riot.matchhistory.game.MatchExtension;
-import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.riot.matchhistory.game.MatchUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 
 @Data
 @RequiredArgsConstructor
-@ExtensionMethod(MatchExtension.class)
+@ExtensionMethod(MatchUtils.class)
 public class MatchAnalyzer {
   private final Match match;
-  private final boolean alreadyInserted;
   private Game game;
   private boolean requiresSelection;
-
-  public MatchAnalyzer(Match match) {
-    this(match, QueryBuilder.hql(Game.class, "FROM PRMMatch WHERE matchId = " + match.getMatchId()).single() != null);
-  }
 
   public Game analyze() {
     if (match.getParticipants().size() != 10 || !match.getMap().equals(Map.SUMMONERS_RIFT)) return null;
 
     this.game = createGame();
-    final MatchSideAnalyzer blueSide = new MatchSideAnalyzer(match, game, alreadyInserted, true);
-    final MatchSideAnalyzer redSide = new MatchSideAnalyzer(match, game, alreadyInserted, false);
+    final MatchSideAnalyzer blueSide = new MatchSideAnalyzer(match, game, Side.BLUE);
+    final MatchSideAnalyzer redSide = new MatchSideAnalyzer(match, game, Side.RED);
     this.requiresSelection = requiresSelection(blueSide, redSide);
     handleSide(blueSide);
     handleSide(redSide);
@@ -51,12 +44,11 @@ public class MatchAnalyzer {
     if (requiresSelection && !game.hasSelections()) analyzer.analyzeSelections();
     if (analyzer.getValidParticipants().isEmpty()) return;
 
-    final TeamPerf side = analyzer.analyze();
-    Database.update(side);
+    analyzer.analyze();
   }
 
   private Game createGame() {
     final int durationInSeconds = (int) Math.round(match.getDuration().getMillis() / 1000.);
-    return new Game(match.getMatchId(), match.getCreation(), durationInSeconds, match.getGameQueue());
+    return new Game(match.getMatchId(), match.getCreation(), durationInSeconds, match.getGameQueue()).create();
   }
 }

@@ -1,37 +1,18 @@
 package de.zahrie.trues.api.riot.matchhistory.champion;
 
-import de.zahrie.trues.api.database.QueryBuilder;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.api.database.Database;
 import org.jetbrains.annotations.NotNull;
 
 public class ChampionFactory {
   public static void loadAllChampions() {
-    for (final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion : Xayah.getChampions()) {
-      final var champion = getChampion(riotChampion);
-      champion.setName(riotChampion.getName());
-      Database.update(champion);
-    }
+    Xayah.getChampions().forEach(ChampionFactory::getChampion);
   }
 
   public static Champion getChampion(@NotNull com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion) {
-    Champion champion = Database.Find.find(Champion.class, riotChampion.getId());
-    if (champion == null) {
-      champion = new Champion(riotChampion.getId(), riotChampion.getName());
-      Database.insert(champion);
-    }
-    return champion;
+    return new Champion(riotChampion.getId(), riotChampion.getName()).create();
   }
 
   public static Champion getChampion(String name) {
-    Champion champion = QueryBuilder.hql(Champion.class, "FROM Champion WHERE name = " + name).single();
-    if (champion == null) {
-      final com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion = Xayah.championNamed(name).get();
-      if (riotChampion != null) {
-        champion = new Champion(riotChampion.getId(), riotChampion.getName());
-        Database.insert(champion);
-      }
-    }
-    return champion;
+    return getChampion(Xayah.championNamed(name).get());
   }
 }

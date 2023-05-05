@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.discord.group;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
@@ -81,7 +80,7 @@ public class RoleGranterBase {
   public void updateRelatedRoles(DiscordUser user) {
     //TODO (Abgie) 21.03.2023: never used
     final Set<DiscordGroup> departmentGroups = user.getActiveGroups().stream().map(group -> group.getDepartment().getGroup()).filter(Objects::nonNull).collect(Collectors.toSet());
-    for ( DiscordGroup pingableGroup : Department.ALL.getPingableGroups()) {
+    for (DiscordGroup pingableGroup : Department.ALL.getPingableGroups()) {
       if (departmentGroups.contains(pingableGroup)) {
         addRole(pingableGroup.getRole());
       } else {
@@ -90,7 +89,7 @@ public class RoleGranterBase {
     }
 
     final Set<DiscordGroup> orgaGroups = user.getActiveGroups().stream().flatMap(group -> group.getTier().getInheritedGroups().stream()).collect(Collectors.toSet());
-    for ( DiscordGroup group : List.of(DiscordGroup.ORGA_MEMBER, DiscordGroup.STAFF, DiscordGroup.ADMIN)) {
+    for (DiscordGroup group : List.of(DiscordGroup.ORGA_MEMBER, DiscordGroup.STAFF, DiscordGroup.ADMIN)) {
       if (orgaGroups.contains(group)) {
         addRole(group.getRole());
       } else {
@@ -101,20 +100,13 @@ public class RoleGranterBase {
 
   public RoleGranterBase add(DiscordGroup group, LocalDateTime start, int days) {
     if (days > 0) {
-      final var timeRange = new TimeRange(start, days, ChronoUnit.DAYS);
-      DiscordUserGroup.build(target, group, timeRange);
+      final var timeRange = new TimeRange(start, Duration.ofDays(days));
+      new DiscordUserGroup(target, group, timeRange).create();
     }
     target.getGroups().stream().filter(DiscordUserGroup::isActive)
         .filter(discordUserGroup -> discordUserGroup.getDiscordGroup().equals(group)).findFirst().ifPresent(discordUserGroup -> {
-          if (days > 0) {
-            final LocalDateTime end = discordUserGroup.getRange().getEndTime();
-            final var timeRange = new TimeRange(start, days, ChronoUnit.DAYS);
-            if (timeRange.getEndTime().isAfter(end)) discordUserGroup.setRange(timeRange);
-          } else {
-            discordUserGroup.setActive(false);
-            discordUserGroup.getRange().setEndTime(LocalDateTime.now());
-          }
-          Database.update(discordUserGroup);
+          if (days > 0) discordUserGroup.updateTimeRange(start, days);
+          else discordUserGroup.end();
         });
 
     updateRelatedRolesOnAdd(group);

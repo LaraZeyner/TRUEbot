@@ -1,80 +1,48 @@
 package de.zahrie.trues.api.discord.channel;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Set;
-
+import de.zahrie.trues.api.database.connector.Database;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Id;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
-import de.zahrie.trues.api.discord.util.Nunu;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.java.Log;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
-import org.hibernate.annotations.DiscriminatorFormula;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-@ToString
-@Entity(name = "DiscordChannel")
-@Table(name = "discord_channel")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorFormula("IF(orga_team IS NULL, 'null', 'not null')")
-@DiscriminatorValue("null")
+@Table("discord_channel")
 @Log
-public class DiscordChannel implements Serializable {
-  @Serial
-  private static final long serialVersionUID = -2307398301886813719L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", columnDefinition = "TINYINT UNSIGNED not null")
-  private short id;
-
-  @Column(name = "discord_id", nullable = false)
-  private long discordId;
-
-  @Column(name = "channel_name", nullable = false)
-  private String name;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "permission_type", nullable = false)
-  private PermissionChannelType permissionType;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "channel_type", nullable = false)
-  private ChannelType channelType;
+public abstract class DiscordChannel implements ADiscordChannel, Id {
+  protected int id; // discord_channel_id
+  protected final long discordId; // discord_id
+  protected final DiscordChannelType channelType; // channel_type
+  protected String name; // channel_name
+  protected PermissionChannelType permissionType; // permission_type
 
   public DiscordChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType) {
     this.discordId = discordId;
     this.name = name;
     this.permissionType = permissionType;
-    this.channelType = channelType;
+    this.channelType = DiscordChannelType.valueOf(channelType.name());
   }
 
+  @Override
+  public void setId(int id) {
+    this.id = id;
+  }
 
-  public IPermissionContainer getChannel() {
-    return (IPermissionContainer) Nunu.DiscordChannel.getChannel(discordId);
+  public void setName(String name) {
+    this.name = name;
+    new Query<DiscordChannel>().col("channel_name", name).update(id);
+    Database.connection().commit();
+  }
+
+  public void setPermissionType(PermissionChannelType permissionType) {
+    this.permissionType = permissionType;
+    new Query<DiscordChannel>().col("permission_type", permissionType).update(id);
   }
 
   public void updatePermissions() {
@@ -87,32 +55,5 @@ public class DiscordChannel implements Serializable {
     if (group == null) return false;
     updateForGroup(group);
     return true;
-  }
-
-  protected void updateForGroup(DiscordGroup group) {
-    uFr(group.getRole(), group);
-  }
-
-  protected void uFr(Role role, DiscordGroup group) {
-    final ChannelRolePattern rolePattern = permissionType.getPattern().getData().get(group);
-    final PermissionOverride override = getChannel().getPermissionOverride(role);
-    if (override == null) {
-      getChannel().getManager().putPermissionOverride(role, rolePattern.getAllowed(), rolePattern.getDenied()).queue();
-      log.info("Override für " + role.getName() + " in " + name + " nicht vorhanden.");
-      return;
-    }
-    final Set<Permission> allowed = rolePattern.getAllowed();
-    final Set<Permission> pattern = permissionType.getPattern().getData().get(DiscordGroup.EVERYONE).getDenied();
-    if (!rolePattern.isRevokeAll()) {
-      pattern.retainAll(rolePattern.getRevokeDenials());
-    }
-    allowed.addAll(pattern);
-    final Set<Permission> denied = rolePattern.getDenied();
-    allowed.removeAll(denied);
-    if (getChannel() instanceof AudioChannel) {
-      allowed.remove(Permission.VIEW_CHANNEL);
-      denied.remove(Permission.VIEW_CHANNEL);
-    }
-    override.getManager().setPermissions(allowed, denied).queue();
   }
 }

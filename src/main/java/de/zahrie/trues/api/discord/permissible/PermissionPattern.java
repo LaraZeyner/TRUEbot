@@ -69,7 +69,7 @@ public class PermissionPattern {
   ).add(GUILD_MODERATE);
 
   public static final PermissionPattern CONTENT_CREATION = new PermissionPattern(
-      Permission.MANAGE_EMOJIS_AND_STICKERS,
+      Permission.MANAGE_GUILD_EXPRESSIONS,
       Permission.MANAGE_EVENTS,
       Permission.MANAGE_WEBHOOKS
   );

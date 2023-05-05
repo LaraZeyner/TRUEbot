@@ -10,11 +10,10 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Iterables;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.util.StringUtils;
-import de.zahrie.trues.util.io.cfg.LogFiles;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
@@ -24,8 +23,8 @@ import lombok.extern.java.Log;
 @Log
 public class LineupCreator extends LineupCreatorBase {
   private final Participator participator;
-  private final Set<Player> players;
-  private final Set<Player> blacklist = new LinkedHashSet<>();
+  private final Set<PlayerBase> players;
+  private final Set<PlayerBase> blacklist = new LinkedHashSet<>();
 
   public LineupCreator(Participator participator) {
     this(participator, ScoutingGameType.TEAM_GAMES);
@@ -50,16 +49,16 @@ public class LineupCreator extends LineupCreatorBase {
     return laneLineup == null ? List.of() : laneLineup.getPlayers();
   }
 
-  private Set<Player> determinePlayers() {
-    final Set<Player> players = participator.getLineups().stream().map(Lineup::getPlayer).collect(Collectors.toSet());
+  private Set<PlayerBase> determinePlayers() {
+    final Set<PlayerBase> players = participator.getLineups().stream().map(Lineup::getPlayer).collect(Collectors.toSet());
     if (participator.getLineups().size() == 5) return players;
 
     players.addAll(participator.getTeam().getPlayers());
     return players;
   }
 
-  private void handleLineup(Player player, ScoutingGameType gameType, int days) {
-    final List<Object[]> list = gameType.playerQuery(player, days).performance("lane, count(p)", "GROUP BY lane ORDER BY count(p) DESC");
+  private void handleLineup(PlayerBase player, ScoutingGameType gameType, int days) {
+    final List<Object[]> list = gameType.playerQuery(player, days).performance().get("lane", Lane.class).get("count(performance_id)", Integer.class).groupBy("lane").descending("count(performance_id)").list();
     for (Object[] o : list) {
       if (o[0] == null) continue;
       final Lane lane = (o[0].toString()).toEnum(Lane.class);
@@ -71,8 +70,8 @@ public class LineupCreator extends LineupCreatorBase {
   private void handleNoPlayers() {
     if (laneLineups.keySet().size() == 5) return;
 
-    for (Player player : players) {
-      final List<Object[]> list = ScoutingGameType.MATCHMADE.playerQuery(player, 180).performance("lane, count(p)", "GROUP BY lane ORDER BY count(p) DESC");
+    for (PlayerBase player : players) {
+      final List<Object[]> list = ScoutingGameType.MATCHMADE.playerQuery(player, 180).performance().get("lane", Lane.class).get("count(performance_id)", Integer.class).groupBy("lane").descending("count(performance_id)").list();
       for (Object[] o : list) {
         if (o[0] == null) continue;
         final Lane lane = (o[0].toString()).toEnum(Lane.class);
@@ -97,10 +96,9 @@ public class LineupCreator extends LineupCreatorBase {
 
 
   List<Lineup> handleLineup() {
-    final List<Player> determineLineup = determineLineup();
+    final List<PlayerBase> determineLineup = determineLineup();
     if (determineLineup.size() != 5) {
       log.warning("Kein Lineup für Team " + participator.getId());
-      LogFiles.log("Kein Lineup für Team " + participator.getId());
     }
     if (determineLineup.isEmpty()) return List.of();
     return Arrays.stream(Lane.values()).filter(lane -> lane.ordinal() > 0)
@@ -108,9 +106,9 @@ public class LineupCreator extends LineupCreatorBase {
         .toList();
   }
 
-  private Lineup determineLineup(Lane lane, Player player) {
+  private Lineup determineLineup(Lane lane, PlayerBase player) {
     Lineup lineup = LineupFactory.determineLineup(participator, lane);
-    if (lineup != null) return lineup;
+    if (lineup != null && lane != Lane.UNKNOWN) return lineup;
 
     lineup = LineupFactory.determineLineup(participator, player);
     if (lineup != null) {
@@ -118,32 +116,30 @@ public class LineupCreator extends LineupCreatorBase {
       return lineup;
     }
 
-    final Lineup lineup1 = new Lineup(lane, player);
-    participator.addLineup(lineup1);
-    return lineup1;
+    return new Lineup(participator, player, lane);
   }
 
-  private List<Player> determineLineup() {
+  private List<PlayerBase> determineLineup() {
     int totalAmount = Integer.MIN_VALUE;
-    List<Player> bestLineup = new ArrayList<>();
+    List<PlayerBase> bestLineup = new ArrayList<>();
     for (LaneGames topLineup : laneLineups.getOrDefault(Lane.TOP, new LaneLineup(Lane.TOP)).getPlayers()) {
-      final Player topPlayer = topLineup.player();
+      final PlayerBase topPlayer = topLineup.player();
       final int topAmount = topLineup.amount();
 
       for (LaneGames jglLineup : laneLineups.getOrDefault(Lane.JUNGLE, new LaneLineup(Lane.JUNGLE)).getPlayers()) {
-        final Player jglPlayer = jglLineup.player();
+        final PlayerBase jglPlayer = jglLineup.player();
         final int jglAmount = jglLineup.amount();
 
         for (LaneGames midLineup : laneLineups.getOrDefault(Lane.MIDDLE, new LaneLineup(Lane.MIDDLE)).getPlayers()) {
-          final Player midPlayer = midLineup.player();
+          final PlayerBase midPlayer = midLineup.player();
           final int midAmount = midLineup.amount();
 
           for (LaneGames botLineup : laneLineups.getOrDefault(Lane.BOTTOM, new LaneLineup(Lane.BOTTOM)).getPlayers()) {
-            final Player botPlayer = botLineup.player();
+            final PlayerBase botPlayer = botLineup.player();
             final int botAmount = botLineup.amount();
 
             for (LaneGames supLineup : laneLineups.getOrDefault(Lane.UTILITY, new LaneLineup(Lane.UTILITY)).getPlayers()) {
-              final Player supPlayer = supLineup.player();
+              final PlayerBase supPlayer = supLineup.player();
               final int supAmount = supLineup.amount();
 
               final int amount = topAmount + jglAmount + midAmount + botAmount + supAmount;

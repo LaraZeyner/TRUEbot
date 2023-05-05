@@ -10,7 +10,6 @@ import de.zahrie.trues.api.coverage.match.MatchLoader;
 import de.zahrie.trues.api.coverage.team.TeamHandler;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.database.Database;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,7 +27,7 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   public void updateAll() {
     updateTeams();
     updateMatches();
-    Database.update(league);
+    league.update();
   }
 
   public void updateMatches() {
@@ -44,8 +43,8 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   public void updateTeams() {
     for (PRMTeam team : teams) {
 
-      TeamLoader teamLoader = new TeamLoader(team);
-      TeamHandler load = teamLoader.load();
+      final TeamLoader teamLoader = new TeamLoader(team);
+      final TeamHandler load = teamLoader.load();
       load.update();
     }
   }

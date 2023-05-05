@@ -1,95 +1,83 @@
 package de.zahrie.trues.api.coverage.match.log;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.util.StringUtils;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "coverage_log")
-@DiscriminatorColumn(name = "action")
+@Table("coverage_log")
 @ExtensionMethod(StringUtils.class)
-public class MatchLog implements Serializable, Comparable<MatchLog> {
+public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
   @Serial
-  private static final long serialVersionUID = 7775661777098550144L;
+  private static final long serialVersionUID = 2481079289217298298L;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "log_id", columnDefinition = "SMALLINT UNSIGNED not null")
   private int id;
+  private final LocalDateTime timestamp; // log_time
+  private final Match match; // coverage
+  private final MatchLogAction action; // action
+  private final String details; // details
+  private final Participator participator; // coverage_team
 
-  @Column(name = "log_time", nullable = false)
-  private LocalDateTime timestamp = LocalDateTime.now();
-
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "coverage")
-  @ToString.Exclude
-  private Match match;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "action", nullable = false, length = 50, insertable=false, updatable=false)
-  private MatchLogAction action;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "coverage_team")
-  @ToString.Exclude
-  private Participator participator;
-
-  @Column(name = "details", nullable = false, length = 1000)
-  private String details = "-";
-
-  @Column(name = "to_send", nullable = false)
-  private boolean toSend = true;
-
-  public MatchLog(LocalDateTime timestamp, MatchLogAction action, String details) {
+  public MatchLog(LocalDateTime timestamp, Match match, MatchLogAction action, String details, Participator participator) {
     this.timestamp = timestamp;
+    this.match = match;
     this.action = action;
     this.details = details;
+    this.participator = participator;
   }
 
-  public MatchLog handleTeam(String content) {
-    final MatchLog log = LogFactory.handleUserWithTeam(this, content);
-    if (this.participator != null) Database.update(this.participator);
-    return log;
+  public MatchLog(int id, LocalDateTime timestamp, Match match, MatchLogAction action, String details, Participator participator) {
+    this.id = id;
+    this.timestamp = timestamp;
+    this.match = match;
+    this.action = action;
+    this.details = details;
+    this.participator = participator;
+  }
+
+  public static MatchLog get(Object[] objects) {
+    return new MatchLog(
+        (int) objects[0],
+        (LocalDateTime) objects[1],
+        new Query<Match>().entity(objects[2]),
+        new SQLEnum<MatchLogAction>().of(objects[3]),
+        (String) objects[4],
+        new Query<Participator>().entity(objects[2])
+    );
+  }
+
+  @Override
+  public MatchLog create() {
+    final var matchlog = (MatchLog) new Query<MatchLog>()
+        .key("log_time", timestamp).key("coverage", match).key("action", action).key("details", details).key("coverage_team", participator)
+        .insert(this);
+    match.getLogs().add(matchlog);
+    return matchlog;
   }
 
   public Participator getParticipator() {
-    return participator != null ? participator : new Participator(false, new Team("Administration", "Admin"));
+    return participator != null ? participator : Participator.ADMIN(match);
   }
 
   @Override
@@ -104,7 +92,7 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
           .collect(Collectors.joining("\n"));
     }
     if (action.equals(MatchLogAction.LINEUP_SUBMIT)) {
-      final String players = getParticipator().getLineups().stream().map(Lineup::getPlayer).map(Player::getSummonerName)
+      final String players = getParticipator().getLineups().stream().map(Lineup::getPlayer).map(PlayerBase::getSummonerName)
           .collect(Collectors.joining(", "));
       if (isMostRecentLogOfType()) {
         final String linkPlayers = players.replace(", ", ",").replace(" ", "%20");
@@ -128,9 +116,17 @@ public class MatchLog implements Serializable, Comparable<MatchLog> {
   }
 
   private boolean isMostRecentLogOfType() {
-    return match.getLogs().stream()
-        .filter(matchLog -> matchLog.getAction().equals(MatchLogAction.LINEUP_SUBMIT))
-        .filter(matchLog -> matchLog.getParticipator().equals(participator))
-        .noneMatch(matchLog -> matchLog.getTimestamp().isAfter(timestamp));
+    return !new Query<MatchLog>()
+        .where("coverage", match).and("action", MatchLogAction.LINEUP_SUBMIT).and("coverage_team", participator)
+        .descending("log_time").entity().getTimestamp().isAfter(timestamp);
+  }
+
+  public List<PlayerBase> determineLineup() {
+    return Arrays.stream(getDetails().split(", "))
+        .map(playerString -> playerString.before(":").intValue())
+        .mapToInt(Integer::intValue)
+        .mapToObj(PrimePlayerFactory::getPlayer)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 }

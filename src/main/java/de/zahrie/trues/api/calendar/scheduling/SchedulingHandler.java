@@ -7,24 +7,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.calendar.CalendarBase;
+import de.zahrie.trues.api.calendar.Calendar;
 import de.zahrie.trues.api.community.member.Membership;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.util.StringUtils;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod({StringUtils.class, DateTimeUtils.class})
-@RequiredArgsConstructor
-@Data
-public class SchedulingHandler {
-  private final DiscordUser user;
-
+public record SchedulingHandler(DiscordUser user) {
   public static boolean isRepeat(String input) {
     return Arrays.stream(input.replace("\n", " ").split(" ")).allMatch(section -> section.equals("repeat") || section.contains("@"));
   }
@@ -32,11 +24,11 @@ public class SchedulingHandler {
   public void repeat() {
     final LocalDate start = LocalDate.now().minusWeeks(1);
     final LocalDate end = LocalDate.now().minusDays(1);
-
-    QueryBuilder.hql(SchedulingCalendar.class,
-            "FROM SchedulingCalendar WHERE user = " + user.getId() + " AND details <> 'urlaub' AND date(startTime) between" + start + " and " + end)
-        .list().stream()
-        .map(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), "", user)).forEach(Database::insert);
+    new Query<SchedulingCalendar>()
+        .where("discord_user", user)
+        .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
+        .and(Condition.between("date(startTime", start, end)).entityList()
+        .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), "", user).create());
   }
 
   public static List<TimeRange> determineTimeRanges(String input) {
@@ -45,22 +37,25 @@ public class SchedulingHandler {
 
   public void add(List<TimeRange> ranges) {
     if (ranges == null || ranges.isEmpty()) return;
+
     delete(ranges);
-    final List<TimeRange> combine = TimeRange.combine(ranges);
-    combine.stream().map(betterTimeRange -> new SchedulingCalendar(betterTimeRange, "", user)).forEach(Database::insert);
+    TimeRange.combine(ranges).forEach(betterTimeRange -> new SchedulingCalendar(betterTimeRange, "", user).create());
   }
 
   public void delete(List<TimeRange> ranges) {
-    ranges.stream().map(TimeRange::getStartTime).map(LocalDateTime::toLocalDate).distinct().forEach(localDate -> QueryBuilder.hql(SchedulingCalendar.class,
-            "FROM SchedulingCalendar WHERE user = " + user.getId() + " AND details <> 'urlaub' AND date(range.startTime) = " + localDate)
-        .list().forEach(Database::remove));
+    ranges.stream().map(TimeRange::getStartTime).map(LocalDateTime::toLocalDate).distinct().forEach(localDate ->
+        new Query<SchedulingCalendar>()
+            .where("discord_user", user)
+            .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
+            .and("DATE(calendar_start)", localDate)
+            .entityList().forEach(Entity::delete));
   }
 
   public List<TimeRange> getRemaining(LocalDate from) {
-    final List<SchedulingCalendar> all = QueryBuilder.hql(SchedulingCalendar.class,
-        "FROM SchedulingCalendar WHERE user = " + user.getId() + " AND date(range.startTime) >= " + from).list();
-    final List<SchedulingCalendar> reduceable = QueryBuilder.hql(SchedulingCalendar.class,
-        "FROM SchedulingCalendar WHERE user = " + user.getId() + " AND details = 'urlaub'").list();
+    final List<SchedulingCalendar> all = new Query<SchedulingCalendar>()
+        .where("discord_user", user).and(Condition.Comparer.GREATER_EQUAL, "DATE(calendar_start)", from).entityList();
+    final List<SchedulingCalendar> reduceable = new Query<SchedulingCalendar>()
+        .where("discord_user", user).and("details", "urlaub").entityList();
     return TimeRange.reduce(new ArrayList<>(all.stream().map(SchedulingCalendar::getRange).toList()),
         new ArrayList<>(reduceable.stream().map(SchedulingCalendar::getRange).toList()));
   }
@@ -75,11 +70,11 @@ public class SchedulingHandler {
     user.getMainMemberships().stream().map(Membership::getOrgaTeam)
         .filter(Objects::nonNull).findFirst()
         .ifPresent(orgaTeam ->
-            blockedRanges.addAll(orgaTeam.getScheduler().getCalendarEntries(at).stream().map(CalendarBase::getRange).toList()));
+            blockedRanges.addAll(orgaTeam.getScheduler().getCalendarEntries(at).stream().map(Calendar::getRange).toList()));
     return TimeRange.reduce(availableRanges, blockedRanges);
   }
 
   public List<TimeRange> getRemainingFromTo(LocalDate from, LocalDate to) {
-    return getRemaining(from).stream().filter(timeRange -> timeRange.getStartTime().isBetween(from, to)).toList();
+    return getRemaining(from).stream().filter(timeRange -> DateTimeUtils.isBetween(timeRange.getStartTime(), from, to)).toList();
   }
 }

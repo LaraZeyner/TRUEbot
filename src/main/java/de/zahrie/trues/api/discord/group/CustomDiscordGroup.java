@@ -1,76 +1,42 @@
 package de.zahrie.trues.api.discord.group;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.util.Nunu;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "discord_group")
-public class CustomDiscordGroup implements Serializable {
+@Table("discord_group")
+public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
   @Serial
-  private static final long serialVersionUID = -2307398301886813719L;
+  private static final long serialVersionUID = 2036772268090427497L;
 
-  public static CustomDiscordGroup build(long discordId, String name, GroupType type, boolean fixed) {
-    final var discordGroup = new CustomDiscordGroup(discordId, name, type, fixed, null);
-    Database.insert(discordGroup);
-    return discordGroup;
-  }
-
-  public static CustomDiscordGroup build(long discordId, String name, GroupType type, boolean fixed, OrgaTeam team) {
-    final var discordGroup = new CustomDiscordGroup(discordId, name, type, fixed, team);
-    Database.insert(discordGroup);
-    team.setGroup(discordGroup);
-    Database.update(team);
-    return discordGroup;
-  }
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "role_id", columnDefinition = "TINYINT UNSIGNED not null")
-  private short id;
-
-  @Column(name = "discord_id", nullable = false)
-  private long discordId;
-
-  @Column(name = "role_name", nullable = false)
-  private String name;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "role_type", nullable = false)
-  private GroupType type;
-
-  @Column(name = "fixed", nullable = false)
-  private boolean fixed;
-
-  @OneToOne(mappedBy = "group")
+  private int id; // discord_group_id
+  private final long discordId; // discord_id
+  private String name; // role_name
+  private final GroupType type; // role_type
+  private final boolean fixed; // fixed
+  @Getter(AccessLevel.NONE)
+  private int orgaTeamId;
+  @Setter(AccessLevel.NONE)
   private OrgaTeam team;
 
-  private CustomDiscordGroup(long discordId, String name, GroupType type, boolean fixed, OrgaTeam team) {
+  public OrgaTeam getOrgaTeam() {
+    if (team == null) this.team = new Query<OrgaTeam>().where("team", this).entity();
+    return team;
+  }
+
+  public CustomDiscordGroup(long discordId, String name, GroupType type, boolean fixed, OrgaTeam team) {
     this.discordId = discordId;
     this.name = name;
     this.type = type;
@@ -78,21 +44,55 @@ public class CustomDiscordGroup implements Serializable {
     this.team = team;
   }
 
-  public long discordId() {
-    try {
-      return discordId;
-    } catch (IllegalStateException exception) {
-      return QueryBuilder.hql(CustomDiscordGroup.class, "FROM CustomDiscordGroup WHERE id = " + id).single().discordId();
-    }
+  public CustomDiscordGroup(int id, long discordId, String name, GroupType type, boolean fixed, int orgaTeamId) {
+    this.id = id;
+    this.discordId = discordId;
+    this.name = name;
+    this.type = type;
+    this.fixed = fixed;
+    this.orgaTeamId = orgaTeamId;
+  }
+
+  public static CustomDiscordGroup get(Object[] objects) {
+    return new CustomDiscordGroup(
+        (int) objects[0],
+        (long) objects[1],
+        (String) objects[2],
+        new SQLEnum<GroupType>().of(objects[3]),
+        (boolean) objects[5],
+        new Query<OrgaTeam>().where("team_role", objects[0]).id()
+    );
+  }
+
+  @Override
+  public CustomDiscordGroup create() {
+    final CustomDiscordGroup discordGroup = new Query<CustomDiscordGroup>().key("discord_id", discordId)
+        .col("role_name", name).col("role_type", type).col("fixed", fixed)
+        .insert(this);
+    if (team != null) team.setGroup(discordGroup);
+    return discordGroup;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setName(String name) {
+    if (!this.name.equals(name)) new Query<CustomDiscordGroup>().col("role_name", name).update(id);
+    this.name = name;
+  }
+
+  public void setOrgaTeamId(int orgaTeamId) {
+    if (orgaTeamId != this.orgaTeamId) team = null;
+    this.orgaTeamId = orgaTeamId;
   }
 
   public Role determineRole() {
-    final long discordId = discordId();
     return Nunu.getInstance().getGuild().getRoleById(discordId);
   }
 
   public IPermissionContainer getChannel() {
-    return (IPermissionContainer) Nunu.DiscordChannel.getChannel(discordId());
+    return (IPermissionContainer) Nunu.DiscordChannel.getChannel(discordId);
   }
 
   public void updatePermissions() {

@@ -1,7 +1,6 @@
 package de.zahrie.trues.api.discord.group;
 
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Query;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,14 +21,12 @@ public class DiscordRoleFactory {
   }
 
   private static CustomDiscordGroup determineCustomGroup(Role role) {
-    return QueryBuilder.hql(CustomDiscordGroup.class, "FROM CustomDiscordGroup WHERE discordId = " + role.getIdLong()).single();
+    return new Query<CustomDiscordGroup>().where("discord_id", role.getIdLong()).entity();
   }
 
   private static CustomDiscordGroup createCustomGroup(Role role) {
-    final var customGroup = CustomDiscordGroup.build(role.getIdLong(), role.getName(), GroupType.PINGABLE, false);
     role.getManager().setMentionable(true).setPermissions().queue();
-    Database.insertAndCommit(customGroup);
-    return customGroup;
+    return new CustomDiscordGroup(role.getIdLong(), role.getName(), GroupType.PINGABLE, false, null).forceCreate();
   }
 
   /**
@@ -37,6 +34,6 @@ public class DiscordRoleFactory {
    */
   public static void removeCustomGroup(Role role) {
     final CustomDiscordGroup customGroup = determineCustomGroup(role);
-    if (customGroup != null) Database.removeAndCommit(customGroup);
+    if (customGroup != null) customGroup.forceDelete();
   }
 }

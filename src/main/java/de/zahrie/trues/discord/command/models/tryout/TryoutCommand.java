@@ -8,12 +8,13 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.io.NamedQueries;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 @Command(name = "tryout", descripion = "Ein Bewerbungsgespräch führen", perm = @Perm(PermissionRole.TEAM_BUILDING), options = {
-    @Option(name = "bewerbung", description = "Bewerbungsdings", completion = "Application.pending"),
+    @Option(name = "bewerbung", description = "Bewerbungsdings", completion = NamedQueries.PENDING_APPLICATIONS),
     @Option(name = "zeitpunkt", description = "Zeitpunkt", type = OptionType.STRING)
 })
 @ExtensionMethod({StringUtils.class, Nunu.DiscordMessager.class})

@@ -2,9 +2,9 @@ package de.zahrie.trues.api.coverage.lineup;
 
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
-import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.coverage.player.model.Rank;
 import lombok.Getter;
 
@@ -24,8 +24,8 @@ public class MatchLineup {
 
   public int getAverageMMR() {
     final double averageMMR = lineup.stream().map(Lineup::getPlayer)
-        .map(Player::getLastRelevantRank)
-        .mapToInt(Rank::getMMR).average().orElse(0);
+        .map(PlayerBase::getLastRelevantRank)
+        .mapToInt(value -> value.getRank().getMMR()).average().orElse(0);
     return (int) Math.round(averageMMR);
   }
 }

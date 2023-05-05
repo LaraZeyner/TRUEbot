@@ -2,6 +2,7 @@ package de.zahrie.trues.api.riot.matchhistory.performance;
 
 import java.util.List;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.Roleable;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.entities.Role;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.ORDINAL)
 public enum Lane implements Roleable {
   UNKNOWN("null"),
   TOP("Top"),

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.Permission;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.LOWER)
 public enum PermissionChannelType {
   PUBLIC(ChannelPattern.builder().build(), true, true),
   SOCIALS(ChannelPattern.builder()

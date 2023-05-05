@@ -1,44 +1,53 @@
 package de.zahrie.trues.api.coverage.team.model;
 
 import java.util.List;
-import java.util.Map;
 
+import de.zahrie.trues.api.coverage.match.model.ATournament;
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.match.model.TournamentMatch;
+import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.stage.model.CalibrationStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.Query;
 import org.jetbrains.annotations.Nullable;
 
-public record MatchManager(Team team) {
+public record MatchManager(TeamBase team) {
   public List<Match> getUpcomingMatches() {
-    return QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = :team and coverage.result = '-:-' ORDER BY coverage.start").addParameter("team", team).list();
+    return new Query<Participator>().join(new JoinQuery<Participator, Match>(JoinQuery.JoinType.LEFT, "match"))
+        .where("team", team).and("_match.result", "-:-")
+        .ascending("_match.coverage_start").convertList(Match.class);
   }
 
   @Nullable
   public Match getNextMatch(boolean avoidCalibration) {
-    final List<Match> nexts = QueryBuilder.hql(Match.class,
-        "SELECT coverage FROM Participator WHERE team = :team AND coverage.result = '-:-' ORDER BY coverage.start").addParameter("team", team).list();
-    nexts.addAll(QueryBuilder.hql(Match.class,
-        "SELECT coverage FROM Participator WHERE team = :team AND coverage.result <> '-:-' ORDER BY coverage.start desc").addParameter("team", team).list());
+    final List<Match> nextMatches = new Query<Participator>().join(new JoinQuery<Participator, Match>("coverage", "_match"))
+        .where("team", team).and("_match.result", "-:-")
+        .ascending("_match.coverage_start")
+        .include(new Query<Participator>().join(new JoinQuery<Participator, Match>("coverage", "_match"))
+            .where("team", team).and(Condition.Comparer.NOT_EQUAL, "_match.result", "-:-")
+            .descending("_match.coverage_start")
+        ).convertList(Match.class);
     if (avoidCalibration) {
-      return nexts.stream().filter(match -> !(match instanceof TournamentMatch tM && tM.getLeague().getStage() instanceof CalibrationStage)).findFirst().orElse(null);
+      return nextMatches.stream().filter(match -> !(match instanceof ATournament tM && tM.getLeague().getStage() instanceof CalibrationStage)).findFirst().orElse(null);
     }
-    return nexts.stream().findFirst().orElse(null);
-
-  }
-
-  public List<Match> getNextMatches() {
-    return QueryBuilder.hql(Match.class,
-        "SELECT coverage FROM Participator WHERE team = " + team.getId() + " AND coverage.result = '-:-' ORDER BY coverage").list();
+    return nextMatches.stream().findFirst().orElse(null);
   }
 
   public List<Match> getMatchesOf(Season season) {
-    return QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = :team and coverage.playday.stage.season = :season ORDER BY coverage.start").addParameters(Map.of("team", team, "season", season)).list();
+    return new Query<Participator>().join(new JoinQuery<Participator, Match>())
+        .join(new JoinQuery<Match, Playday>("matchday"))
+        .join(new JoinQuery<Playday, Stage>("_playday.stage"))
+        .where("team", team).and("_stage.season", season)
+        .ascending("_match.coverage_start").convertList(Match.class);
   }
 
   public List<Match> getMatchesOf(Stage stage) {
-    return QueryBuilder.hql(Match.class, "SELECT coverage FROM Participator WHERE team = :team and coverage.playday.stage = :stage ORDER BY coverage.start").addParameters(Map.of("team", team, "stage", stage)).list();
+    return new Query<Participator>().join(new JoinQuery<Participator, Match>())
+        .join(new JoinQuery<Match, Playday>("matchday"))
+        .where("team", team).and("_playday.stage", stage)
+        .ascending("_match.coverage_start").convertList(Match.class);
   }
 }

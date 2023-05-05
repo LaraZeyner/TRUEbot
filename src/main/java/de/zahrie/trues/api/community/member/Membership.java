@@ -1,34 +1,22 @@
 package de.zahrie.trues.api.community.member;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
+import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,68 +25,81 @@ import org.jetbrains.annotations.NotNull;
  * Man kann nur einmal pro Team auftreten.
  */
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-@ToString
-@Entity(name = "Membership")
-@Table(name = "orga_member", indexes = {@Index(name = "idx_app", columnList = "discord_user, orga_team", unique = true)})
+@Table("orga_member")
 @ExtensionMethod(StringUtils.class)
-public class Membership implements Serializable, Comparable<Membership> {
+public class Membership implements Entity<Membership>, Comparable<Membership> {
   @Serial
-  private static final long serialVersionUID = -6006729315935528279L;
+  private static final long serialVersionUID = 3193091569421460896L;
 
-  public static Membership build(DiscordUser user, TeamPosition position) {
-    return build(user, null, TeamRole.ORGA, position);
-  }
+  private int id; // orga_member_id
+  private final DiscordUser user; // discord_user
+  private OrgaTeam orgaTeam; // orga_team
+  private TeamRole role; // role
+  private TeamPosition position; // position
+  private LocalDateTime timestamp = LocalDateTime.now(); // timestamp
+  private boolean captain = false; // captain
+  private boolean active = true; // active
 
-  public static Membership build(DiscordUser user, OrgaTeam team, TeamRole role, TeamPosition position) {
-    final Membership membership = new Membership(user, team, role, position);
-    Database.insert(membership);
-    return membership;
-  }
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "lineup_id", columnDefinition = "SMALLINT UNSIGNED not null")
-  private int id;
-
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, optional = false)
-  @JoinColumn(name = "discord_user", nullable = false)
-  @ToString.Exclude
-  private DiscordUser user;
-
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "orga_team")
-  @ToString.Exclude
-  private OrgaTeam orgaTeam;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "role", length = 15)
-  private TeamRole role;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "position", length = 15)
-  private TeamPosition position;
-
-  @Column(name = "timestamp")
-  private LocalDateTime timestamp = LocalDateTime.now();
-
-  @Column(name = "captain")
-  private boolean captain = false;
-
-  @Column(name = "active")
-  private boolean active = true;
 
   public Membership(DiscordUser user, TeamPosition position) {
     this(user, null, TeamRole.ORGA, position);
   }
 
-  private Membership(DiscordUser user, OrgaTeam team, TeamRole role, TeamPosition position) {
+  Membership(DiscordUser user, OrgaTeam team, TeamRole role, TeamPosition position) {
     this.user = user;
     this.orgaTeam = team;
     this.role = role;
     this.position = position;
+  }
+
+  public static Membership get(Object[] objects) {
+    return new Membership(
+        (int) objects[0],
+        new Query<DiscordUser>().entity( objects[1]),
+        new Query<OrgaTeam>().forId((int) objects[2]).entity(),
+        new SQLEnum<TeamRole>().of(objects[3]),
+        new SQLEnum<TeamPosition>().of(objects[4]),
+        (LocalDateTime) objects[5],
+        (boolean) objects[6],
+        (boolean) objects[7]
+    );
+  }
+
+  @Override
+  public Membership create() {
+    return new Query<Membership>().key("discord_user", user).key("orga_team", orgaTeam)
+        .col("position", position).col("role", role).col("timestamp", timestamp).col("captain", captain).col("active", active).insert(this);
+  }
+
+  public void removeFromTeam(OrgaTeam team) {
+    this.orgaTeam = null;
+    this.active = false;
+    new Query<Membership>().col("orga_team", null).col("active", false).update(id);
+    new RoleGranter(user).removeTeamRole(this, team);
+    Nunu.DiscordMessager.dm(user, "Du wurdest aus dem Team **" + team.getName() + "** entfernt. Du kannst aber jederzeit gerne eine neue Bewerbung schreiben. Solltest du Probleme oder Fragen haben kannst du mir jederzeit schreiben.");
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setCaptain(boolean captain) {
+    if (this.captain != captain) new Query<Membership>().col("captain", captain).update(id);
+    this.captain = captain;
+    new RoleGranter(user).handleCaptain(captain);
+  }
+
+  public void updateRoleAndPosition(TeamRole role, TeamPosition position) {
+    this.role = role;
+    this.position = position;
+    this.active = true;
+    new Query<Membership>().col("role", role).col("position", position).col("active", true).update(id);
+  }
+
+  public void setRole(TeamRole role) {
+    this.role = role;
+    new Query<Membership>().col("role", role).update(id);
   }
 
   public String getPositionString() {

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.util.Nunu;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.entities.Role;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.UPPER)
 public enum DiscordGroup implements Roleable {
   EVERYONE(0, "@everyone", 1094596402098733129L, GroupTier.EVERYONE, Department.NONE, GroupType.DEFAULT, Set.of()),
   REGISTERED(1, "Bestätigt", 1094596402098733134L, GroupTier.REGISTERED, Department.NONE, GroupType.PINGABLE, Set.of()),

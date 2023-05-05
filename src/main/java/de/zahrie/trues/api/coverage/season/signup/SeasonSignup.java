@@ -1,67 +1,53 @@
 package de.zahrie.trues.api.coverage.season.signup;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.season.Season;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-@Entity
-@Table(name = "season_signup", indexes = @Index(name = "season_team_idx_season_team", columnList = "season, team", unique = true))
-public class SeasonSignup implements Serializable, Comparable<SeasonSignup> {
+@Table("season_signup")
+public class SeasonSignup implements Entity<SeasonSignup>, Comparable<SeasonSignup> {
   @Serial
-  private static final long serialVersionUID = -763378764697829834L;
+  private static final long serialVersionUID = 4493211805830610407L;
 
-  public static SeasonSignup build(Season season, Team team, String info) {
-    final var signup = new SeasonSignup(season, team, info);
-    Database.insert(signup);
-    return signup;
-  }
+  private int id; // season_signup_id
+  private final Season season; // season
+  private final PRMTeam team; // team
+  private final String info; // signup_info
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "seasonteam_id", nullable = false)
-  private int id;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "season", nullable = false)
-  @ToString.Exclude
-  private Season season;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "team", nullable = false)
-  @ToString.Exclude
-  private Team team;
-
-  @Column(name = "signup_info", length = 100)
-  private String info;
-
-  public SeasonSignup(Season season, Team team, String info) {
+  public SeasonSignup(Season season, PRMTeam team, String info) {
     this.season = season;
     this.team = team;
     this.info = info;
+  }
+
+  public static SeasonSignup get(Object[] objects) {
+    return new SeasonSignup(
+        (int) objects[0],
+        new Query<Season>().entity(objects[1]),
+        new Query<PRMTeam>().entity(objects[2]),
+        (String) objects[3]
+    );
+  }
+
+  @Override
+  public SeasonSignup create() {
+    return new Query<SeasonSignup>().key("season", season).key("team", team)
+        .col("signup_info", info).insert(this);
+  }
+
+  @Override
+  public void setId(int id) {
+    this.id = id;
   }
 
   @Override

@@ -10,11 +10,12 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.io.NamedQueries;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @Command(name = "test", descripion = "Dies ist ein Test", perm = @Perm(PermissionRole.EVERYONE), options = {
     @Option(name = "name", description = "Testname", choices = {"Hallo", "Welt"}),
-    @Option(name = "teamname", description = "Teamname des Communityteams", completion = "OrgaTean.OrgaTeams.str")
+    @Option(name = "teamname", description = "Teamname des Communityteams", completion = NamedQueries.ORGA_TEAMS)
 })
 public class TestCommand extends SlashCommand {
 

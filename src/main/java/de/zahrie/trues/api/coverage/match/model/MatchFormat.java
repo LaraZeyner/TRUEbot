@@ -1,16 +1,30 @@
 package de.zahrie.trues.api.coverage.match.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.time.Duration;
 
-@RequiredArgsConstructor
-@Getter
+import de.zahrie.trues.api.database.connector.Listing;
+
+@Listing(Listing.ListingType.ORDINAL)
 public enum MatchFormat {
-  NO_GAMES(0),
-  ONE_GAME(43),
-  TWO_GAMES(90),
-  BEST_OF_THREE(138),
-  FOUR_GAMES(185),
-  BEST_OF_FIVE(233);
-  private final int duration;
+  NO_GAMES,
+  ONE_GAME, // 42:30
+  TWO_GAMES, // 1:30:00
+  BEST_OF_THREE, // 2:17:30
+  FOUR_GAMES, // 3:05:00
+  BEST_OF_FIVE, // 3:52:30
+  SIX_GAMES,
+  BEST_OF_SEVEN,
+  EIGHT_GAMES,
+  BEST_OF_NINE;
+
+  public Duration getPRMDuration() {
+    return getDuration(2, 2, 9.9892, 29.7047, .7426, 5);
+  }
+
+  public Duration getDuration(double initialLobby, double lobby, double preGame, double game, double gamePause, double pause) {
+    if (ordinal() == 0) return Duration.ZERO;
+    final double durationPerGame = lobby + preGame + game + gamePause + pause;
+    final double totalDuration = initialLobby + ordinal() * durationPerGame - pause; // keine Pause am Ende
+    return Duration.ofMinutes(Math.round(totalDuration));
+  }
 }

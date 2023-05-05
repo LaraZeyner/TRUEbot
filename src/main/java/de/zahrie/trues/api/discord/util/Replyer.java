@@ -3,6 +3,7 @@ package de.zahrie.trues.api.discord.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.util.StringUtils;
@@ -46,14 +47,17 @@ public abstract class Replyer {
   }
 
   protected boolean reply(String message) {
-    reply(message, true);
-    return true;
+    return reply(message, true);
   }
 
   protected boolean reply(String message, boolean ephemeral) {
-    event.reply(message).setEphemeral(ephemeral).queue();
-    end = true;
-    return true;
+    try {
+      event.reply(message).setEphemeral(ephemeral).queue();
+      end = true;
+      return true;
+    } catch (RejectedExecutionException exception) {
+      return false;
+    }
   }
 
   protected Member getInvokingMember() {

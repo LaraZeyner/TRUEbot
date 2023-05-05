@@ -4,21 +4,23 @@ import java.util.List;
 
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.util.Util;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;
 
 @Log
 public final class PlayerFactory {
+  @NonNull
   public static List<Player> registeredPlayers() {
-    return QueryBuilder.hql(Player.class, "FROM Player WHERE discordUser is not null").list();
+    return new Query<Player>().where(Condition.notNull("discord_user")).entityList();
   }
-  public static Player findPlayer(String puuid) {
-    return Util.avoidNull(puuid, null,
-        puuidStr -> QueryBuilder.hql(Player.class, "FROM Player WHERE puuid = " + puuidStr).single());
+
+  @Nullable
+  public static Player findPlayer(@Nullable String puuid) {
+    return puuid == null ? null : new Query<Player>().where("lol_puuid", puuid).entity();
   }
 
   @Nullable
@@ -26,40 +28,35 @@ public final class PlayerFactory {
     Player player = findPlayer(puuid);
     if (player == null) {
       final Summoner summoner = Xayah.summonerWithPuuid(puuid).get();
-      if (summoner != null) {
-        player = new Player(summoner.getName(), puuid);
-        Database.insert(player);
-      }
+      if (summoner != null) player = new Player(summoner.getName(), puuid).create();
     }
     return player;
   }
 
   @Nullable
   public static Player getPlayerFromName(String summonerName) {
-    Player player = lookForPlayer(summonerName);
-    if (player == null) {
-      final Summoner summoner = Xayah.summonerNamed(summonerName).get();
-      if (summoner == null) {
-        log.fine("Der Spieler existiert nicht");
-        return null;
-      }
-      player = new Player(summoner.getName(), summoner.getPuuid());
-      Database.insert(player);
+    final Player player = lookForPlayer(summonerName);
+    if (player != null) return player;
+
+    final Summoner summoner = Xayah.summonerNamed(summonerName).get();
+    if (summoner == null) {
+      log.fine("Der Spieler existiert nicht");
+      return null;
     }
-    return player;
+
+    return new Player(summoner.getName(), summoner.getPuuid()).create();
   }
 
   private static Player lookForPlayer(String summonerName) {
     final Player player = determineExistingPlayerFromName(summonerName);
-    if (player != null) {
-      return player;
-    }
+    if (player != null) return player;
+
     final Summoner summoner = Xayah.summonerNamed(summonerName).get();
     return summoner == null ? null : findPlayer(summoner.getPuuid());
   }
 
-  private static Player determineExistingPlayerFromName(String summonerName) {
-    return Util.avoidNull(summonerName, null,
-        nameStr -> QueryBuilder.hql(Player.class, "FROM Player WHERE summonerName = " + nameStr).single());
+  @Nullable
+  private static Player determineExistingPlayerFromName(@Nullable String summonerName) {
+    return summonerName == null ? null : new Query<Player>().where("lol_name", summonerName).entity();
   }
 }

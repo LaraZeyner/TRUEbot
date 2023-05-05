@@ -24,15 +24,15 @@ import de.zahrie.trues.util.Util;
 public record TeamTrainingScheduleHandler(OrgaTeam team) {
 
   public List<List<String>> ofWeekStarting(LocalDate day) {
-    List<List<String>> times = new ArrayList<>();
+    final List<List<String>> times = new ArrayList<>();
     for (int i = 0; i < 5; i++) {
       final TeamPosition position = TeamPosition.values()[i];
-      final Membership membership = MembershipFactory.getOfTeam(team, TeamRole.MAIN, position);
+      final Membership membership = team.getMembership(TeamRole.MAIN, position);
       day = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
       if (membership != null) {
         final DiscordUser user = membership.getUser();
-        Map<TimeRanges, List<DayOfWeek>> weekdays = new HashMap<>();
+        final Map<TimeRanges, List<DayOfWeek>> weekdays = new HashMap<>();
         for (int j = 0; j < 7; j++) {
           final DayOfWeek dayOfWeek = DayOfWeek.of(j + 1);
           final List<TimeRange> remaining = new SchedulingHandler(user).getRemainingAt(day.plusDays(j));
@@ -41,9 +41,9 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
           if (matchingRanges == null) weekdays.put(timeRanges, new ArrayList<>(List.of(dayOfWeek)));
           else weekdays.get(matchingRanges).add(dayOfWeek);
         }
-        List<String> weekdayStrings = new ArrayList<>();
+        final List<String> weekdayStrings = new ArrayList<>();
         weekdays.forEach(((timeRanges, dayOfWeeks) -> {
-          StringBuilder days = new StringBuilder();
+          final StringBuilder days = new StringBuilder();
           boolean until = false;
           DayOfWeek last = null;
           for (final DayOfWeek dayOfWeek : dayOfWeeks.stream().sorted().toList()) {
@@ -59,7 +59,7 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
           if (last != null) days.append(until ? "-" : ",").append(last.getDisplayName(TextStyle.SHORT, Locale.GERMANY));
 
 
-          String time = timeRanges.ranges().stream().map(TimeRange::toString).collect(Collectors.joining(", "));
+          final String time = timeRanges.ranges().stream().map(TimeRange::toString).collect(Collectors.joining(", "));
           weekdayStrings.add(days + " " + time);
         }));
         final String key = Util.avoidNull(membership, position.toString(), msh -> msh.getUser().getMention());
@@ -74,7 +74,7 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
     final List<List<String>> times = new ArrayList<>();
     for (int i = 0; i < 5; i++) {
       final TeamPosition position = TeamPosition.values()[i];
-      final Membership membership = MembershipFactory.getOfTeam(team, TeamRole.MAIN, position);
+      final Membership membership = team.getMembership(TeamRole.MAIN, position);
       final List<TimeRange> remainingAt = new ArrayList<>();
       if (membership != null) {
         final DiscordUser user = membership.getUser();
@@ -104,7 +104,7 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
     List<TimeRange> remainingRanges = new ArrayList<>();
     for (int i = 0; i < 5; i++) {
       final TeamPosition position = TeamPosition.values()[i];
-      final Membership membership = MembershipFactory.getOfTeam(team, TeamRole.MAIN, position);
+      final Membership membership = team.getMembership(TeamRole.MAIN, position);
       if (membership == null) return List.of();
 
       final List<TimeRange> remaining = new ArrayList<>(new SchedulingHandler(membership.getUser()).getRemaining(date));

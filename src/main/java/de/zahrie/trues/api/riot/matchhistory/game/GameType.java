@@ -2,11 +2,13 @@ package de.zahrie.trues.api.riot.matchhistory.game;
 
 import java.util.Arrays;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.ORDINAL)
 public enum GameType {
   TOURNAMENT(0),
   CUSTOM(0),

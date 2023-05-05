@@ -5,8 +5,7 @@ import java.util.Map;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.channel.ChannelRolePattern;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
 import de.zahrie.trues.api.discord.channel.PermissionChannelType;
@@ -34,17 +33,25 @@ public class OrgaTeamChannelHandler {
    * Ist der Channel nicht vorhanden wird er erstellt
    */
   @Nullable
-  public TeamChannel getChannelOf(TeamChannelType teamChannelType) {
+  public TeamChannel get(TeamChannelType teamChannelType) {
     final TeamChannel channel = getExistingChannelOf(teamChannelType);
     return channel == null ? createChannel(teamChannelType) : channel;
   }
 
-  private TeamChannel getExistingChannelOf(@NonNull TeamChannelType teamChannelType) {
-    return QueryBuilder.hql(TeamChannel.class, "FROM TeamChannel WHERE orgaTeam = :team and teamChannelType = :channelType")
-        .addParameters(Map.of("team", team, "channelType", teamChannelType)).single();
+  void updateChannels() {
+    final String categoryName = getCategoryName();
+    final TeamChannel teamChannel = get(TeamChannelType.CATEGORY);
+    if (teamChannel == null) throw new NullPointerException("Team Channel sollte bereits erstellt sein!");
+
+    teamChannel.setName(categoryName);
+    teamChannel.getChannel().getManager().setName(categoryName).queue();
   }
 
-  private String getCategoryName() {
+  private TeamChannel getExistingChannelOf(@NonNull TeamChannelType teamChannelType) {
+    return new Query<TeamChannel>().where("orga_team", team).and("teamchannel_type", teamChannelType).entity();
+  }
+
+  String getCategoryName() {
     return team.getName() + " (" + team.getAbbreviation() + ")";
   }
 
@@ -53,9 +60,8 @@ public class OrgaTeamChannelHandler {
    */
   private TeamChannel createChannel(TeamChannelType channelType) {
     final TeamChannel category = getExistingChannelOf(TeamChannelType.CATEGORY);
-    if (category == null) {
-      createChannels();
-    } else {
+    if (category == null) createChannels();
+    else {
       switch (channelType) {
         case SCOUTING -> ChannelKind.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.SCOUTING, team);
         case INFO -> ChannelKind.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.INFO, team);
@@ -83,10 +89,7 @@ public class OrgaTeamChannelHandler {
   public static TeamChannel createTeamChannelEntity(@NonNull GuildChannel channel, @NonNull OrgaTeam team) {
     final TeamChannelType channelType = TeamChannelType.fromChannel(channel);
     final PermissionChannelType permissionChannelType = channelType.getPermissionType();
-    final TeamChannel teamChannel = new TeamChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType(), team, channelType);
-    Database.insert(teamChannel);
-    Database.updateAndCommit(team);
-    return teamChannel;
+    return new TeamChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType(), team, channelType).forceCreate();
   }
 
   @RequiredArgsConstructor

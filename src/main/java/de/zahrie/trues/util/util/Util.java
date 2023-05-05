@@ -50,10 +50,10 @@ public final class Util {
   }
 
   public static <T> T nonNull(T obj) {
-    return Util.nonNull(obj);
+    return Objects.requireNonNull(obj);
   }
 
   public static <T> T nonNull(T obj, String message) {
-    return Util.nonNull(obj, message);
+    return Objects.requireNonNull(obj, message);
   }
 }

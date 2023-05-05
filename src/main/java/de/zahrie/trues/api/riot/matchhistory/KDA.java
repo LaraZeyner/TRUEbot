@@ -1,27 +1,22 @@
 package de.zahrie.trues.api.riot.matchhistory;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.util.Set;
 
-/**
- * Created by Lara on 31.03.2023 for TRUEbot
- */
-@Embeddable
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-public class KDA {
-  @Column(name = "kills", columnDefinition = "SMALLINT UNSIGNED")
-  private short kills;
+import com.merakianalytics.orianna.types.core.match.Participant;
+import com.merakianalytics.orianna.types.core.match.ParticipantStats;
 
-  @Column(name = "deaths", columnDefinition = "SMALLINT UNSIGNED")
-  private short deaths;
+public record KDA(short kills, short deaths, short assists) {
+  public static KDA fromParticipant(Participant participant) {
+    final ParticipantStats stats = participant.getStats();
+    return new KDA((short) stats.getKills(), (short) stats.getDeaths(), (short) stats.getAssists());
+  }
 
-  @Column(name = "assists", columnDefinition = "SMALLINT UNSIGNED")
-  private short assists;
+  public static KDA sum(Set<KDA> kdas) {
+    final int kills = kdas.stream().mapToInt(KDA::kills).sum();
+    final int deaths = kdas.stream().mapToInt(KDA::deaths).sum();
+    final int assists = kdas.stream().mapToInt(KDA::assists).sum();
+    return new KDA((short) kills, (short) deaths, (short) assists);
+  }
 
   @Override
   public String toString() {

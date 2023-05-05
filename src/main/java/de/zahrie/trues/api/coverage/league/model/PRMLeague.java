@@ -1,55 +1,60 @@
 package de.zahrie.trues.api.coverage.league.model;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.io.request.URLType;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@DiscriminatorValue("not null")
-public class PRMLeague extends League implements Serializable {
-
+@Table(value = "coverage_group", department = "prime")
+public class PRMLeague extends LeagueBase implements Entity<PRMLeague> {
   @Serial
-  private static final long serialVersionUID = -4755609416246322480L;
+  private static final long serialVersionUID = -6947551713641103275L;
 
-  public static PRMLeague build(String divisionName, PlayStage stage, int prmId) {
-    final var league = new PRMLeague(prmId);
-    league.setStage(stage);
-    league.setName(divisionName);
-    Database.insert(league);
-    return league;
+  private int prmId; // prm_id
+
+  public PRMLeague(int prmId, Stage stage, String name) {
+    super(stage, name);
+    this.prmId = prmId;
   }
 
-  @Column(name = "prm_id", nullable = false)
-  private int prmId;
+  private PRMLeague(int id, Stage stage, String name, int prmId) {
+    super(id, stage, name);
+    this.prmId = prmId;
+  }
+
+  public static PRMLeague get(Object[] objects) {
+    return new PRMLeague(
+        (int) objects[0],
+        new Query<Stage>().entity(objects[2]),
+        (String) objects[3],
+        (int) objects[4]
+    );
+  }
+
+  @Override
+  public PRMLeague create() {
+    return new Query<PRMLeague>().key("stage", stage).key("group_name", name)
+        .col("prm_id", prmId)
+        .insert(this);
+  }
+
 
   public LocalDateTime getAlternative(Playday playday) {
     final PlaydayScheduler scheduler = PlaydayScheduler.create(getStage(), playday.getId(), getTier());
     return scheduler.defaultTime();
-  }
-
-  public LeagueTier getTier() {
-    return LeagueTier.fromName(getName());
   }
 
   public boolean isStarter() {
@@ -57,6 +62,6 @@ public class PRMLeague extends League implements Serializable {
   }
 
   public String getUrl() {
-    return String.format(URLType.LEAGUE.getUrlName(), ((PRMSeason) getStage().getSeason()).getPrmId(), getStage().pageId(), prmId);
+    return String.format(URLType.LEAGUE.getUrlName(), ((PRMSeason) getStage().getSeason()).getPrmId(), ((PlayStage) getStage()).pageId(), prmId);
   }
 }

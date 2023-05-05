@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.datatypes.calendar;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,9 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 
 public class DateTimeUtils {
+  public static long getMinutes(Duration duration) {
+    return Math.round(duration.getSeconds() / 60.);
+  }
   public static int daysBetween(DayOfWeek startDay, DayOfWeek endDay) {
     final int daysBetween = endDay.getValue() - startDay.getValue();
     return daysBetween < 0 ? daysBetween + 7 : daysBetween;

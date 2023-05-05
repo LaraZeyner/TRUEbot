@@ -9,6 +9,7 @@ public class GamesportsLoader {
   protected final HTML html;
   protected final String url;
 
+  @SuppressWarnings("ConfusingArgumentToVarargsMethod")
   public GamesportsLoader(URLType urlType, Integer... ids) {
     this.id = ids[ids.length - 1];
     this.html = Request.requestHTML(urlType, ids);

@@ -1,136 +1,148 @@
 package de.zahrie.trues.api.discord.user;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.ApplicationCalendar;
 import de.zahrie.trues.api.community.application.Application;
+import de.zahrie.trues.api.community.application.ApplicationFactory;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.discord.notify.NotificationManager;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
 
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Getter
-@Setter
-@ToString
-@Entity
-@Table(name = "discord_user", indexes = {@Index(name = "discord_id", columnList = "discord_id", unique = true)})
-@ExtensionMethod({DiscordUserFactory.class})
-public class DiscordUser implements Serializable {
+@Table("discord_user")
+public class DiscordUser implements Entity<DiscordUser> {
   @Serial
-  private static final long serialVersionUID = -2575760126811506041L;
-
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "discord_user_id", columnDefinition = "SMALLINT UNSIGNED not null")
+  private static final long serialVersionUID = 675455029296764536L;
   private int id;
+  private final long discordId; // discord_id
+  private String mention; // mention
+  private int points = 1000; // points
+  private int messagesSent = 0; // msg_count
+  private int digitsWritten = 0; // msg_digits
+  private int secondsOnline = 0; // seconds_online
+  private boolean active = false; // active
+  private LocalDateTime lastTimeJoined; // joined
+  private DiscordUser acceptedBy; // accepted
+  private short notification = 0; // notification
+  private LocalDate birthday; // birthday
 
-  @Column(name = "discord_id", nullable = false)
-  private long discordId;
+  public DiscordUser(long discordId, String mention) {
+    this.discordId = discordId;
+    this.mention = mention;
+  }
 
-  @Column(name = "discord_mention", nullable = false)
-  private String mention;
+  public DiscordUser(int id, long discordId, String mention, int points, int messagesSent, int digitsWritten, int secondsOnline, boolean active, LocalDateTime lastTimeJoined, DiscordUser acceptedBy, short notification, LocalDate birthday) {
+    this.id = id;
+    this.discordId = discordId;
+    this.mention = mention;
+    this.points = points;
+    this.messagesSent = messagesSent;
+    this.digitsWritten = digitsWritten;
+    this.secondsOnline = secondsOnline;
+    this.active = active;
+    this.lastTimeJoined = lastTimeJoined;
+    this.acceptedBy = acceptedBy;
+    this.notification = notification;
+    this.birthday = birthday;
+  }
 
-  @Column(name = "msg_count", columnDefinition = "SMALLINT UNSIGNED not null")
-  @Setter(AccessLevel.NONE)
-  private int messagesSent = 0;
+  public Player getPlayer() {
+    return new Query<Player>().where("discord_user", this).entity();
+  }
 
-  @Column(name = "msg_digits", nullable = false)
-  @Setter(AccessLevel.NONE)
-  private int digitsWritten = 0;
+  @Override
+  public void setId(int id) {
+    this.id = id;
+  }
 
-  @Column(name = "seconds_online", nullable = false)
-  @Setter(AccessLevel.NONE)
-  private int secondsOnline = 0;
+  public void setMention(String mention) {
+    this.mention = mention;
+    new Query<DiscordUser>().col("mention", mention).update(id);
+  }
 
-  @Column(name = "joined")
-  @Setter(AccessLevel.NONE)
-  private LocalDateTime lastTimeJoined;
+  public void setPoints(int points) {
+    this.points = points;
+    new Query<DiscordUser>().col("points", points).update(id);
+  }
 
-  @Column(name = "birthday")
-  private LocalDate birthday;
+  public void setAcceptedBy(DiscordUser acceptedBy) {
+    this.acceptedBy = acceptedBy;
+    new Query<DiscordUser>().col("accepted", acceptedBy).update(id);
+    ApplicationFactory.updateApplicationStatus(this);
+  }
 
-  @Column(name = "points", nullable = false)
-  private int points = 1000;
+  public void setBirthday(LocalDate birthday) {
+    this.birthday = birthday;
+    new Query<DiscordUser>().col("birthday", birthday).update(id);
+  }
 
-  @Column(name = "active", nullable = false)
-  private boolean isActive = false;
+  public static DiscordUser get(Object[] objects) {
+    return new DiscordUser(
+        (int) objects[0],
+        (long) objects[1],
+        (String) objects[2],
+        (int) objects[3],
+        (int) objects[4],
+        (int) objects[5],
+        (int) objects[6],
+        (boolean) objects[7],
+        (LocalDateTime) objects[8],
+        new Query<DiscordUser>().entity(objects[9]),
+        (short) objects[10],
+        (LocalDate) objects[11]
+    );
+  }
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "accepted")
-  @ToString.Exclude
-  private DiscordUser acceptedBy;
-
-  @Column(name = "notification", columnDefinition = "SMALLINT UNSIGNED")
-  private short notification = 0;
+  @Override
+  public DiscordUser create() {
+    return new Query<DiscordUser>().key("discord_id", discordId)
+        .col("mention", mention).col("points", points).col("msg_count", messagesSent).col("msg_digits", digitsWritten)
+        .col("seconds_online", secondsOnline).col("active", active).col("joined", lastTimeJoined).col("accepted", acceptedBy)
+        .col("notification", notification).col("birthday", birthday)
+        .insert(this);
+  }
 
   public void setNotification(short notification) {
     final Integer difference = notification == -1 ? null : this.notification - notification;
     if (difference != null && difference.equals(0)) return;
     this.notification = notification;
     NotificationManager.addNotifiersFor(this,difference);
+    new Query<DiscordUser>().col("notification", notification).update(id);
   }
 
   public List<DiscordUserGroup> getGroups() {
-    return QueryBuilder.hql(DiscordUserGroup.class, "FROM DiscordUserGroup WHERE user = :user").addParameter("user", this).list();
+    return new Query<DiscordUserGroup>().where("discord_user", this).entityList();
   }
 
   public List<Membership> getMemberships() {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user").addParameter("user", this).list();
+    return new Query<Membership>().where("discord_user", this).entityList();
   }
 
   public List<Membership> getMainMemberships() {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user and role = :role").addParameters(Map.of("user", this, "role", TeamRole.MAIN)).list();
+    return new Query<Membership>().where("discord_user", this).and("role", TeamRole.MAIN).entityList();
   }
 
   public List<Application> getApplications() {
-    return QueryBuilder.hql(Application.class, "FROM Application WHERE user = :user").addParameter("user", this).list();
-  }
-
-  @ToString.Exclude
-  @OneToOne(mappedBy = "discordUser")
-  private Player player;
-
-  public DiscordUser(long discordId, String mention) {
-    this.discordId = discordId;
-    this.mention = mention;
+    return new Query<Application>().where("discord_user", this).entityList();
   }
 
   public Member getMember() {
@@ -146,8 +158,6 @@ public class DiscordUser implements Serializable {
       if (!discordUserGroup.isActive() && discordUserGroup.getRange().getEndTime().isAfter(LocalDateTime.now())) {
         addGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(true);
-        Database.update(discordUserGroup);
-        Database.update(this);
       }
     }
   }
@@ -165,8 +175,6 @@ public class DiscordUser implements Serializable {
       if (discordUserGroup.isActive() && !discordUserGroup.getRange().hasEnded()) {
         removeGroup(discordUserGroup.getDiscordGroup());
         discordUserGroup.setActive(false);
-        Database.update(discordUserGroup);
-        Database.update(this);
       }
     }
   }
@@ -191,9 +199,10 @@ public class DiscordUser implements Serializable {
 
   public void schedule(LocalDateTime dateTime, DiscordUser invoker) {
     this.acceptedBy = invoker;
-    final var timeRange = new TimeRange(dateTime, 30, ChronoUnit.MINUTES);
-    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention()).queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember()
-        .getNickname()).queue(threadChannel -> Database.insert(new ApplicationCalendar(timeRange, "by " + id + " - " + mention, this, threadChannel.getIdLong()))));
+    final var timeRange = new TimeRange(dateTime, Duration.ofMinutes(30));
+    Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention())
+        .queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember().getNickname())
+            .queue(threadChannel -> new ApplicationCalendar(timeRange, "by " + getId() + " - " + mention, this, threadChannel.getIdLong()).create()));
     dm("Neuer Termin für Vorstellungsgespräch: " + TimeFormat.DISCORD.of(dateTime));
   }
 
@@ -202,13 +211,18 @@ public class DiscordUser implements Serializable {
       final Duration duration = Duration.between(lastTimeJoined, LocalDateTime.now());
       this.secondsOnline += duration.getSeconds();
       this.points += Math.round(duration.getSeconds() / 60.);
+      new Query<DiscordUser>().col("joined", lastTimeJoined).col("seconds_online", secondsOnline).col("points", points).update(id);
     }
-    if (stillOnline) this.lastTimeJoined = LocalDateTime.now();
+    if (stillOnline) {
+      this.lastTimeJoined = LocalDateTime.now();
+      new Query<DiscordUser>().col("joined", lastTimeJoined).update(id);
+    }
   }
 
   public void addMessage(String content) {
     this.messagesSent++;
     this.digitsWritten += content.length();
     this.points += content.length();
+    new Query<DiscordUser>().col("msg_count", messagesSent).col("msg_digits", digitsWritten).col("points", points).update(id);
   }
 }

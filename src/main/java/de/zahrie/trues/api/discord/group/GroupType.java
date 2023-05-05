@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.discord.group;
 
+import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.permissible.PermissionPattern;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.Permission;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.LOWER)
 public enum GroupType {
   DEFAULT(new PermissionPattern(Permission.NICKNAME_CHANGE).add(PermissionPattern.CHANNEL_INTERACT_TALK)),
   PINGABLE(new PermissionPattern()),
@@ -16,5 +18,4 @@ public enum GroupType {
   CONTENT(new PermissionPattern().add(PermissionPattern.CONTENT_CREATION));
   
   private final PermissionPattern pattern;
-
 }

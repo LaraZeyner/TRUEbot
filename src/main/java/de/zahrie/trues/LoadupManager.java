@@ -5,7 +5,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.riot.Xayah;
 import de.zahrie.trues.util.Connectable;

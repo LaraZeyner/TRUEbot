@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,25 +11,21 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Embeddable
 @ExtensionMethod(DateTimeUtils.class)
 public class TimeRange implements Comparable<TimeRange> {
-  private LocalDateTime startTime;
-  private LocalDateTime endTime;
+  private final LocalDateTime startTime;
+  private final LocalDateTime endTime;
 
-  public TimeRange(LocalDateTime startTime, int minutes, TemporalUnit unit) {
+  public TimeRange(LocalDateTime startTime, Duration duration) {
     this.startTime = startTime;
-    this.endTime = startTime.plus(minutes, unit);
+    this.endTime = startTime.plus(duration);
   }
 
   public String display() {

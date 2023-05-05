@@ -1,56 +1,61 @@
 package de.zahrie.trues.api.community.orgateam.teamchannel;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
+import de.zahrie.trues.api.discord.channel.DiscordChannelType;
 import de.zahrie.trues.api.discord.channel.PermissionChannelType;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@DiscriminatorValue("not null")
-public class TeamChannel extends DiscordChannel implements Serializable {
+@Table(value = "discord_channel", department = "team")
+public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
   @Serial
-  private static final long serialVersionUID = -6665003217262393566L;
+  private static final long serialVersionUID = -1851145520721821488L;
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "orga_team")
-  @ToString.Exclude
-  private OrgaTeam orgaTeam;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "teamchannel_type")
-  private TeamChannelType teamChannelType;
+  private final OrgaTeam orgaTeam; // orga_team
+  private final TeamChannelType teamChannelType; // teamchannel_type
 
   public TeamChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
     super(discordId, name, permissionType, channelType);
     this.orgaTeam = orgaTeam;
     this.teamChannelType = teamChannelType;
+  }
+
+  private TeamChannel(int id, long discordId, DiscordChannelType channelType, String name, PermissionChannelType permissionType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
+    super(id, discordId, channelType, name, permissionType);
+    this.orgaTeam = orgaTeam;
+    this.teamChannelType = teamChannelType;
+  }
+
+  public static TeamChannel get(Object[] objects) {
+    return new TeamChannel(
+        (int) objects[0],
+        (long) objects[2],
+        new SQLEnum<DiscordChannelType>().of(objects[3]),
+        (String) objects[4],
+        new SQLEnum<PermissionChannelType>().of(objects[5]),
+        new Query<OrgaTeam>().entity( objects[6]),
+        new SQLEnum<TeamChannelType>().of(objects[7])
+    );
+  }
+
+  @Override
+  public TeamChannel create() {
+    return new Query<TeamChannel>().key("discord_id", discordId).key("department", "team")
+        .col("channel_type", channelType).col("channel_name", name).col("permission_type", permissionType)
+        .col("orga_team", orgaTeam).col("teamchannel_type", teamChannelType)
+        .insert(this);
   }
 
   @Override
@@ -64,9 +69,8 @@ public class TeamChannel extends DiscordChannel implements Serializable {
   }
 
   @Override
-  protected void updateForGroup(DiscordGroup group) {
+  public void updateForGroup(DiscordGroup group) {
     final Role role = orgaTeam.getRoleManager().getRole();
     uFr(role, group);
   }
-
 }

@@ -8,9 +8,9 @@ import de.zahrie.trues.api.coverage.lineup.LineupFinder;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerAnalyzer;
-import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.coverage.team.TeamAnalyzer;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
@@ -33,7 +33,7 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
   public List<MessageEmbed.Field> getOverview(Participator participator, ScoutingGameType gameType, int days) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
     for (Lineup lineup : LineupFinder.getLineup(participator, gameType, days)) {
-      final Player player = lineup.getPlayer();
+      final PlayerBase player = lineup.getPlayer();
       final var analyzer = new PlayerAnalyzer(player, gameType, player.getTeam(), days);
       fields.addAll(analyzer.analyzePicks(lineup.getLane()));
     }
@@ -43,7 +43,7 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
   public List<MessageEmbed.Field> getMatchups(Participator participator, ScoutingGameType gameType, int days) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
     for (Lineup lineup : LineupFinder.getLineup(participator, gameType, days)) {
-      final Player player = lineup.getPlayer();
+      final PlayerBase player = lineup.getPlayer();
       final var analyzer = new PlayerAnalyzer(player, gameType, player.getTeam(), days);
       fields.addAll(analyzer.analyzeMatchups(lineup.getLane()));
     }
@@ -51,19 +51,19 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
   }
 
   public List<MessageEmbed.Field> getHistory(Participator participator, ScoutingGameType gameType, int days, int page) {
-    final Team team = participator.getTeam();
+    final TeamBase team = participator.getTeam();
     final var analyzer = new TeamAnalyzer(team, gameType, days);
     return analyzer.analyzeHistory(page);
   }
 
   public List<MessageEmbed.Field> getChampions(Participator participator, ScoutingGameType gameType, int days) {
-    final Team team = participator.getTeam();
+    final TeamBase team = participator.getTeam();
     final var analyzer = new TeamAnalyzer(team, gameType, days);
     return analyzer.analyzeChampions();
   }
 
   public List<MessageEmbed.Field> getSchedule(Participator participator) {
-    final Team team = participator.getTeam();
+    final TeamBase team = participator.getTeam();
     final var analyzer = new TeamAnalyzer(team, gameType, days);
     return analyzer.analyzeSchedule();
   }

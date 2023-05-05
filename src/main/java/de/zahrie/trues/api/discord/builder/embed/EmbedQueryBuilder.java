@@ -3,7 +3,7 @@ package de.zahrie.trues.api.discord.builder.embed;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomColumn;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
 import de.zahrie.trues.util.Util;
@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 public record EmbedQueryBuilder(EmbedCreator creator, List<CustomQuery> queries, List<CustomEmbedData> embedData) {
   public EmbedCreator build() {
     for (CustomQuery query : queries) {
-      final List<Object[]> entries = query.getQuery().contains(".") ? Database.Find.getData(query.getQuery()) :
+      final List<Object[]> entries = query.getQuery().contains(".") ? new Query<>(query.getQuery()).list() :
           embedData.stream().filter(data -> data.key().equals(query.getQuery()))
-              .map(CustomEmbedData::data).findFirst().orElse(null);
+          .map(CustomEmbedData::data).findFirst().orElse(null);
       if (!handleNoData(query, entries)) handleData(query, Util.nonNull(entries));
     }
     return creator;

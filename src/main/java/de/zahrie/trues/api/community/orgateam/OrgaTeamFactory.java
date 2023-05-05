@@ -8,8 +8,8 @@ import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.connector.Database;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
 import de.zahrie.trues.api.discord.group.GroupType;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -55,7 +55,7 @@ public final class OrgaTeamFactory {
     final PRMTeam team = Util.avoidNull(id, null, TeamFactory::getTeam);
     Nunu.getInstance().getGuild().createRole().setName(orgaTeam.getRoleManager().getRoleName())
         .setPermissions().setMentionable(true).setHoisted(true)
-        .queue(role -> CustomDiscordGroup.build(role.getIdLong(), orgaTeam.getRoleManager().getRoleName(), GroupType.PINGABLE, true, orgaTeam));
+        .queue(role -> new CustomDiscordGroup(role.getIdLong(), orgaTeam.getRoleManager().getRoleName(), GroupType.PINGABLE, true, orgaTeam).create());
     orgaTeam.getChannels().createChannels();
     Database.connection().commit();
     return orgaTeam;
@@ -63,6 +63,6 @@ public final class OrgaTeamFactory {
 
   @Nullable
   public static OrgaTeam fromAbbreviation(String abbreviation) {
-    return QueryBuilder.hql(OrgaTeam.class, "FROM OrgaTeam WHERE abbreviationCreation = :abbr").addParameter("abbr", abbreviation).single();
+    return new Query<OrgaTeam>().where("team_abbr_created", abbreviation).entity();
   }
 }

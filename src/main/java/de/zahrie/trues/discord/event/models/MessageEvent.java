@@ -13,8 +13,9 @@ import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.Database;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.user.DiscordUser;
@@ -88,7 +89,7 @@ public class MessageEvent extends ListenerAdapter {
     if (!content.contains(":")) return;
 
     final Integer userId = content.before(":").intValue();
-    final DiscordUser discordUser = DiscordUserFactory.fromId(userId);
+    final var discordUser = new Query<DiscordUser>().entity(userId);
     if (discordUser == null) return;
 
     final String answer = content.after(":");
@@ -136,50 +137,44 @@ public class MessageEvent extends ListenerAdapter {
 
   private static void handleEditMatchData(@NotNull MessageReceivedEvent event, ThreadChannel threadChannel) {
     final String between = threadChannel.getName().between("(", ")", -1);
-    final Team team = Database.Find.find(Team.class, between.intValue());
+    final var team = new Query<TeamBase>().entity(between.intValue());
     final OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(threadChannel.getParentChannel());
     if (orgaTeam == null || orgaTeam.getTeam() == null) return;
     final Match match = MatchFactory.getMatchesOf(orgaTeam.getTeam(), team).stream().max(Comparator.naturalOrder()).orElse(null);
     if (match != null) {
-      boolean executed = false;
       final String content = event.getMessage().getContentDisplay();
       final String value = content.after(":").strip();
-      if (content.startsWith("Result:")) executed = handleResult(threadChannel, match, value);
-      else if (content.startsWith("Start:")) executed = handleStart(threadChannel, match, value);
-      else if (content.startsWith("Lineup 1:")) executed = handleLineup(threadChannel, match, value, true);
-      else if (content.startsWith("Lineup 2:")) executed = handleLineup(threadChannel, match, value, false);
-      if (executed) {
-        Database.updateAndCommit(match);
-        event.getMessage().delete().queue();
-        ScoutingManager.updateThread(threadChannel);
-      }
+      if (content.startsWith("Result:")) handleResult(threadChannel, match, value);
+      else if (content.startsWith("Start:")) handleStart(threadChannel, match, value);
+      else if (content.startsWith("Lineup 1:")) handleLineup(threadChannel, match, value, true);
+      else if (content.startsWith("Lineup 2:")) handleLineup(threadChannel, match, value, false);
+      ((Entity<?>) match).forceUpdate();
+      event.getMessage().delete().queue();
+      ScoutingManager.updateThread(threadChannel);
     }
   }
 
-  private static boolean handleLineup(@NotNull ThreadChannel threadChannel, Match match, String value, boolean home) {
+  private static void handleLineup(@NotNull ThreadChannel threadChannel, Match match, String value, boolean home) {
     final Participator participator = home ? match.getHome() : match.getGuest();
     participator.get().setOrderedLineup(value);
-    Database.updateAndCommit(participator);
+    participator.forceUpdate();
     if (value.equals("-:-") || Pattern.compile("\\d+:\\d+").matcher(value).matches()) {
       threadChannel.sendMessage("Neues Lineup festgelegt.").queue();
     }
-    return true;
   }
 
-  private static boolean handleStart(@NotNull ThreadChannel threadChannel, Match match, String value) {
+  private static void handleStart(@NotNull ThreadChannel threadChannel, Match match, String value) {
     final LocalDateTime dateTime = value.getDateTime();
     if (dateTime != null) {
-      match.setStart(dateTime);
+      match.updateStart(dateTime);
       threadChannel.sendMessage("Neuer Spieltermin: **" + TimeFormat.DISCORD.of(dateTime) + "**").queue();
     }
-    return true;
   }
 
-  private static boolean handleResult(@NotNull ThreadChannel threadChannel, Match match, String value) {
+  private static void handleResult(@NotNull ThreadChannel threadChannel, Match match, String value) {
     match.updateResult(value);
     if (value.equals("-:-") || Pattern.compile("\\d+:\\d+").matcher(value).matches()) {
       threadChannel.sendMessage("Neues Ergebnis: **" + value + "**").queue();
     }
-    return true;
   }
 }

@@ -2,10 +2,9 @@ package de.zahrie.trues.api.coverage.player;
 
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Xayah;
-import de.zahrie.trues.util.Util;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,7 @@ public final class PrimePlayerFactory {
 
   @Nullable
   public static PRMPlayer getPlayer(int primeId) {
-    return QueryBuilder.hql(PRMPlayer.class, "FROM PRMPlayer WHERE prmUserId = " + primeId).single();
+    return new Query<PRMPlayer>().where("prm_id", primeId).entity();
   }
 
   @Nullable
@@ -28,7 +27,6 @@ public final class PrimePlayerFactory {
     final PRMPlayer p = determinePlayer(summonerName, primeId);
     if (p != null) {
       p.setPrmUserId(primeId);
-      Database.update(p);
     }
     return p;
   }
@@ -37,9 +35,7 @@ public final class PrimePlayerFactory {
     final Summoner summoner = Xayah.summonerNamed(summonerName).get();
     final String puuid = summoner.getPuuid();
     if (!player.getPuuid().equals(puuid) && puuid != null) {
-      player.setPuuid(puuid);
-      player.setSummonerName(summoner.getName());
-      Database.update(player);
+      player.setPuuidAndName(puuid, summoner.getName());
     }
   }
 
@@ -47,34 +43,31 @@ public final class PrimePlayerFactory {
   private static PRMPlayer determinePlayer(String summonerName, int primeId) {
     final String puuid = Xayah.summonerNamed(summonerName).get().getPuuid();
     if (puuid != null) {
-      final PRMPlayer PRMPlayer = determineExistingPlayerFromPuuid(puuid);
-      return PRMPlayer != null ? PRMPlayer : new PRMPlayer(puuid, summonerName, primeId);
+      return new PRMPlayer(puuid, summonerName, primeId).create();
     }
-    return performNoPuuid(summonerName);
+    final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(summonerName);
+    if (prmPlayer != null) prmPlayer.setPrmUserId(primeId);
+    return prmPlayer;
   }
 
   @Nullable
-  private static PRMPlayer performNoPuuid(String summonerName) {
-    final PRMPlayer player = determineExistingPlayerFromName(summonerName);
+  private static PlayerBase performNoPuuid(String summonerName) {
+    final PlayerBase player = determineExistingPlayerFromName(summonerName);
     if (player == null) {
       log.config("Der Spieler existiert nicht");
       return null;
     }
 
     new PlayerHandler(null, player).updateName();
-    Database.update(player);
-
     return determineExistingPlayerFromName(summonerName);
   }
 
-  private static PRMPlayer determineExistingPlayerFromName(String summonerName) {
-    return Util.avoidNull(summonerName, null,
-        nameStr -> QueryBuilder.hql(PRMPlayer.class, "FROM PRMPlayer WHERE summonerName = " + nameStr).single());
+  private static PlayerBase determineExistingPlayerFromName(String summonerName) {
+    return summonerName == null ? null : new Query<PlayerBase>().where("lol_name", summonerName).entity();
   }
 
-  private static PRMPlayer determineExistingPlayerFromPuuid(String puuid) {
-    return Util.avoidNull(puuid, null,
-        puuidStr -> QueryBuilder.hql(PRMPlayer.class, "FROM PRMPlayer WHERE puuid = " + puuidStr).single());
+  private static PlayerBase determineExistingPlayerFromPuuid(String puuid) {
+    return puuid == null ? null : new Query<PlayerBase>().where("lol_puuid", puuid).entity();
   }
 
 }

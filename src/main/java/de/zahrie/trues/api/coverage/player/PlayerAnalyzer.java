@@ -8,20 +8,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.coverage.team.model.Standing;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLGroup;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
+import de.zahrie.trues.api.riot.matchhistory.game.Game;
+import de.zahrie.trues.api.riot.matchhistory.game.Selection;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
+import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
 import de.zahrie.trues.api.riot.matchhistory.performance.PlayerMatchHistoryPerformanceDTO;
+import de.zahrie.trues.api.riot.matchhistory.performance.TeamPerf;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, int days) {
+public record PlayerAnalyzer(PlayerBase player, ScoutingGameType type, TeamBase team, int days) {
   public List<MessageEmbed.Field> analyzePicks(Lane lane) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
     fields.add(getPlayerHeadField(lane));
@@ -34,7 +41,7 @@ public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, in
   }
 
   public List<MessageEmbed.Field> analyzeGamesWith(@Nullable Champion champion, @Nullable Lane lane) {
-    final List<List<String>> entries = PlayerMatchHistoryPerformanceDTO.get(player, type, lane, champion).list(25).stream().map(PlayerMatchHistoryPerformanceDTO::getData).toList();
+    final List<List<String>> entries = PlayerMatchHistoryPerformanceDTO.get(player, type, lane, champion).entityList(25).stream().map(performance -> new PlayerMatchHistoryPerformanceDTO(performance).getData()).toList();
     final var data = new EmbedFieldBuilder<>(entries)
         .add("Zeitpunkt", entry -> entry.get(0))
         .add("Matchup", entry -> entry.get(1))
@@ -59,28 +66,32 @@ public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, in
   }
 
   private List<PlayerMatchupData> handleMatchups() {
-    final List<Object[]> matchupList = type.playerQuery(player, days).performance("opponent, count(p), avg(teamPerformance.win)", "GROUP BY champion HAVING count(p) > 4 ORDER BY avg(teamPerformance.win)");
+    final List<Object[]> matchupList = type.playerQuery(player, days).performance().get("enemy_champion", Champion.class).get("count(performance_id)", Integer.class).get("avg(_teamperf.win)", Double.class).groupBy(new SQLGroup("champion").having("count(performance_id) > 4")).ascending("avg(_teamperf.win)").list();
     return matchupList.stream().map(objects -> new PlayerMatchupData((Champion) objects[0],
         new Standing((int) ((int) objects[1] * (double) objects[2]), (int) ((int) objects[1] * (1 - ((double) objects[2])))))).toList();
   }
 
   private List<PlayerAnalyzerData> handlePicks() {
     final var time = LocalDateTime.now().minusDays(days);
-    List<Object[]> presentPicks = type.playerQuery(player, days).selection("champion, count(s)", "GROUP BY champion ORDER BY count(s) desc");
-    if (presentPicks.isEmpty())
-      presentPicks = QueryBuilder.hql(Object[].class, "SELECT champion, count(s) FROM Selection s WHERE game IN (SELECT teamPerformance FROM Performance p WHERE player = :player AND teamPerformance.game.start > :start GROUP BY lane ORDER BY count(p)) GROUP BY champion ORDER BY count(s) desc")
-          .addParameters(Map.of("player", player, "start", time)).list();
+    List<Object[]> presentPicks = type.playerQuery(player, days).selection().get("champion", Champion.class).get("count(selection_id)", Integer.class).groupBy("champion").descending("count(selection_id)").list();
+    if (presentPicks.isEmpty()) {
+      presentPicks = new Query<Selection>().get("champion", Champion.class).get("count(selection_id)", Integer.class)
+          .where(Condition.inSubquery("game", new Query<Performance>().get("_teamperf.game", Game.class)
+              .join(new JoinQuery<Performance, TeamPerf>("t_perf")).join(new JoinQuery<TeamPerf, Game>())
+              .where("player", player).and("_game.start_time", time)
+              .groupBy("lane").ascending("count(performance_id)")
+          )).groupBy("champion").descending("count(selection_id)").list();
+    }
 
-
-    final List<Object[]> picksList = type.playerQuery(player, days).performance("champion, count(p)", "GROUP BY champion ORDER BY count(p) desc");
+    final List<Object[]> picksList = type.playerQuery(player, days).performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).groupBy("champion").descending("count(performance_id)").list();
     final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
-    final List<Object[]> mmList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance("champion, count(p)", "GROUP BY champion ORDER BY count(p) desc");
+    final List<Object[]> mmList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).groupBy("champion").descending("count(performance_id)").list();
     final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
-    final List<Object[]> winsList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance("champion, count(p)", "AND teamPerformance.win = true GROUP BY champion ORDER BY count(p) desc");
+    final List<Object[]> winsList = ScoutingGameType.MATCHMADE.playerQuery(player, days).performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).where("_teamperf.win", true).groupBy("champion").descending("count(performance_id)").list();
     final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objects -> (Champion) objects[0], objects -> ((Long) objects[1]).intValue(), (a, b) -> b));
 
-    final List<Object[]> games = type.playerQuery(player, days).performance("count(p)");
-    final Long amountOfGames = ((Long)games.get(0)[0]);
+    final List<Object[]> games = type.playerQuery(player, days).performance().get("count(performance_id)").list();
+    final Long amountOfGames = ((Long) games.get(0)[0]);
     final Map<Champion, PlayerAnalyzerData> data = new HashMap<>();
     for (final Object[] presentPick : presentPicks) {
       final Champion champion = (Champion) presentPick[0];
@@ -104,11 +115,12 @@ public record PlayerAnalyzer(Player player, ScoutingGameType type, Team team, in
   }
 
   public int getGames() {
-    final List<Long> games = type.playerQuery(Long.class, player, days).performance("count(p)");
-    return games.get(0).intValue();
+    final Object[] games = type.playerQuery(Long.class, player, days).performance().get("count(performance_id)").single();
+    return (int) games[0];
   }
 
-  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames, int matchMadeWins) implements Comparable<PlayerAnalyzerData> {
+  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames,
+                                   int matchMadeWins) implements Comparable<PlayerAnalyzerData> {
     public String getChampionString() {
       return champion.getName();
     }

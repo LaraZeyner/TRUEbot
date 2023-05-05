@@ -21,8 +21,6 @@ import java.util.stream.IntStream;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
-import lombok.Data;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * <b>Allowed Dates</b> <br>
@@ -36,11 +34,7 @@ import lombok.experimental.ExtensionMethod;
  * 12:34 <br>
  * 12h <br>
  */
-@Data
-@ExtensionMethod(StringUtils.class)
-public final class DateTimeStringConverter {
-  private final String input;
-
+public record DateTimeStringConverter(String input) {
   public LocalDateTime toTime() {
     final TimeRange timeRange = toRangeList().stream().findFirst().orElse(null);
     return Util.avoidNull(timeRange, null, TimeRange::getStartTime);
@@ -94,7 +88,7 @@ public final class DateTimeStringConverter {
   }
 
   private DayOfWeek determineDayOfWeek(String day) {
-    day = day.keep(2).capitalizeFirst();
+    day = StringUtils.capitalizeFirst(StringUtils.keep(day, 2));
     try {
       final TemporalAccessor temporalAccessor = DateTimeFormatter.ofPattern("E").withLocale(Locale.GERMANY).parse(day + ".");
       return DayOfWeek.from(temporalAccessor);
@@ -152,18 +146,18 @@ public final class DateTimeStringConverter {
    * </table>
    */
   private LocalDate handleDateString(String section) {
-    if (section.erase(1).contains(".")) {
-      if (section.endsWith(".")) section = section.erase(-1);
-      if (section.replace(".", "").intValue() == -1) return null;
+    if (StringUtils.erase(section, 1).contains(".")) {
+      if (section.endsWith(".")) section = StringUtils.erase(section, -1);
+      if (StringUtils.intValue(section.replace(".", "")) == -1) return null;
       final String[] splitted = section.split("\\.");
-      int day = section.intValue();
+      int day = StringUtils.intValue(section);
       int month = LocalDate.now().getMonthValue();
       int year = LocalDate.now().getYear();
 
       if (splitted.length > 0) {
-        day = splitted[0].intValue();
-        month = splitted[1].intValue();
-        if (splitted.length > 2) year = splitted[2].intValue();
+        day = StringUtils.intValue(splitted[0]);
+        month = StringUtils.intValue(splitted[1]);
+        if (splitted.length > 2) year = StringUtils.intValue(splitted[2]);
       }
       try {
         return LocalDate.of(year, month, day);
@@ -173,7 +167,7 @@ public final class DateTimeStringConverter {
     }
     final DayOfWeek dayOfWeek = determineDayOfWeek(section);
     if (dayOfWeek == null) return null;
-    final int repeated = section.after("+").intValue(section.contains("+") ? 1 : 0);
+    final int repeated = StringUtils.intValue(StringUtils.after(section, "+"), section.contains("+") ? 1 : 0);
     final LocalDate date = LocalDate.now().with(TemporalAdjusters.nextOrSame(dayOfWeek));
     return date.plusWeeks(repeated);
   }
@@ -182,9 +176,9 @@ public final class DateTimeStringConverter {
     final String origin = "00:00:00";
     timeString = timeString.replace("h", "");
     timeString = timeString.length() == 1 ? "0" + timeString + ":00:00" : timeString + origin.substring(timeString.length());
-    final int hour = timeString.split(":")[0].intValue();
-    final int minute = timeString.split(":")[1].intValue();
-    final int second = timeString.split(":")[2].intValue();
+    final int hour = StringUtils.intValue(timeString.split(":")[0]);
+    final int minute = StringUtils.intValue(timeString.split(":")[1]);
+    final int second = StringUtils.intValue(timeString.split(":")[2]);
     return LocalTime.of(hour, minute, second);
   }
 }

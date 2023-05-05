@@ -1,95 +1,79 @@
 package de.zahrie.trues.api.riot.matchhistory.game;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
-import de.zahrie.trues.api.database.Database;
-import de.zahrie.trues.api.riot.matchhistory.selection.Selection;
-import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
+import de.zahrie.trues.api.riot.matchhistory.performance.TeamPerf;
 import de.zahrie.trues.util.Util;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "game", indexes = @Index(name = "game_idx_orgagame", columnList = "orgagame"))
-public class Game implements Serializable {
+@Table("game")
+public class Game implements Entity<Game>, Comparable<Game> {
   @Serial
-  private static final long serialVersionUID = -2880626253889374458L;
+  private static final long serialVersionUID = -1636645398510925983L;
 
+  private int id; // game_id
+  private final String gameId; // game_index
+  private final LocalDateTime start; // start_time
+  private final int durationInSeconds; // duration
+  private final GameType type; // game_type
+  private boolean orgaGame = false; // orgagame
 
-  @Id
-  @Column(name = "game_id", nullable = false, length = 16, unique = true)
-  private String id;
-
-  @Column(name = "start_time", nullable = false)
-  private LocalDateTime start;
-
-  @Column(name = "duration", columnDefinition = "SMALLINT UNSIGNED not null")
-  private int durationInSeconds;
-
-  @Enumerated
-  @Column(name = "game_type", nullable = false)
-  private GameType type;
-
-  @Column(name = "orgagame", nullable = false)
-  private boolean isOrgagame = false;
-
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
-  private Set<TeamPerf> teamPerformances = new LinkedHashSet<>();
-
-  public void addTeamPerformance(TeamPerf teamPerf) {
-    teamPerf.setGame(this);
-    teamPerformances.add(teamPerf);
-    Database.update(this);
-    Database.update(teamPerf);
+  public List<TeamPerf> getTeamPerformances() {
+    return new Query<TeamPerf>().where("game", this).entityList();
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
-  private Set<Selection> selections = new LinkedHashSet<>();
-
-  public void addSelection(Selection selection) {
-    selection.setGame(this);
-    selections.add(selection);
-    Database.update(selection);
-    Database.update(this);
+  public List<Selection> getSelections() {
+    return new Query<Selection>().where("game", this).entityList();
   }
 
-  public Game(String id, LocalDateTime start, int durationInSeconds, GameType type) {
-    this(id, start, durationInSeconds, type, false);
+  public static Game get(Object[] objects) {
+    return new Game(
+        (int) objects[0],
+        (String) objects[1],
+        (LocalDateTime) objects[2],
+        (int) objects[3],
+        new SQLEnum<GameType>().of(objects[4]),
+        (boolean) objects[5]
+    );
   }
 
-  public Game(String id, LocalDateTime start, int durationInSeconds, GameType type, boolean isOrgagame) {
-    this.id = id;
-    this.start = start;
-    this.durationInSeconds = durationInSeconds;
-    this.type = type;
-    this.isOrgagame = isOrgagame;
+  @Override
+  public Game create() {
+    return new Query<Game>().key("game_index", gameId)
+        .col("start_time", start).col("duration", durationInSeconds).col("game_type", type).col("orgagame", orgaGame)
+        .insert(this);
+  }
+
+  public void setOrgaGame(boolean orgaGame) {
+    if (orgaGame != this.orgaGame) new Query<Game>().col("orgagame", orgaGame).update(id);
+    this.orgaGame = orgaGame;
   }
 
   public boolean hasSelections() {
-    return !selections.isEmpty();
+    return !getSelections().isEmpty();
   }
 
   public String getDuration() {
     return Util.formatDuration(durationInSeconds);
+  }
+
+  @Override
+  public int compareTo(@NotNull Game o) {
+    return start.compareTo(o.getStart());
   }
 }

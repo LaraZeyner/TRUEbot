@@ -5,7 +5,8 @@ import java.util.Comparator;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.community.member.MembershipFactory;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.api.scheduler.Schedule;
@@ -15,7 +16,8 @@ import de.zahrie.trues.api.scheduler.ScheduledTask;
 public class CheckSubstitudeStatus extends ScheduledTask {
   @Override
   public void execute() {
-    for (DiscordUserGroup toRemove : QueryBuilder.hql(DiscordUserGroup.class, "FROM DiscordUserGroup WHERE isActive = true AND range.endTime is not null AND range.endTime > NOW()").list()) {
+    for (DiscordUserGroup toRemove : new Query<DiscordUserGroup>().where("active", true)
+        .and(Condition.notNull("permission_end")).and("permission_end > now()").entityList()) {
       toRemove.setActive(false);
       new RoleGranter(toRemove.getUser()).remove(toRemove.getDiscordGroup());
       MembershipFactory.getCurrentTeams(toRemove.getUser()).stream()

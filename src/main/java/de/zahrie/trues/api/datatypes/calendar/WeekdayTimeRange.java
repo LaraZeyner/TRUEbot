@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import de.zahrie.trues.api.coverage.playday.RepeatType;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayConfig;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -28,7 +29,7 @@ public final class WeekdayTimeRange {
     this(start, end, 0);
   }
 
-  public TimeRange nextOrCurrent(PlayStage stage, int index) {
+  public TimeRange nextOrCurrent(Stage stage, int index) {
     return nextOrCurrent(determineDateOfWeekday(stage, index));
   }
 
@@ -39,8 +40,8 @@ public final class WeekdayTimeRange {
     return new TimeRange(startDateTime, endDateTime);
   }
 
-  private LocalDate determineDateOfWeekday(PlayStage stage, int index) {
-    final PlaydayConfig config = stage.playdayConfig();
+  private LocalDate determineDateOfWeekday(Stage stage, int index) {
+    final PlaydayConfig config = ((PlayStage) stage).playdayConfig();
     LocalDateTime startTime = stage.getRange().getStartTime();
     if (config.customDays() == null) {
       final RepeatType repeatType = config.repeater().type();

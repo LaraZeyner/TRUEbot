@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.match.model.Scrimmage;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.database.Database;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -26,19 +25,17 @@ public class ScrimCreateModal extends ModalImpl {
     final LocalDateTime time = getTime();
     if (time == null) return reply("Das Datum ist fehlerhaft.");
 
-    final Scrimmage scrimmage = new Scrimmage(time);
     if (getTeam() == null) return reply("Dein Team konnte nicht gefunden werden.");
+    if (getTeamIdOrName() == null) return reply("Der Gegner konnte nicht gefunden werden.");
+    final Scrimmage scrimmage = new Scrimmage(time);
+    scrimmage.create();
 
-    final var home = new Participator(true, getTeam().getTeam());
+    final Participator home = scrimmage.addParticipator(getTeam().getTeam(), true);
     if (handleTeamsLineup(home)) return errorMessage();
 
-    if (getTeamIdOrName() == null) return reply("Der Gegner konnte nicht gefunden werden.");
-
-    final var guest = new Participator(false, getTeamIdOrName());
+    final Participator guest = scrimmage.addParticipator(getTeamIdOrName(), true);
     if (handleTeamsLineup(guest)) return errorMessage();
 
-    Database.insert(scrimmage);
-    scrimmage.addParticipators(home, guest);
     return sendMessage();
   }
 }

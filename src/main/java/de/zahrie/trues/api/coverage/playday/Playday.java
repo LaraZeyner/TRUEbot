@@ -1,74 +1,59 @@
 package de.zahrie.trues.api.coverage.playday;
 
 import java.io.Serial;
-import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 
 import de.zahrie.trues.api.coverage.match.model.MatchFormat;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayRange;
-import de.zahrie.trues.api.coverage.stage.model.PlayStage;
+import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.api.database.connector.Table;
+import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "coverage_playday", indexes = @Index(name = "idx_playday_2", columnList = "stage, playday_index", unique = true))
-public class Playday implements Serializable, Comparable<Playday> {
+@Table("coverage_playday")
+public class Playday implements Entity<Playday>, Comparable<Playday> {
   @Serial
-  private static final long serialVersionUID = -1118100065150854452L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "coverage_playday_id", columnDefinition = "SMALLINT UNSIGNED not null")
+  private static final long serialVersionUID = 341434050654966994L;
   private int id;
+  private final Stage stage; // stage
+  private final short idx; // playday_index
+  private final TimeRange range; // playday_start, playday_end
+  private final MatchFormat format; // format
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "stage", nullable = false)
-  @ToString.Exclude
-  private PlayStage stage;
-
-  @Column(name = "playday_index", columnDefinition = "TINYINT UNSIGNED not null")
-  private short idx;
-
-  @Embedded
-  @AttributeOverrides({
-      @AttributeOverride(name = "startTime", column = @Column(name = "playday_start", nullable = false)),
-      @AttributeOverride(name = "endTime", column = @Column(name = "playday_end", nullable = false))
-  })
-  private TimeRange range;
-
-  @Enumerated
-  @Column(name = "format")
-  private MatchFormat format;
-
-  public Playday(PlayStage stage, short index, PlaydayRange playdayRange, MatchFormat format) {
+  public Playday(Stage stage, short index, PlaydayRange playdayRange, MatchFormat format) {
     this.stage = stage;
     this.idx = index;
     this.range = playdayRange;
     this.format = format;
+  }
+
+  public static Playday get(Object[] objects) {
+    return new Playday(
+        (int) objects[0],
+        new Query<Stage>().entity(objects[1]),
+        (short) objects[2],
+        new TimeRange((LocalDateTime) objects[3], (LocalDateTime) objects[4]),
+        new SQLEnum<MatchFormat>().of(objects[5])
+    );
+  }
+
+  @Override
+  public Playday create() {
+    return new Query<Playday>()
+        .key("stage", stage).key("playday_index", idx)
+        .col("playday_start", range.getStartTime()).col("playday_end", range.getEndTime()).col("format", format)
+        .insert(this);
   }
 
   @Override

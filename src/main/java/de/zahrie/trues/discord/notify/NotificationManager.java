@@ -9,7 +9,8 @@ import java.util.List;
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import lombok.experimental.ExtensionMethod;
@@ -23,8 +24,12 @@ public class NotificationManager {
     day = LocalDate.now();
     notifiers.clear();
     final LocalDateTime localDateTime = LocalDateTime.of(day.plusDays(2), LocalTime.MIN);
-    QueryBuilder.hql(TeamCalendar.class, "FROM TeamCalendar WHERE range.startTime between now() and :end").addParameter("end", localDateTime).list().forEach(NotificationManager::addNotifiersFor);
-    QueryBuilder.hql(Participator.class, "FROM Participator WHERE team.orgaTeam is not null and coverage.start between now() and :end").addParameter("end", localDateTime).list().forEach(NotificationManager::addNotifiersFor);
+    new Query<TeamCalendar>().where(Condition.between("calendar_start", "now()", localDateTime))
+        .entityList().forEach(NotificationManager::addNotifiersFor);
+    new Query<Participator>("SELECT * FROM coverage_team " +
+        "LEFT JOIN orga_team ot on coverage_team.team = ot.team INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
+        "WHERE orga_team_id is not null and coverage_start between now() and ?")
+        .entityList(List.of(localDateTime)).forEach(NotificationManager::addNotifiersFor);
   }
 
   public static void addNotifiersFor(TeamCalendar calendar) {
@@ -40,8 +45,8 @@ public class NotificationManager {
     final List<Notifier> existing = notifiers.stream().filter(notifier -> notifier instanceof MatchNotifier teamEventNotifier && teamEventNotifier.getParticipator().equals(participator)).toList();
     notifiers.removeAll(existing);
     participator.getTeam().getOrgaTeam().getActiveMemberships().stream().map(Membership::getUser).filter(user -> user.getNotification() >= 0).forEach(user -> {
-      notifiers.add(new MatchNotifier(participator.getCoverage().getStart().toLocalTime(), user, participator));
-      if (user.getNotification() > 0) notifiers.add(new MatchNotifier(participator.getCoverage().getStart().toLocalTime().minusMinutes(user.getNotification()), user, participator));
+      notifiers.add(new MatchNotifier(participator.getMatch().getStart().toLocalTime(), user, participator));
+      if (user.getNotification() > 0) notifiers.add(new MatchNotifier(participator.getMatch().getStart().toLocalTime().minusMinutes(user.getNotification()), user, participator));
     });
   }
 

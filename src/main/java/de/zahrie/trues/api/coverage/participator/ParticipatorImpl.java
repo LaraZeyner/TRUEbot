@@ -9,8 +9,8 @@ import de.zahrie.trues.api.coverage.lineup.LineupManager;
 import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.api.database.Database;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,11 +18,11 @@ import org.jetbrains.annotations.NotNull;
 public class ParticipatorImpl {
   private final Participator participator;
 
-  public void setLineup(List<Player> newLineup) {
+  public void setLineup(List<PlayerBase> newLineup) {
     setLineup(newLineup, false);
   }
 
-  public void setOrderedLineup(List<Player> newLineup) {
+  public void setOrderedLineup(List<PlayerBase> newLineup) {
     setLineup(newLineup, true);
   }
 
@@ -30,7 +30,7 @@ public class ParticipatorImpl {
     return setOrderedLineup(opGgUrl, new ArrayList<>(5));
   }
 
-  public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<Player> players) {
+  public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<PlayerBase> players) {
     final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split("%2C");
     for (int i = 0; i < split.length; i++) {
       if (i > 4) break;
@@ -46,22 +46,17 @@ public class ParticipatorImpl {
     return true;
   }
 
-  private void setLineup(List<Player> newLineup, boolean ordered) {
-    participator.getLineups().stream().filter(lineup -> !newLineup.contains(lineup.getPlayer())).forEach(participator::removeLineup);
+  private void setLineup(List<PlayerBase> newLineup, boolean ordered) {
+    participator.getLineups().stream().filter(lineup -> !newLineup.contains(lineup.getPlayer())).forEach(Lineup::delete);
 
-    for (Player player : newLineup) {
+    for (PlayerBase player : newLineup) {
       final Lane lane = determineLane(newLineup, ordered, player);
-      if (LineupFactory.determineLineup(participator, player) == null) {
-        final var lineup = new Lineup(lane, player);
-        Database.insert(lineup);
-        participator.addLineup(lineup);
-      }
+      if (LineupFactory.determineLineup(participator, player) == null) new Lineup(participator, player, lane).create();
     }
-    Database.update(this);
-    LineupManager.getMatch(participator.getCoverage()).update();
+    LineupManager.getMatch(participator.getMatch()).update();
   }
 
-  private static Lane determineLane(List<Player> newLineup, boolean ordered, Player player) {
+  private static Lane determineLane(List<PlayerBase> newLineup, boolean ordered, PlayerBase player) {
     if (!ordered) return Lane.UNKNOWN;
     final int index = newLineup.indexOf(player);
     return Lane.values()[index + 1];

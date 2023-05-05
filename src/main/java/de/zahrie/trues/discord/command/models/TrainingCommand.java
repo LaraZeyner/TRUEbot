@@ -40,13 +40,13 @@ public class TrainingCommand extends SlashCommand {
     final LocalDateTime end = start.plusMinutes(duration);
     final var timeRange = new TimeRange(start, end);
     final TeamCalendar.TeamCalendarType type = find("typ").toEnum(TeamCalendar.TeamCalendarType.class, TeamCalendar.TeamCalendarType.TRAINING);
-    final TextChannel textChannel = (TextChannel) getLocatedTeam().getChannels().getChannelOf(TeamChannelType.SCOUTING);
+    final TextChannel textChannel = (TextChannel) getLocatedTeam().getChannels().get(TeamChannelType.SCOUTING);
     if (textChannel == null) return reply("Der Channel wurde nicht gesetzt.");
 
     final String typeString = find("typ").string();
     textChannel.sendMessage("**Neues " + typeString + " am " + TimeFormat.DEFAULT.of(start) + "**\n" + details)
         .queue(message -> textChannel.createThreadChannel(typeString + " am " + TimeFormat.DAY_LONG.of(start))
-            .queue(threadChannel -> TeamCalendar.create(timeRange, details, type, getLocatedTeam(), threadChannel.getIdLong())));
+            .queue(threadChannel -> new TeamCalendar(timeRange, details, type, getLocatedTeam(), threadChannel.getIdLong()).create()));
     return sendMessage();
   }
 }

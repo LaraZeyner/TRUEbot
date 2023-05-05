@@ -23,6 +23,7 @@ public record FileLog(Logger logger, LocalDate date) {
     return instance;
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   private static FileLog createFileLog() {
     final Logger l = Logger.getLogger("FileLog");
     l.setLevel(Level.FINER);
@@ -30,7 +31,7 @@ public record FileLog(Logger logger, LocalDate date) {
     final String todayStr = TimeFormat.DAY_STANDARD.of(today);
 
     try {
-      Path currentRelativePath = Paths.get("");
+      final Path currentRelativePath = Paths.get("");
       final File directory = new File(currentRelativePath.toAbsolutePath() + "/logs");
       directory.mkdir();
       final File file = new File(currentRelativePath.toAbsolutePath() + "/logs/" + todayStr + ".log");

@@ -9,35 +9,21 @@ import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.riot.matchhistory.KDA;
 import de.zahrie.trues.api.riot.matchhistory.champion.Champion;
 import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
-import de.zahrie.trues.api.riot.matchhistory.performance.ParticipantExtension;
+import de.zahrie.trues.api.riot.matchhistory.performance.Matchup;
+import de.zahrie.trues.api.riot.matchhistory.performance.ParticipantUtils;
 import de.zahrie.trues.api.riot.matchhistory.performance.Performance;
-import de.zahrie.trues.api.riot.matchhistory.performance.PerformanceFactory;
-import de.zahrie.trues.api.riot.matchhistory.teamperformance.TeamPerf;
-import lombok.Data;
-import lombok.experimental.ExtensionMethod;
+import de.zahrie.trues.api.riot.matchhistory.performance.TeamPerf;
 
-@Data
-@ExtensionMethod(ParticipantExtension.class)
-public class ParticipantsAnalyzer {
-  private final Match match;
-  private final TeamPerf teamPerformance;
-  private final Team team;
-  private final Participant participant;
-
+public record ParticipantsAnalyzer(Match match, TeamPerf teamPerformance, Team team, Participant participant) {
   public Performance analyze() {
     final Player player = PlayerFactory.getPlayerFromPuuid(participant.getSummoner().getPuuid());
-    final Performance performance = PerformanceFactory.getPerformanceByPlayerAndTeamPerformance(player, teamPerformance);
-    if (performance != null) {
-      return null;
-    }
     final ParticipantStats stats = participant.getStats();
-    final Lane lane = participant.getPlayedLane();
-    final Champion selectedChampion = participant.getSelectedChampion();
-    final Participant opponent = participant.getOpponent(match);
-    final Champion opposingChampion = opponent == null ? null : opponent.getSelectedChampion();
-    final KDA kda = participant.getKDA();
-    final Performance performance1 = new Performance(player, lane, selectedChampion, opposingChampion, kda, stats.getGoldEarned(), stats.getDamageDealt(), stats.getVisionScore(), stats.getCreepScore());
-    teamPerformance.addPerformance(performance1);
-    return performance1;
+    final Lane lane = ParticipantUtils.getPlayedLane(participant);
+    final Champion selectedChampion = ParticipantUtils.getSelectedChampion(participant);
+    final Participant opponent = ParticipantUtils.getOpponent(participant, match);
+    final Champion opposingChampion = opponent == null ? null : ParticipantUtils.getSelectedChampion(opponent);
+    final Matchup matchup = new Matchup(selectedChampion, opposingChampion);
+    final KDA kda = KDA.fromParticipant(participant);
+    return new Performance(teamPerformance, player, lane, matchup, kda, stats.getGoldEarned(), stats.getDamageDealt(), stats.getVisionScore(), stats.getCreepScore()).create();
   }
 }

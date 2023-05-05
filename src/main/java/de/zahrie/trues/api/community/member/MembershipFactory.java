@@ -2,29 +2,24 @@ package de.zahrie.trues.api.community.member;
 
 import java.util.List;
 
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
-import de.zahrie.trues.api.database.QueryBuilder;
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.api.database.Database;
 
 public class MembershipFactory {
 
   public static Membership getMember(OrgaTeam team, DiscordUser user, TeamRole role, TeamPosition position) {
     Membership membership = getMember(team, user);
     if (membership == null) {
-      membership = Membership.build(user, team, role, position);
+      membership = new Membership(user, team, role, position).create();
     }
-    membership.setRole(role);
-    membership.setPosition(position);
-    membership.setActive(true);
-    Database.update(membership);
+    membership.updateRoleAndPosition(role, position);
     return membership;
   }
   public static List<Membership> getCurrentTeams(DiscordUser user) {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user AND active = true")
-        .addParameter("user", user).list();
+    return new Query<Membership>().where("discord_user", user).and("active", true).entityList();
   }
 
   public static Membership getMostImportantTeam(DiscordUser user) {
@@ -35,24 +30,15 @@ public class MembershipFactory {
     return getCurrentTeams(user).stream().filter(member1 -> member1.getOrgaTeam().equals(team)).findFirst().orElse(null);
   }
 
-  public static Membership getOfTeam(OrgaTeam team, TeamRole role, TeamPosition position) {
-    return team.getMemberships().stream().filter(member -> member.getRole().equals(role))
-        .filter(member -> member.getPosition().equals(position)).findFirst().orElse(null);
-  }
-
   public static List<Membership> getOfPosition(TeamPosition position) {
-
-    return QueryBuilder.hql(Membership.class,
-        "FROM Membership WHERE position = :position and active = true")
-        .addParameter("position", position).list();
+    return new Query<Membership>().where("position", position).and("active", true).entityList();
   }
 
   public static Membership getMember(OrgaTeam orgaTeam, DiscordUser user) {
-    return orgaTeam.getMemberships().stream().filter(membership -> membership.getUser().equals(user)).findFirst().orElse(null);
+    return new Query<Membership>().where("orga_team", orgaTeam).and("discord_user", user).entity();
   }
 
   public static List<Membership> getCaptainRoles(DiscordUser user) {
-    return QueryBuilder.hql(Membership.class, "FROM Membership WHERE user = :user AND active = true AND captain = true")
-        .addParameter("user", user).list();
+    return new Query<Membership>().where("discord_user", user).and("active", true).and("captain", true).entityList();
   }
 }
