@@ -1,6 +1,5 @@
 package de.zahrie.trues.api.community.betting;
 
-import de.zahrie.trues.api.coverage.match.model.AMatch;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
@@ -17,7 +16,7 @@ public class BetFactory {
     return true;
   }
 
-  public static Bet getBet(DiscordUser user, AMatch AMatch) {
-    return new Query<Bet>().where("discord_user", user).and("coverage", AMatch).entity();
+  public static Bet getBet(DiscordUser user, Match match) {
+    return new Query<>(Bet.class).where("discord_user", user).and("coverage", match).entity();
   }
 }

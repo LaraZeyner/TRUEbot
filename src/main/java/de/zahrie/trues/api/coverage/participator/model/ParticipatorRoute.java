@@ -1,0 +1,33 @@
+package de.zahrie.trues.api.coverage.participator.model;
+
+import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.database.connector.Listing;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public class ParticipatorRoute {
+  private League league; // route_group
+  private RouteType type; // route_type
+  private Short value; // route_value
+
+  @Override
+  public String toString() {
+    if (type == null) return "n.A.";
+    return switch (type) {
+      case LOSER -> "Verlierer M" + value;
+      case PLACE -> value + ". " + league.getName();
+      case SEEDED -> "Seed " + value;
+      case WINNER -> "Sieger M" + value;
+    };
+  }
+
+  @Listing(Listing.ListingType.LOWER)
+  public enum RouteType {
+    LOSER,
+    PLACE,
+    SEEDED,
+    WINNER
+  }
+}

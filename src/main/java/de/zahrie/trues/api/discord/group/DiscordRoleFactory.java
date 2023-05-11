@@ -21,7 +21,7 @@ public class DiscordRoleFactory {
   }
 
   private static CustomDiscordGroup determineCustomGroup(Role role) {
-    return new Query<CustomDiscordGroup>().where("discord_id", role.getIdLong()).entity();
+    return new Query<>(CustomDiscordGroup.class).where("discord_id", role.getIdLong()).entity();
   }
 
   private static CustomDiscordGroup createCustomGroup(Role role) {

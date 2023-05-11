@@ -3,6 +3,7 @@ package de.zahrie.trues.api.community.member;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
@@ -53,29 +54,29 @@ public class Membership implements Entity<Membership>, Comparable<Membership> {
     this.position = position;
   }
 
-  public static Membership get(Object[] objects) {
+  public static Membership get(List<Object> objects) {
     return new Membership(
-        (int) objects[0],
-        new Query<DiscordUser>().entity( objects[1]),
-        new Query<OrgaTeam>().forId((int) objects[2]).entity(),
-        new SQLEnum<TeamRole>().of(objects[3]),
-        new SQLEnum<TeamPosition>().of(objects[4]),
-        (LocalDateTime) objects[5],
-        (boolean) objects[6],
-        (boolean) objects[7]
+        (int) objects.get(0),
+        new Query<>(DiscordUser.class).entity( objects.get(1)),
+        new Query<>(OrgaTeam.class).forId((int) objects.get(2)).entity(),
+        new SQLEnum<>(TeamRole.class).of(objects.get(3)),
+        new SQLEnum<>(TeamPosition.class).of(objects.get(4)),
+        (LocalDateTime) objects.get(5),
+        (boolean) objects.get(6),
+        (boolean) objects.get(7)
     );
   }
 
   @Override
   public Membership create() {
-    return new Query<Membership>().key("discord_user", user).key("orga_team", orgaTeam)
+    return new Query<>(Membership.class).key("discord_user", user).key("orga_team", orgaTeam)
         .col("position", position).col("role", role).col("timestamp", timestamp).col("captain", captain).col("active", active).insert(this);
   }
 
   public void removeFromTeam(OrgaTeam team) {
     this.orgaTeam = null;
     this.active = false;
-    new Query<Membership>().col("orga_team", null).col("active", false).update(id);
+    new Query<>(Membership.class).col("orga_team", null).col("active", false).update(id);
     new RoleGranter(user).removeTeamRole(this, team);
     Nunu.DiscordMessager.dm(user, "Du wurdest aus dem Team **" + team.getName() + "** entfernt. Du kannst aber jederzeit gerne eine neue Bewerbung schreiben. Solltest du Probleme oder Fragen haben kannst du mir jederzeit schreiben.");
   }
@@ -85,7 +86,7 @@ public class Membership implements Entity<Membership>, Comparable<Membership> {
   }
 
   public void setCaptain(boolean captain) {
-    if (this.captain != captain) new Query<Membership>().col("captain", captain).update(id);
+    if (this.captain != captain) new Query<>(Membership.class).col("captain", captain).update(id);
     this.captain = captain;
     new RoleGranter(user).handleCaptain(captain);
   }
@@ -94,12 +95,12 @@ public class Membership implements Entity<Membership>, Comparable<Membership> {
     this.role = role;
     this.position = position;
     this.active = true;
-    new Query<Membership>().col("role", role).col("position", position).col("active", true).update(id);
+    new Query<>(Membership.class).col("role", role).col("position", position).col("active", true).update(id);
   }
 
   public void setRole(TeamRole role) {
     this.role = role;
-    new Query<Membership>().col("role", role).update(id);
+    new Query<>(Membership.class).col("role", role).update(id);
   }
 
   public String getPositionString() {

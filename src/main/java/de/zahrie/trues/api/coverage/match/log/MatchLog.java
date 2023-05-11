@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.lineup.model.Lineup;
+import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.match.model.PRMMatch;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -56,20 +56,20 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
     this.participator = participator;
   }
 
-  public static MatchLog get(Object[] objects) {
+  public static MatchLog get(List<Object> objects) {
     return new MatchLog(
-        (int) objects[0],
-        (LocalDateTime) objects[1],
-        new Query<Match>().entity(objects[2]),
-        new SQLEnum<MatchLogAction>().of(objects[3]),
-        (String) objects[4],
-        new Query<Participator>().entity(objects[2])
+        (int) objects.get(0),
+        (LocalDateTime) objects.get(1),
+        new Query<>(Match.class).entity(objects.get(2)),
+        new SQLEnum<>(MatchLogAction.class).of(objects.get(3)),
+        (String) objects.get(4),
+        new Query<>(Participator.class).entity(objects.get(2))
     );
   }
 
   @Override
   public MatchLog create() {
-    final var matchlog = (MatchLog) new Query<MatchLog>()
+    final var matchlog = (MatchLog) new Query<>(MatchLog.class)
         .key("log_time", timestamp).key("coverage", match).key("action", action).key("details", details).key("coverage_team", participator)
         .insert(this);
     match.getLogs().add(matchlog);
@@ -92,7 +92,7 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
           .collect(Collectors.joining("\n"));
     }
     if (action.equals(MatchLogAction.LINEUP_SUBMIT)) {
-      final String players = getParticipator().getLineups().stream().map(Lineup::getPlayer).map(PlayerBase::getSummonerName)
+      final String players = getParticipator().getTeamLineup().getFixedLineups().stream().map(Lineup::getPlayer).map(Player::getSummonerName)
           .collect(Collectors.joining(", "));
       if (isMostRecentLogOfType()) {
         final String linkPlayers = players.replace(", ", ",").replace(" ", "%20");
@@ -116,17 +116,15 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
   }
 
   private boolean isMostRecentLogOfType() {
-    return !new Query<MatchLog>()
+    return !new Query<>(MatchLog.class)
         .where("coverage", match).and("action", MatchLogAction.LINEUP_SUBMIT).and("coverage_team", participator)
         .descending("log_time").entity().getTimestamp().isAfter(timestamp);
   }
 
-  public List<PlayerBase> determineLineup() {
+  public List<Player> determineLineup() {
     return Arrays.stream(getDetails().split(", "))
         .map(playerString -> playerString.before(":").intValue())
-        .mapToInt(Integer::intValue)
-        .mapToObj(PrimePlayerFactory::getPlayer)
-        .filter(Objects::nonNull)
+        .map(playerId -> match instanceof PRMMatch ? PrimePlayerFactory.getPlayer(playerId) : new Query<>(Player.class).entity(playerId))
         .collect(Collectors.toList());
   }
 }

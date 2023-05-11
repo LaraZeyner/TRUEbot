@@ -32,7 +32,6 @@ public interface ADiscordChannel {
     final PermissionOverride override = getChannel().getPermissionOverride(role);
     if (override == null) {
       getChannel().getManager().putPermissionOverride(role, rolePattern.getAllowed(), rolePattern.getDenied()).queue();
-      System.err.println("Override für " + role.getName() + " in " + getName() + " nicht vorhanden.");
       return;
     }
     final Set<Permission> allowed = rolePattern.getAllowed();

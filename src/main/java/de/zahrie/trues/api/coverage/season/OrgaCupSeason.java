@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -17,19 +18,19 @@ public class OrgaCupSeason extends Season implements Entity<OrgaCupSeason> {
     super(id, name, fullName, range, active);
   }
 
-  public static OrgaCupSeason get(Object[] objects) {
+  public static OrgaCupSeason get(List<Object> objects) {
     return new OrgaCupSeason(
-        (int) objects[0],
-        (String) objects[2],
-        (String) objects[3],
-        new TimeRange((LocalDateTime) objects[4], (LocalDateTime) objects[5]),
-        (boolean) objects[6]
+        (int) objects.get(0),
+        (String) objects.get(2),
+        (String) objects.get(3),
+        new TimeRange((LocalDateTime) objects.get(4), (LocalDateTime) objects.get(5)),
+        (boolean) objects.get(6)
     );
   }
 
   @Override
   public OrgaCupSeason create() {
-    return new Query<OrgaCupSeason>().key("department", "intern")
+    return new Query<>(OrgaCupSeason.class)
         .key("season_name", name).key("season_full", fullName)
         .col("season_start", range.getStartTime()).col("season_end", range.getEndTime()).col("active", active).insert(this);
   }

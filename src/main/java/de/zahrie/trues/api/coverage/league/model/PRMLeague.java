@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.league.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
@@ -19,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "coverage_group", department = "prime")
-public class PRMLeague extends LeagueBase implements Entity<PRMLeague> {
+public class PRMLeague extends League implements Entity<PRMLeague> {
   @Serial
   private static final long serialVersionUID = -6947551713641103275L;
 
@@ -35,18 +36,18 @@ public class PRMLeague extends LeagueBase implements Entity<PRMLeague> {
     this.prmId = prmId;
   }
 
-  public static PRMLeague get(Object[] objects) {
+  public static PRMLeague get(List<Object> objects) {
     return new PRMLeague(
-        (int) objects[0],
-        new Query<Stage>().entity(objects[2]),
-        (String) objects[3],
-        (int) objects[4]
+        (int) objects.get(0),
+        new Query<>(Stage.class).entity(objects.get(2)),
+        (String) objects.get(3),
+        (int) objects.get(4)
     );
   }
 
   @Override
   public PRMLeague create() {
-    return new Query<PRMLeague>().key("stage", stage).key("group_name", name)
+    return new Query<>(PRMLeague.class).key("stage", stage).key("group_name", name)
         .col("prm_id", prmId)
         .insert(this);
   }

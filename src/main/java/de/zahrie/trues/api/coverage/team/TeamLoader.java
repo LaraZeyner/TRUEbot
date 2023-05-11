@@ -7,6 +7,7 @@ import java.util.Objects;
 import de.zahrie.trues.api.coverage.GamesportsLoader;
 import de.zahrie.trues.api.coverage.player.PlayerHandler;
 import de.zahrie.trues.api.coverage.player.PlayerLoader;
+import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.util.StringUtils;
@@ -30,14 +31,13 @@ public class TeamLoader extends GamesportsLoader {
     this.team = team;
   }
 
-  TeamLoader(int teamId) {
+  public TeamLoader(int teamId) {
     super(URLType.TEAM, teamId);
   }
 
   TeamLoader create() {
-    if (html == null) {
-      return null;
-    }
+    if (html == null || html.text() == null) return null;
+
     final String teamTitle = html.find("h1").text();
     final String name = teamTitle.before(" (", -1);
     final String abbreviation = teamTitle.between("(", ")", -1);
@@ -46,6 +46,8 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   public TeamHandler load() {
+    if (html == null || html.text() == null) return null;
+
     final String teamTitle = html.find("h1").text();
     team.setName(teamTitle.before(" (", -1));
     team.setAbbreviation(teamTitle.between("(", ")", -1));
@@ -56,6 +58,23 @@ public class TeamLoader extends GamesportsLoader {
         .team(team)
         .players(getPlayers())
         .build();
+  }
+
+  public PRMPlayer getPlayer(int prmId) {
+    List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li").stream()
+        .map(HTML::text).map(str -> str.after(":")).toList();
+    teamInfos = teamInfos.subList(3, teamInfos.size());
+    if (teamInfos.size() == 4) return null;
+
+    final var players = new ArrayList<PRMPlayer>();
+    for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
+      final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
+      if (primeId == prmId) {
+        final String summonerName = user.find("div", "txt-info").find("span").text();
+        return PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+      }
+    }
+    return null;
   }
 
   private List<PRMPlayer> getPlayers() {

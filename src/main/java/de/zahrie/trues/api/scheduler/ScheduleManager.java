@@ -17,6 +17,6 @@ public class ScheduleManager {
         tasks.forEach(ScheduledTask::handleTask);
         LeaderboardHandler.handleLeaderboards();
       }
-    }, 0, 60000L);
+    }, 0, 60_000L);
   }
 }

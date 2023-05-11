@@ -9,20 +9,31 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.zahrie.trues.api.database.query.Id;
+import lombok.NonNull;
 
 public class SortedList<E> extends AbstractList<E> {
-  private Class<E> clazz;
   private Set<E> data;
+  private boolean sorted = false;
   private final Comparator<? super E> comparator;
 
   public SortedList() {
     this(new LinkedHashSet<>(), null);
   }
 
+  public SortedList(boolean sorted) {
+    this(new LinkedHashSet<>(), null);
+    this.sorted = sorted;
+  }
+
   public SortedList(Comparator<? super E> comparator) {
     this(new LinkedHashSet<>(), comparator);
+  }
+
+  public SortedList(@NonNull Stream<? extends E> c) {
+    this(c.toList(), null);
   }
 
   public SortedList(Collection<? extends E> c) {
@@ -37,7 +48,12 @@ public class SortedList<E> extends AbstractList<E> {
   @Override
   public void add(int index, E element) {
     data.add(element);
-    sort();
+    if (sorted) sort();
+  }
+
+  @Override
+  public boolean remove(Object o) {
+    return data.remove(o);
   }
 
   @Override
@@ -51,9 +67,10 @@ public class SortedList<E> extends AbstractList<E> {
   }
 
   private void sort() {
+    if (size() == 0) return;
     if (comparator != null) this.data = data.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
-    else if (clazz.isInstance(Comparable.class)) this.data = new LinkedHashSet<>(new TreeSet<>(data));
-    else if (clazz.isInstance(Id.class)) {
+    else if (get(0) instanceof Comparable) this.data = new LinkedHashSet<>(new TreeSet<>(data));
+    else if (get(0) instanceof Id) {
       this.data = data.stream().sorted(Comparator.comparingInt(o -> ((Id) o).getId())).collect(Collectors.toCollection(LinkedHashSet::new));
     }
   }

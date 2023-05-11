@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.community.orgateam.teamchannel;
 
 import java.io.Serial;
+import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.database.connector.Table;
@@ -38,21 +39,21 @@ public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
     this.teamChannelType = teamChannelType;
   }
 
-  public static TeamChannel get(Object[] objects) {
+  public static TeamChannel get(List<Object> objects) {
     return new TeamChannel(
-        (int) objects[0],
-        (long) objects[2],
-        new SQLEnum<DiscordChannelType>().of(objects[3]),
-        (String) objects[4],
-        new SQLEnum<PermissionChannelType>().of(objects[5]),
-        new Query<OrgaTeam>().entity( objects[6]),
-        new SQLEnum<TeamChannelType>().of(objects[7])
+        (int) objects.get(0),
+        (long) objects.get(2),
+        new SQLEnum<>(DiscordChannelType.class).of(objects.get(3)),
+        (String) objects.get(4),
+        new SQLEnum<>(PermissionChannelType.class).of(objects.get(5)),
+        new Query<>(OrgaTeam.class).entity( objects.get(6)),
+        new SQLEnum<>(TeamChannelType.class).of(objects.get(7))
     );
   }
 
   @Override
   public TeamChannel create() {
-    return new Query<TeamChannel>().key("discord_id", discordId).key("department", "team")
+    return new Query<>(TeamChannel.class).key("discord_id", discordId)
         .col("channel_type", channelType).col("channel_name", name).col("permission_type", permissionType)
         .col("orga_team", orgaTeam).col("teamchannel_type", teamChannelType)
         .insert(this);

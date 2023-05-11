@@ -8,19 +8,23 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UnknownFormatConversionException;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.util.io.log.DevInfo;
 
 public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
   protected final String query;
 
-  public SimpleQueryFormer(String query) {
+  public SimpleQueryFormer(Class<T> targetId) {
+    this(targetId, null);
+  }
+
+  public SimpleQueryFormer(Class<T> targetId, String query) {
+    super(targetId);
     this.query = query;
   }
 
@@ -33,7 +37,8 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
   String insertString() {
     if (getDepartment() != null) key("department", getDepartment());
     final String allFields = fields.stream().map(SQLField::getColumnName).collect(Collectors.joining(", "));
-    final String allValues = IntStream.range(0, fields.size()).mapToObj(i -> (i == 0) ? ", ?" : "?").collect(Collectors.joining());
+    String allValues = ", ?".repeat(fields.size());
+    if (!allValues.isBlank()) allValues = allValues.substring(2);
     final String updateable = fields.stream().filter(columnType -> columnType instanceof SQLField.Updateable).map(SQLField::getColumnName)
         .map(fieldName -> fieldName + " = VALUES(" + fieldName + ")").collect(Collectors.joining(", "));
     final String output = "INSERT INTO " + getTableName() + " (" + allFields + ") VALUES (" + allValues + ")";
@@ -66,14 +71,13 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
    * 7: <b>limit</b> - {@link Integer} <br>
    * ? auf <b>4</b>
    */
-  String selectString() {
+  public String getSelectString() {
     if (getDepartment() != null) where("department", getDepartment());
     StringBuilder mainQuery = new StringBuilder(querySelectString());
     if (unified.isEmpty()) return mainQuery.toString();
 
     mainQuery = new StringBuilder("(" + mainQuery + ")");
-    for (Union union : unified)
-      mainQuery.append(union.type().toString()).append(" (").append(union.query().querySelectString()).append(")");
+    for (Union union : unified) mainQuery.append(union.type().toString()).append(" (").append(union.query().querySelectString()).append(")");
     return mainQuery.toString();
   }
 
@@ -96,17 +100,21 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
   }
 
   protected String getInnerSimpleQuery() {
-    return selectString();
+    return getSelectString();
   }
 
-  protected List<Object> getValues() {
+  protected List<Object> getValues(String query) {
     final List<Object> sqlFields = new ArrayList<>(fields.stream().filter(sqlField -> !(sqlField instanceof SQLReturnField)).map(SQLField::getValue).toList());
-    sqlFields.addAll(conditionManager.getValues());
+    joins.stream().map(JoinQuery::getParams).forEach(sqlFields::addAll);
+    if (query.contains("WHERE")) sqlFields.addAll(conditionManager.getValues());
+    for (final Union union : unified) {
+      sqlFields.addAll(union.query().getValues(union.query().getSelectString()));
+    }
     return sqlFields;
   }
 
-  protected void setValues(PreparedStatement statement, Object... parameters) throws SQLException {
-    final List<Object> values = query == null ? getValues() : Arrays.stream(parameters).toList();
+  protected void setValues(PreparedStatement statement, List<Object> parameters, String q) throws SQLException {
+    final List<Object> values = query == null ? getValues(q) : parameters;
     if (values.isEmpty()) return;
 
     for (int i = 0; i < values.size(); i++) {
@@ -117,10 +125,18 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
         continue;
       }
 
-      if (parameter instanceof Id entity) statement.setInt(pos, entity.getId());
-      else if (parameter instanceof Enum<?> parameterEnum) {
+      if (parameter instanceof Id entity) {
+        statement.setInt(pos, entity.getId());
+        continue;
+      }
+
+      if (parameter instanceof Enum<?> parameterEnum) {
         final Listing listing = parameterEnum.getClass().getAnnotation(Listing.class);
-        if (listing == null) throw new IllegalArgumentException("Dieses Enum ist nicht zulässig.");
+        if (listing == null) {
+          final RuntimeException exception = new IllegalArgumentException("Dieses Enum ist nicht zulässig.");
+          new DevInfo(parameterEnum + " is " + parameterEnum.getClass().getSimpleName()).severe(exception);
+          throw exception;
+        }
 
         switch (listing.value()) {
           case CUSTOM -> statement.setString(pos, parameterEnum.toString());
@@ -146,7 +162,11 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
       else if (parameter instanceof Short paramShort) statement.setShort(pos, paramShort);
       else if (parameter instanceof Integer paramInteger) statement.setInt(pos, paramInteger);
       else if (parameter instanceof Long paramLong) statement.setLong(pos, paramLong);
-      else throw new UnknownFormatConversionException("Dieses Format ist nicht spezifiziert");
+      else {
+        final RuntimeException ex = new UnknownFormatConversionException("Das Format ist nicht bekannt.");
+        new DevInfo(parameter + " is " + parameter.getClass().getSimpleName()).severe(ex);
+        throw ex;
+      }
     }
   }
 
@@ -157,12 +177,12 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
         .map(sqlField -> ((sqlField instanceof SQLReturnField returnField && returnField.isDistinct()) ? "DISTINCT " : "") +
             sqlField.getColumnName() + suffix)
         .collect(Collectors.joining(", "));
-    if (subEntity != null) out += "_" + subEntity.getSimpleName().toLowerCase() + "*";
+    if (subEntity != null) out += "`_" + subEntity.getSimpleName().toLowerCase() + "`.*";
     return out;
   }
 
   private String getFrom() {
-    return " FROM " + getTableName() + " as " + getTargetId().getSimpleName().toLowerCase();
+    return getTableName() + " as `_" + targetId.getSimpleName().toLowerCase() + "`";
   }
 
   private String getJoins() {

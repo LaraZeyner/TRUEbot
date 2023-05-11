@@ -23,7 +23,8 @@ public interface Entity<T extends Entity<T>> extends Serializable, Id {
   }
 
   default void delete() {
-    new Query<T>().delete(getId());
+    Query.remove(this);
+    new Query<>((Class<T>) getClass()).delete(getId());
   }
 
   default void forceDelete() {
@@ -31,7 +32,7 @@ public interface Entity<T extends Entity<T>> extends Serializable, Id {
     Database.connection().commit();
   }
 
-  default T refresh() {
-    return new Query<T>().entity(getId());
+  default T refresh(Class<T> entityClass) {
+    return new Query<>(entityClass).entity(getId());
   }
 }

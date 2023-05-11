@@ -51,18 +51,18 @@ public class CalibrationStage extends Stage implements Entity<CalibrationStage>,
         )).build();
   }
 
-  public static CalibrationStage get(Object[] objects) {
+  public static CalibrationStage get(List<Object> objects) {
     return new CalibrationStage(
-        (int) objects[0],
-        new Query<Season>().entity(objects[2]),
-        new TimeRange((LocalDateTime) objects[3], (LocalDateTime) objects[4]),
-        (Long) objects[5]
+        (int) objects.get(0),
+        new Query<>(Season.class).entity(objects.get(2)),
+        new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
+        (Long) objects.get(5)
     );
   }
 
   @Override
   public CalibrationStage create() {
-    return new Query<CalibrationStage>().key("season", season).key("department", "Kalibrierungsphase")
+    return new Query<>(CalibrationStage.class).key("season", season)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

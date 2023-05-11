@@ -2,6 +2,7 @@ package de.zahrie.trues.api.calendar.scheduling;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.calendar.UserCalendar;
 import de.zahrie.trues.api.database.connector.Table;
@@ -19,7 +20,6 @@ public class SchedulingCalendar extends UserCalendar implements Entity<Schedulin
   @Serial
   private static final long serialVersionUID = -3658276021282430693L;
 
-
   public SchedulingCalendar(TimeRange timeRange, String details, DiscordUser discordUser) {
     super(timeRange, details, discordUser);
   }
@@ -28,21 +28,19 @@ public class SchedulingCalendar extends UserCalendar implements Entity<Schedulin
     super(id, range, details, discordUser);
   }
 
-  public static SchedulingCalendar get(Object[] objects) {
+  public static SchedulingCalendar get(List<Object> objects) {
     return new SchedulingCalendar(
-        (int) objects[0],
-        new TimeRange((LocalDateTime) objects[2], (LocalDateTime) objects[3]),
-        (String) objects[4],
-        new Query<DiscordUser>().entity( objects[7])
+        (int) objects.get(0),
+        new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
+        (String) objects.get(4),
+        new Query<>(DiscordUser.class).entity( objects.get(7))
     );
   }
 
   @Override
   public SchedulingCalendar create() {
-    return new Query<SchedulingCalendar>().key("department", "app")
-        .col("calendar_start", range.getStartTime())
-        .col("calendar_end", range.getEndTime())
-        .col("details", details)
+    return new Query<>(SchedulingCalendar.class)
+        .col("calendar_start", range.getStartTime()).col("calendar_end", range.getEndTime()).col("details", details)
         .col("discord_user", user)
         .insert(this);
   }

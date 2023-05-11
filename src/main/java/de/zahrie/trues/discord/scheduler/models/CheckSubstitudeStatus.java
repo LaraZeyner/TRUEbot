@@ -11,12 +11,13 @@ import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
+import de.zahrie.trues.util.io.log.Console;
 
 @Schedule(minute = "0")
 public class CheckSubstitudeStatus extends ScheduledTask {
   @Override
   public void execute() {
-    for (DiscordUserGroup toRemove : new Query<DiscordUserGroup>().where("active", true)
+    for (DiscordUserGroup toRemove : new Query<>(DiscordUserGroup.class).where("active", true)
         .and(Condition.notNull("permission_end")).and("permission_end > now()").entityList()) {
       toRemove.setActive(false);
       new RoleGranter(toRemove.getUser()).remove(toRemove.getDiscordGroup());
@@ -25,5 +26,6 @@ public class CheckSubstitudeStatus extends ScheduledTask {
           .min(Comparator.comparing(Membership::getTimestamp))
           .ifPresent(om -> om.getOrgaTeam().getRoleManager().removeRole(toRemove.getUser()));
     }
+    new Console("Substitute-Rollen bearbeitet").info();
   }
 }

@@ -23,6 +23,11 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
     this.player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
   }
 
+  public PlayerLoader(int primeId) {
+    super(URLType.PLAYER, primeId);
+    this.player = null;
+  }
+
   @Override
   public PlayerHandler load() {
     return new PlayerHandler(url, player);
@@ -35,6 +40,15 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
         .getAttribute("href"));
     final PRMTeam team = TeamFactory.getTeam(teamId);
     player.setTeam(team);
+  }
+
+  public PRMPlayer handleMissingPlayer() {
+    final int teamId = TeamLoader.idFromURL(html.find("ul", "content-icon-info-l")
+        .find("li")
+        .find("a")
+        .getAttribute("href"));
+    final TeamLoader teamLoader = new TeamLoader(teamId);
+    return teamLoader.getPlayer(id);
   }
 
 }

@@ -25,7 +25,7 @@ public abstract class Calendar implements ACalendar, Id, Comparable<Calendar> {
 
   public void setRange(TimeRange range) {
     this.range = range;
-    new Query<Calendar>().col("calendar_start", range.getStartTime()).col("calendar_end", range.getEndTime()).update(id);
+    new Query<>(Calendar.class).col("calendar_start", range.getStartTime()).col("calendar_end", range.getEndTime()).update(id);
   }
 
   @Override

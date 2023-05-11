@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.league.LeagueLoader;
-import de.zahrie.trues.api.coverage.league.model.LeagueBase;
+import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchHandler;
 import de.zahrie.trues.api.coverage.match.MatchLoader;
+import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
+import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerRank;
 import de.zahrie.trues.api.coverage.season.signup.SignupFactory;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
@@ -38,20 +41,23 @@ public class TeamHandler extends TeamModel implements Serializable {
     final List<HTML> stages = html.findAll("section", "league-team-stage");
     updateResult(stages);
     updateRecordAndSeasons();
-    handleStarterMatches(stages);
+    if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) {
+      handleStarterMatches(stages);
+    }
+    final double averageMMR = team.getPlayers().stream().map(Player::getLastRelevantRank).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
+    team.setLastMMR((int) Math.round(averageMMR));
     team.update();
   }
 
   public void loadDivision() {
-    final LeagueBase currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
+    final League currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
     if (currentLeague instanceof PRMLeague prmLeague) {
-      final LeagueLoader leagueLoader = new LeagueLoader(prmLeague.getUrl());
+      final LeagueLoader leagueLoader = new LeagueLoader(prmLeague);
       leagueLoader.load().updateAll();
     }
   }
 
   private void handleStarterMatches(List<HTML> stages) {
-    if (!((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) return;
     stages.get(stages.size() - 1)
         .find("ul", "league-stage-matches")
         .findAll("li").stream()

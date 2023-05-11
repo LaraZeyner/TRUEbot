@@ -14,6 +14,7 @@ import de.zahrie.trues.api.community.application.ApplicationFactory;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -24,11 +25,13 @@ import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.discord.notify.NotificationManager;
 import lombok.Getter;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
 
 
 @Getter
 @Table("discord_user")
+@ExtensionMethod(SQLUtils.class)
 public class DiscordUser implements Entity<DiscordUser> {
   @Serial
   private static final long serialVersionUID = 675455029296764536L;
@@ -41,7 +44,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   private int secondsOnline = 0; // seconds_online
   private boolean active = false; // active
   private LocalDateTime lastTimeJoined; // joined
-  private DiscordUser acceptedBy; // accepted
+  private Long acceptedBy; // accepted
   private short notification = 0; // notification
   private LocalDate birthday; // birthday
 
@@ -50,7 +53,7 @@ public class DiscordUser implements Entity<DiscordUser> {
     this.mention = mention;
   }
 
-  public DiscordUser(int id, long discordId, String mention, int points, int messagesSent, int digitsWritten, int secondsOnline, boolean active, LocalDateTime lastTimeJoined, DiscordUser acceptedBy, short notification, LocalDate birthday) {
+  public DiscordUser(int id, long discordId, String mention, int points, int messagesSent, int digitsWritten, int secondsOnline, boolean active, LocalDateTime lastTimeJoined, Long acceptedBy, short notification, LocalDate birthday) {
     this.id = id;
     this.discordId = discordId;
     this.mention = mention;
@@ -66,7 +69,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   }
 
   public Player getPlayer() {
-    return new Query<Player>().where("discord_user", this).entity();
+    return new Query<>(Player.class).where("discord_user", this).entity();
   }
 
   @Override
@@ -76,45 +79,50 @@ public class DiscordUser implements Entity<DiscordUser> {
 
   public void setMention(String mention) {
     this.mention = mention;
-    new Query<DiscordUser>().col("mention", mention).update(id);
+    new Query<>(DiscordUser.class).col("mention", mention).update(id);
   }
 
   public void setPoints(int points) {
     this.points = points;
-    new Query<DiscordUser>().col("points", points).update(id);
+    new Query<>(DiscordUser.class).col("points", points).update(id);
   }
 
   public void setAcceptedBy(DiscordUser acceptedBy) {
-    this.acceptedBy = acceptedBy;
-    new Query<DiscordUser>().col("accepted", acceptedBy).update(id);
+    this.acceptedBy = acceptedBy.getDiscordId();
+    new Query<>(DiscordUser.class).col("accepted", acceptedBy).update(id);
     ApplicationFactory.updateApplicationStatus(this);
+  }
+
+  public DiscordUser getAcceptedBy() {
+    if (acceptedBy == null) return null;
+    return new Query<>(DiscordUser.class).where("discord_id", acceptedBy).entity();
   }
 
   public void setBirthday(LocalDate birthday) {
     this.birthday = birthday;
-    new Query<DiscordUser>().col("birthday", birthday).update(id);
+    new Query<>(DiscordUser.class).col("birthday", birthday).update(id);
   }
 
-  public static DiscordUser get(Object[] objects) {
+  public static DiscordUser get(List<Object> objects) {
     return new DiscordUser(
-        (int) objects[0],
-        (long) objects[1],
-        (String) objects[2],
-        (int) objects[3],
-        (int) objects[4],
-        (int) objects[5],
-        (int) objects[6],
-        (boolean) objects[7],
-        (LocalDateTime) objects[8],
-        new Query<DiscordUser>().entity(objects[9]),
-        (short) objects[10],
-        (LocalDate) objects[11]
+        (int) objects.get(0),
+        (long) objects.get(1),
+        (String) objects.get(2),
+        (int) objects.get(3),
+        (int) objects.get(4),
+        (int) objects.get(5),
+        (int) objects.get(6),
+        (boolean) objects.get(7),
+        (LocalDateTime) objects.get(8),
+        (Long) objects.get(9),
+        objects.get(10).shortValue(),
+        (LocalDate) objects.get(11)
     );
   }
 
   @Override
   public DiscordUser create() {
-    return new Query<DiscordUser>().key("discord_id", discordId)
+    return new Query<>(DiscordUser.class).key("discord_id", discordId)
         .col("mention", mention).col("points", points).col("msg_count", messagesSent).col("msg_digits", digitsWritten)
         .col("seconds_online", secondsOnline).col("active", active).col("joined", lastTimeJoined).col("accepted", acceptedBy)
         .col("notification", notification).col("birthday", birthday)
@@ -126,23 +134,23 @@ public class DiscordUser implements Entity<DiscordUser> {
     if (difference != null && difference.equals(0)) return;
     this.notification = notification;
     NotificationManager.addNotifiersFor(this,difference);
-    new Query<DiscordUser>().col("notification", notification).update(id);
+    new Query<>(DiscordUser.class).col("notification", notification).update(id);
   }
 
   public List<DiscordUserGroup> getGroups() {
-    return new Query<DiscordUserGroup>().where("discord_user", this).entityList();
+    return new Query<>(DiscordUserGroup.class).where("discord_user", this).entityList();
   }
 
   public List<Membership> getMemberships() {
-    return new Query<Membership>().where("discord_user", this).entityList();
+    return new Query<>(Membership.class).where("discord_user", this).entityList();
   }
 
   public List<Membership> getMainMemberships() {
-    return new Query<Membership>().where("discord_user", this).and("role", TeamRole.MAIN).entityList();
+    return new Query<>(Membership.class).where("discord_user", this).and("role", TeamRole.MAIN).entityList();
   }
 
   public List<Application> getApplications() {
-    return new Query<Application>().where("discord_user", this).entityList();
+    return new Query<>(Application.class).where("discord_user", this).entityList();
   }
 
   public Member getMember() {
@@ -198,7 +206,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   }
 
   public void schedule(LocalDateTime dateTime, DiscordUser invoker) {
-    this.acceptedBy = invoker;
+    setAcceptedBy(invoker);
     final var timeRange = new TimeRange(dateTime, Duration.ofMinutes(30));
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getMention())
         .queue(message -> message.createThreadChannel("Bewerbung von " + invoker.getMember().getNickname())
@@ -211,11 +219,11 @@ public class DiscordUser implements Entity<DiscordUser> {
       final Duration duration = Duration.between(lastTimeJoined, LocalDateTime.now());
       this.secondsOnline += duration.getSeconds();
       this.points += Math.round(duration.getSeconds() / 60.);
-      new Query<DiscordUser>().col("joined", lastTimeJoined).col("seconds_online", secondsOnline).col("points", points).update(id);
+      new Query<>(DiscordUser.class).col("joined", lastTimeJoined).col("seconds_online", secondsOnline).col("points", points).update(id);
     }
     if (stillOnline) {
       this.lastTimeJoined = LocalDateTime.now();
-      new Query<DiscordUser>().col("joined", lastTimeJoined).update(id);
+      new Query<>(DiscordUser.class).col("joined", lastTimeJoined).update(id);
     }
   }
 
@@ -223,6 +231,6 @@ public class DiscordUser implements Entity<DiscordUser> {
     this.messagesSent++;
     this.digitsWritten += content.length();
     this.points += content.length();
-    new Query<DiscordUser>().col("msg_count", messagesSent).col("msg_digits", digitsWritten).col("points", points).update(id);
+    new Query<>(DiscordUser.class).col("msg_count", messagesSent).col("msg_digits", digitsWritten).col("points", points).update(id);
   }
 }

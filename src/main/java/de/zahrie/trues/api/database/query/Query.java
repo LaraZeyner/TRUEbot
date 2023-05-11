@@ -9,12 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UnknownFormatConversionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,9 +23,11 @@ import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.connector.Listing;
-import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
+import de.zahrie.trues.util.Const;
+import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
@@ -32,17 +35,39 @@ import org.reflections.scanners.Scanners;
 
 @Log
 public class Query<T extends Id> extends SimpleQueryFormer<T> {
-  public Query() {
-    super(null);
+  private static final Map<Id, LocalDateTime> entities = new HashMap<>();
+  private static int queryCount = 0, savedCount = 0;
+
+  public static void remove(Id entity) {
+    entities.remove(entity);
   }
 
-  public Query(int amount) {
-    super(null);
+  public Query(Class<T> clazz) {
+    super(clazz);
+  }
+
+  public Query(Class<T> clazz, int amount) {
+    super(clazz);
     limit(amount);
   }
 
   public Query(String query) {
-    super(query);
+    super(null, query);
+    this.additionalParameters = List.of();
+  }
+
+  public Query(String query, List<Object> parameters) {
+    super(null, query);
+    this.additionalParameters = parameters;
+  }
+
+  public Query(Class<T> clazz, String query) {
+    super(clazz, query);
+  }
+
+  public Query(Class<T> clazz, String query, List<Object> parameters) {
+    super(clazz, query);
+    this.additionalParameters = parameters;
   }
 
   public static int update(String query) {
@@ -50,11 +75,14 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   public static int update(String query, List<Object> parameters) {
+    if (Const.SHOW_SQL) new Console(query).debug();
     try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
       for (int i = 0; i < parameters.size(); i++) statement.setObject(i + 1, parameters.get(i));
       return statement.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    } catch (SQLException exception) {
+      if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
+      new DevInfo("Query nicht zulässig: " + query).with(Console.class).severe(exception);
+      throw new IllegalArgumentException(exception);
     }
   }
 
@@ -128,24 +156,26 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
 
   private <R> T executeUpdate(String query, boolean insert, T entity, Function<T, R> action, Function<T, R> otherWise, List<Object> parameters) {
     final Connection connection = Database.connection().getConnection();
+    if (Const.SHOW_SQL) new Console(query).debug();
     try (final PreparedStatement statement = insert ? connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(query)) {
-      setValues(statement, parameters);
+      setValues(statement, parameters, query);
       statement.executeUpdate();
       if (entity == null) return null;
 
       try (final ResultSet generatedKeys = statement.getGeneratedKeys()) {
         if (generatedKeys.next()) { // id != 0
           final int id = generatedKeys.getInt(1);
-          if (entity.getId() != 0) log.severe("Id existiert bereits - Skipping");
-          else {
+          if (entity.getId() == 0) {
             entity.setId(id);
             action.apply(entity);
           }
         } else otherWise.apply(entity);
       }
       return entity;
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    } catch (SQLException exception) {
+      if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
+      new DevInfo("Query nicht zulässig: " + query).with(Console.class).severe(exception);
+      throw new IllegalArgumentException(exception);
     }
   }
 
@@ -166,8 +196,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     List<? extends Class<?>> clazzes = new ArrayList<>(fields.stream().filter(sqlField -> sqlField instanceof SQLReturnField).map(o -> (SQLReturnField) o)
         .map(SQLReturnField::getReturnType).toList());
 
-    try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(query == null ? selectString() : query)) {
-      setValues(statement, parameters);
+    final String selectQuery = query == null ? getSelectString() : query;
+    if (Const.SHOW_SQL) new Console(selectQuery).debug();
+    try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(selectQuery)) {
+      setValues(statement, parameters, selectQuery);
       final List<Object[]> out = new ArrayList<>();
       try (final ResultSet resultSet = statement.executeQuery()) {
         clazzes = adjust(clazzes, statement);
@@ -180,25 +212,49 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
       }
       return out;
     } catch (SQLException exception) {
-      throw new IllegalArgumentException("SQL Error!");
+      if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + selectQuery).severe(exception);
+      new DevInfo("Query nicht zulässig: " + selectQuery).with(Console.class).severe(exception);
+      throw new IllegalArgumentException(exception);
     }
   }
 
   public T entity(Object id) {
+    if (id == null) return null;
     return entity((int) id);
   }
 
   public T entity(int id) {
-    return forId(id).entity();
+    forId(id);
+    final T stored = findEntityStoredById(id);
+    if (stored != null) {
+      savedCount++;
+      System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount);
+      return stored;
+    }
+
+    final T entity = entity();
+    if (entity == null) return null;
+
+    queryCount++;
+    entities.put(entity, LocalDateTime.now());
+    return entity;
+  }
+
+  private T findEntityStoredById(int id) {
+    final Id e = entities.keySet().stream().filter(Objects::nonNull).filter(entity -> entity.getId() == id).filter(entity -> entity.getClass().isAssignableFrom(targetId)).findFirst().orElse(null);
+    if (e == null) return null;
+
+    entities.replace(e, LocalDateTime.now());
+    return (T) e;
+  }
+
+  public T entity() {
+    return entity(List.of());
   }
 
   public T entity(List<Object> objects) {
     final List<T> results = limit(1).entityList(objects);
     return results.isEmpty() ? null : results.stream().findFirst().orElse(null);
-  }
-
-  public T entity() {
-    return entity(List.of());
   }
 
   public List<T> entityList(int limit) {
@@ -215,25 +271,28 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
 
   @SuppressWarnings("unchecked")
   private List<T> determineEntityList(List<Object[]> objectList) {
-    final List<T> out = new SortedList<>();
+    final List<T> out = new SortedList<>(false);
     try {
-      if (targetId.isInstance(Entity.class)) {
-        final Method getMethod = getTargetId().getMethod("get", Object[].class);
+      if (Entity.class.isAssignableFrom(targetId)) {
+        final Method getMethod = targetId.getMethod("get", List.class);
         for (final Object[] objects : objectList) {
-          final T object = (T) getMethod.invoke(null, objects);
+          final T object = (T) getMethod.invoke(null, Arrays.stream(objects).toList());
           out.add(object);
         }
 
-      } else if (getDepartment() != null) {
+      } else {
         final Map<String, Class<?>> classes = determineSubClasses();
         for (Object[] objects : objectList) {
           final Class<?> aClass = classes.get((String) objects[1]);
-          final Method getMethod = aClass.getMethod("get", Object[].class);
-          final T object = (T) getMethod.invoke(null, objects);
+          final Method getMethod = aClass.getMethod("get", List.class);
+          final T object = (T) getMethod.invoke(null, Arrays.stream(objects).toList());
           out.add(object);
         }
       }
-    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e.getCause());
+    } catch (NoSuchMethodException | IllegalAccessException e) {
+      new DevInfo("Funktion nicht verfügbar").error(e);
       throw new RuntimeException(e);
     }
 
@@ -254,7 +313,8 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   public Integer id() {
     fields.clear();
     fields.add(SQLReturnField.idOf((Class<Id>) targetId));
-    return (Integer) single()[0];
+    final Object[] entity = single();
+    return entity == null ? null : (Integer) entity[0];
   }
 
   public <C extends Id> C convert(Class<C> targetClass) {
@@ -267,9 +327,9 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     getAll(targetClass);
     final List<Object[]> objectsList = list();
     if (objectsList.get(0).length == 1) {
-      return objectsList.stream().map(objects -> new Query<C>().entity(objects[0])).collect(Collectors.toCollection(SortedList::new));
+      return objectsList.stream().map(objs -> new Query<>(targetClass).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
     } else {
-      return new Query<C>().get("_" + getTableName() + ".*").determineEntityList(objectsList);
+      return new Query<>(targetClass).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
     }
   }
 
@@ -314,25 +374,35 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     final Object[] data = new Object[clazzes.size()];
     for (int i = 0; i < clazzes.size(); i++) {
       final Class<?> clazz = clazzes.get(i);
-      if (clazz.isInstance(Enum.class)) {
+      if (!clazz.equals(Object.class) && Enum.class.isAssignableFrom(clazz)) {
         final Listing listing = clazz.getAnnotation(Listing.class);
-        if (listing == null) throw new IllegalArgumentException("Dieses Enum ist nicht zulässig.");
+        if (listing == null) {
+          final RuntimeException exception = new IllegalArgumentException("Dieses Enum ist nicht zulässig.");
+          new DevInfo(clazz.getName()).severe(exception);
+          throw exception;
+        }
 
         final Object index = resultSet.getObject(i + 1);
-        data[i] = index == null ? null : switch (listing.value()) {
-          case ORDINAL -> SQLUtils.toEnum(clazz.asSubclass(Enum.class), (Byte) index - listing.start());
-          case LOWER, CUSTOM, UPPER, CAPITALIZE -> SQLUtils.toEnum(clazz.asSubclass(Enum.class), index);
-        };
+        data[i] = index == null ? null : new SQLEnum<>(clazz.asSubclass(Enum.class)).of(switch (listing.value()) {
+          case ORDINAL -> (int) index - listing.start();
+          case LOWER, CUSTOM, UPPER, CAPITALIZE -> index;
+        });
         continue;
       }
 
       final Object field = resultSet.getObject(i + 1);
       if (field == null) data[i] = null;
-      else if (clazz.isInstance(LocalDateTime.class)) data[i] = ((Timestamp) field).toLocalDateTime();
-      else if (clazz.isInstance(LocalDate.class)) data[i] = ((Date) field).toLocalDate();
-      else if (clazz.isInstance(String.class)) data[i] = field;
-      else if (clazz.isInstance(Number.class)) data[i] = field;
-      else throw new UnknownFormatConversionException("Das Format ist nicht bekannt.");
+      else if (field instanceof LocalDateTime dateTime) data[i] = dateTime;
+      else if (field instanceof Timestamp timestamp) data[i] = timestamp.toLocalDateTime();
+      else if (field instanceof Date date) data[i] = date.toLocalDate();
+      else if (field instanceof String) data[i] = field;
+      else if (field instanceof Number) data[i] = field;
+      else if (field instanceof Boolean) data[i] = field;
+      else {
+        final RuntimeException ex = new UnknownFormatConversionException("Das Format ist nicht bekannt.");
+        new DevInfo(field + " is " + field.getClass().getSimpleName()).severe(ex);
+        throw ex;
+      }
     }
     return data;
   }

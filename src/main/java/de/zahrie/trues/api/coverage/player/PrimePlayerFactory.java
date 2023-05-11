@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.player;
 
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Xayah;
 import lombok.extern.java.Log;
@@ -13,7 +13,9 @@ public final class PrimePlayerFactory {
 
   @Nullable
   public static PRMPlayer getPlayer(int primeId) {
-    return new Query<PRMPlayer>().where("prm_id", primeId).entity();
+    final PRMPlayer prmPlayer = new Query<>(PRMPlayer.class).where("prm_id", primeId).entity();
+    if (prmPlayer != null) return prmPlayer;
+    return new PlayerLoader(primeId).handleMissingPlayer();
   }
 
   @Nullable
@@ -51,8 +53,8 @@ public final class PrimePlayerFactory {
   }
 
   @Nullable
-  private static PlayerBase performNoPuuid(String summonerName) {
-    final PlayerBase player = determineExistingPlayerFromName(summonerName);
+  private static Player performNoPuuid(String summonerName) {
+    final Player player = determineExistingPlayerFromName(summonerName);
     if (player == null) {
       log.config("Der Spieler existiert nicht");
       return null;
@@ -62,12 +64,11 @@ public final class PrimePlayerFactory {
     return determineExistingPlayerFromName(summonerName);
   }
 
-  private static PlayerBase determineExistingPlayerFromName(String summonerName) {
-    return summonerName == null ? null : new Query<PlayerBase>().where("lol_name", summonerName).entity();
+  private static Player determineExistingPlayerFromName(String summonerName) {
+    return summonerName == null ? null : new Query<>(Player.class).where("lol_name", summonerName).entity();
   }
 
-  private static PlayerBase determineExistingPlayerFromPuuid(String puuid) {
-    return puuid == null ? null : new Query<PlayerBase>().where("lol_puuid", puuid).entity();
+  private static Player determineExistingPlayerFromPuuid(String puuid) {
+    return puuid == null ? null : new Query<>(Player.class).where("lol_puuid", puuid).entity();
   }
-
 }

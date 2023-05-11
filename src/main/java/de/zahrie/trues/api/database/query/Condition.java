@@ -20,7 +20,11 @@ public final class Condition extends AbstractSQLField {
   }
 
   public static Condition between(String columnName, Object value, Object value2) {
-    return new Condition(columnName + " between " + value  + " and " + value2);
+    if (value instanceof String string1) {
+      if (value2 instanceof String string2) return new Condition(columnName + " between " + string1 + " and " + string2);
+      return new Condition(columnName + " between " + string1 + " and ?", List.of(value2));
+    }
+    return new Condition(columnName + " between ? and ?", List.of(value, value2));
   }
 
   static Condition compare(Comparer comparer, String columnName, Object value) {
@@ -41,12 +45,12 @@ public final class Condition extends AbstractSQLField {
 
   public static Condition inSubquery(String columnName, Query<?> query) {
     if (query.getInnerSimpleQuery().isBlank()) return new Condition("0");
-    return new Condition(columnName + " in (" + query.getInnerSimpleQuery() + ")", query.getValues());
+    return new Condition(columnName + " in (" + query.getInnerSimpleQuery() + ")", query.getValues(query.getInnerSimpleQuery()));
   }
 
   public static Condition notInSubquery(String columnName, Query<?> query) {
     if (query.getInnerSimpleQuery().isBlank()) return new Condition("1");
-    return new Condition(columnName + " not in (" + query.getInnerSimpleQuery() + ")", query.getValues());
+    return new Condition(columnName + " not in (" + query.getInnerSimpleQuery() + ")", query.getValues(query.getInnerSimpleQuery()));
   }
 
   private final List<Object> paramsToAdd;

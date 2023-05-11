@@ -19,7 +19,7 @@ public class MembershipFactory {
     return membership;
   }
   public static List<Membership> getCurrentTeams(DiscordUser user) {
-    return new Query<Membership>().where("discord_user", user).and("active", true).entityList();
+    return new Query<>(Membership.class).where("discord_user", user).and("active", true).entityList();
   }
 
   public static Membership getMostImportantTeam(DiscordUser user) {
@@ -31,14 +31,14 @@ public class MembershipFactory {
   }
 
   public static List<Membership> getOfPosition(TeamPosition position) {
-    return new Query<Membership>().where("position", position).and("active", true).entityList();
+    return new Query<>(Membership.class).where("position", position).and("active", true).entityList();
   }
 
   public static Membership getMember(OrgaTeam orgaTeam, DiscordUser user) {
-    return new Query<Membership>().where("orga_team", orgaTeam).and("discord_user", user).entity();
+    return new Query<>(Membership.class).where("orga_team", orgaTeam).and("discord_user", user).entity();
   }
 
   public static List<Membership> getCaptainRoles(DiscordUser user) {
-    return new Query<Membership>().where("discord_user", user).and("active", true).and("captain", true).entityList();
+    return new Query<>(Membership.class).where("discord_user", user).and("active", true).and("captain", true).entityList();
   }
 }

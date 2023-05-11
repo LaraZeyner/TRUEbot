@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.season.signup;
 
 import java.io.Serial;
 import java.util.Comparator;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
@@ -30,18 +31,18 @@ public class SeasonSignup implements Entity<SeasonSignup>, Comparable<SeasonSign
     this.info = info;
   }
 
-  public static SeasonSignup get(Object[] objects) {
+  public static SeasonSignup get(List<Object> objects) {
     return new SeasonSignup(
-        (int) objects[0],
-        new Query<Season>().entity(objects[1]),
-        new Query<PRMTeam>().entity(objects[2]),
-        (String) objects[3]
+        (int) objects.get(0),
+        new Query<>(Season.class).entity(objects.get(1)),
+        new Query<>(PRMTeam.class).entity(objects.get(2)),
+        (String) objects.get(3)
     );
   }
 
   @Override
   public SeasonSignup create() {
-    return new Query<SeasonSignup>().key("season", season).key("team", team)
+    return new Query<>(SeasonSignup.class).key("season", season).key("team", team)
         .col("signup_info", info).insert(this);
   }
 

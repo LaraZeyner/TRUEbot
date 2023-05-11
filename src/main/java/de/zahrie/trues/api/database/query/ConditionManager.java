@@ -7,14 +7,15 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.database.connector.Table;
 import lombok.NonNull;
 
-public class ConditionManager<T> {
-  private Class<T> entityClass;
+public class ConditionManager {
   private final List<Condition> conditions = new ArrayList<>();
   private Condition always = null;
 
-  public ConditionManager() {
-    final String department = entityClass.getAnnotation(Table.class).department();
-    if (!department.isBlank()) this.always = Condition.compare(Condition.Comparer.EQUAL, "department", department);
+  public ConditionManager(Class<?> entityClass) {
+    if (entityClass != null) {
+      final String department = entityClass.getAnnotation(Table.class).department();
+      if (!department.isBlank()) this.always = Condition.compare(Condition.Comparer.EQUAL, "department", department);
+    }
   }
 
   protected void and(@NonNull Condition condition) {
@@ -36,14 +37,15 @@ public class ConditionManager<T> {
   }
 
   protected List<Object> getValues() {
-    return conditions.stream().flatMap(condition -> condition.getParamsToAdd().stream()).collect(Collectors.toList());
+    final List<Object> paramsToAdd = always == null ? new ArrayList<>() : new ArrayList<>(always.getParamsToAdd());
+    paramsToAdd.addAll(conditions.stream().flatMap(condition -> condition.getParamsToAdd().stream()).toList());
+    return paramsToAdd;
   }
 
   @Override
   public String toString() {
-    final String department = entityClass.getAnnotation(Table.class).department();
-    if (conditions.isEmpty()) return department.isBlank() ? "" : "WHERE department = '" + department + "'";
     final String statement = "(" + conditions.stream().map(Condition::toString).collect(Collectors.joining(") or (")) + ")";
-    return "WHERE " + (always != null ? always + " and (" + statement + ")" : statement);
+    final String output = always != null ? always + " and (" + statement + ")" : statement;
+    return output.replace("(", "").replace(")", "").isBlank() ? "" : "WHERE " + output;
   }
 }

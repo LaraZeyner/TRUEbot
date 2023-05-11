@@ -13,6 +13,7 @@ import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,14 +42,18 @@ public class OrgaTeamChannelHandler {
   void updateChannels() {
     final String categoryName = getCategoryName();
     final TeamChannel teamChannel = get(TeamChannelType.CATEGORY);
-    if (teamChannel == null) throw new NullPointerException("Team Channel sollte bereits erstellt sein!");
+    if (teamChannel == null) {
+      final RuntimeException e = new NullPointerException("Team Channel sollte bereits erstellt sein!");
+      new DevInfo().severe(e);
+      throw new RuntimeException(e);
+    }
 
     teamChannel.setName(categoryName);
     teamChannel.getChannel().getManager().setName(categoryName).queue();
   }
 
   private TeamChannel getExistingChannelOf(@NonNull TeamChannelType teamChannelType) {
-    return new Query<TeamChannel>().where("orga_team", team).and("teamchannel_type", teamChannelType).entity();
+    return new Query<>(TeamChannel.class).where("orga_team", team).and("teamchannel_type", teamChannelType).entity();
   }
 
   String getCategoryName() {

@@ -22,7 +22,8 @@ public class Const {
   public static final double PREDICTION_FACTOR = .03;
 
   public static final boolean SAVE_LOGS = false;
-  public static final long LOGGING_CHANNEL = 1223L;
+  public static final long LOGGING_CHANNEL = 1104331246663913493L;
+  public static final boolean SHOW_SQL = false;
 
   public static boolean check() {
     return true;

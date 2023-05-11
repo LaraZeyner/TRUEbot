@@ -1,0 +1,120 @@
+package de.zahrie.trues.api.coverage.participator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import de.zahrie.trues.api.coverage.match.log.MatchLog;
+import de.zahrie.trues.api.coverage.participator.model.Lineup;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.player.PlayerFactory;
+import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerRank;
+import de.zahrie.trues.api.coverage.player.model.Rank;
+import de.zahrie.trues.api.riot.performance.Lane;
+import de.zahrie.trues.util.io.log.DevInfo;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+@Getter
+public abstract class TeamLineupBase {
+  @Getter(AccessLevel.NONE)
+  protected final Participator participator;
+  protected List<Lineup> storedLineups;
+  @Getter(AccessLevel.NONE)
+  protected TeamLineup expectedLineups;
+  protected int mmr;
+
+  public TeamLineupBase(Participator participator) {
+    this.participator = participator;
+    updateLineups();
+  }
+
+  @Nullable
+  public Lineup getStoredLineup(@NonNull Lane lane) {
+    if (lane.equals(Lane.UNKNOWN)) {
+      final RuntimeException exception = new IllegalArgumentException("UNKNOWN darf hier nicht verwendet werden.");
+      new DevInfo().error(exception);
+      throw exception;
+    }
+    return getFixedLineups().stream().filter(lineup -> lineup.getLane().equals(lane)).findFirst().orElse(null);
+  }
+
+  @Nullable
+  public Lineup getStoredLineup(@NonNull Player player) {
+    return getFixedLineups().stream().filter(lineup -> lineup.getPlayer().equals(player)).findFirst().orElse(null);
+  }
+
+  public List<Lineup> getFixedLineups() {
+    return storedLineups;
+  }
+
+  /**
+   * fuege Lineup hinzu - Wenn lineup auf der genannten Lane bereits exisitiert ersetze Lane des alten
+   * Spielers durch Unknown
+   *
+   * @return Lineup fuer Chaining
+   */
+  public Lineup add(@NonNull Lineup lineup) {
+    if (!lineup.getLane().equals(Lane.UNKNOWN)) {
+      storedLineups.stream().filter(lineup1 -> lineup1.getLane().equals(lineup.getLane())).forEach(lineup1 -> lineup1.setLane(Lane.UNKNOWN));
+    }
+    return lineup;
+  }
+
+  public void remove(Lineup lineup) {
+    storedLineups.remove(lineup);
+  }
+
+  public boolean setOrderedLineup(@NotNull String opGgUrl) {
+    return setOrderedLineup(opGgUrl, new ArrayList<>(5));
+  }
+
+  public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<Player> players) {
+    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split("%2C");
+    for (int i = 0; i < split.length; i++) {
+      if (i > 4) break;
+
+      final String summonerName = split[i];
+      if (summonerName.isBlank()) continue;
+
+      final Player player = PlayerFactory.getPlayerFromName(summonerName);
+      if (player != null) players.set(i, player);
+    }
+    if (players.stream().anyMatch(Objects::isNull)) return false;
+    setLineup(players, true);
+    return true;
+  }
+
+  public void setLineup(MatchLog log, boolean ordered) {
+    setLineup(log.determineLineup(), ordered);
+  }
+
+  public void setLineup(List<Player> newLineup, boolean ordered) {
+    storedLineups.stream().filter(lineup -> !newLineup.contains(lineup.getPlayer())).forEach(Lineup::delete);
+
+    for (int i = 0; i < newLineup.size(); i++) {
+      final Player player = newLineup.get(i);
+      if (player != null) {
+        final Lane lane = ordered ? Lane.values()[i + 1] : Lane.UNKNOWN;
+        new Lineup(participator, player, lane).create();
+      }
+    }
+    updateLineups();
+  }
+
+  protected abstract void updateLineups();
+
+  public Rank getAverageRank() {
+    return PlayerRank.fromMMR(mmr);
+  }
+
+  protected void updateMMR() {
+    this.mmr = (int) Math.round(storedLineups.stream().map(Lineup::getPlayer)
+        .map(Player::getLastRelevantRank)
+        .mapToInt(value -> value.getRank().getMMR()).average().orElse(0));
+  }
+}

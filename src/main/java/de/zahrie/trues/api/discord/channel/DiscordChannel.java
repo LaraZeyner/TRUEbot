@@ -36,13 +36,13 @@ public abstract class DiscordChannel implements ADiscordChannel, Id {
 
   public void setName(String name) {
     this.name = name;
-    new Query<DiscordChannel>().col("channel_name", name).update(id);
+    new Query<>(DiscordChannel.class).col("channel_name", name).update(id);
     Database.connection().commit();
   }
 
   public void setPermissionType(PermissionChannelType permissionType) {
     this.permissionType = permissionType;
-    new Query<DiscordChannel>().col("permission_type", permissionType).update(id);
+    new Query<>(DiscordChannel.class).col("permission_type", permissionType).update(id);
   }
 
   public void updatePermissions() {

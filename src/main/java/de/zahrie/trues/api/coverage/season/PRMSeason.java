@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -24,20 +25,20 @@ public class PRMSeason extends Season implements Entity<PRMSeason> {
     this.prmId = prmId;
   }
 
-  public static PRMSeason get(Object[] objects) {
+  public static PRMSeason get(List<Object> objects) {
     return new PRMSeason(
-        (int) objects[0],
-        (String) objects[2],
-        (String) objects[3],
-        new TimeRange((LocalDateTime) objects[4], (LocalDateTime) objects[5]),
-        (boolean) objects[6],
-        (int) objects[7]
+        (int) objects.get(0),
+        (String) objects.get(2),
+        (String) objects.get(3),
+        new TimeRange((LocalDateTime) objects.get(4), (LocalDateTime) objects.get(5)),
+        (boolean) objects.get(6),
+        (int) objects.get(7)
     );
   }
 
   @Override
   public PRMSeason create() {
-    return new Query<PRMSeason>().key("department", "prime")
+    return new Query<>(PRMSeason.class)
         .key("season_name", name).key("season_full", fullName).key("season_id", prmId)
         .col("season_start", range.getStartTime()).col("season_end", range.getEndTime()).col("active", active).insert(this);
   }

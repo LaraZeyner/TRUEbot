@@ -8,16 +8,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlaydayFactory {
   public static Playday getPlayday(Stage stage, int index) {
-    final var playday = new Query<Playday>().where("stage", stage).and("playday_index", index).entity();
+    final var playday = new Query<>(Playday.class).where("stage", stage).and("playday_index", index).entity();
     return playday == null ? new PlaydayCreator(stage, index).create() : playday;
   }
 
   public static Playday fromMatchtime(Stage stage, LocalDateTime start) {
-    return new Query<Playday>().where("stage", stage).where("playday_start", start).entity();
+    return new Query<>(Playday.class).where("stage", stage).where("playday_start", start).entity();
   }
 
   @Nullable
   public static Playday current() {
-    return new Query<Playday>().where("playday_start <= NOW()").descending("playday_start").entity();
+    return new Query<>(Playday.class).where("playday_start <= NOW()").descending("playday_start").entity();
   }
 }

@@ -2,18 +2,19 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.coverage.match.MatchResult;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
-import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.datatypes.collections.SortedList;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +31,36 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   protected final short rateOffset;
   protected EventStatus status;
   protected String lastMessage;
-  protected final boolean active;
-  protected MatchResult result;
-  protected final Participator[] participators = IntStream.range(0, 2).mapToObj(i -> new Participator(this, i == 0))
-      .toArray(Participator[]::new);
-  protected final List<MatchLog> logs = new SortedList<>();
+  protected boolean active;
+  protected String result;
+  protected Participator[] participators;
 
-  public Match(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, MatchResult result) {
+  public Participator[] getParticipators() {
+    if (participators == null) participators = new Query<>(Participator.class)
+        .where("coverage", this).descending("first").entityList().toArray(Participator[]::new);
+    return participators;
+  }
+
+  protected List<MatchLog> logs;
+
+  public List<MatchLog> getLogs() {
+    if (logs == null) logs = new Query<>(MatchLog.class).where("coverage", this).entityList();
+    return logs;
+  }
+
+  public List<MatchLog> getLogs(MatchLogAction action) {
+    if (logs == null) logs = new Query<>(MatchLog.class).where("coverage", this).and("action", action).entityList();
+    return logs;
+  }
+
+  protected MatchResult matchResult;
+
+  public MatchResult getResult() {
+    if (matchResult == null) this.matchResult = MatchResult.fromResultString(result,this);
+    return matchResult;
+  }
+
+  public Match(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result) {
     this.playday = playday;
     this.format = format;
     this.start = start;
@@ -49,59 +73,60 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   @Override
   public void setStart(LocalDateTime start) {
-    if (this.start != start) new Query<Match>().col("coverage_start", start).update(id);
-    this.start = start;
-  }
-
-  public void updateStart(LocalDateTime start) {
     if (getStart().equals(start)) return;
-    setStart(start);
-    new Query<Match>().col("coverage_start", start).update(id);
+    if (this.start != start) new Query<>(Match.class).col("coverage_start", start).update(id);
+    this.start = start;
     handleNotifications();
-  }
-
-  public void updateStatus(EventStatus status) {
-    setStatus(status);
-    new Query<Match>().col("status", status).update(id);
-  }
-
-  public void updateLastMessage(String lastMessage) {
-    setLastMessage(lastMessage);
-    new Query<Match>().col("last_message", lastMessage).update(id);
-  }
-
-  public void updateResult(MatchResult result) {
-    setResult(result);
-    getHome().setWins((short) result.getHomeScore());
-    getGuest().setWins((short) result.getGuestScore());
-    setResult(result);
-    new Query<Match>().col("result", result).update(id);
-  }
-
-  public void updateResult(String result) {
-    updateResult(MatchResult.fromResultString(result, getFormat()));
   }
 
   @Override
   public void setStatus(EventStatus status) {
-    if (this.status != status) new Query<Match>().col("status", status).update(id);
+    if (this.status != status) new Query<>(Match.class).col("status", status).update(id);
     this.status = status;
   }
 
   @Override
   public void setLastMessage(String lastMessage) {
-    if (!this.lastMessage.equals(lastMessage)) new Query<Match>().col("last_message", lastMessage).update(id);
+    if (!this.lastMessage.equals(lastMessage)) new Query<>(Match.class).col("last_message", lastMessage).update(id);
     this.lastMessage = lastMessage;
   }
 
-  @Override
-  public void setResult(MatchResult result) {
-    if (this.result != result) new Query<Match>().col("result", result).update(id);
-    this.result = result;
+  /**
+   * Für die Matchlogs
+   */
+  public void updateResult() {
+    if (result != null) {
+      setResult(MatchResult.fromResultString(result.toString(), this));
+    }
+  }
+
+  /**
+   * Für Result setzen
+   * @param result ResultString
+   */
+  public void updateResult(@NonNull String result) {
+    setResult(MatchResult.fromResultString(result, this));
+  }
+
+  private void setResult(MatchResult result) {
+    if (result == null || getMatchResult().equals(result)) return;
+    this.result = result.toString();
+    new Query<>(Match.class).col("result", result.toString()).update(id);
+    getHome().setWins(result.getHomeScore());
+    getGuest().setWins(result.getGuestScore());
+    if (matchResult.getPlayed()) {
+      setStatus(EventStatus.PLAYED);
+    }
+  }
+
+  public MatchResult ofTeam(@NonNull Team team) {
+    if (getParticipator(team) == null) return null;
+    if (getHome().getTeam().equals(team)) return getMatchResult();
+    return new MatchResult(getMatchResult().getGuestScore(), getMatchResult().getHomeScore(), getMatchResult().getMaxGames(), getMatchResult().getPlayed());
   }
 
   public String getExpectedResult() {
-    return getResult().expectResultOf(this) + (isRunning() ? "*" : "");
+    return getMatchResult().expectResultOf(this) + (isRunning() ? "*" : "");
   }
 
   @Override

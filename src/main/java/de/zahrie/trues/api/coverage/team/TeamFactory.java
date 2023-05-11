@@ -8,7 +8,7 @@ public class TeamFactory {
 
   @Nullable
   public static PRMTeam getTeam(int teamId) {
-    final PRMTeam team = new Query<PRMTeam>().where("prm_id", teamId).entity();
+    final PRMTeam team = new Query<>(PRMTeam.class).where("prm_id", teamId).entity();
     if (team != null) return team;
 
     final TeamLoader teamLoader = new TeamLoader(teamId).create();
@@ -17,7 +17,7 @@ public class TeamFactory {
 
 
   public static PRMTeam getTeam(int prmId, String name, String abbreviation) {
-    PRMTeam team = new Query<PRMTeam>().where("prm_id", prmId).entity();
+    PRMTeam team = new Query<>(PRMTeam.class).where("prm_id", prmId).entity();
     if (team != null) return team;
 
     team = fromName(name, abbreviation);
@@ -31,16 +31,16 @@ public class TeamFactory {
 
   @Nullable
   public static PRMTeam fromName(String name, String abbreviation) {
-    return new Query<PRMTeam>().where("team_name", name).and("team_abbr", abbreviation).entity();
+    return new Query<>(PRMTeam.class).where("team_name", name).and("team_abbr", abbreviation).entity();
   }
 
   @Nullable
   public static PRMTeam fromAbbreviation(String abbreviation) {
-    return new Query<PRMTeam>().where("team_abbr", abbreviation).entity();
+    return new Query<>(PRMTeam.class).where("team_abbr", abbreviation).entity();
   }
 
   @Nullable
   public static PRMTeam fromName(String name) {
-    return new Query<PRMTeam>().where("team_name", name).entity();
+    return new Query<>(PRMTeam.class).where("team_name", name).entity();
   }
 }

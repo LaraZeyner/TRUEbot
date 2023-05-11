@@ -10,7 +10,7 @@ import de.zahrie.trues.api.database.query.Query;
 public record OrgaTeamScheduler(OrgaTeam team) {
   public List<TeamCalendar> getCalendarEntries() {
     final var limitTime = LocalDateTime.now().plusMinutes(30);
-    final List<TeamCalendar> calendarEntries = new Query<TeamCalendar>().where("orga_team", team).and("calendar_end", limitTime)
+    final List<TeamCalendar> calendarEntries = new Query<>(TeamCalendar.class).where("orga_team", team).and("calendar_end", limitTime)
         .entityList();
     team.getTeam().getMatches().getUpcomingMatches().stream()
         .map(match -> new TeamCalendar(match.getExpectedTimeRange(), String.valueOf(match.getId()), TeamCalendar.TeamCalendarType.MATCH, team, -1).create())

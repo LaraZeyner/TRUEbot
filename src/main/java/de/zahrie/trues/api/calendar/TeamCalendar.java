@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.DTO;
 import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.database.connector.Table;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @Table(value = "calendar", department = "team")
 @ExtensionMethod(StringUtils.class)
-public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO {
+public class TeamCalendar extends EventCalendar implements Entity<TeamCalendar>, DTO {
   @Serial
   private static final long serialVersionUID = -8449986995823183145L;
 
@@ -46,26 +46,22 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
     this.orgaTeam = orgaTeam;
   }
 
-  public static TeamCalendar get(Object[] objects) {
+  public static TeamCalendar get(List<Object> objects) {
     return new TeamCalendar(
-        (int) objects[0],
-        new TimeRange((LocalDateTime) objects[2], (LocalDateTime) objects[3]),
-        (String) objects[4],
-        (Long) objects[5],
-        new SQLEnum<TeamCalendarType>().of(objects[5]),
-        new Query<OrgaTeam>().entity(objects[8])
+        (int) objects.get(0),
+        new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
+        (String) objects.get(4),
+        (Long) objects.get(5),
+        new SQLEnum<>(TeamCalendarType.class).of(objects.get(5)),
+        new Query<>(OrgaTeam.class).entity(objects.get(8))
     );
   }
 
   @Override
   public TeamCalendar create() {
-    final var calendar = new Query<TeamCalendar>().key("department", "team")
-        .col("calendar_start", range.getStartTime())
-        .col("calendar_end", range.getEndTime())
-        .col("details", details)
-        .col("thread_id", threadId)
-        .col("calendar_type", type)
-        .col("orga_team", orgaTeam)
+    final var calendar = new Query<>(TeamCalendar.class)
+        .col("calendar_start", range.getStartTime()).col("calendar_end", range.getEndTime()).col("details", details)
+        .col("thread_id", threadId).col("calendar_type", type).col("orga_team", orgaTeam)
         .insert(this);
     if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
       NotificationManager.addNotifiersFor(calendar);
@@ -86,7 +82,7 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
   public Match getMatch() {
     final Integer matchId = getDetails().intValue();
     if (matchId == -1) return null;
-    return new Query<Match>().entity(matchId);
+    return new Query<>(Match.class).entity(matchId);
   }
 
   @Override
@@ -95,7 +91,7 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
     return List.of(
         getRange().display(),
         match == null ? type.toString() : match.getTypeString(),
-        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(orgaTeam.getTeam()), "kein Gegner", TeamBase::getName)
+        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(orgaTeam.getTeam()), "kein Gegner", Team::getName)
     );
   }
 

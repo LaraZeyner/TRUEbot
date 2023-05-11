@@ -11,11 +11,13 @@ import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.stage.model.SignupStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @Getter
 @Setter
+@Table("coverage_season")
 public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
   protected int id;
   protected final String name; // season_name
@@ -34,7 +37,7 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
 
   @Override
   public List<Stage> getStages() {
-    return new Query<Stage>().where("season", this).entityList();
+    return new Query<>(Stage.class).where("season", this).entityList();
   }
 
   @Override
@@ -57,7 +60,9 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
       final var playStage = (PlayStage) stage;
       if ((playStage.pageId() == id)) return Util.nonNull(playStage);
     }
-    throw new NullPointerException("Stage cannot be null");
+    final RuntimeException exception = new NullPointerException("Stage cannot be null");
+    new DevInfo().severe(exception);
+    throw exception;
   }
 
   @Override
@@ -74,7 +79,7 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
   public List<EventDTO> getEvents() {
     final List<Stage> stagesEvents = getStages();
     final List<EventDTO> events = new ArrayList<>(stagesEvents.stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList());
-    final List<Playday> playdaysEvents = new Query<Playday>().where("season", this).entityList();
+    final List<Playday> playdaysEvents = new Query<>(Playday.class).where("season", this).entityList();
     final List<EventDTO> pdEvents = playdaysEvents.stream().map(playday -> new EventDTO(playday.getRange(), "Spieltag " + playday.getIdx(), true)).toList();
     if (!pdEvents.isEmpty()) events.addAll(pdEvents);
     return events.stream().sorted().toList();

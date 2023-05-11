@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.discord.group;
 
 import java.io.Serial;
+import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.database.connector.Table;
@@ -32,7 +33,7 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
   private OrgaTeam team;
 
   public OrgaTeam getOrgaTeam() {
-    if (team == null) this.team = new Query<OrgaTeam>().where("team", this).entity();
+    if (team == null) this.team = new Query<>(OrgaTeam.class).where("team", this).entity();
     return team;
   }
 
@@ -53,20 +54,20 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
     this.orgaTeamId = orgaTeamId;
   }
 
-  public static CustomDiscordGroup get(Object[] objects) {
+  public static CustomDiscordGroup get(List<Object> objects) {
     return new CustomDiscordGroup(
-        (int) objects[0],
-        (long) objects[1],
-        (String) objects[2],
-        new SQLEnum<GroupType>().of(objects[3]),
-        (boolean) objects[5],
-        new Query<OrgaTeam>().where("team_role", objects[0]).id()
+        (int) objects.get(0),
+        (long) objects.get(1),
+        (String) objects.get(2),
+        new SQLEnum<>(GroupType.class).of(objects.get(3)),
+        (boolean) objects.get(4),
+        new Query<>(OrgaTeam.class).where("team_role", objects.get(0)).id()
     );
   }
 
   @Override
   public CustomDiscordGroup create() {
-    final CustomDiscordGroup discordGroup = new Query<CustomDiscordGroup>().key("discord_id", discordId)
+    final CustomDiscordGroup discordGroup = new Query<>(CustomDiscordGroup.class).key("discord_id", discordId)
         .col("role_name", name).col("role_type", type).col("fixed", fixed)
         .insert(this);
     if (team != null) team.setGroup(discordGroup);
@@ -78,7 +79,7 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
   }
 
   public void setName(String name) {
-    if (!this.name.equals(name)) new Query<CustomDiscordGroup>().col("role_name", name).update(id);
+    if (!this.name.equals(name)) new Query<>(CustomDiscordGroup.class).col("role_name", name).update(id);
     this.name = name;
   }
 

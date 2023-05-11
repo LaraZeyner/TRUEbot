@@ -9,23 +9,23 @@ public final class SeasonFactory {
 
   @Nullable
   public static PRMSeason getSeason(int seasonId) {
-    return new Query<PRMSeason>().where("season_id", seasonId).entity();
+    return new Query<>(PRMSeason.class).where("season_id", seasonId).entity();
   }
 
   @Nullable
   public static PRMSeason getSeason(String seasonName) {
-    return new Query<PRMSeason>().where("season_name", seasonName).entity();
+    return new Query<>(PRMSeason.class).where("season_name", seasonName).entity();
 
   }
 
   @Nullable
   public static PRMSeason getLastPRMSeason() {
-    return new Query<PRMSeason>().where("season_start <= now()").descending("season_start").entity();
+    return new Query<>(PRMSeason.class).where("season_start <= now()").descending("season_start").entity();
   }
 
   @Nullable
   public static PRMSeason getUpcomingPRMSeason() {
-    return new Query<PRMSeason>()
+    return new Query<>(PRMSeason.class)
         .where(Condition.between("now", "season_start", "season_end")).or("season_start >= now()")
         .ascending("season_start").entity();
   }
@@ -38,12 +38,12 @@ public final class SeasonFactory {
 
   @Nullable
   public static OrgaCupSeason getLastInternSeason() {
-    return new Query<OrgaCupSeason>().where("season_start <= now()").descending("season_start").entity();
+    return new Query<>(OrgaCupSeason.class).where("season_start <= now()").descending("season_start").entity();
   }
 
   @Nullable
   public static OrgaCupSeason getUpcomingInternSeason() {
-    return new Query<OrgaCupSeason>()
+    return new Query<>(OrgaCupSeason.class)
         .where(Condition.between("now", "season_start", "season_end")).or("season_start >= now()")
         .ascending("season_start").entity();
   }

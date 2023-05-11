@@ -2,15 +2,13 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.match.log.LogFactory;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
-import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.discord.scouting.Scouting;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +27,12 @@ public class PrimeMatchImpl {
 
     final Participator participator = LogFactory.handleUserWithTeam(match, userWithTeam);
     final var log = new MatchLog(timestamp, match, action, details, participator).create();
-    final TeamBase team = participator == null ? null : participator.getTeam();
+    final Team team = participator == null ? null : participator.getTeam();
     final String lastMessage = (team == null ? "ADMIN" : team.getAbbreviation()) + " : " + details;
-    match.updateLastMessage(lastMessage);
+    match.setLastMessage(lastMessage);
 
-    if (log.getAction().equals(MatchLogAction.LINEUP_SUBMIT)) {
-      final List<PlayerBase> newLineup = log.determineLineup();
-      participator.get().setLineup(newLineup);
+    if (participator != null && log.getAction().equals(MatchLogAction.LINEUP_SUBMIT)) {
+      participator.getTeamLineup().setLineup(log, false);
     }
     match.getOrgaTeams().stream().map(ScoutingManager::forTeam).filter(Objects::nonNull).forEach(Scouting::sendLog);
     return true;

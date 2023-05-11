@@ -3,10 +3,12 @@ package de.zahrie.trues.api.coverage.playday;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.MatchFormat;
 import de.zahrie.trues.api.coverage.playday.config.PlaydayRange;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -16,12 +18,14 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @Table("coverage_playday")
+@ExtensionMethod(SQLUtils.class)
 public class Playday implements Entity<Playday>, Comparable<Playday> {
   @Serial
   private static final long serialVersionUID = 341434050654966994L;
@@ -38,19 +42,19 @@ public class Playday implements Entity<Playday>, Comparable<Playday> {
     this.format = format;
   }
 
-  public static Playday get(Object[] objects) {
+  public static Playday get(List<Object> objects) {
     return new Playday(
-        (int) objects[0],
-        new Query<Stage>().entity(objects[1]),
-        (short) objects[2],
-        new TimeRange((LocalDateTime) objects[3], (LocalDateTime) objects[4]),
-        new SQLEnum<MatchFormat>().of(objects[5])
+        (int) objects.get(0),
+        new Query<>(Stage.class).entity(objects.get(1)),
+        objects.get(2).shortValue(),
+        new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
+        new SQLEnum<>(MatchFormat.class).of(objects.get(5))
     );
   }
 
   @Override
   public Playday create() {
-    return new Query<Playday>()
+    return new Query<>(Playday.class)
         .key("stage", stage).key("playday_index", idx)
         .col("playday_start", range.getStartTime()).col("playday_end", range.getEndTime()).col("format", format)
         .insert(this);

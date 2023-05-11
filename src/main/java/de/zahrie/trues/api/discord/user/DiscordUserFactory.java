@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.Member;
 public class DiscordUserFactory {
   public static DiscordUser getDiscordUser(Member member) {
     final long memberId = member.getIdLong();
-    final var user = new Query<DiscordUser>().where("discord_id", memberId).entity();
+    final var user = new Query<>(DiscordUser.class).where("discord_id", memberId).entity();
     return user == null ? createDiscordUser(member) : user;
   }
 

@@ -82,7 +82,7 @@ public class ApplicationFactory {
     final List<Membership> currentTeams = MembershipFactory.getCurrentTeams(user);
     final List<OrgaTeam> currentOrgaTeams = currentTeams.stream().map(Membership::getOrgaTeam).toList();
     final RoleGranter granter = new RoleGranter(user);
-    for (OrgaTeam orgaTeam : new Query<OrgaTeam>().entityList()) {
+    for (OrgaTeam orgaTeam : new Query<>(OrgaTeam.class).entityList()) {
       if (currentOrgaTeams.contains(orgaTeam) && !user.getMember().getRoles().contains(orgaTeam.getRoleManager().getRole())) {
         granter.addTeam(orgaTeam);
         continue;

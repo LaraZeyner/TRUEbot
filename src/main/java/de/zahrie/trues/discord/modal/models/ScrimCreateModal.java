@@ -3,7 +3,7 @@ package de.zahrie.trues.discord.modal.models;
 import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.coverage.match.model.Scrimmage;
-import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;

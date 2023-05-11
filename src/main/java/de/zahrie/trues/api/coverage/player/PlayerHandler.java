@@ -8,7 +8,7 @@ import com.merakianalytics.orianna.types.common.Tier;
 import com.merakianalytics.orianna.types.core.league.LeagueEntry;
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Division;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.RankFactory;
 import de.zahrie.trues.api.riot.Xayah;
 import lombok.Builder;
@@ -20,7 +20,7 @@ public class PlayerHandler extends PlayerModel implements Serializable {
   private static final long serialVersionUID = -3900511589414972005L;
 
   @Builder
-  public PlayerHandler(String url, PlayerBase player) {
+  public PlayerHandler(String url, Player player) {
     super(url, player);
   }
 

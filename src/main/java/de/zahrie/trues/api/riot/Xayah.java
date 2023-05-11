@@ -1,7 +1,7 @@
 package de.zahrie.trues.api.riot;
 
 import com.merakianalytics.orianna.Orianna;
-import de.zahrie.trues.api.riot.matchhistory.champion.ChampionFactory;
+import de.zahrie.trues.api.riot.champion.ChampionFactory;
 import de.zahrie.trues.util.Connectable;
 import de.zahrie.trues.util.io.cfg.JSON;
 import lombok.Data;

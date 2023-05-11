@@ -25,7 +25,7 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   }
 
   public void updateAll() {
-    updateTeams();
+    // updateTeams();
     updateMatches();
     league.update();
   }
@@ -42,10 +42,9 @@ public class LeagueHandler extends LeagueModel implements Serializable {
 
   public void updateTeams() {
     for (PRMTeam team : teams) {
-
       final TeamLoader teamLoader = new TeamLoader(team);
       final TeamHandler load = teamLoader.load();
-      load.update();
+      if (load != null) load.update();
     }
   }
 }

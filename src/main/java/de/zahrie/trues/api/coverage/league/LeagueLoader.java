@@ -17,6 +17,7 @@ import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.util.io.log.Console;
 import de.zahrie.trues.util.io.log.DevInfo;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
@@ -31,8 +32,8 @@ public class LeagueLoader extends GamesportsLoader {
     final int divisionId = url.between("/", "-", 8).intValue();
     final PRMSeason season = SeasonFactory.getSeason(seasonId);
     if (season == null) {
-      new DevInfo().severe(new NullPointerException("Season wurde nicht erstellt."));
-      throw new NullPointerException("Season wurde nicht erstellt.");
+      new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
+      return null;
     }
     return LeagueFactory.getGroup(season, name, stageId, divisionId);
   }
@@ -44,24 +45,27 @@ public class LeagueLoader extends GamesportsLoader {
   }
 
   public static Integer stageIdFromUrl(String url) {
-    return url.between("/group/", "-").intValue();
+    return url.between("/group/", "/").intValue();
   }
 
   private final PRMLeague league;
   private final String url;
 
-  public LeagueLoader(@NotNull String url) {
-    super(URLType.LEAGUE, url.between("/prm/", "-").intValue(), url.between("/group/", "-").intValue(),
-        url.between("/", "-", -1).intValue());
-    final PRMSeason season = SeasonFactory.getSeason(url.between("/prm/", "-").intValue());
+  /**
+   * @param url url besitzt keine -
+   */
+  public LeagueLoader(@NotNull PRMLeague prmLeague) {
+    super(URLType.LEAGUE, prmLeague.getUrl().between("/prm/", "/").intValue(), prmLeague.getUrl().between("/group/", "/").intValue(),
+        prmLeague.getUrl().after("/", -1).intValue());
+    this.url = prmLeague.getUrl();
+    final PRMSeason season = SeasonFactory.getSeason(url.between("/prm/", "/").intValue());
     if (season == null) {
-      new DevInfo().severe(new NullPointerException("Season wurde nicht erstellt."));
-      throw new NullPointerException("Season wurde nicht erstellt.");
+      new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
+      this.league = null;
+    } else {
+      final int divisionId = url.after("/", -1).intValue();
+      this.league = LeagueFactory.getGroup(season, prmLeague.getName(), stageIdFromUrl(url), divisionId);
     }
-
-    final int divisionId = url.between("/", "-", 8).intValue();
-    this.league = LeagueFactory.getGroup(season, divisionNameFromURL(url), stageIdFromUrl(url), divisionId);
-    this.url = url;
   }
 
   public LeagueHandler load() {

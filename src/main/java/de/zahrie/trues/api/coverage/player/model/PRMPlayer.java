@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.player.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.Table;
@@ -14,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "player", department = "prime")
-public class PRMPlayer extends PlayerBase implements Entity<PRMPlayer> {
+public class PRMPlayer extends Player implements Entity<PRMPlayer> {
   @Serial
   private static final long serialVersionUID = 1620593763353601777L;
 
@@ -30,29 +31,29 @@ public class PRMPlayer extends PlayerBase implements Entity<PRMPlayer> {
     this.prmUserId = prmUserId;
   }
 
-  public static PRMPlayer get(Object[] objects) {
+  public static PRMPlayer get(List<Object> objects) {
     return new PRMPlayer(
-        (int) objects[0],
-        (String) objects[2],
-        (String) objects[3],
-        new Query<DiscordUser>().entity(objects[4]),
-        new Query<Team>().entity(objects[5]),
-        (LocalDateTime) objects[6],
-        (boolean) objects[7],
-        (Integer) objects[8]);
+        (int) objects.get(0),
+        (String) objects.get(2),
+        (String) objects.get(3),
+        new Query<>(DiscordUser.class).entity(objects.get(4)),
+        new Query<>(Team.class).entity(objects.get(5)),
+        (LocalDateTime) objects.get(6),
+        (boolean) objects.get(7),
+        (Integer) objects.get(8));
   }
 
   @Override
   public PRMPlayer create() {
-    return new Query<PRMPlayer>().key("lol_puuid", puuid)
-        .col("department", "prime").col("lol_name", summonerName).col("discord_user", discordUser).col("team", team)
-        .col("updated", updated).col("played", played).col("prm_id", prmUserId)
+    return new Query<>(PRMPlayer.class).key("lol_puuid", puuid)
+        .col("lol_name", summonerName).col("discord_user", discordUser).col("team", team).col("updated", updated).col("played", played)
+        .col("prm_id", prmUserId)
         .insert(this);
   }
 
   public void setPrmUserId(Integer prmUserId) {
     this.prmUserId = prmUserId;
-    new Query<PRMPlayer>().col("department", prmUserId == null ? "league" : "prime").col("prm_id", prmUserId).update(id);
+    new Query<>(PRMPlayer.class).col("department", prmUserId == null ? "league" : "prime").col("prm_id", prmUserId).update(id);
   }
 
   @Override

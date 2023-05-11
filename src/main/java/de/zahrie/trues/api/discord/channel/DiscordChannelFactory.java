@@ -24,7 +24,7 @@ public class DiscordChannelFactory {
    */
   @NonNull
   public static DiscordChannel getDiscordChannel(@NonNull GuildChannel channel) {
-    final DiscordChannel discordChannel = new Query<DiscordChannel>().where("discord_id", channel.getIdLong()).entity();
+    final DiscordChannel discordChannel = new Query<>(DiscordChannel.class).where("discord_id", channel.getIdLong()).entity();
     return discordChannel != null ? discordChannel : createChannel(channel);
   }
 
@@ -36,7 +36,7 @@ public class DiscordChannelFactory {
     OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(channel);
     if (orgaTeam == null && channel.getName().contains(" (")) {
       final String categoryAbbr = channel.getName().between(" (", ")");
-      orgaTeam = new Query<OrgaTeam>().where("team_abbr_created", categoryAbbr).entity();
+      orgaTeam = new Query<>(OrgaTeam.class).where("team_abbr_created", categoryAbbr).entity();
     }
 
     return orgaTeam != null ? OrgaTeamChannelHandler.createTeamChannelEntity(channel, orgaTeam) :

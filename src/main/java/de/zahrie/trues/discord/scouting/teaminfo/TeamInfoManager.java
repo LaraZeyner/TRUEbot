@@ -39,7 +39,7 @@ public class TeamInfoManager {
   }
 
   public static void loadAllData() {
-    for (OrgaTeam fromOrgaTeam : new Query<OrgaTeam>().entityList()) {
+    for (OrgaTeam fromOrgaTeam : new Query<>(OrgaTeam.class).entityList()) {
       final TeamInfo info = fromTeam(fromOrgaTeam);
       if (Duration.between(info.getLastUpdate(), LocalDateTime.now()).get(ChronoUnit.SECONDS) >= 24*3600) toUpdate.add(fromOrgaTeam);
     }

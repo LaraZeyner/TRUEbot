@@ -11,8 +11,8 @@ import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
-import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
@@ -38,7 +38,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     final AtomicReference<ThreadChannel> thread = new AtomicReference<>();
     final TeamChannel scoutingChannel = orgaTeam.getChannels().get(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return null;
-    final TeamBase team = participator.getTeam();
+    final Team team = participator.getTeam();
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
     if (participator.getMessageId() == null) {
       textChannel.sendMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog())

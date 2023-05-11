@@ -18,6 +18,8 @@ import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.util.StringUtils;
+import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.log.DevInfo;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
 import lombok.Getter;
@@ -34,7 +36,7 @@ public class MatchLoader extends GamesportsLoader {
   private PRMMatch match;
 
   public MatchLoader(@NotNull PRMMatch match) {
-    super(URLType.MATCH, match.getId());
+    super(URLType.MATCH, match.getMatchId());
     this.match = match;
   }
 
@@ -45,7 +47,10 @@ public class MatchLoader extends GamesportsLoader {
   MatchLoader create() {
     final String seasonName = html.find("h1").text().before(":");
     final PRMSeason season = SeasonFactory.getSeason(seasonName);
-    if (season == null) throw new NullPointerException("Season nicht erstellt.");
+    if (season == null) {
+      new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
+      return null;
+    }
 
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
     final String divisionName = division.text();
@@ -89,7 +94,7 @@ public class MatchLoader extends GamesportsLoader {
 
   private List<PRMTeam> getTeams() {
     return html.findAll("div", "content-match-head-team-top").stream()
-        .map(team -> team.getAttribute("href"))
+        .map(team -> team.find("a").getAttribute("href"))
         .map(TeamLoader::idFromURL)
         .map(TeamFactory::getTeam)
         .toList();

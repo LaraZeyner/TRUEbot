@@ -1,5 +1,6 @@
 package de.zahrie.trues;
 
+import java.util.TimeZone;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -36,6 +37,7 @@ public final class LoadupManager implements Connectable {
   public void connect() {
     if (!Const.check()) System.exit(1);
 
+    TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin"));
     final Handler consoleHandler = new ConsoleHandler();
     consoleHandler.setLevel(Level.FINE);
     Logger.getAnonymousLogger().addHandler(consoleHandler);
@@ -75,7 +77,6 @@ public final class LoadupManager implements Connectable {
     Database.Connector.disconnect();
     instance = null;
     log.info("System beendet in " + (System.currentTimeMillis() - disconnectingMillis) + " Millisekunden.");
-    System.exit(0);
     handleRestart();
   }
 

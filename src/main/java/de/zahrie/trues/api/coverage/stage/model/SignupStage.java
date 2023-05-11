@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.stage.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.database.connector.Table;
@@ -22,18 +23,18 @@ public class SignupStage extends Stage implements Entity<SignupStage>, WaitingSt
     super(id, season, range, discordEventId);
   }
 
-  public static SignupStage get(Object[] objects) {
+  public static SignupStage get(List<Object> objects) {
     return new SignupStage(
-        (int) objects[0],
-        new Query<Season>().entity(objects[2]),
-        new TimeRange((LocalDateTime) objects[3], (LocalDateTime) objects[4]),
-        (Long) objects[5]
+        (int) objects.get(0),
+        new Query<>(Season.class).entity(objects.get(2)),
+        new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
+        (Long) objects.get(5)
     );
   }
 
   @Override
   public SignupStage create() {
-    return new Query<SignupStage>().key("season", season).key("department", "Anmeldung")
+    return new Query<>(SignupStage.class).key("season", season)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

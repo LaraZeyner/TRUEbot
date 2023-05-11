@@ -13,7 +13,7 @@ public class TeamChannelRepository {
 
   @Nullable
   public static TeamChannel getTeamChannelFromChannelId(long channelId) {
-    return new Query<TeamChannel>().where("discord_id", channelId).entity();
+    return new Query<>(TeamChannel.class).where("discord_id", channelId).entity();
   }
 
 }

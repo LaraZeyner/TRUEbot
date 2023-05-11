@@ -63,6 +63,6 @@ public final class OrgaTeamFactory {
 
   @Nullable
   public static OrgaTeam fromAbbreviation(String abbreviation) {
-    return new Query<OrgaTeam>().where("team_abbr_created", abbreviation).entity();
+    return new Query<>(OrgaTeam.class).where("team_abbr_created", abbreviation).entity();
   }
 }

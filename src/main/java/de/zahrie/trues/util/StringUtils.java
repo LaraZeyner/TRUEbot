@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.scheduling.DateTimeStringConverter;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
@@ -81,7 +82,11 @@ public class StringUtils {
       if (end != null) endIndex = value.indexOf(end, startIndex + 1);
     } else if (end != null) endIndex = ordinalIndexOf(value, end, occurrence);
 
-    if (endIndex < startIndex) throw new IndexOutOfBoundsException("Index-Fehler");
+    if (endIndex < startIndex) {
+      final RuntimeException exception = new IndexOutOfBoundsException("Index-Fehler");
+      new DevInfo().severe(exception);
+      throw exception;
+    }
     if (endIndex == -1) endIndex = value.length();
     return value.substring(startIndex + 1, endIndex);
   }

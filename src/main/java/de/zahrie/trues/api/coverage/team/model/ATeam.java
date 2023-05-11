@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.season.signup.SeasonSignup;
 
 public interface ATeam {
@@ -23,5 +23,5 @@ public interface ATeam {
   void setLastMMR(Integer mmr);
   List<Participator> getParticipators();
   List<SeasonSignup> getSignups();
-  List<PlayerBase> getPlayers();
+  List<Player> getPlayers();
 }

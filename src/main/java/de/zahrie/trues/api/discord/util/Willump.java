@@ -1,6 +1,5 @@
 package de.zahrie.trues.api.discord.util;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,9 +7,9 @@ import de.zahrie.trues.api.discord.builder.leaderboard.LeaderboardHandler;
 import de.zahrie.trues.api.discord.builder.modal.ModalHandler;
 import de.zahrie.trues.api.discord.command.context.ContextHandler;
 import de.zahrie.trues.api.discord.command.slash.SlashHandler;
+import de.zahrie.trues.api.scheduler.ScheduleManager;
 import de.zahrie.trues.discord.event.EventRegisterer;
-import de.zahrie.trues.discord.notify.NotificationManager;
-import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
+import de.zahrie.trues.discord.event.models.EventLogger;
 import de.zahrie.trues.util.Connectable;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
@@ -35,15 +34,7 @@ public class Willump implements Connectable {
     }
 
     System.out.println("DONE");
-    // ScheduleManager.run();
-    test();
-    System.out.println("TEST COMPLETED");
-  }
-
-  private void test() {
-    TeamInfoManager.loadAllData();
-    if (!NotificationManager.getDay().equals(LocalDate.now())) NotificationManager.create();
-    NotificationManager.sendNotifications();
+    ScheduleManager.run();
   }
 
   @Override
@@ -52,7 +43,7 @@ public class Willump implements Connectable {
   }
 
   private void handleEvents() {
-    final var adapters = new ArrayList<>(List.of(new BotConfigurator(), new ContextHandler(), new ModalHandler(), new SlashHandler()));
+    final var adapters = new ArrayList<>(List.of(new BotConfigurator(), new ContextHandler(), new EventLogger(), new ModalHandler(), new SlashHandler()));
     adapters.addAll(new EventRegisterer().register());
     client.addEventListener(adapters.toArray());
   }

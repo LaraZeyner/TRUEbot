@@ -24,7 +24,7 @@ public record SchedulingHandler(DiscordUser user) {
   public void repeat() {
     final LocalDate start = LocalDate.now().minusWeeks(1);
     final LocalDate end = LocalDate.now().minusDays(1);
-    new Query<SchedulingCalendar>()
+    new Query<>(SchedulingCalendar.class)
         .where("discord_user", user)
         .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
         .and(Condition.between("date(startTime", start, end)).entityList()
@@ -44,7 +44,7 @@ public record SchedulingHandler(DiscordUser user) {
 
   public void delete(List<TimeRange> ranges) {
     ranges.stream().map(TimeRange::getStartTime).map(LocalDateTime::toLocalDate).distinct().forEach(localDate ->
-        new Query<SchedulingCalendar>()
+        new Query<>(SchedulingCalendar.class)
             .where("discord_user", user)
             .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
             .and("DATE(calendar_start)", localDate)
@@ -52,9 +52,9 @@ public record SchedulingHandler(DiscordUser user) {
   }
 
   public List<TimeRange> getRemaining(LocalDate from) {
-    final List<SchedulingCalendar> all = new Query<SchedulingCalendar>()
+    final List<SchedulingCalendar> all = new Query<>(SchedulingCalendar.class)
         .where("discord_user", user).and(Condition.Comparer.GREATER_EQUAL, "DATE(calendar_start)", from).entityList();
-    final List<SchedulingCalendar> reduceable = new Query<SchedulingCalendar>()
+    final List<SchedulingCalendar> reduceable = new Query<>(SchedulingCalendar.class)
         .where("discord_user", user).and("details", "urlaub").entityList();
     return TimeRange.reduce(new ArrayList<>(all.stream().map(SchedulingCalendar::getRange).toList()),
         new ArrayList<>(reduceable.stream().map(SchedulingCalendar::getRange).toList()));

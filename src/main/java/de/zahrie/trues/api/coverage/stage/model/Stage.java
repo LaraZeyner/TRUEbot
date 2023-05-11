@@ -39,14 +39,14 @@ public abstract class Stage implements ABetable, AEventable, Comparable<Stage>, 
   }
 
   public void setDiscordEventId(@NotNull Long discordEventId) {
-    if (!discordEventId.equals(this.discordEventId)) new Query<>().col("discord_event", discordEventId).forId(id).update(id);
+    if (!discordEventId.equals(this.discordEventId)) new Query<>(Stage.class).col("discord_event", discordEventId).forId(id).update(id);
     this.discordEventId = discordEventId;
   }
 
   @Override
   public void setRange(TimeRange timeRange) {
     if (getRange().getStartTime() != range.getStartTime() || getRange().getEndTime() != timeRange.getEndTime()) {
-      new Query<Stage>().col("stage_start", timeRange.getStartTime()).col("stage_end", timeRange.getEndTime()).update(id);
+      new Query<>(Stage.class).col("stage_start", timeRange.getStartTime()).col("stage_end", timeRange.getEndTime()).update(id);
     }
     this.range = timeRange;
   }
@@ -87,7 +87,7 @@ public abstract class Stage implements ABetable, AEventable, Comparable<Stage>, 
     @Nullable
     public static StageType fromPrmId(int prmId) {
       if (prmId < 1) return null;
-      return Arrays.stream(StageType.values()).filter(stageType -> stageType.getPrmId() == prmId).findFirst().orElse(null);
+      return Arrays.stream(StageType.values()).filter(stageType -> stageType.getPrmId() != null && stageType.getPrmId() == prmId).findFirst().orElse(null);
     }
 
     private final Class<? extends Stage> entityClass;

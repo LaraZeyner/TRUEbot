@@ -9,6 +9,6 @@ import de.zahrie.trues.api.database.query.Query;
 
 public interface PlayStage extends IdAble, Playable, Id {
   default List<League> leagues() {
-    return new Query<League>().where("stage", this).entityList();
+    return new Query<>(League.class).where("stage", this).entityList();
   }
 }

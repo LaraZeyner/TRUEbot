@@ -2,6 +2,7 @@ package de.zahrie.trues.api.calendar;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -30,19 +31,19 @@ public class ApplicationCalendar extends UserCalendar implements Entity<Applicat
     this.threadId = threadId;
   }
 
-  public static ApplicationCalendar get(Object[] objects) {
+  public static ApplicationCalendar get(List<Object> objects) {
     return new ApplicationCalendar(
-        (int) objects[0],
-        new TimeRange((LocalDateTime) objects[2], (LocalDateTime) objects[3]),
-        (String) objects[4],
-        new Query<DiscordUser>().entity(objects[7]),
-        (Long) objects[6]
+        (int) objects.get(0),
+        new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
+        (String) objects.get(4),
+        new Query<>(DiscordUser.class).entity(objects.get(7)),
+        (Long) objects.get(6)
     );
   }
 
   @Override
   public ApplicationCalendar create() {
-    return new Query<ApplicationCalendar>().key("department", "app")
+    return new Query<>(ApplicationCalendar.class)
         .col("calendar_start", range.getStartTime())
         .col("calendar_end", range.getEndTime())
         .col("details", details)

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerImpl;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Xayah;
@@ -15,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 public final class PlayerFactory {
   @NonNull
   public static List<Player> registeredPlayers() {
-    return new Query<Player>().where(Condition.notNull("discord_user")).entityList();
+    return new Query<>(Player.class).where(Condition.notNull("discord_user")).entityList();
   }
 
   @Nullable
   public static Player findPlayer(@Nullable String puuid) {
-    return puuid == null ? null : new Query<Player>().where("lol_puuid", puuid).entity();
+    return puuid == null ? null : new Query<>(Player.class).where("lol_puuid", puuid).entity();
   }
 
   @Nullable
@@ -28,7 +29,7 @@ public final class PlayerFactory {
     Player player = findPlayer(puuid);
     if (player == null) {
       final Summoner summoner = Xayah.summonerWithPuuid(puuid).get();
-      if (summoner != null) player = new Player(summoner.getName(), puuid).create();
+      if (summoner != null) player = new PlayerImpl(summoner.getName(), puuid).create();
     }
     return player;
   }
@@ -44,7 +45,7 @@ public final class PlayerFactory {
       return null;
     }
 
-    return new Player(summoner.getName(), summoner.getPuuid()).create();
+    return new PlayerImpl(summoner.getName(), summoner.getPuuid()).create();
   }
 
   private static Player lookForPlayer(String summonerName) {
@@ -57,6 +58,6 @@ public final class PlayerFactory {
 
   @Nullable
   private static Player determineExistingPlayerFromName(@Nullable String summonerName) {
-    return summonerName == null ? null : new Query<Player>().where("lol_name", summonerName).entity();
+    return summonerName == null ? null : new Query<>(Player.class).where("lol_name", summonerName).entity();
   }
 }

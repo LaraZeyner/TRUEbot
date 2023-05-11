@@ -3,17 +3,25 @@ package de.zahrie.trues.util.io.log;
 import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.api.logging.CommandLog;
 import de.zahrie.trues.api.logging.CustomLog;
+import de.zahrie.trues.api.logging.ServerLog;
+import lombok.NoArgsConstructor;
 
-public class SQLInfo extends Log {
+@NoArgsConstructor
+public class SQLInfo extends AbstractLog<SQLInfo> {
 
-  public void doCommand(DiscordUser user, String command, String full) {
-    new CommandLog(LocalDateTime.now(), user, command, full);
+  public SQLInfo(String message) {
+    super(message);
+  }
+
+  public SQLInfo doCommand(DiscordUser user, String command, String full) {
+    new ServerLog(user, null, full, ServerLog.ServerLogAction.COMMAND).create();
+    return this;
   }
 
   @Override
-  protected void doLog(Level level, String msg) {
-    if (Level.DATABASE_LOG.contains(level)) new CustomLog(LocalDateTime.now(), msg, level).create();
+  protected SQLInfo doLog() {
+    if (Level.DATABASE_LOG.contains(level)) new CustomLog(LocalDateTime.now(), toString(), level).create();
+    return this;
   }
 }

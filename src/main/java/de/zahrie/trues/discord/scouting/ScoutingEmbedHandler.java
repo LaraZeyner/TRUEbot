@@ -2,18 +2,17 @@ package de.zahrie.trues.discord.scouting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.lineup.LineupCreator;
-import de.zahrie.trues.api.coverage.lineup.LineupFinder;
-import de.zahrie.trues.api.coverage.lineup.model.Lineup;
-import de.zahrie.trues.api.coverage.participator.Participator;
-import de.zahrie.trues.api.coverage.player.PlayerAnalyzer;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
-import de.zahrie.trues.api.coverage.team.TeamAnalyzer;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.participator.TeamLineup;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
-import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
+import de.zahrie.trues.api.riot.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.api.scouting.TeamAnalyzer;
+import de.zahrie.trues.util.Util;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public record ScoutingEmbedHandler(Participator participator, ScoutingGameType gameType, int days, int page) {
@@ -31,46 +30,44 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
   }
 
   public List<MessageEmbed.Field> getOverview(Participator participator, ScoutingGameType gameType, int days) {
-    final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : LineupFinder.getLineup(participator, gameType, days)) {
-      final PlayerBase player = lineup.getPlayer();
-      final var analyzer = new PlayerAnalyzer(player, gameType, player.getTeam(), days);
-      fields.addAll(analyzer.analyzePicks(lineup.getLane()));
-    }
-    return fields;
+    return participator.getTeamLineup(gameType, days).getLineup().stream()
+        .flatMap(lineup -> lineup.getPlayer().analyze(gameType, days).analyzePicks(lineup.getLane()).stream())
+        .collect(Collectors.toList());
   }
 
   public List<MessageEmbed.Field> getMatchups(Participator participator, ScoutingGameType gameType, int days) {
-    final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : LineupFinder.getLineup(participator, gameType, days)) {
-      final PlayerBase player = lineup.getPlayer();
-      final var analyzer = new PlayerAnalyzer(player, gameType, player.getTeam(), days);
-      fields.addAll(analyzer.analyzeMatchups(lineup.getLane()));
-    }
-    return fields;
+    return participator.getTeamLineup(gameType, days).getLineup().stream()
+        .flatMap(lineup -> lineup.getPlayer().analyze(gameType, days).analyzeMatchups(lineup.getLane()).stream())
+        .collect(Collectors.toList());
   }
 
   public List<MessageEmbed.Field> getHistory(Participator participator, ScoutingGameType gameType, int days, int page) {
-    final TeamBase team = participator.getTeam();
-    final var analyzer = new TeamAnalyzer(team, gameType, days);
-    return analyzer.analyzeHistory(page);
+    final Team team = participator.getTeam();
+    return team.analyze(gameType, days).analyzeHistory(page);
   }
 
   public List<MessageEmbed.Field> getChampions(Participator participator, ScoutingGameType gameType, int days) {
-    final TeamBase team = participator.getTeam();
-    final var analyzer = new TeamAnalyzer(team, gameType, days);
-    return analyzer.analyzeChampions();
+    final Team team = participator.getTeam();
+    final TeamAnalyzer analyze = team.analyze(gameType, days);
+    return new EmbedFieldBuilder<>(analyze.handleChampions())
+        .num("Champion", championData -> championData.champion().getName())
+        .add("Picks", TeamAnalyzer.ChampionData::getPicksString)
+        .add("KDA", TeamAnalyzer.ChampionData::getKDAString)
+        .build();
   }
 
   public List<MessageEmbed.Field> getSchedule(Participator participator) {
-    final TeamBase team = participator.getTeam();
-    final var analyzer = new TeamAnalyzer(team, gameType, days);
-    return analyzer.analyzeSchedule();
+    final Team team = participator.getTeam();
+    final TeamAnalyzer analyze = team.analyze(gameType, days);
+    return new EmbedFieldBuilder<>(analyze.getMatches())
+        .add("Spielzeit", match -> TimeFormat.DISCORD.of(match.getStart()))
+        .add("Gegner", match -> Util.avoidNull(match.getOpponentOf(team), "keine Daten", Team::getName))
+        .add("Ergebnis", match -> match.getResult().toString()).build();
   }
 
   public List<MessageEmbed.Field> getLineup(Participator participator, ScoutingGameType gameType, int days) {
     List<MessageEmbed.Field> fields = new ArrayList<>();
-    final LineupCreator lineupCreator = new LineupCreator(participator, gameType, days);
+    final TeamLineup lineupCreator = participator.getTeamLineup(gameType, days);
     for (Lane lane : Lane.values()) {
       if (lane.equals(Lane.UNKNOWN)) continue;
       fields = new EmbedFieldBuilder<>(fields, lineupCreator.getPlayersOnLane(lane))

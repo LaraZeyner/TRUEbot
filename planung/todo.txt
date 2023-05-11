@@ -1,20 +1,5 @@
-TODO: LOGGING
- commands
- events
-
- TODO:
-  signup -> result pre, main, po
-  groups only
-
-
-  DTO Transformation
-
-
-
-  whats default time zone
-
-
-TODO:
- how does the signup work
-
 Signup für Internes Turnier
+GETTER UND SETTER PRÜFEN
+DISCORDS SONDERRZEICHEN
+CHAMPION MASTERY
+UPDATE EMBEDS ON CHANGE

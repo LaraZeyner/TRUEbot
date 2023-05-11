@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.community.betting;
 
 import java.io.Serial;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.database.connector.Table;
@@ -25,19 +26,19 @@ public final class Bet implements Entity<Bet> {
   private final String outcome; // bet_outcome
   private final int amount; // bet_amount
 
-  public static Bet get(Object[] objects) {
+  public static Bet get(List<Object> objects) {
     return new Bet(
-        (int) objects[0],
-        new Query<Match>().entity(objects[1]),
-        new Query<DiscordUser>().entity(objects[2]),
-        (String) objects[3],
-        (int) objects[4]
+        (int) objects.get(0),
+        new Query<>(Match.class).entity(objects.get(1)),
+        new Query<>(DiscordUser.class).entity(objects.get(2)),
+        (String) objects.get(3),
+        (int) objects.get(4)
     );
   }
 
   @Override
   public Bet create() {
-    return new Query<Bet>()
+    return new Query<>(Bet.class)
         .key("coverage", match).key("discord_user", user)
         .col("bet_outcome", outcome).col("bet_amount", amount)
         .insert(this);

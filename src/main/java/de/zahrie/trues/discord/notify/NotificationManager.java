@@ -8,7 +8,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.member.Membership;
-import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
@@ -24,9 +24,9 @@ public class NotificationManager {
     day = LocalDate.now();
     notifiers.clear();
     final LocalDateTime localDateTime = LocalDateTime.of(day.plusDays(2), LocalTime.MIN);
-    new Query<TeamCalendar>().where(Condition.between("calendar_start", "now()", localDateTime))
+    new Query<>(TeamCalendar.class).where(Condition.between("calendar_start", "now()", localDateTime))
         .entityList().forEach(NotificationManager::addNotifiersFor);
-    new Query<Participator>("SELECT * FROM coverage_team " +
+    new Query<>(Participator.class, "SELECT * FROM coverage_team " +
         "LEFT JOIN orga_team ot on coverage_team.team = ot.team INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
         "WHERE orga_team_id is not null and coverage_start between now() and ?")
         .entityList(List.of(localDateTime)).forEach(NotificationManager::addNotifiersFor);

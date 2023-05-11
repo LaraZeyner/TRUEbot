@@ -1,33 +1,34 @@
 package de.zahrie.trues.api.database.query;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UnknownFormatConversionException;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.database.connector.Table;
-import de.zahrie.trues.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class SimpleAbstractQuery<T extends Id> {
-  protected Class<T> targetId;
+  protected final Class<T> targetId;
   protected Class<? extends Id> subEntity;
   protected final List<SQLField> fields = new ArrayList<>();
   protected final List<JoinQuery<?, ?>> joins = new ArrayList<>();
-  protected final ConditionManager<T> conditionManager = new ConditionManager<>();
+  protected final ConditionManager conditionManager;
   protected SQLGroup group;
   protected SQLOrder order;
   protected Integer offset;
   protected int limit = 1000;
   protected final List<Union> unified = new ArrayList<>();
+  protected List<Object> additionalParameters = new ArrayList<>();
+
+  public SimpleAbstractQuery(Class<T> targetId) {
+    this.targetId = targetId;
+    this.conditionManager = new ConditionManager(targetId);
+  }
+
+  public List<Object> getAdditionalParameters() {
+    return additionalParameters;
+  }
 
   public Query<T> key(String key, Object value) {
     return field(new SQLField.Key(key, value));
@@ -52,7 +53,7 @@ public abstract class SimpleAbstractQuery<T extends Id> {
 
   public Query<T> get(@Nullable String delimiter, Formatter... columnNames) {
     final String joinDelimiter = delimiter == null ? "', '" : "', '" + delimiter + "', '";
-    final String columnName = Arrays.stream(columnNames).map(formatter -> formatter.toString(getTargetId().getSimpleName()))
+    final String columnName = Arrays.stream(columnNames).map(formatter -> formatter.toString(targetId.getSimpleName()))
         .collect(Collectors.joining(joinDelimiter, "CONCAT('", "')"));
     return get(columnName, String.class);
   }
@@ -171,11 +172,6 @@ public abstract class SimpleAbstractQuery<T extends Id> {
     return (Query<T>) this;
   }
 
-  public Query<T> with(Query<?> query) {
-    unified.add(new Union(query, Union.UnionType.INTERSECT));
-    return (Query<T>) this;
-  }
-
   public Query<T> exclude(Query<?> query) {
     unified.add(new Union(query, Union.UnionType.EXCEPT));
     return (Query<T>) this;
@@ -186,50 +182,9 @@ public abstract class SimpleAbstractQuery<T extends Id> {
   }
 
   protected String getDepartment() {
-    final String department = targetId.getAnnotation(Table.class).department();
+    final Table annotation = targetId.getAnnotation(Table.class);
+    if (annotation == null) return "";
+    final String department = annotation.department();
     return department.isBlank() ? null : department;
   }
-
-  protected Class<T> getTargetId() {
-    return targetId;
-  }
-
-  void setParams(PreparedStatement statement, Object... parameters) throws SQLException {
-    boolean nextNull = false;
-    int diff = 0;
-    for (int i = 0; i < parameters.length; i++) {
-      final Object parameter = parameters[i];
-      final int pos = i - diff + 1;
-      if (parameter instanceof Id id) statement.setInt(pos, id.getId());
-      else if (parameter instanceof Enum<?> parameterEnum) {
-        final Listing listing = parameterEnum.getClass().getAnnotation(Listing.class);
-        if (listing == null) throw new IllegalArgumentException("Dieses Enum ist nicht zulässig.");
-
-        switch (listing.value()) {
-          case CUSTOM -> statement.setString(pos, parameterEnum.toString());
-          case UPPER -> statement.setString(pos, parameterEnum.toString().toUpperCase());
-          case LOWER -> statement.setString(pos, parameterEnum.toString().toLowerCase());
-          case CAPITALIZE -> statement.setString(pos, StringUtils.capitalizeEnum(parameterEnum.toString().toLowerCase()));
-          case ORDINAL -> statement.setByte(pos, (byte) (parameterEnum.ordinal() + listing.start()));
-        }
-        continue;
-      }
-
-      if (nextNull) {
-        diff++;
-        nextNull = false;
-        statement.setNull(pos, (int) parameter);
-      } else if (parameter == null) nextNull = true;
-      else if (parameter instanceof LocalDateTime dateTime) statement.setTimestamp(pos, Timestamp.valueOf(dateTime));
-      else if (parameter instanceof LocalDate date) statement.setDate(pos, Date.valueOf(date));
-      else if (parameter instanceof String paramString) statement.setString(pos, paramString);
-      else if (parameter instanceof Boolean paramBool) statement.setBoolean(pos, paramBool);
-      else if (parameter instanceof Byte paramByte) statement.setByte(pos, paramByte);
-      else if (parameter instanceof Short paramShort) statement.setShort(pos, paramShort);
-      else if (parameter instanceof Integer paramInteger) statement.setInt(pos, paramInteger);
-      else if (parameter instanceof Long paramLong) statement.setLong(pos, paramLong);
-      else throw new UnknownFormatConversionException("Dieses Format ist nicht spezifiziert");
-    }
-  }
-
 }

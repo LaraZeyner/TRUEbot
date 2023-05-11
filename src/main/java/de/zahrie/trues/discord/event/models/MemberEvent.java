@@ -6,9 +6,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
-import de.zahrie.trues.api.logging.ServerLog;
 import de.zahrie.trues.discord.Settings;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
@@ -35,7 +33,6 @@ public class MemberEvent extends ListenerAdapter {
   @Override
   public void onGuildMemberJoin(GuildMemberJoinEvent event) {
     final DiscordUser user = DiscordUserFactory.createDiscordUser(event.getMember());
-    new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_JOIN).create();
 
     final String settings = Arrays.stream(Settings.RegistrationAction.values()).map(registrationAction -> registrationAction.name().toLowerCase()).collect(Collectors.joining(", "));
     user.getMember().getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
@@ -56,14 +53,5 @@ public class MemberEvent extends ListenerAdapter {
   public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
     final DiscordUser user = DiscordUserFactory.getDiscordUser(event.getMember());
     user.setMention(event.getMember().getAsMention());
-  }
-
-  @Override
-  public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
-    final Member member = event.getMember();
-    if (member != null) {
-      final DiscordUser user = DiscordUserFactory.getDiscordUser(member);
-      new ServerLog(user, "", ServerLog.ServerLogAction.SERVER_LEAVE).create();
-    }
   }
 }

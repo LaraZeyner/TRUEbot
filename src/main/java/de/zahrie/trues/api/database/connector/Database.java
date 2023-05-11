@@ -3,8 +3,13 @@ package de.zahrie.trues.api.database.connector;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 
+import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.util.io.cfg.JSON;
+import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.log.DevInfo;
 import org.json.JSONObject;
 
 
@@ -18,6 +23,7 @@ public final class Database {
   public static class Connector {
     public static void connect() {
       connection = Connector.run();
+      new Query<>(DiscordUser.class).col("joined", null).update(List.of());
     }
 
     static DatabaseConnection run() {
@@ -31,11 +37,12 @@ public final class Database {
 
       try {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        final String url = "jdbc:mysql://" + server + ":" + port + "/" + database + "?sessionVariables=&&sql_mode=''";
+        final String url = "jdbc:mysql://" + server + ":" + port + "/" + database + "?sessionVariables=sql_mode=''";
         final Connection connection = DriverManager.getConnection(url, username, password);
         connection.setAutoCommit(false);
         return new DatabaseConnection(connection);
       } catch (ClassNotFoundException | SQLException e) {
+        new Console("SQL konnte nicht gefunden werden").severe(e);
         throw new RuntimeException(e);
       }
     }
@@ -45,6 +52,7 @@ public final class Database {
       try {
         connection.getConnection().close();
       } catch (SQLException e) {
+        new DevInfo("SQL-Connection konnte nicht geschlossen werden").severe(e);
         throw new RuntimeException(e);
       }
       connection = null;

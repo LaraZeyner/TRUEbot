@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public record MatchLogBuilder(Match match, TeamBase team, List<MatchLog> matchLogs) {
-  public MatchLogBuilder(Match match, TeamBase team) {
+public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) {
+  public MatchLogBuilder(Match match, Team team) {
     this(match, team, match.getLogs().stream().filter(matchLog -> matchLog.getAction().getOutput() != null).sorted(Comparator.reverseOrder()).toList());
   }
 

@@ -20,18 +20,16 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
-import de.zahrie.trues.api.coverage.lineup.LineupManager;
-import de.zahrie.trues.api.coverage.lineup.MatchLineup;
-import de.zahrie.trues.api.coverage.lineup.model.Lineup;
 import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
-import de.zahrie.trues.api.coverage.match.model.AMatch;
 import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
-import de.zahrie.trues.api.coverage.participator.Participator;
+import de.zahrie.trues.api.coverage.participator.TeamLineupBase;
+import de.zahrie.trues.api.coverage.participator.model.Lineup;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.coverage.player.model.AbstractRank;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
+import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerRank;
 import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.OrgaCupSeason;
 import de.zahrie.trues.api.coverage.season.PRMSeason;
@@ -42,7 +40,7 @@ import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Standing;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
@@ -92,7 +90,7 @@ public class TeamInfo {
 
   private MessageEmbed getDivision() {
     final PRMSeason currentSeason = SeasonFactory.getCurrentPRMSeason();
-    final TeamBase team = orgaTeam.getTeam();
+    final Team team = orgaTeam.getTeam();
     if (!(team instanceof PRMTeam prmTeam)) {
       return new EmbedBuilder().setTitle("keine Division").setDescription("Das Team ist nicht auf Prime League registriert.").build();
     }
@@ -122,7 +120,7 @@ public class TeamInfo {
     playdayMatches.keySet().stream().sorted().forEach(playday -> new EmbedFieldBuilder<>(playdayMatches.get(playday).stream().sorted().toList())
         .add("Spielwoche " + playday.getIdx(), match -> TimeFormat.WEEKLY.of(match.getStart()))
         .add("Standing", match -> match.getHomeAbbr() + " vs " + match.getGuestAbbr())
-        .add("Prognose", AMatch::getExpectedResult).build().forEach(builder::addField));
+        .add("Prognose", Match::getExpectedResult).build().forEach(builder::addField));
     final int correct = (int) lastLeague.getMatches().stream().filter(match -> match.getResult().wasAcurate(match)).count();
     final int incorrect = (int) lastLeague.getMatches().stream().filter(match -> Boolean.FALSE.equals(match.getResult().wasAcurate(match))).count();
     builder.addField("Fehlerrate", new Standing(correct, incorrect).getWinrate().toString(), false);
@@ -162,7 +160,7 @@ public class TeamInfo {
     final PlayoffStage playoffStage = (PlayoffStage) lastSeason.getStage(Stage.StageType.PLAYOFF_STAGE);
     getFieldsForStage(playoffStage, "Endrunde").forEach(builder::addField);
 
-    final List<Match> games = orgaTeam.getTeam().getMatches().getMatchesOf(lastSeason).stream().filter(AMatch::isRunning).toList();
+    final List<Match> games = orgaTeam.getTeam().getMatches().getMatchesOf(lastSeason).stream().filter(Match::isRunning).toList();
     getFieldsOfGames("kommende Spiele", games);
 
     return builder.build();
@@ -180,7 +178,7 @@ public class TeamInfo {
     return new EmbedFieldBuilder<>(games)
         .add(name, match -> TimeFormat.WEEKLY.of(match.getStart()))
         .add("Standing", match -> match.getHomeAbbr() + " vs " + match.getGuestAbbr())
-        .add("Prognose", AMatch::getExpectedResult).build();
+        .add("Prognose", Match::getExpectedResult).build();
   }
 
   private MessageEmbed getNextMatch() {
@@ -199,13 +197,13 @@ public class TeamInfo {
     return builder.build();
   }
 
-  private List<MessageEmbed.Field> determineMatchLineupFields(String title, Match AMatch, TeamBase team) {
-    final Participator participator = AMatch.getParticipator(team);
-    final MatchLineup lineup = LineupManager.getMatch(AMatch).getLineup(participator);
-    final List<PlayerBase> players = lineup.getLineup().stream().map(Lineup::getPlayer).toList();
+  private List<MessageEmbed.Field> determineMatchLineupFields(String title, Match match, Team team) {
+    final Participator participator = match.getParticipator(team);
+    final TeamLineupBase lineup = participator.getTeamLineup();
+    final List<Player> players = lineup.getFixedLineups().stream().map(Lineup::getPlayer).toList();
     return List.of(
-        new MessageEmbed.Field(title, players.stream().map(PlayerBase::getSummonerName).collect(Collectors.joining("\n")), false),
-        new MessageEmbed.Field("Elo (" + lineup.getAverageElo() + ")", players.stream().map(PlayerBase::getLastRank).map(Rank::toString).collect(Collectors.joining("\n")), true)
+        new MessageEmbed.Field(title, players.stream().map(Player::getSummonerName).collect(Collectors.joining("\n")), false),
+        new MessageEmbed.Field("Elo (" + lineup.getAverageRank().toString() + ")", players.stream().map(Player::getLastRank).map(PlayerRank::toString).collect(Collectors.joining("\n")), true)
     );
   }
 
@@ -226,7 +224,7 @@ public class TeamInfo {
         .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     final double averageMMR = orgaTeam.getMainMemberships().stream()
         .mapToInt(membership -> membership.getUser().getPlayer().getLastRelevantRank().getRank().getMMR()).average().orElse(0);
-    final AbstractRank teamRank = Rank.fromMMR((int) averageMMR);
+    final Rank teamRank = PlayerRank.fromMMR((int) averageMMR);
 
     new EmbedFieldBuilder<>(orgaTeam.getActiveMemberships().stream().sorted().toList())
         .add("Position", Membership::getPositionString)
@@ -254,7 +252,7 @@ public class TeamInfo {
           .build().forEach(builder::addField);
     }
 
-    final List<EventCalendar> events = new Query<EventCalendar>()
+    final List<EventCalendar> events = new Query<>(EventCalendar.class)
         .where(Condition.Comparer.GREATER_EQUAL, "calendar_end", LocalDateTime.now().plusDays(1)).entityList();
     if (!events.isEmpty()) {
       new EmbedFieldBuilder<>(events.subList(0, Math.min(10, events.size())))

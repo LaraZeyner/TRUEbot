@@ -14,6 +14,7 @@ import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Role;
 
@@ -61,11 +62,8 @@ public class RoleGranterBase {
   }
 
   public void perform(DiscordGroup group) {
-    if (target.getMember().getRoles().contains(group.getRole())) {
-      target.removeGroup(group);
-    } else {
-      target.addGroup(group);
-    }
+    if (target.getMember().getRoles().contains(group.getRole())) target.removeGroup(group);
+    else target.addGroup(group);
   }
 
 
@@ -168,17 +166,23 @@ public class RoleGranterBase {
   }
 
   public void addOrga(TeamPosition position) {
-    if (position.getDiscordGroup() == null) throw new IllegalArgumentException("Kein Orgamember");
-    addRole(position.getDiscordGroup().getRole());
+    if (handleNull(position)) addRole(position.getDiscordGroup().getRole());
+  }
+
+  public void removeOrga(TeamPosition position) {
+    if (handleNull(position)) removeRole(position.getDiscordGroup().getRole());
   }
 
   public void removeTeam(OrgaTeam team) {
     removeRole(team.getRoleManager().getRole());
   }
 
-  public void removeOrga(TeamPosition position) {
-    if (position.getDiscordGroup() == null) throw new IllegalArgumentException("Kein Orgamember");
-    removeRole(position.getDiscordGroup().getRole());
+  private boolean handleNull(TeamPosition position) {
+    if (position.getDiscordGroup() == null) {
+      final RuntimeException exception = new IllegalArgumentException("Kein Orgamember");
+      new DevInfo().severe(exception);
+      return false;
+    }
+    return true;
   }
-
 }

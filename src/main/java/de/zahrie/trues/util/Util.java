@@ -1,21 +1,11 @@
 package de.zahrie.trues.util;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.Function;
 
 public final class Util {
-  public static int getInt(Object object) {
-    return object != null ? (int) (((Long) object).longValue()) : 0;
-  }
-
-  public static int longToInt(Long l) {
-    return Integer.parseInt(String.valueOf(l));
-  }
-
   public static String formatDuration(int seconds) {
     if (seconds < 60) return ":" + seconds;
     if (seconds < 60*60) return seconds/60 + ":" + seconds%60;
@@ -46,14 +36,6 @@ public final class Util {
       str.append(minutes * 60 + seconds).append("s");
     }
     return str.toString();
-  }
-
-  public static Date getDate(LocalDateTime dateToConvert) {
-    return Date.from(dateToConvert.atZone(ZoneId.systemDefault()).toInstant());
-  }
-
-  public static LocalDateTime getLocalDate(Date dateToConvert) {
-    return dateToConvert.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
   }
 
   public static <T> T nonNull(T obj) {

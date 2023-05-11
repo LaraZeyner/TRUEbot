@@ -14,13 +14,13 @@ import net.dv8tion.jda.api.Permission;
 @Data
 public class ChannelRolePattern extends PermissionPattern {
   public static final ChannelRolePattern EMPTY = new ChannelRolePattern();
-  public static final ChannelRolePattern HIDE = (ChannelRolePattern) EMPTY.deny(Permission.VIEW_CHANNEL);
+  public static final ChannelRolePattern HIDE = (ChannelRolePattern) new ChannelRolePattern(EMPTY).deny(Permission.VIEW_CHANNEL);
   public static final ChannelRolePattern HIDE_VOICE_BASE = new ChannelRolePattern(Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.VOICE_DEAF_OTHERS, Permission.VOICE_MUTE_OTHERS);
-  public static final ChannelRolePattern HIDE_FULL = (ChannelRolePattern) HIDE.deny(Permission.MESSAGE_SEND);
-  public static final ChannelRolePattern VIEW_ONLY = (ChannelRolePattern) HIDE_FULL.deny(Permission.VOICE_CONNECT);
-  public static final ChannelRolePattern CONNECT_ONLY = (ChannelRolePattern) EMPTY.deny(Permission.VOICE_SPEAK);
+  public static final ChannelRolePattern HIDE_FULL = (ChannelRolePattern) new ChannelRolePattern(HIDE).deny(Permission.MESSAGE_SEND);
+  public static final ChannelRolePattern VIEW_ONLY = (ChannelRolePattern) new ChannelRolePattern(HIDE_FULL).deny(Permission.VOICE_CONNECT);
+  public static final ChannelRolePattern CONNECT_ONLY = (ChannelRolePattern) new ChannelRolePattern(EMPTY).deny(Permission.VOICE_SPEAK);
   public static final ChannelRolePattern EDIT = new ChannelRolePattern(Permission.MANAGE_CHANNEL);
-  public static final ChannelRolePattern MANAGE = (ChannelRolePattern) EDIT.allow(Permission.MANAGE_PERMISSIONS);
+  public static final ChannelRolePattern MANAGE = (ChannelRolePattern) new ChannelRolePattern(EDIT).allow(Permission.MANAGE_PERMISSIONS);
   public static final ChannelRolePattern MANAGE_TALK_BASE = new ChannelRolePattern(Permission.VOICE_SPEAK, Permission.VOICE_DEAF_OTHERS, Permission.VOICE_MUTE_OTHERS);
 
   private Set<Permission> revokeDenials = new HashSet<>();
@@ -28,6 +28,11 @@ public class ChannelRolePattern extends PermissionPattern {
 
   public ChannelRolePattern(Permission... permissions) {
     super(permissions);
+  }
+
+  public ChannelRolePattern(ChannelRolePattern rolePattern) {
+    super(rolePattern.getAllowed().toArray(Permission[]::new));
+    deny(rolePattern.getDenied().toArray(Permission[]::new));
   }
 
   public ChannelRolePattern revoke() {

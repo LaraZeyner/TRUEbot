@@ -3,11 +3,13 @@ package de.zahrie.trues.api.community.orgateam;
 import java.io.Serial;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
-import de.zahrie.trues.api.coverage.team.model.TeamBase;
+import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -17,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @Setter
 @Table("orga_team")
+@ToString
 public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   @Serial
   private static final long serialVersionUID = 5847570695211918386L;
@@ -32,7 +36,7 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   private String abbreviationCreation; // team_abbr_created
   @Getter(AccessLevel.PACKAGE)
   private CustomDiscordGroup group; // team_role
-  private TeamBase team; // team
+  private Team team; // team
   private Byte place = 0; // orga_place
   private Byte standins = 4; // stand_ins
 
@@ -41,26 +45,26 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
     this.abbreviationCreation = abbreviationCreation;
   }
 
-  public static OrgaTeam get(Object[] objects) {
+  public static OrgaTeam get(List<Object> objects) {
     return new OrgaTeam(
-        (int) objects[0],
-        (String) objects[1],
-        (String) objects[2],
-        new Query<CustomDiscordGroup>().entity( objects[3]),
-        new Query<TeamBase>().entity(objects[4]),
-        (Byte) objects[5],
-        (Byte) objects[6]
+        (int) objects.get(0),
+        (String) objects.get(1),
+        (String) objects.get(2),
+        new Query<>(CustomDiscordGroup.class).entity(objects.get(3)),
+        new Query<>(Team.class).entity(objects.get(4)),
+        SQLUtils.byteValue(objects.get(5)),
+        SQLUtils.byteValue(objects.get(6))
     );
   }
 
   @Nullable
   public static OrgaTeam fromName(@NonNull String name) {
-    return new Query<OrgaTeam>().where("team_name_created", name).entity();
+    return new Query<>(OrgaTeam.class).where("team_name_created", name).entity();
   }
 
   @Override
   public OrgaTeam create() {
-    final OrgaTeam orgaTeam = new Query<OrgaTeam>().key("orga_team_id", id)
+    final OrgaTeam orgaTeam = new Query<>(OrgaTeam.class).key("orga_team_id", id)
         .col("team_name_created", nameCreation).col("team_abbr_created", abbreviationCreation).col("team_role", group)
         .col("team", team).col("orga_place", place).col("stand_ins", standins).insert(this);
     team.setOrgaTeam(this);
@@ -78,7 +82,7 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
     if (updated) {
       getRoleManager().updateRoleName(nameCreation);
       getChannels().updateChannels();
-      new Query<OrgaTeam>().col("team_name_created", nameCreation).update(id);
+      new Query<>(OrgaTeam.class).col("team_name_created", nameCreation).update(id);
     }
   }
 
@@ -87,32 +91,33 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
     this.abbreviationCreation = abbreviationCreation;
     if (updated) {
       getChannels().updateChannels();
-      new Query<OrgaTeam>().col("team_abbr_created", nameCreation).update(id);
+      new Query<>(OrgaTeam.class).col("team_abbr_created", nameCreation).update(id);
     }
   }
 
   public void setGroup(CustomDiscordGroup group) {
     this.group = group;
-    new Query<OrgaTeam>().col("team_role", group).update(id);
+    new Query<>(OrgaTeam.class).col("team_role", group).update(id);
   }
 
-  public void setTeam(TeamBase team) {
+  public void setTeam(Team team) {
     team.setOrgaTeam(this);
     this.team = team;
-    new Query<OrgaTeam>().col("team", team).update(id);
+    team.setOrgaTeamId(id);
+    new Query<>(OrgaTeam.class).col("team", team).update(id);
   }
 
   public List<Membership> getActiveMemberships() {
-    return new Query<Membership>().where("orga_team", this).and("active", true).entityList();
+    return new Query<>(Membership.class).where("orga_team", this).and("active", true).entityList();
   }
 
   public List<Membership> getMainMemberships() {
-    return new Query<Membership>().where("orga_team", this).and("active", true).and("role", TeamRole.MAIN)
+    return new Query<>(Membership.class).where("orga_team", this).and("active", true).and("role", TeamRole.MAIN)
         .entityList();
   }
 
   public Membership getMembership(TeamRole role, TeamPosition position) {
-    return new Query<Membership>().where("orga_team", team).and("active", true).and("role", role).and("position", position).entity();
+    return new Query<>(Membership.class).where("orga_team", team).and("active", true).and("role", role).and("position", position).entity();
   }
 
   public String getName() {
@@ -145,7 +150,12 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
 
   @Override
   public int compareTo(@NotNull OrgaTeam o) {
-    return Comparator.comparing(OrgaTeam::getPlace)
+    return Comparator.comparing(OrgaTeam::getPlace, Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(OrgaTeam::getId).compare(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getNameCreation(), getAbbreviationCreation());
   }
 }

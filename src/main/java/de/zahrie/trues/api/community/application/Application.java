@@ -2,6 +2,7 @@ package de.zahrie.trues.api.community.application;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -63,21 +64,21 @@ public class Application implements Entity<Application> {
     return role.name() + " - " + position.name() + "\n" + appNotes;
   }
 
-  public static Application get(Object[] objects) {
+  public static Application get(List<Object> objects) {
     return new Application(
-        (int) objects[0],
-        new Query<DiscordUser>().entity(objects[1]),
-        new SQLEnum<TeamRole>().of(objects[2]),
-        new SQLEnum<TeamPosition>().of(objects[3]),
-        (LocalDateTime) objects[4],
-        (Boolean) objects[5],
-        (String) objects[6]
+        (int) objects.get(0),
+        new Query<>(DiscordUser.class).entity(objects.get(1)),
+        new SQLEnum<>(TeamRole.class).of(objects.get(2)),
+        new SQLEnum<>(TeamPosition.class).of(objects.get(3)),
+        (LocalDateTime) objects.get(4),
+        (Boolean) objects.get(5),
+        (String) objects.get(6)
     );
   }
 
   @Override
   public Application create() {
-    return new Query<Application>()
+    return new Query<>(Application.class)
         .key("discord_user", user).key("position", position)
         .col("lineup_role", role).col("app_timestamp", appTimestamp).col("waiting", waiting).col("app_notes", appNotes)
         .insert(this);

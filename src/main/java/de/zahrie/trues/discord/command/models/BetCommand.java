@@ -26,7 +26,7 @@ public class BetCommand extends SlashCommand {
   public boolean execute(SlashCommandInteractionEvent event) {
     final String matchString = find("match").string();
     final Integer matchId = matchString.before(":").intValue();
-    final Match match = new Query<Match>().entity(matchId);
+    final Match match = new Query<>(Match.class).entity(matchId);
     final String result = find("ergebnis").string();
     final Integer amount = find("menge").integer();
     return send(getInvoker().bet(match, result, amount));

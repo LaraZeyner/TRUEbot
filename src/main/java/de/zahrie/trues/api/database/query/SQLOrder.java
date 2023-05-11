@@ -1,8 +1,11 @@
 package de.zahrie.trues.api.database.query;
 
+import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
+import lombok.experimental.ExtensionMethod;
 
 @Getter
+@ExtensionMethod(StringUtils.class)
 public class SQLOrder extends AbstractSQLField {
   private final boolean descending;
 
@@ -17,6 +20,8 @@ public class SQLOrder extends AbstractSQLField {
 
   @Override
   public String toString() {
-    return getColumnName() + (descending ? " DESC" : "");
+    if (getColumnName().contains("`") || getColumnName().toLowerCase().contains("count(")) return getColumnName() + (descending ? " DESC" : "");
+    final String name = getColumnName().contains(".") ? "`" + getColumnName().before(".") + "`.`" + getColumnName().after(".") + "`" : "`" + getColumnName() + "`";
+    return name + (descending ? " DESC" : "");
   }
 }

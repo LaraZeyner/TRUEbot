@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.lineup.LineupManager;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
@@ -38,14 +37,11 @@ public class MatchHandler extends MatchModel implements Serializable {
     updateResult();
     updateMatchtime();
     updateTeams();
-    if (this.teams.stream().anyMatch(team -> team.getOrgaTeam() != null)) {
+    if (teams.stream().anyMatch(team -> team.getOrgaTeam() != null)) {
       final boolean updated = updateLogs();
       if (updated) {
-        match.updateStatus(determineStatus());
+        match.setStatus(determineStatus());
       }
-    }
-    if (!match.getStatus().equals(EventStatus.PLAYED)) {
-      LineupManager.getMatch(match).update();
     }
     match.update();
   }
@@ -53,10 +49,10 @@ public class MatchHandler extends MatchModel implements Serializable {
   private void updateMatchtime() {
     final int epochSeconds = html.find("span", "tztime").getAttribute("data-time").intValue();
     final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
-    match.updateStart(dateTime);
+    match.setStart(dateTime);
   }
 
-  public void updateResult() {
+  private void updateResult() {
     final String result = html.find("span", "league-match-result").text();
     if (result != null && !result.isEmpty()) {
       match.updateResult(result);
@@ -73,15 +69,20 @@ public class MatchHandler extends MatchModel implements Serializable {
   private boolean updateLogs() {
     boolean updated = false;
     Collections.reverse(logs);
+    boolean changeScore = false;
     for (HTML html : logs) {
       final List<HTML> cells = html.findAll("td");
+      if (cells.isEmpty()) continue;
+
       final int epochSeconds = html.find("span", "itime ").getAttribute("data-time").intValue();
       final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
       final String userWithTeam = cells.get(1).text();
       final var action = MatchLogAction.valueOf(cells.get(2).text().upper());
       final String details = cells.get(3).text();
       updated = match.get().updateLogs(dateTime, userWithTeam, action, details) || updated;
+      if (action.equals(MatchLogAction.CHANGE_SCORE)) changeScore = true;
     }
+    if (changeScore) match.updateResult();
     return updated;
   }
 

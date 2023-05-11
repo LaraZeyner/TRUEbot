@@ -2,13 +2,12 @@ package de.zahrie.trues.discord.modal.models.scouting;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.coverage.lineup.model.Lineup;
+import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.player.model.PlayerBase;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
-import de.zahrie.trues.api.riot.matchhistory.performance.Lane;
+import de.zahrie.trues.api.riot.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
 import de.zahrie.trues.discord.scouting.Scouting;
@@ -30,13 +29,13 @@ public class ScoutMatchHistoryModal extends ModalImpl {
   @Override
   public boolean execute(ModalInteractionEvent event) {
     final Object positionOrName = getLolPositionOrSummonername();
-    PlayerBase player = null;
+    Player player = null;
     Lane lane = null;
     if (positionOrName instanceof Lane selectedLane) {
       final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(event.getGuildChannel());
       final Scouting scouting = ScoutingManager.forTeam(team);
       if (scouting != null) {
-        player = scouting.participator().getLineups().stream()
+        player = scouting.participator().getTeamLineup().getFixedLineups().stream()
             .filter(lineup -> lineup.getLane().equals(selectedLane))
             .map(Lineup::getPlayer).findFirst().orElse(null);
         lane = selectedLane;
