@@ -13,7 +13,7 @@ public class MembershipFactory {
   public static Membership getMember(OrgaTeam team, DiscordUser user, TeamRole role, TeamPosition position) {
     Membership membership = getMember(team, user);
     if (membership == null) {
-      membership = new Membership(user, team, role, position).create();
+      membership = new Membership(user, team, role, position).forceCreate();
     }
     membership.updateRoleAndPosition(role, position);
     return membership;

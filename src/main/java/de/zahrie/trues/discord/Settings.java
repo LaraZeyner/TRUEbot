@@ -36,7 +36,10 @@ public final class Settings {
   }
 
   public void execute(DiscordUser discordUser) {
-    getActions().forEach((registrationAction, s) -> registrationAction.getAction().apply(discordUser, s));
+    getActions().forEach((registrationAction, s) -> {
+      final String apply = registrationAction.getAction().apply(discordUser, s.strip());
+      discordUser.dm(apply);
+    });
   }
 
   public Message message() {
@@ -52,7 +55,7 @@ public final class Settings {
       if (player == null) return "Der Name **" + userName + "** konnte nicht gefunden werden.";
       if (player.getDiscordUser() != null) return "Der Account wurde bereits verknüpft.";
       player.setDiscordUser(user);
-      return "**" + user.getMention() + "** wurde mit dem Namen " + userName + " registriert";
+      return "**" + user.getNickname() + "** wurde mit dem Namen " + userName + " registriert";
     }),
     BDAY((user, birthday) -> {
       final LocalDate birthdate = new DateTimeStringConverter(birthday).toTime().toLocalDate();

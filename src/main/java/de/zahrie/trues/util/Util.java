@@ -42,15 +42,19 @@ public final class Util {
     return Objects.requireNonNull(obj);
   }
 
+  public static <T> T nonNull(T obj, String message) {
+    return Objects.requireNonNull(obj, message);
+  }
+
+  public static <T, R> R avoidNull(T obj, Function<T, R> consumer) {
+    return avoidNull(obj, null, consumer);
+  }
+
   public static <T, R> R avoidNull(T obj, R other, Function<T, R> consumer) {
     if (obj == null) {
       return other;
     }
     return consumer.apply(obj);
-  }
-
-  public static <T> T nonNull(T obj, String message) {
-    return Objects.requireNonNull(obj, message);
   }
 
   public static <T> T avoidNull(T obj, T other) {

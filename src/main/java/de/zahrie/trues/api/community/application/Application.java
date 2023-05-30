@@ -31,15 +31,9 @@ public class Application implements Entity<Application> {
    * <code>false</code> = Vorstellungsgespräch abgehalten <br>
    * <code>null</code> = abgelehnt
    */
-  private Boolean waiting = true;
+  private Boolean waiting;
 
   private String appNotes;
-
-  public Application(DiscordUser user, TeamRole role, TeamPosition position) {
-    this.user = user;
-    this.role = role;
-    this.position = position;
-  }
 
   public Application(DiscordUser user, TeamRole role, TeamPosition position, Boolean waiting, String appNotes) {
     this.user = user;

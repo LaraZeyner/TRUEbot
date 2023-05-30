@@ -24,22 +24,26 @@ public class EmbedFieldBuilder<T> {
     this(new ArrayList<>(), data);
   }
 
+  public EmbedFieldBuilder<T> outline(String key, String value) {
+    return handleAddField(key, value, false);
+  }
+
   public EmbedFieldBuilder<T> num(String key, Function<T, String> consumer) {
     final StringJoiner joiner = new StringJoiner("\n");
     IntStream.range(0, data.size()).mapToObj(i -> i + 1 + ". " + consumer.apply(data.get(i))).forEach(joiner::add);
     final String content = joiner.toString();
-    return handleAddField(key, content);
+    return handleAddField(key, content, true);
   }
 
   public EmbedFieldBuilder<T> add(String key, Function<T, String> consumer) {
     final String content = data.stream().map(consumer).collect(Collectors.joining("\n"));
-    return handleAddField(key, content);
+    return handleAddField(key, content, true);
   }
 
   @NotNull
-  private EmbedFieldBuilder<T> handleAddField(String key, String content) {
+  private EmbedFieldBuilder<T> handleAddField(String key, String content, boolean inline) {
     if (content.isBlank()) content = "keine Daten";
-    final var field = new MessageEmbed.Field(key, content.substring(0, Math.min(1024, content.length())), true);
+    final var field = new MessageEmbed.Field(key, content.substring(0, Math.min(1024, content.length())), inline);
     fields.add(field);
     return this;
   }

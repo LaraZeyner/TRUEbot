@@ -1,5 +1,12 @@
-Signup für Internes Turnier
-GETTER UND SETTER PRÜFEN
-DISCORDS SONDERRZEICHEN
-CHAMPION MASTERY
-UPDATE EMBEDS ON CHANGE
+Bugs:
+Mögliche Bugs:
+TODOs:
+ - UPDATE EMBEDS ON CHANGE
+ - ON TRYOUT ADD: REMOVE LOCAL PERMISSION TO EDIT
+ - Getter und Setter prüfen.
+Features deaktivieren:
+ - Rollen vergeben
+Ideen:
+ - Winrates auslesen
+ - Champion Mastery
+ - Signup für Internes Turnier

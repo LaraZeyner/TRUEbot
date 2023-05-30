@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import de.zahrie.trues.api.calendar.scheduling.DateTimeStringConverter;
 import de.zahrie.trues.api.calendar.scheduling.SchedulingHandler;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
@@ -28,6 +29,7 @@ import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
@@ -80,7 +82,7 @@ public class MessageEvent extends ListenerAdapter {
 
   private void handleSettings(MessageReceivedEvent event) {
     final Settings settings = new Settings(event.getMessage());
-    if (settings.validate()) settings.execute(Util.nonNull(event.getMember()).getDiscordUser());
+    if (settings.validate()) settings.execute(event.getAuthor().getDiscordUser());
     else handleQuestion(event);
   }
 
@@ -93,12 +95,13 @@ public class MessageEvent extends ListenerAdapter {
     if (discordUser == null) return;
 
     final String answer = content.after(":");
-    Nunu.DiscordMessager.dm(discordUser, answer);
+    discordUser.dm(answer);
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Die Antwort wurde gesendet.").queue();
   }
 
   private static void handleQuestion(@NotNull MessageReceivedEvent event) {
-    final DiscordUser discordUser = event.getAuthor().getMember().getDiscordUser();
+    if (event.getAuthor().isBot()) return;
+    final DiscordUser discordUser = event.getAuthor().getDiscordUser();
     Nunu.DiscordChannel.getAdminChannel().sendMessage("**Neue Frage von **" + event.getAuthor().getAsMention() + " (" + discordUser.getId() +
         ")\n" + event.getMessage().getContentDisplay()).queue();
   }
@@ -124,14 +127,16 @@ public class MessageEvent extends ListenerAdapter {
       users.forEach(user -> new SchedulingHandler(user.getMember().getDiscordUser()).repeat());
       return;
     }
-    final List<TimeRange> timeRanges = SchedulingHandler.determineTimeRanges(message.getContentStripped());
-    if (!timeRanges.isEmpty()) {
-      for (User user : users) {
-        final DiscordUser discordUser = user.getMember().getDiscordUser();
-        final SchedulingHandler handler = new SchedulingHandler(discordUser);
-        if (event instanceof MessageDeleteEvent) handler.delete(timeRanges);
-        else handler.add(timeRanges);
-      }
+
+    final List<TimeRange> timeRanges = new DateTimeStringConverter(message.getContentStripped()).toRangeList();
+    if (timeRanges.isEmpty()) return;
+
+    for (User user : users) {
+      final DiscordUser discordUser = user.getMember().getDiscordUser();
+      if (event instanceof MessageDeleteEvent) discordUser.getScheduling().delete(timeRanges);
+      else discordUser.getScheduling().add(timeRanges);
+      discordUser.dm("Deine Anwesenheitszeiten wurden aktualisiert. Aktuelle Anwesenheiten:\n" +
+          discordUser.getScheduling().getAvailabilities());
     }
   }
 
@@ -142,14 +147,15 @@ public class MessageEvent extends ListenerAdapter {
     if (orgaTeam == null || orgaTeam.getTeam() == null) return;
     final Match match = MatchFactory.getMatchesOf(orgaTeam.getTeam(), team).stream().max(Comparator.naturalOrder()).orElse(null);
     if (match != null) {
-      final String content = event.getMessage().getContentDisplay();
+      final Message message = event.getMessage();
+      final String content = message.getContentDisplay();
       final String value = content.after(":").strip();
       if (content.startsWith("Result:")) handleResult(threadChannel, match, value);
       else if (content.startsWith("Start:")) handleStart(threadChannel, match, value);
       else if (content.startsWith("Lineup 1:")) handleLineup(threadChannel, match, value, true);
       else if (content.startsWith("Lineup 2:")) handleLineup(threadChannel, match, value, false);
       ((Entity<?>) match).forceUpdate();
-      event.getMessage().delete().queue();
+      if (!message.getType().equals(MessageType.THREAD_STARTER_MESSAGE) && !message.getAuthor().equals(Nunu.getInstance().getClient().getSelfUser())) message.delete().queue();
       ScoutingManager.updateThread(threadChannel);
     }
   }

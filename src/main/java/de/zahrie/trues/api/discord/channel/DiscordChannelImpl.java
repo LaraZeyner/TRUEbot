@@ -10,7 +10,6 @@ import de.zahrie.trues.api.database.query.SQLEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 @Getter
 @Setter
@@ -20,11 +19,11 @@ public class DiscordChannelImpl extends DiscordChannel implements Entity<Discord
   @Serial
   private static final long serialVersionUID = -495599946883173951L;
 
-  public DiscordChannelImpl(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType) {
+  public DiscordChannelImpl(long discordId, String name, ChannelType permissionType, net.dv8tion.jda.api.entities.channel.ChannelType channelType) {
     super(discordId, name, permissionType, channelType);
   }
 
-  private DiscordChannelImpl(int id, long discordId, DiscordChannelType channelType, String name, PermissionChannelType permissionType) {
+  private DiscordChannelImpl(int id, long discordId, DiscordChannelType channelType, String name, ChannelType permissionType) {
     super(id, discordId, channelType, name, permissionType);
   }
 
@@ -34,7 +33,7 @@ public class DiscordChannelImpl extends DiscordChannel implements Entity<Discord
         (long) objects.get(2),
         new SQLEnum<>(DiscordChannelType.class).of(objects.get(3)),
         (String) objects.get(4),
-        new SQLEnum<>(PermissionChannelType.class).of(objects.get(5))
+        new SQLEnum<>(ChannelType.class).of(objects.get(5))
     );
   }
 

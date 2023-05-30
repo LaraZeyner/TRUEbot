@@ -10,4 +10,9 @@ public final class SQLUtils {
     if (object == null) return null;
     return ((Number) object).shortValue();
   }
+
+  public static Integer intValue(Object object) {
+    if (object == null) return null;
+    return ((Number) object).intValue();
+  }
 }

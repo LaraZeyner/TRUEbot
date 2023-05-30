@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.connector.Listing;
+import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.util.Const;
@@ -35,11 +38,15 @@ import org.reflections.scanners.Scanners;
 
 @Log
 public class Query<T extends Id> extends SimpleQueryFormer<T> {
-  private static final Map<Id, LocalDateTime> entities = new HashMap<>();
-  private static int queryCount = 0, savedCount = 0;
+  private static final Map<Id, LocalDateTime> entities = Collections.synchronizedMap(new HashMap<>());
+  private static int queryCount = 0, savedCount = 0, concurrentCount = 0;
 
   public static void remove(Id entity) {
     entities.remove(entity);
+  }
+
+  public static void reset() {
+    entities.clear();
   }
 
   public Query(Class<T> clazz) {
@@ -131,7 +138,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   public void update(List<Object> parameters) {
-    executeUpdate(updateString(), false, null, t -> null, t -> null, parameters);
+    executeUpdate((query == null || query.isBlank()) ? updateString() : query, false, null, t -> null, t -> null, parameters);
   }
 
   public void update(int id) {
@@ -158,7 +165,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     final Connection connection = Database.connection().getConnection();
     if (Const.SHOW_SQL) new Console(query).debug();
     try (final PreparedStatement statement = insert ? connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(query)) {
-      setValues(statement, parameters, query);
+      setValues(statement, parameters, query, false);
       statement.executeUpdate();
       if (entity == null) return null;
 
@@ -169,7 +176,19 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
             entity.setId(id);
             action.apply(entity);
           }
-        } else otherWise.apply(entity);
+        } else {
+          if (entity.getId() == 0) {
+            final String where = fields.stream().filter(f -> f instanceof SQLField.Key).map(f -> "`" + f.getColumnName() + "` = ?").collect(Collectors.joining(" AND "));
+            final List<Object> objects = fields.stream().filter(f -> f instanceof SQLField.Key).map(SQLField::getValue).toList();
+            final List<Object[]> single = new Query<>("SELECT * FROM " + getTableName() + " WHERE " + where, objects).list(objects);
+            if (!single.isEmpty()) {
+              final int i = SQLUtils.intValue(single.get(0)[0]);
+              if (i == 0) throw new SQLException("ID NOT FOUND!!!");
+              entity.setId(i);
+            }
+          }
+          otherWise.apply(entity);
+        }
       }
       return entity;
     } catch (SQLException exception) {
@@ -193,13 +212,18 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   public List<Object[]> list(List<Object> parameters) {
+    return list(parameters, false);
+  }
+
+  public List<Object[]> list(List<Object> parameters, boolean force) {
     List<? extends Class<?>> clazzes = new ArrayList<>(fields.stream().filter(sqlField -> sqlField instanceof SQLReturnField).map(o -> (SQLReturnField) o)
         .map(SQLReturnField::getReturnType).toList());
 
-    final String selectQuery = query == null ? getSelectString() : query;
+    final String selectQuery = (query == null || query.isBlank()) ? getSelectString() : query;
     if (Const.SHOW_SQL) new Console(selectQuery).debug();
     try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(selectQuery)) {
-      setValues(statement, parameters, selectQuery);
+      setValues(statement, parameters, selectQuery, force);
+
       final List<Object[]> out = new ArrayList<>();
       try (final ResultSet resultSet = statement.executeQuery()) {
         clazzes = adjust(clazzes, statement);
@@ -228,7 +252,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     final T stored = findEntityStoredById(id);
     if (stored != null) {
       savedCount++;
-      System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount);
+      if (savedCount % 10_000 == 0) System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount + " - " + concurrentCount + "x errors");
       return stored;
     }
 
@@ -241,7 +265,14 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   private T findEntityStoredById(int id) {
-    final Id e = entities.keySet().stream().filter(Objects::nonNull).filter(entity -> entity.getId() == id).filter(entity -> entity.getClass().isAssignableFrom(targetId)).findFirst().orElse(null);
+    Id e;
+    try {
+      e = entities.keySet().stream().filter(Objects::nonNull).filter(entity -> entity.getId() == id).filter(entity -> entity.getClass().isAssignableFrom(targetId)).findFirst().orElse(null);
+    } catch (ConcurrentModificationException ignored) {
+      concurrentCount++;
+      e = forId(id).entity();
+    }
+
     if (e == null) return null;
 
     entities.replace(e, LocalDateTime.now());
@@ -271,6 +302,8 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
 
   @SuppressWarnings("unchecked")
   private List<T> determineEntityList(List<Object[]> objectList) {
+    if (targetId == null) throw new NullPointerException("Entity kann nicht generiert werden");
+
     final List<T> out = new SortedList<>(false);
     try {
       if (Entity.class.isAssignableFrom(targetId)) {
@@ -284,6 +317,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
         final Map<String, Class<?>> classes = determineSubClasses();
         for (Object[] objects : objectList) {
           final Class<?> aClass = classes.get((String) objects[1]);
+          if (aClass == null) {
+            new DevInfo("Error bei der Deklarierung: " + objects[1] + " nicht in " + String.join(", ", classes.keySet())).with(Console.class).severe();
+            throw new NoSuchMethodException(objects[1] + ".get(List<Object>)");
+          }
           final Method getMethod = aClass.getMethod("get", List.class);
           final T object = (T) getMethod.invoke(null, Arrays.stream(objects).toList());
           out.add(object);
@@ -322,15 +359,22 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     return results.isEmpty() ? null : results.stream().findFirst().orElse(null);
   }
 
+  public List<T> convertList(List<Object> parameters) {
+    fields.clear();
+    getAll(targetId);
+    final List<Object[]> objectsList = list(parameters);
+    if (objectsList.isEmpty()) return List.of();
+    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetId).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
+    else return new Query<>(targetId).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
+  }
+
   public <C extends Id> List<C> convertList(Class<C> targetClass) {
     fields.clear();
     getAll(targetClass);
     final List<Object[]> objectsList = list();
-    if (objectsList.get(0).length == 1) {
-      return objectsList.stream().map(objs -> new Query<>(targetClass).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
-    } else {
-      return new Query<>(targetClass).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
-    }
+    if (objectsList.isEmpty()) return List.of();
+    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetClass).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
+    else return new Query<>(targetClass).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
   }
 
   public <C extends Id> List<C> convertList(Class<C> targetClass, int limit) {

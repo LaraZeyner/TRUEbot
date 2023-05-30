@@ -7,16 +7,21 @@ import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.RoleGranter;
+import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 
 public class DiscordUserFactory {
-  public static DiscordUser getDiscordUser(Member member) {
+  @NonNull
+  public static DiscordUser getDiscordUser(@NonNull UserSnowflake member) {
     final long memberId = member.getIdLong();
-    final var user = new Query<>(DiscordUser.class).where("discord_id", memberId).entity();
-    return user == null ? createDiscordUser(member) : user;
+    var user = new Query<>(DiscordUser.class).where("discord_id", memberId).entity();
+    if (user == null) user = createDiscordUser(member);
+    if (member instanceof Member m) user.setNickname(m.getEffectiveName());
+    return user;
   }
 
-  public static DiscordUser createDiscordUser(Member member) {
+  public static DiscordUser createDiscordUser(UserSnowflake member) {
     return new DiscordUser(member.getIdLong(), member.getAsMention()).create();
   }
 

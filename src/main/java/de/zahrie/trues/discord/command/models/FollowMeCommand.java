@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @Command(name = "followme", descripion = "Nutzer verschieben", perm = @Perm(PermissionRole.ORGA_MEMBER), options =
-@Option(name = "type", description = "Typ des Folgens", choices = {"Alle", "Team"}))
+@Option(name = "type", description = "Typ des Folgens", choices = {"Alle", "Team", "Match"}))
 public class FollowMeCommand extends SlashCommand {
 
   @Override
@@ -30,6 +30,7 @@ public class FollowMeCommand extends SlashCommand {
 
   public enum FollowType {
     ALLE,
-    TEAM
+    TEAM,
+    MATCH
   }
 }

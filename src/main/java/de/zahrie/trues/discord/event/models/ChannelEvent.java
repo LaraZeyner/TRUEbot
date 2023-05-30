@@ -60,6 +60,7 @@ public class ChannelEvent extends ListenerAdapter {
   public void onChannelDelete(ChannelDeleteEvent event) {
     final GuildChannel channel = event.getChannel().asGuildChannel();
     channel.removeTeamChannel();
+
   }
 
   @Override

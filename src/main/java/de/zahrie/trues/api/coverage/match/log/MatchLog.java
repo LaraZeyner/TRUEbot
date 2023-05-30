@@ -72,7 +72,8 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
     final var matchlog = (MatchLog) new Query<>(MatchLog.class)
         .key("log_time", timestamp).key("coverage", match).key("action", action).key("details", details).key("coverage_team", participator)
         .insert(this);
-    match.getLogs().add(matchlog);
+    if (matchlog.getId() == 0) match.clearLogs();
+    else match.getLogs().add(matchlog);
     return matchlog;
   }
 
@@ -116,9 +117,10 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
   }
 
   private boolean isMostRecentLogOfType() {
-    return !new Query<>(MatchLog.class)
+    final MatchLog entity = new Query<>(MatchLog.class)
         .where("coverage", match).and("action", MatchLogAction.LINEUP_SUBMIT).and("coverage_team", participator)
-        .descending("log_time").entity().getTimestamp().isAfter(timestamp);
+        .descending("log_time").entity();
+    return entity == null || !entity.getTimestamp().isAfter(timestamp);
   }
 
   public List<Player> determineLineup() {

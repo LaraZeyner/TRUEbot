@@ -13,14 +13,11 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.util.Format;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @Table("player_ranked")
@@ -34,11 +31,25 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
   }
 
   private int id; // player_ranked_id
-  private Season season; // season
-  private Player player; // player
+  private final int seasonId; // season
+  private final int playerId; // player
   private Rank rank;
   private int wins; // wins
   private int losses; // losses
+
+  private Season season;
+
+  public Season getSeason() {
+    if (season == null) this.season = new Query<>(Season.class).entity(seasonId);
+    return season;
+  }
+
+  private Player player;
+
+  public Player getPlayer() {
+    if (player == null) this.player = new Query<>(Player.class).entity(playerId);
+    return player;
+  }
 
   public Standing getWinrate() {
     return new Standing(wins, losses);
@@ -46,7 +57,7 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
 
   @Override
   public boolean equals(Object obj) {
-    return obj instanceof PlayerRank && this.player.equals(((PlayerRank) obj).getPlayer());
+    return obj instanceof PlayerRank && this.playerId == ((PlayerRank) obj).getPlayerId();
   }
 
   @Override
@@ -54,10 +65,21 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
     return rank.toString() + (rank.tier().equals(Rank.RankTier.UNRANKED) ? "" : " - (" + getWinrate().format(Format.ADDITIONAL) + ")");
   }
 
-  public PlayerRank(Player player, Tier tier, Division division, byte points, int wins, int losses) {
+  public PlayerRank(Player player, Rank.RankTier tier, Division division, byte points, int wins, int losses) {
     this.season = SeasonFactory.getLastPRMSeason();
+    this.seasonId = season.getId();
+    this.playerId = player.getId();
     this.player = player;
     this.rank = new Rank(tier, division, points);
+    this.wins = wins;
+    this.losses = losses;
+  }
+
+  private PlayerRank(int id, int seasonId, int playerId, Rank rank, int wins, int losses) {
+    this.id = id;
+    this.seasonId = seasonId;
+    this.playerId = playerId;
+    this.rank = rank;
     this.wins = wins;
     this.losses = losses;
   }
@@ -65,8 +87,8 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
   public static PlayerRank get(List<Object> objects) {
     return new PlayerRank(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(1)),
-        new Query<>(Player.class).entity(objects.get(2)),
+        (int) objects.get(1),
+        (int) objects.get(2),
         new Rank(Tier.valueOf(new SQLEnum<>(Rank.RankTier.class).of(objects.get(3)).name()), new SQLEnum<>(Division.class).of(objects.get(4)), objects.get(5).byteValue()),
         (int) objects.get(6),
         (int) objects.get(7)
@@ -75,7 +97,7 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
 
   @Override
   public PlayerRank create() {
-    return new Query<>(PlayerRank.class).key("season", season).key("player", player)
+    return new Query<>(PlayerRank.class).key("season", seasonId).key("player", playerId)
         .col("tier", rank.tier()).col("division", rank.division()).col("points", rank.points())
         .col("wins", wins).col("losses", losses).insert(this);
   }

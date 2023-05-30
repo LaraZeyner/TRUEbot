@@ -39,7 +39,7 @@ public abstract class SQLField extends AbstractSQLField {
 
   @EqualsAndHashCode(callSuper = true)
   @Getter
-  static final class Key extends SQLField {
+  public static final class Key extends SQLField {
     public Key(String columnName, Object value) {
       super(columnName, value);
     }

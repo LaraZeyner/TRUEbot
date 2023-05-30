@@ -5,23 +5,45 @@ import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.GamesportsLoader;
-import de.zahrie.trues.api.coverage.player.PlayerHandler;
 import de.zahrie.trues.api.coverage.player.PlayerLoader;
 import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+/**
+ * Lade Team und dessen Teaminfos von primeleague.gg
+ */
 @Getter
 @ExtensionMethod(StringUtils.class)
 public class TeamLoader extends GamesportsLoader {
+  protected static List<Team> loadedTeams = new ArrayList<>();
+
+  public static void reset() {
+    loadedTeams.clear();
+  }
+
   public static int idFromURL(String url) {
     return Integer.parseInt(url.between("/teams/", "-"));
+  }
+
+  @Nullable
+  public static TeamLoader create(int teamId) {
+    final TeamLoader teamLoader = new TeamLoader(teamId);
+    if (teamLoader.html == null || teamLoader.html.text() == null) return null;
+
+    final String teamTitle = teamLoader.html.find("h1").text();
+    final String name = teamTitle.before(" (", -1);
+    final String abbreviation = teamTitle.between("(", ")", -1);
+    teamLoader.team = TeamFactory.getTeam(teamLoader.id, name, abbreviation);
+    return teamLoader;
   }
 
   private PRMTeam team;
@@ -33,16 +55,6 @@ public class TeamLoader extends GamesportsLoader {
 
   public TeamLoader(int teamId) {
     super(URLType.TEAM, teamId);
-  }
-
-  TeamLoader create() {
-    if (html == null || html.text() == null) return null;
-
-    final String teamTitle = html.find("h1").text();
-    final String name = teamTitle.before(" (", -1);
-    final String abbreviation = teamTitle.between("(", ")", -1);
-    this.team = TeamFactory.getTeam(id, name, abbreviation);
-    return this;
   }
 
   public TeamHandler load() {
@@ -66,12 +78,13 @@ public class TeamLoader extends GamesportsLoader {
     teamInfos = teamInfos.subList(3, teamInfos.size());
     if (teamInfos.size() == 4) return null;
 
-    final var players = new ArrayList<PRMPlayer>();
     for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
       if (primeId == prmId) {
         final String summonerName = user.find("div", "txt-info").find("span").text();
-        return PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+        final PRMPlayer primePlayer = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+        if (primePlayer != null) primePlayer.setTeam(team);
+        return primePlayer;
       }
     }
     return null;
@@ -87,10 +100,11 @@ public class TeamLoader extends GamesportsLoader {
     for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
       final String summonerName = user.find("div", "txt-info").find("span").text();
-      final var playerLoader = new PlayerLoader(primeId, summonerName);
-      final PlayerHandler playerHandler = playerLoader.load();
-      playerHandler.update();
-      players.add((PRMPlayer) playerHandler.getPlayer());
+      final PRMPlayer player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+      if (player != null) {
+        player.setTeam(team);
+        players.add(player);
+      }
     }
 
     team.getPlayers().stream().filter(player -> !players.contains((PRMPlayer) player)).filter(Objects::nonNull).forEach(player -> new PlayerLoader(((PRMPlayer) player).getPrmUserId(), player.getSummonerName()).handleLeftTeam());

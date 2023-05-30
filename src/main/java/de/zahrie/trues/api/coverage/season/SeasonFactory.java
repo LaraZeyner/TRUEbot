@@ -26,7 +26,7 @@ public final class SeasonFactory {
   @Nullable
   public static PRMSeason getUpcomingPRMSeason() {
     return new Query<>(PRMSeason.class)
-        .where(Condition.between("now", "season_start", "season_end")).or("season_start >= now()")
+        .where(Condition.between("now()", "season_start", "season_end")).or("season_start >= now()")
         .ascending("season_start").entity();
   }
 
@@ -44,7 +44,7 @@ public final class SeasonFactory {
   @Nullable
   public static OrgaCupSeason getUpcomingInternSeason() {
     return new Query<>(OrgaCupSeason.class)
-        .where(Condition.between("now", "season_start", "season_end")).or("season_start >= now()")
+        .where(Condition.between("now()", "season_start", "season_end")).or("season_start >= now()")
         .ascending("season_start").entity();
   }
 

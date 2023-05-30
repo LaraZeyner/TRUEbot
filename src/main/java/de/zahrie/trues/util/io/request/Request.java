@@ -19,7 +19,7 @@ public final class Request {
         final URL url = new URL(urlString);
         return new HTMLRequester(url).html();
       }
-      log.severe("No URL requested");
+      log.severe("No URL requested: " + urlString);
     } catch (MalformedURLException urlException) {
       log.severe("Wrong url");
       log.throwing("Request", "requestHTML(String): HTML", urlException);

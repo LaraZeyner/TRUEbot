@@ -25,7 +25,7 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   }
 
   public void updateAll() {
-    // updateTeams();
+    updateTeams();
     updateMatches();
     league.update();
   }

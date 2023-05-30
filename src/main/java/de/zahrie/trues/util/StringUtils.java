@@ -119,7 +119,10 @@ public class StringUtils {
   }
 
   public static LocalDateTime getDateTime(String value) {
-    return DateTimeUtils.fromEpoch((int) new DateTimeStringConverter(value).toTime().toEpochSecond(ZoneOffset.ofHours(2)));
+    final LocalDateTime localDateTime = new DateTimeStringConverter(value).toTime();
+    if (localDateTime == null) return null;
+
+    return DateTimeUtils.fromEpoch((int) localDateTime.toEpochSecond(ZoneOffset.ofHours(2)));
   }
 
   public static int countMatches(String value, String sub) {

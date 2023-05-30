@@ -17,8 +17,9 @@ public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) 
   }
 
   public MessageEmbed getLog() {
+    final Team opponent = match.getOpponentOf(team);
     final EmbedBuilder builder = new EmbedBuilder()
-        .setTitle("Match " + match.getId() + " gegen " + team.getName() + " (" + team.getId() + ")")
+        .setTitle("Match " + match.getId() + " gegen " + opponent.getName() + " (" + opponent.getId() + ")")
         .setDescription(getDescription());
     getFields().forEach(builder::addField);
     return builder.build();

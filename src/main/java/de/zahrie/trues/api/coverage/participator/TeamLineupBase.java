@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.coverage.participator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,7 +27,6 @@ public abstract class TeamLineupBase {
   protected List<Lineup> storedLineups;
   @Getter(AccessLevel.NONE)
   protected TeamLineup expectedLineups;
-  protected int mmr;
 
   public TeamLineupBase(Participator participator) {
     this.participator = participator;
@@ -49,6 +49,7 @@ public abstract class TeamLineupBase {
   }
 
   public List<Lineup> getFixedLineups() {
+    if (storedLineups == null) updateLineups();
     return storedLineups;
   }
 
@@ -70,15 +71,17 @@ public abstract class TeamLineupBase {
   }
 
   public boolean setOrderedLineup(@NotNull String opGgUrl) {
-    return setOrderedLineup(opGgUrl, new ArrayList<>(5));
+    return setOrderedLineup(opGgUrl, new ArrayList<>(Arrays.asList(null, null, null, null, null)));
   }
 
   public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<Player> players) {
-    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split("%2C");
+    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "")
+        .replace("%20", " ")
+        .replace("%2C", ",").split(",");
     for (int i = 0; i < split.length; i++) {
       if (i > 4) break;
 
-      final String summonerName = split[i];
+      final String summonerName = split[i].replace("+", " ");
       if (summonerName.isBlank()) continue;
 
       final Player player = PlayerFactory.getPlayerFromName(summonerName);
@@ -109,12 +112,6 @@ public abstract class TeamLineupBase {
   protected abstract void updateLineups();
 
   public Rank getAverageRank() {
-    return PlayerRank.fromMMR(mmr);
-  }
-
-  protected void updateMMR() {
-    this.mmr = (int) Math.round(storedLineups.stream().map(Lineup::getPlayer)
-        .map(Player::getLastRelevantRank)
-        .mapToInt(value -> value.getRank().getMMR()).average().orElse(0));
+    return PlayerRank.fromMMR(participator.getLineupMMR());
   }
 }

@@ -1,15 +1,10 @@
 package de.zahrie.trues.api.community.orgateam;
 
-import java.util.Map;
-
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
-import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.discord.channel.ChannelRolePattern;
+import de.zahrie.trues.api.discord.channel.ChannelType;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
-import de.zahrie.trues.api.discord.channel.PermissionChannelType;
-import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
@@ -19,6 +14,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
@@ -93,7 +90,7 @@ public class OrgaTeamChannelHandler {
   @NonNull
   public static TeamChannel createTeamChannelEntity(@NonNull GuildChannel channel, @NonNull OrgaTeam team) {
     final TeamChannelType channelType = TeamChannelType.fromChannel(channel);
-    final PermissionChannelType permissionChannelType = channelType.getPermissionType();
+    final ChannelType permissionChannelType = channelType.getPermissionType();
     return new TeamChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType(), team, channelType).forceCreate();
   }
 
@@ -109,7 +106,7 @@ public class OrgaTeamChannelHandler {
 
     private final boolean voice;
 
-    public void createChannel(String name, Category category, PermissionChannelType type) {
+    public void createChannel(String name, Category category, ChannelType type) {
       getAction(name, category, type, null).queue();
     }
 
@@ -117,25 +114,23 @@ public class OrgaTeamChannelHandler {
       getAction(teamChannelType.getDefaultName(), category, teamChannelType.getPermissionType(), team).queue();
     }
 
-    private ChannelAction<? extends GuildChannel> getAction(String name, Category category, PermissionChannelType type, OrgaTeam team) {
-      ChannelAction<? extends GuildChannel> channelAction = switch (this) {
+    private ChannelAction<? extends GuildChannel> getAction(String name, Category category, ChannelType type, OrgaTeam team) {
+      final ChannelAction<? extends GuildChannel> channelAction = switch (this) {
         case FORUM -> Util.nonNull(category).createForumChannel(name);
         case NEWS -> Util.nonNull(category).createNewsChannel(name);
         case STAGE -> Util.nonNull(category).createStageChannel(name);
         case TEXT -> Util.nonNull(category).createTextChannel(name);
         case VOICE -> Util.nonNull(category).createVoiceChannel(name);
       };
-      for (Map.Entry<DiscordGroup, ChannelRolePattern> entry : type.getPattern().getData().entrySet()) {
-        final DiscordGroup discordGroup = entry.getKey();
-        if (team == null) {
-          final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(category);
-          if (teamChannel != null) team = teamChannel.getOrgaTeam();
-        }
-        long roleId = discordGroup.getDiscordId();
-        if (discordGroup.equals(DiscordGroup.TEAM_ROLE_PLACEHOLDER) && team != null) roleId = team.getRoleManager().getRole().getIdLong();
-        if (roleId == -1) continue;
 
-        channelAction = channelAction.addRolePermissionOverride(roleId, entry.getValue().getAllowed(), entry.getValue().getDenied());
+      channelAction.clearPermissionOverrides().queue();
+      for (ChannelType.APermissionOverride permission : type.getPermissions()) {
+        IPermissionHolder permissionHolder = permission.permissionHolder();
+        if (permissionHolder instanceof Role role && OrgaTeamFactory.isRoleOfTeam(role)) {
+          permissionHolder = team.getRoleManager().getRole();
+        }
+
+        channelAction.addPermissionOverride(permissionHolder, permission.getAllowed(), permission.getDenied()).queue();
       }
       return channelAction;
     }

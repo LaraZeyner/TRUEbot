@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.Calendar;
 import de.zahrie.trues.api.community.member.Membership;
@@ -29,10 +30,6 @@ public record SchedulingHandler(DiscordUser user) {
         .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
         .and(Condition.between("date(startTime", start, end)).entityList()
         .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), "", user).create());
-  }
-
-  public static List<TimeRange> determineTimeRanges(String input) {
-    return new DateTimeStringConverter(input).toRangeList();
   }
 
   public void add(List<TimeRange> ranges) {
@@ -76,5 +73,11 @@ public record SchedulingHandler(DiscordUser user) {
 
   public List<TimeRange> getRemainingFromTo(LocalDate from, LocalDate to) {
     return getRemaining(from).stream().filter(timeRange -> DateTimeUtils.isBetween(timeRange.getStartTime(), from, to)).toList();
+  }
+
+  public String getAvailabilities() {
+    final List<TimeRange> remaining = getRemaining(LocalDate.now());
+    if (remaining.isEmpty()) return "keine Einträge";
+    return remaining.stream().map(TimeRange::toString).collect(Collectors.joining("\n"));
   }
 }

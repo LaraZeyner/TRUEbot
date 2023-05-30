@@ -4,11 +4,9 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.discord.user.DiscordUser;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,8 +24,8 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
     this.prmUserId = prmUserId;
   }
 
-  private PRMPlayer(int id, String puuid, String summonerName, DiscordUser discordUser, Team team, LocalDateTime updated, boolean played, Integer prmUserId) {
-    super(id, puuid, summonerName, discordUser, team, updated, played);
+  private PRMPlayer(int id, String puuid, String summonerName, Integer discordUserId, Integer teamId, LocalDateTime updated, boolean played, Integer prmUserId) {
+    super(id, puuid, summonerName, discordUserId, teamId, updated, played);
     this.prmUserId = prmUserId;
   }
 
@@ -36,8 +34,8 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
         (int) objects.get(0),
         (String) objects.get(2),
         (String) objects.get(3),
-        new Query<>(DiscordUser.class).entity(objects.get(4)),
-        new Query<>(Team.class).entity(objects.get(5)),
+        (Integer) objects.get(4),
+        (Integer) objects.get(5),
         (LocalDateTime) objects.get(6),
         (boolean) objects.get(7),
         (Integer) objects.get(8));
@@ -46,7 +44,7 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
   @Override
   public PRMPlayer create() {
     return new Query<>(PRMPlayer.class).key("lol_puuid", puuid)
-        .col("lol_name", summonerName).col("discord_user", discordUser).col("team", team).col("updated", updated).col("played", played)
+        .col("lol_name", summonerName).col("discord_user", discordUserId).col("team", teamId).col("updated", updated).col("played", played)
         .col("prm_id", prmUserId)
         .insert(this);
   }

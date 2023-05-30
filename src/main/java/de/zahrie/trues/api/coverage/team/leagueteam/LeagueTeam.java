@@ -68,6 +68,7 @@ public class LeagueTeam implements Entity<LeagueTeam>, Comparable<LeagueTeam> {
     return league.getName() + " - " + score.toString();
   }
 
+  @Deprecated
   public TeamScore getExpectedScore() {
     final Map<Team, MatchResult> results = new TreeMap<>();
     for (final LeagueMatch match : league.getMatches()) {

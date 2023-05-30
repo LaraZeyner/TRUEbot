@@ -17,7 +17,7 @@ public abstract class AbstractLog<T extends AbstractLog<T>> {
   protected String message = null;
   protected Throwable throwable = null;
   protected Level level = null;
-  protected List<AbstractLog<?>> otherLoggers = new ArrayList<>();
+  protected final List<AbstractLog<?>> otherLoggers = new ArrayList<>();
 
   public AbstractLog(String message) {
     this.message = message;
@@ -66,6 +66,7 @@ public abstract class AbstractLog<T extends AbstractLog<T>> {
     this.level = level;
     this.throwable = throwable;
     otherLoggers.add(this);
+    otherLoggers.forEach(abstractLog -> abstractLog.level = level);
     otherLoggers.forEach(AbstractLog::doLog);
     return (T) this;
   }
@@ -143,15 +144,15 @@ public abstract class AbstractLog<T extends AbstractLog<T>> {
   public String toString() {
     final String messageFormatted;
     if (this instanceof DevInfo) {
-      messageFormatted = "[" + level.name() + "] **" + message + "**";
+      messageFormatted = "[" + level.name() + "] **" + message.replace("**", "__") + "**";
     } else if (this instanceof SQLInfo) {
-      messageFormatted = message;
+      messageFormatted = message.replace("**", "__");
     } else {
       messageFormatted = LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)) +
-          " [" + level.name() + "] " + message;
+          " [" + level.name() + "] " + message.replace("**", "").replace("__", "");
     }
     final String stackTrace = getStackTrace();
     final boolean split = !messageFormatted.isBlank() && !stackTrace.isBlank();
-    return messageFormatted + (split ? "\n" : "") + stackTrace;
+    return Thread.currentThread().getName() + " -> " + messageFormatted + (split ? "\n" : "") + stackTrace;
   }
 }

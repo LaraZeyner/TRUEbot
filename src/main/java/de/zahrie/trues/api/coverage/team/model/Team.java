@@ -109,7 +109,7 @@ public abstract class Team implements ATeam, Id, Comparable<Team> {
   @Override
   public void setRefresh(LocalDateTime refresh) {
     final LocalDateTime refreshUntil = orgaTeam == null ? refresh.plusDays(70) : LocalDateTime.MAX;
-    if (refreshUntil.isAfter(this.refresh)) {
+    if (this.refresh == null || refreshUntil.isAfter(this.refresh)) {
       this.refresh = refreshUntil;
       new Query<>(Team.class).col("refresh", refreshUntil).update(id);
     }

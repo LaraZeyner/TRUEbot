@@ -27,8 +27,8 @@ public class PlayoffStage extends Stage implements Entity<PlayoffStage>, PlaySta
     super(season, range);
   }
 
-  private PlayoffStage(int id, Season season, TimeRange range, Long discordEventId) {
-    super(id, season, range, discordEventId);
+  private PlayoffStage(int id, int seasonId, TimeRange range, Long discordEventId) {
+    super(id, seasonId, range, discordEventId);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class PlayoffStage extends Stage implements Entity<PlayoffStage>, PlaySta
   public static PlayoffStage get(List<Object> objects) {
     return new PlayoffStage(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(2)),
+        (int) objects.get(2),
         new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
         (Long) objects.get(5)
     );
@@ -66,7 +66,7 @@ public class PlayoffStage extends Stage implements Entity<PlayoffStage>, PlaySta
 
   @Override
   public PlayoffStage create() {
-    return new Query<>(PlayoffStage.class).key("season", season)
+    return new Query<>(PlayoffStage.class).key("season", seasonId)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

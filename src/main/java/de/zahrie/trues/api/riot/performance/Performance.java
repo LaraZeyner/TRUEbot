@@ -11,27 +11,22 @@ import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.riot.KDA;
 import de.zahrie.trues.api.riot.champion.Champion;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Setter
 @Table("performance")
 @ExtensionMethod(SQLUtils.class)
 public class Performance implements Entity<Performance>, Comparable<Performance> {
   @Serial
   private static final long serialVersionUID = -8274031327889064909L;
 
+  @Setter
   private int id; // perf_id
-  private final TeamPerf teamPerformance; // t_perf
-  private final Player player; // player
+  private final int teamPerformanceId; // t_perf
+  private final Integer playerId; // player
   private final Lane lane; // lane
   private final Matchup matchup; // champion, enemy_champion
   private final KDA kda;
@@ -40,13 +35,54 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
   private final Integer vision; // vision
   private final int creeps; // creeps
 
+  private TeamPerf teamPerformance; // t_perf
+
+  public TeamPerf getTeamPerformance() {
+    if (teamPerformance == null) this.teamPerformance = new Query<>(TeamPerf.class).entity(teamPerformanceId);
+    return teamPerformance;
+  }
+
+  private Player player; // player
+
+  public Player getPlayer() {
+    if (player == null) this.player = new Query<>(Player.class).entity(playerId);
+    return player;
+  }
+
+  public Performance(TeamPerf teamPerformance, Player player, Lane lane, Matchup matchup, KDA kda, int gold, Integer damage, Integer vision, int creeps) {
+    this.teamPerformance = teamPerformance;
+    this.teamPerformanceId = teamPerformance.getId();
+    this.player = player;
+    this.playerId = player.getId();
+    this.lane = lane;
+    this.matchup = matchup;
+    this.kda = kda;
+    this.gold = gold;
+    this.damage = damage;
+    this.vision = vision;
+    this.creeps = creeps;
+  }
+
+  private Performance(int id, int teamPerformanceId, Integer playerId, Lane lane, Matchup matchup, KDA kda, int gold, Integer damage, Integer vision, int creeps) {
+    this.id = id;
+    this.teamPerformanceId = teamPerformanceId;
+    this.playerId = playerId;
+    this.lane = lane;
+    this.matchup = matchup;
+    this.kda = kda;
+    this.gold = gold;
+    this.damage = damage;
+    this.vision = vision;
+    this.creeps = creeps;
+  }
+
   public static Performance get(List<Object> objects) {
     return new Performance(
-        (int) objects.get(0),
-        new Query<>(TeamPerf.class).entity(objects.get(1)),
-        new Query<>(Player.class).entity(objects.get(2)),
+        objects.get(0).intValue(),
+        objects.get(1).intValue(),
+        objects.get(2).intValue(),
         new SQLEnum<>(Lane.class).of(objects.get(3)),
-        new Matchup(new Query<>(Champion.class).entity( objects.get(4)), new Query<>(Champion.class).entity(objects.get(5))),
+        new Matchup(new Query<>(Champion.class).entity(objects.get(4)), new Query<>(Champion.class).entity(objects.get(5))),
         new KDA(objects.get(6).shortValue(), objects.get(7).shortValue(), objects.get(8).shortValue()),
         (int) objects.get(9),
         (Integer) objects.get(10),
@@ -56,15 +92,14 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
 
   @Override
   public Performance create() {
-    return new Query<>(Performance.class)
-        .key("t_perf", teamPerformance).key("player", player).key("lane", lane).key("champion", matchup.champion()).key("enemy_champion", matchup.opponent())
-        .key("kills", kda.kills()).key("deaths", kda.deaths()).key("assists", kda.assists()).key("gold", gold).key("damage", gold)
-        .key("vision", vision).key("creeps", creeps)
-        .insert(this);
+    return new Query<>(Performance.class).key("t_perf", teamPerformanceId).key("player", playerId).key("lane", lane)
+        .col("champion", matchup.champion()).col("enemy_champion", matchup.opponent()).col("kills", kda.kills()).col("deaths", kda.deaths())
+        .col("assists", kda.assists()).col("gold", gold).col("damage", gold).col("vision", vision).col("creeps", creeps)
+        .insert(this, getTeamPerformance()::addPerformance);
   }
 
   public String getPlayername() {
-    return player.getSummonerName();
+    return getPlayer().getSummonerName();
   }
 
   public String getStats() {

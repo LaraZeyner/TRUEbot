@@ -11,7 +11,6 @@ import lombok.extern.java.Log;
 public record HTMLRequester(URL url) {
 
   public HTML html() {
-    System.out.println("Request " + url.getPath());
     String content = determineContent();
     if (content.contains("webmaster has already been notified")) {
       content = determineContent();
@@ -23,7 +22,7 @@ public record HTMLRequester(URL url) {
     try (final Scanner scanner = new Scanner(this.url.openStream(), StandardCharsets.UTF_8).useDelimiter("\\A")) {
       return scanner.hasNext() ? scanner.next() : "";
     } catch (IOException e) {
-      log.severe("No URL requested");
+      log.severe("No URL requested: " + url.getPath());
       log.throwing(getClass().getName(), "determineContent", e);
     }
     return "";

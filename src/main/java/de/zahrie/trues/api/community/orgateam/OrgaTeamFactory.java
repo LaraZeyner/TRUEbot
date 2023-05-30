@@ -17,6 +17,7 @@ import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -35,6 +36,14 @@ public final class OrgaTeamFactory {
     channel = Util.avoidNull(category, channel);
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(channel);
     return Util.avoidNull(teamChannel, null, TeamChannel::getOrgaTeam);
+  }
+
+  /**
+   * Erhalte {@link OrgaTeam} vom Channel oder der Categorie in der sich der registrierte Channel befindet
+   */
+  public static boolean isRoleOfTeam(@NonNull Role role) {
+    final CustomDiscordGroup discordGroup = new Query<>(CustomDiscordGroup.class).where("discord_Id", role.getIdLong()).entity();
+    return Util.avoidNull(discordGroup, false, customDiscordGroup -> customDiscordGroup.getOrgaTeam() != null);
   }
 
   /**

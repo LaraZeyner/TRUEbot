@@ -2,11 +2,13 @@ package de.zahrie.trues.api.discord.command.context;
 
 import java.util.function.Predicate;
 
+import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.discord.util.Replyer;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
@@ -16,7 +18,6 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 public abstract class ContextCommand extends Replyer {
   private Command.Type type;
   private Predicate<DiscordUser> permissionCheck = o -> true;
-  private UserContextInteractionEvent event;
 
   public ContextCommand() {
     super(UserContextInteractionEvent.class);
@@ -35,14 +36,22 @@ public abstract class ContextCommand extends Replyer {
   }
 
   public void handleCommand(UserContextInteractionEvent event) {
-    if (permissionCheck.test(getInvoker())) {
+    if (!hasModal()) event.deferReply(true).queue();
+
+    final Member targetMember = event.getTargetMember();
+    if (targetMember == null) {
+      reply("Internal Error");
+      return;
+    }
+
+    if (permissionCheck.test(DiscordUserFactory.getDiscordUser(event.getTargetMember()))) {
       this.event = event;
+      customEmbedData.clear();
       execute(event);
-    } else {
-      reply("Dir fehlen die nötigen Rechte.", true);
+      return;
     }
-    if (!end) {
-      reply("Internal Error", true);
-    }
+
+    else reply("Dir fehlen die nötigen Rechte.");
+    reply("Internal Error");
   }
 }

@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 
 @EqualsAndHashCode(callSuper = true)
 public abstract class ModalBase extends Replyer {
+  protected Modal.Builder builder;
+
   public ModalBase() {
     super(ModalInteractionEvent.class);
     final View annotation = getClass().asSubclass(this.getClass()).getAnnotation(View.class);
@@ -16,11 +18,7 @@ public abstract class ModalBase extends Replyer {
     this.name = annotation.value();
   }
 
-  public Modal.Builder create(String title) {
-    return Modal.create(name, title);
-  }
+  public abstract Modal getModal(boolean value);
 
-  protected abstract Modal getModal(boolean value);
-
-  protected abstract boolean execute(ModalInteractionEvent event);
+  public abstract boolean execute(ModalInteractionEvent event);
 }

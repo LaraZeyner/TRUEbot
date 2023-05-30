@@ -5,16 +5,20 @@ import de.zahrie.trues.api.database.query.Query;
 import org.jetbrains.annotations.Nullable;
 
 public class TeamFactory {
-
   @Nullable
   public static PRMTeam getTeam(int teamId) {
     final PRMTeam team = new Query<>(PRMTeam.class).where("prm_id", teamId).entity();
     if (team != null) return team;
 
-    final TeamLoader teamLoader = new TeamLoader(teamId).create();
+    final TeamLoader teamLoader = TeamLoader.create(teamId);
     return teamLoader == null ? null : teamLoader.getTeam();
   }
 
+  @Nullable
+  public static TeamLoader getTeamLoader(int teamId) {
+    final PRMTeam team = new Query<>(PRMTeam.class).where("prm_id", teamId).entity();
+    return team != null ? new TeamLoader(team) : TeamLoader.create(teamId);
+  }
 
   public static PRMTeam getTeam(int prmId, String name, String abbreviation) {
     PRMTeam team = new Query<>(PRMTeam.class).where("prm_id", prmId).entity();
@@ -26,7 +30,7 @@ public class TeamFactory {
       return team;
     }
 
-    return new PRMTeam(prmId, name, abbreviation);
+    return new PRMTeam(prmId, name, abbreviation).create();
   }
 
   @Nullable

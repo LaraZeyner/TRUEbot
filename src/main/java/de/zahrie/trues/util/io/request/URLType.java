@@ -12,7 +12,7 @@ public enum URLType {
   TEAM;
 
   public String getUrlName() {
-    final var apiConfig = JSON.fromFile("apis.json");
+    final var apiConfig = JSON.read("apis.json");
     final var primeConfig = apiConfig.getJSONObject("gamesports");
     final var primeEndpoints = primeConfig.getJSONObject("endpoints");
     return primeEndpoints.getString(this.name().toLowerCase());

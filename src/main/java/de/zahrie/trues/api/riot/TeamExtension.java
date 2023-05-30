@@ -2,21 +2,29 @@ package de.zahrie.trues.api.riot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Suppliers;
-import com.merakianalytics.orianna.types.core.match.Participant;
-import com.merakianalytics.orianna.types.core.match.Team;
-import de.zahrie.trues.api.riot.champion.Champion;
-import de.zahrie.trues.api.riot.champion.ChampionFactory;
+import de.zahrie.trues.api.riot.performance.ParticipantUtils;
+import no.stelar7.api.r4j.pojo.lol.match.v5.ChampionBan;
+import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
+import no.stelar7.api.r4j.pojo.lol.match.v5.MatchParticipant;
+import no.stelar7.api.r4j.pojo.lol.match.v5.MatchTeam;
 
 public class TeamExtension {
-  public static List<Champion> getBanned(Team team) {
-    return team.getBans().stream().map(ChampionFactory::getChampion).toList();
+  public static List<Integer> getBanned(MatchTeam team) {
+    return team.getBans().stream().map(ChampionBan::getChampionId).toList();
   }
-  public static List<Champion> getPicks(Team team) {
-    final Supplier<List<Champion>> pickTurns = Suppliers.memoize(() ->
-        team.getParticipants().stream().map(Participant::getChampion).map(ChampionFactory::getChampion).toList())::get;
-    return new ArrayList<>(pickTurns.get());
+  public static List<Integer> getPicks(MatchTeam team, LOLMatch match) {
+    final List<Integer> integers = team.getBans().stream().map(ChampionBan::getPickTurn).toList();
+    final List<Integer> finalized = new ArrayList<>();
+    for (Integer integer : integers) {
+      while (finalized.contains(integer)) integer++;
+      finalized.add(integer);
+    }
+
+    final List<Integer> champions = ParticipantUtils.getParticipants(match, team.getTeamId())
+        .stream().map(MatchParticipant::getChampionId).toList();
+
+    return finalized.stream().sorted().map(finalized::indexOf).map(champions::get).collect(Collectors.toList());
   }
 }

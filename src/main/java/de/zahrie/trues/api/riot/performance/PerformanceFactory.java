@@ -17,9 +17,11 @@ public class PerformanceFactory {
         .join(new JoinQuery<>(TeamPerf.class, Game.class, "_teamperf.game"))
         .join(new JoinQuery<>(Performance.class, Champion.class, "_my"))
         .join(new JoinQuery<>(Performance.class, Champion.class, "enemy_champion", "enemy"))
-        .get(" - ", Formatter.of("_game.start_time", Formatter.CellFormat.AUTO), Formatter.of("lane"))
+        .get(" - ", Formatter.of("_game.start_time", Formatter.CellFormat.AUTO),
+            Formatter.of("IF(lane = 1, 'Top', IF(lane = 2, 'Jgl', IF(lane = 3, 'Mid', IF(lane = 4, 'Bot', IF(lane = 5, 'Sup', 'none')))))"))
         .get(" vs ", Formatter.of("_my.champion_name"), Formatter.of("_enemy.champion_name"))
-        .get(" / ", Formatter.of("kills"), Formatter.of("deaths"), Formatter.of("assists"))
+        .get(" / ", Formatter.of("kills"), Formatter.of("deaths"),
+            Formatter.of("CONCAT(_performance.assists, ' (', IF(_teamperf.win = false, 'N', 'S'), ')')"))
         .where("_game.game_type", gameType).and("player", player)
         .descending("_game.start_time").list();
   }

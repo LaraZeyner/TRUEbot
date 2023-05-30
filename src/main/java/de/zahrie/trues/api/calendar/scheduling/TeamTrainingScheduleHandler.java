@@ -62,7 +62,7 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
           final String time = timeRanges.ranges().stream().map(TimeRange::toString).collect(Collectors.joining(", "));
           weekdayStrings.add(days + " " + time);
         }));
-        final String key = Util.avoidNull(membership, position.toString(), msh -> msh.getUser().getMention());
+        final String key = Util.avoidNull(membership, position.toString(), msh -> msh.getUser().getNickname());
         final String value = String.join(", ", weekdayStrings);
         times.add(List.of(key, value));
       }
@@ -84,9 +84,9 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
       final String value;
       if (remainingAt.isEmpty()) {
         final List<DiscordUser> otherMembers = determinePossibleMembers(position, day);
-        value = otherMembers.subList(0, Math.min(3, otherMembers.size())).stream().map(DiscordUser::getMention).collect(Collectors.joining(", "));
+        value = otherMembers.subList(0, Math.min(3, otherMembers.size())).stream().map(DiscordUser::getNickname).collect(Collectors.joining(", "));
       } else {
-        key = membership.getUser().getMention();
+        key = membership.getUser().getNickname();
         value = remainingAt.stream().map(TimeRange::toString).collect(Collectors.joining(", "));
       }
       times.add(List.of(key, value));

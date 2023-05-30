@@ -7,7 +7,6 @@ import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
 import de.zahrie.trues.discord.notify.NotificationManager;
 import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
-import de.zahrie.trues.util.io.log.Console;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
 
@@ -20,6 +19,10 @@ public class TeamInfoUpdater extends ScheduledTask {
     TeamInfoManager.loadAllData();
     if (!NotificationManager.getDay().equals(LocalDate.now())) NotificationManager.create();
     NotificationManager.sendNotifications();
-    new Console("Teaminfos aktualisiert.").info();
+  }
+
+  @Override
+  protected String name() {
+    return "Teaminfo";
   }
 }

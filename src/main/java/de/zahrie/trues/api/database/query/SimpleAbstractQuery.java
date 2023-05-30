@@ -26,8 +26,10 @@ public abstract class SimpleAbstractQuery<T extends Id> {
     this.conditionManager = new ConditionManager(targetId);
   }
 
-  public List<Object> getAdditionalParameters() {
-    return additionalParameters;
+  public List<Object> getParameters() {
+    final ArrayList<Object> objects = new ArrayList<>(additionalParameters);
+    objects.addAll(conditionManager.getValues());
+    return objects;
   }
 
   public Query<T> key(String key, Object value) {
@@ -52,9 +54,10 @@ public abstract class SimpleAbstractQuery<T extends Id> {
   }
 
   public Query<T> get(@Nullable String delimiter, Formatter... columnNames) {
-    final String joinDelimiter = delimiter == null ? "', '" : "', '" + delimiter + "', '";
-    final String columnName = Arrays.stream(columnNames).map(formatter -> formatter.toString(targetId.getSimpleName()))
-        .collect(Collectors.joining(joinDelimiter, "CONCAT('", "')"));
+    final String joinDelimiter = delimiter == null ? ", " : ", '" + delimiter + "', ";
+    final String columnName = Arrays.stream(columnNames)
+        .map(formatter -> formatter.toString("_" + targetId.getSimpleName().toLowerCase()))
+        .collect(Collectors.joining(joinDelimiter, "CONCAT(", ")"));
     return get(columnName, String.class);
   }
 
@@ -65,6 +68,12 @@ public abstract class SimpleAbstractQuery<T extends Id> {
 
   public <E extends Id, J extends Id> Query<T> join(JoinQuery<E, J> joinSimpleQuery) {
     joins.add(joinSimpleQuery);
+    additionalParameters.addAll(joinSimpleQuery.getParams());
+    final Query<E> innerQuery = joinSimpleQuery.getInnerQuery();
+    if (innerQuery != null) {
+      final String selectString = joinSimpleQuery.getTargetClass() == null ? innerQuery.query : innerQuery.getSelectString();
+      additionalParameters.addAll(innerQuery.getValues(selectString));
+    }
     return (Query<T>) this;
   }
 
@@ -104,6 +113,11 @@ public abstract class SimpleAbstractQuery<T extends Id> {
 
   public Query<T> or(String query) {
     conditionManager.or(new Condition(query));
+    return (Query<T>) this;
+  }
+
+  public Query<T> or(Condition.Comparer comparer, String name, Object value) {
+    conditionManager.or(Condition.compare(comparer, name, value));
     return (Query<T>) this;
   }
 
@@ -182,6 +196,7 @@ public abstract class SimpleAbstractQuery<T extends Id> {
   }
 
   protected String getDepartment() {
+    if (targetId == null) return null;
     final Table annotation = targetId.getAnnotation(Table.class);
     if (annotation == null) return "";
     final String department = annotation.department();

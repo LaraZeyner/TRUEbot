@@ -12,6 +12,7 @@ import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
+import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 public record MatchManager(Team team) {
@@ -23,6 +24,12 @@ public record MatchManager(Team team) {
 
   @Nullable
   public Match getNextMatch(boolean avoidCalibration) {
+    final List<Match> nextMatches = getNextMatches(avoidCalibration);
+    return nextMatches.isEmpty() ? null : nextMatches.get(0);
+  }
+
+  @NonNull
+  public List<Match> getNextMatches(boolean avoidCalibration) {
     final List<Match> nextMatches = new Query<>(Participator.class)
         .join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
         .where("team", team).and("_match.result", "-:-")
@@ -33,17 +40,18 @@ public record MatchManager(Team team) {
             .descending("_match.coverage_start")
         ).convertList(Match.class);
     if (avoidCalibration) {
-      return nextMatches.stream().filter(match -> !(match instanceof ATournament tM && tM.getLeague().getStage() instanceof CalibrationStage)).findFirst().orElse(null);
+      return nextMatches.stream().filter(match -> !(match instanceof ATournament tM && tM.getLeague().getStage() instanceof CalibrationStage)).toList();
     }
-    return nextMatches.stream().findFirst().orElse(null);
+    return nextMatches;
   }
 
   public List<Match> getMatchesOf(Season season) {
-    return new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class))
-        .join(new JoinQuery<>(Match.class, Playday.class, "matchday"))
-        .join(new JoinQuery<>(Playday.class, Stage.class, "_playday.stage"))
-        .where("team", team).and("_stage.season", season)
-        .ascending("_match.coverage_start").convertList(Match.class);
+    return new Query<>(Match.class, "SELECT _match.* FROM coverage_team as _participator " +
+        "INNER JOIN coverage as _match ON _participator.coverage = _match.coverage_id " +
+        "INNER JOIN coverage_playday as _playday ON _match.matchday = _playday.coverage_playday_id " +
+        "INNER JOIN coverage_stage as _stage ON _playday.stage = _stage.coverage_stage_id " +
+        "WHERE (team = ? and _stage.season = ?) ORDER BY _match.coverage_start LIMIT 1000")
+        .entityList(List.of(team, season));
   }
 
   public List<Match> getMatchesOf(Stage stage) {

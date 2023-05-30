@@ -41,7 +41,7 @@ public class TrainingCommand extends SlashCommand {
     final var timeRange = new TimeRange(start, end);
     final TeamCalendar.TeamCalendarType type = find("typ").toEnum(TeamCalendar.TeamCalendarType.class, TeamCalendar.TeamCalendarType.TRAINING);
     final TextChannel textChannel = (TextChannel) getLocatedTeam().getChannels().get(TeamChannelType.SCOUTING);
-    if (textChannel == null) return reply("Der Channel wurde nicht gesetzt.");
+    if (textChannel == null) return sendMessage();
 
     final String typeString = find("typ").string();
     textChannel.sendMessage("**Neues " + typeString + " am " + TimeFormat.DEFAULT.of(start) + "**\n" + details)

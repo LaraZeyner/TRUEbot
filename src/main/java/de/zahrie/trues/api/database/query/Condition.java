@@ -28,7 +28,9 @@ public final class Condition extends AbstractSQLField {
   }
 
   static Condition compare(Comparer comparer, String columnName, Object value) {
-    return new Condition(columnName + comparer.operant + "?", List.of(value));
+    final ArrayList<Object> objects = new ArrayList<>();
+    objects.add(value);
+    return new Condition(columnName + comparer.operant + "?", objects);
   }
 
   public static Condition inList(String columnName, List<Object> values) {

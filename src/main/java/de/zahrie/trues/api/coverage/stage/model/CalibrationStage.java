@@ -25,8 +25,8 @@ public class CalibrationStage extends Stage implements Entity<CalibrationStage>,
     super(season, range);
   }
 
-  private CalibrationStage(int id, Season season, TimeRange range, Long discordEventId) {
-    super(id, season, range, discordEventId);
+  private CalibrationStage(int id, int seasonId, TimeRange range, Long discordEventId) {
+    super(id, seasonId, range, discordEventId);
   }
 
   @Override
@@ -54,7 +54,7 @@ public class CalibrationStage extends Stage implements Entity<CalibrationStage>,
   public static CalibrationStage get(List<Object> objects) {
     return new CalibrationStage(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(2)),
+        (int) objects.get(2),
         new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
         (Long) objects.get(5)
     );
@@ -62,7 +62,7 @@ public class CalibrationStage extends Stage implements Entity<CalibrationStage>,
 
   @Override
   public CalibrationStage create() {
-    return new Query<>(CalibrationStage.class).key("season", season)
+    return new Query<>(CalibrationStage.class).key("season", seasonId)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

@@ -45,15 +45,15 @@ public interface AMatch extends ABetable {
   }
 
   default Participator getHome() {
-    return getParticipators()[0];
+    return getParticipators().length > 0 ? getParticipators()[0] : null;
   }
 
   default String getHomeAbbr() {
-    return getHome().getAbbreviation();
+    return getHome() == null ? "null" : getHome().getAbbreviation();
   }
 
   default String getHomeName() {
-    return getHome().getName();
+    return getHome() == null ? "null" : getHome().getName();
   }
 
   default String getMatchup() {
@@ -61,18 +61,19 @@ public interface AMatch extends ABetable {
   }
 
   default Participator getGuest() {
-    return getParticipators()[1];
+    return getParticipators().length > 1 ? getParticipators()[1] : null;
   }
 
   default String getGuestAbbr() {
-    return getGuest().getAbbreviation();
+    return getGuest() == null ? "null" : getGuest().getAbbreviation();
   }
 
   default String getGuestName() {
-    return getGuest().getName();
+    return getGuest() == null ? "null" : getGuest().getName();
   }
 
-  String getExpectedResult();
+  MatchResult getExpectedResult();
+  String getExpectedResultString();
 
   default Participator getOpponent(Team team) {
     final Participator participator = getParticipator(team);
@@ -80,7 +81,11 @@ public interface AMatch extends ABetable {
   }
 
   default Participator getParticipator(@Nullable Team team) {
-    return Arrays.stream(getParticipators()).filter(participator -> participator.getTeam().equals(team)).findFirst().orElse(null);
+    if (team == null) return null;
+    return Arrays.stream(getParticipators())
+        .filter(participator -> participator.getTeam() != null)
+        .filter(participator -> participator.getTeam().getId() == team.getId())
+        .findFirst().orElse(null);
   }
 
   default Team getOpponentOf(Team team) {
@@ -88,7 +93,9 @@ public interface AMatch extends ABetable {
   }
 
   default List<OrgaTeam> getOrgaTeams() {
-    return Arrays.stream(getParticipators()).map(Participator::getTeam).map(Team::getOrgaTeam).filter(Objects::nonNull).toList();
+    return Arrays.stream(getParticipators())
+        .map(Participator::getTeam).filter(Objects::nonNull)
+        .map(Team::getOrgaTeam).filter(Objects::nonNull).toList();
   }
 
   default boolean isOrgagame() {

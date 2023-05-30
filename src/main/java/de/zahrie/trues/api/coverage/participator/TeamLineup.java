@@ -36,10 +36,9 @@ public class TeamLineup extends TeamLineupBase {
   }
 
   public void updateLineups() {
-    if (participator.getMatch().getStatus().equals(EventStatus.PLAYED)) return;
+    if (participator.getMatch().getStatus().equals(EventStatus.PLAYED) && storedLineups != null) return;
 
     this.storedLineups = new Query<>(Lineup.class).where("coverage_team", participator).entityList();
-    updateMMR();
     this.games = null;
     this.lineup = null;
   }

@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.database.connector;
 
-import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomColumn;
+import de.zahrie.trues.api.discord.command.slash.Column;
 
 public record CellEntry(Object entry) {
 
@@ -9,8 +9,8 @@ public record CellEntry(Object entry) {
     return String.valueOf(this.entry);
   }
 
-  public String round(CustomColumn column) {
-    return round(column.getRound());
+  public String round(Column column) {
+    return round(column.round());
   }
 
   public String round(int amount) {

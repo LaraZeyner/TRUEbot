@@ -1,85 +1,81 @@
 package de.zahrie.trues.api.discord.channel;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 
+import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import de.zahrie.trues.api.database.connector.Listing;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
-import lombok.Builder;
+import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Singular;
+import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
 @RequiredArgsConstructor
 @Getter
+@Listing(Listing.ListingType.LOWER)
+@ExtensionMethod(StringUtils.class)
 public enum ChannelType {
-  PUBLIC(ChannelPattern.builder().build(), true, true),
-  SOCIALS(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.VIEW_ONLY)
-      .assign(DiscordGroup.EVENT, ChannelRolePattern.EMPTY.revoke())
-      .assign(DiscordGroup.EVENT_LEAD, ChannelRolePattern.EDIT.revoke())
-      .assign(DiscordGroup.SOCIAL_MEDIA_LEAD, ChannelRolePattern.EDIT.revoke())
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.EDIT.revoke())
-      .build(), true, true),
-  EVENTS(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.VIEW_ONLY)
-      .assign(DiscordGroup.EVENT_PLANNING, ChannelRolePattern.EDIT.revoke())
-      .assign(DiscordGroup.EVENT_LEAD, ChannelRolePattern.MANAGE.revoke())
-      .assign(DiscordGroup.SOCIAL_MEDIA_LEAD, ChannelRolePattern.MANAGE.revoke())
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.MANAGE.revoke())
-      .build(), false, true),
-  LEADERBOARD(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.HIDE_FULL)
-      .assign(DiscordGroup.ORGA_MEMBER, ChannelRolePattern.VIEW_ONLY.revoke())
-      .assign(DiscordGroup.SOCIAL_MEDIA_LEAD, ChannelRolePattern.MANAGE.revoke())
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.MANAGE.revoke())
-      .build(), false, true),
-  ORGA_INTERN(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.HIDE)
-      .assign(DiscordGroup.TRYOUT, ChannelRolePattern.EMPTY.revoke())
-      .assign(DiscordGroup.ORGA_MEMBER, ChannelRolePattern.EMPTY.revoke())
-      .build(), false, true),
-  STAFF_INTERN(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.HIDE)
-      .assign(DiscordGroup.STAFF, ChannelRolePattern.EMPTY.revoke())
-      .build(), true, true),
-  CONTENT_INTERN(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.HIDE)
-      .assign(DiscordGroup.ORGA_MEMBER, ChannelRolePattern.CONNECT_ONLY)
-      .assign(DiscordGroup.STAFF, ChannelRolePattern.CONNECT_ONLY)
-      .assign(DiscordGroup.EVENT, ChannelRolePattern.MANAGE_TALK_BASE.revoke())
-      .assign(DiscordGroup.SOCIAL_MEDIA_LEAD, ChannelRolePattern.MANAGE.revoke())
-      .assign(DiscordGroup.EVENT_LEAD, ChannelRolePattern.MANAGE.revoke())
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.MANAGE.revoke())
-      .build(), true, true),
-  TEAM_CHAT(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.HIDE.remove(ChannelRolePattern.HIDE_VOICE_BASE))
-      .assign(DiscordGroup.ORGA_MEMBER, ChannelRolePattern.CONNECT_ONLY)
-      .assign(DiscordGroup.TEAM_ROLE_PLACEHOLDER, ChannelRolePattern.MANAGE.add(ChannelRolePattern.MANAGE_TALK_BASE).revoke())
-      .assign(DiscordGroup.STAFF, ChannelRolePattern.EDIT.revoke(Permission.VIEW_CHANNEL, Permission.VOICE_SPEAK))
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.EMPTY.revoke(Permission.VOICE_MUTE_OTHERS, Permission.VOICE_DEAF_OTHERS))
-      .build(), false, false),
-  TEAM_VOICE(ChannelPattern.builder()
-      .assign(DiscordGroup.EVERYONE, ChannelRolePattern.EMPTY.remove(ChannelRolePattern.HIDE_VOICE_BASE))
-      .assign(DiscordGroup.ORGA_MEMBER, ChannelRolePattern.CONNECT_ONLY)
-      .assign(DiscordGroup.TEAM_ROLE_PLACEHOLDER, ChannelRolePattern.MANAGE.add(ChannelRolePattern.MANAGE_TALK_BASE).revoke())
-      .assign(DiscordGroup.STAFF, ChannelRolePattern.EDIT.revoke(Permission.VOICE_SPEAK))
-      .assign(DiscordGroup.ADMIN, ChannelRolePattern.EMPTY.revoke(Permission.VOICE_MUTE_OTHERS, Permission.VOICE_DEAF_OTHERS))
-      .build(), false, true);
+  PUBLIC(1110508527308505158L),
+  SOCIALS(1110511082184921119L),
+  EVENTS(1110512000175439972L),
+  LEADERBOARD(1110514204429013022L),
+  ORGA_INTERN(1110519317302349834L),
+  ORGA_INTERN_VOICE(1110520608757919765L),
+  STAFF_INTERN(1110520957614948433L),
+  CONTENT_INTERN(1110522667112615946L),
+  CONTENT_INTERN_VOICE(1110522667112615946L),
+  TEAM_CATEGORY(924429703002079272L),
+  TEAM_CHAT(1110525496464248904L),
+  TEAM_VOICE(1110523880596062261L);
 
-  private final ChannelPattern pattern;
-  private final boolean fixed;
-  private final boolean template;
+  private final long channelId;
 
-  public static List<ChannelType> getTemplates() {
-    return Arrays.stream(ChannelType.values()).filter(ChannelType::isTemplate).toList();
+  @NonNull
+  private List<Long> getViewableRoles() {
+    final GuildChannel channel = Nunu.DiscordChannel.getChannel(channelId);
+    if (channel instanceof AudioChannel) return List.of();
+    if (channel instanceof StandardGuildMessageChannel messageChannel) return messageChannel.getTopic() == null ? List.of() :
+        Arrays.stream(messageChannel.getTopic().before("//").strip().split(",")).map(Long::parseLong).toList();
+    throw new IllegalArgumentException("Hier sollte Schluss sein!");
   }
 
-  @Builder
-  @Getter
-  public static class ChannelPattern {
-    @Singular("assign")
-    private Map<DiscordGroup, ChannelRolePattern> data;
+  public List<APermissionOverride> getPermissions() {
+    return Nunu.DiscordChannel.getChannel(channelId).getPermissionContainer().getPermissionOverrides().stream().map(permissionOverride -> new APermissionOverride(permissionOverride.getPermissionHolder(), permissionOverride.getAllowed(), permissionOverride.getDenied(), getViewableRoles())).toList();
+  }
+
+  public APermissionOverride getTeamPermission() {
+    return getPermissions().stream().filter(permission -> permission.permissionHolder() instanceof Role role
+        && OrgaTeamFactory.isRoleOfTeam(role)).findFirst().orElse(null);
+  }
+
+  public record APermissionOverride(IPermissionHolder permissionHolder, List<Permission> allowed, List<Permission> denied, List<Long> viewable) {
+    public APermissionOverride(IPermissionHolder permissionHolder, EnumSet<Permission> allowed, EnumSet<Permission> denied, List<Long> viewable) {
+      this(permissionHolder, new SortedList<>(allowed), new SortedList<>(denied), viewable);
+    }
+
+    public List<Permission> getAllowed() {
+      final List<Permission> allowed = new SortedList<>(allowed());
+      if (viewable.isEmpty()) allowed.remove(Permission.VIEW_CHANNEL);
+      else if (viewable.contains(permissionHolder.getIdLong())) allowed.add(Permission.VIEW_CHANNEL);
+      return allowed;
+    }
+
+    public List<Permission> getDenied() {
+      final List<Permission> denied = new SortedList<>(denied());
+      if (viewable.isEmpty()) denied.remove(Permission.VIEW_CHANNEL);
+      else if (permissionHolder.getIdLong() == DiscordGroup.EVERYONE.getDiscordId()) denied.add(Permission.VIEW_CHANNEL);
+      return denied;
+    }
   }
 }

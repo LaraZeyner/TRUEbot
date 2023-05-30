@@ -19,14 +19,14 @@ public class CreationStage extends Stage implements Entity<CreationStage>, Waiti
     super(season, range);
   }
 
-  public CreationStage(int id, Season season, TimeRange range, Long discordEventId) {
-    super(id, season, range, discordEventId);
+  public CreationStage(int id, int seasonId, TimeRange range, Long discordEventId) {
+    super(id, seasonId, range, discordEventId);
   }
 
   public static CreationStage get(List<Object> objects) {
     return new CreationStage(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(2)),
+        (int) objects.get(2),
         new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
         (Long) objects.get(5)
     );
@@ -34,7 +34,7 @@ public class CreationStage extends Stage implements Entity<CreationStage>, Waiti
 
   @Override
   public CreationStage create() {
-    return new Query<>(CreationStage.class).key("season", season)
+    return new Query<>(CreationStage.class).key("season", seasonId)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

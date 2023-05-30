@@ -36,9 +36,9 @@ public class SQLEnum<E extends Enum<E>> {
     return Arrays.stream(enumClazz.getEnumConstants())
         .filter(e -> (switch (value) {
           case CUSTOM -> e.toString();
-          case LOWER -> e.toString().toLowerCase();
-          case UPPER -> e.toString().toUpperCase();
-          case CAPITALIZE -> StringUtils.capitalizeEnum(e.toString().toLowerCase());
+          case LOWER -> e.name().toLowerCase();
+          case UPPER -> e.name().toUpperCase();
+          case CAPITALIZE -> StringUtils.capitalizeEnum(e.name().toLowerCase());
           case ORDINAL -> e.ordinal();
         }).equals(source))
         .findFirst().orElseThrow(() -> new IllegalArgumentException("Der Wert kann nicht vergeben werden."));

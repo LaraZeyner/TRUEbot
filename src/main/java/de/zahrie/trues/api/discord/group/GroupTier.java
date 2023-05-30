@@ -28,7 +28,7 @@ public enum GroupTier {
     return switch (this) {
       case ORGA_MEMBER -> Set.of(DiscordGroup.FRIEND);
       case LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER);
-      case MANAGEMENT, ORGA_LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.DRAFT_COACH, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.STRATEGIC_COACH);
+      case MANAGEMENT, ORGA_LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.TEAM_COACH);
       default -> Set.of();
     };
   }

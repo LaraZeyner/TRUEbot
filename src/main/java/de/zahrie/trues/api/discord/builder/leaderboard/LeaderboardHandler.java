@@ -25,14 +25,14 @@ public class LeaderboardHandler {
   }
 
   private static List<PublicLeaderboard> load() {
-    final JSONArray dataArray = JSON.fromFile("leaderboards.json").getJSONArray("data");
+    final JSONArray dataArray = JSON.read("leaderboards.json").getJSONArray("data");
     return IntStream.range(0, dataArray.length()).mapToObj(dataArray::getJSONObject).map(PublicLeaderboard::fromJSON).collect(Collectors.toList());
   }
 
   public static void handleLeaderboards() {
     final LocalDateTime dateTime = LocalDateTime.now();
     leaderboards.forEach((leaderboard, last) -> {
-      final int frequency = leaderboard.getCustomQuery().getCustomQuery().getFrequencyInMinutes();
+      final int frequency = leaderboard.getCustomQuery().getFrequencyInMinutes();
       if (frequency == 0) return;
       if (Duration.between(last, dateTime).get(ChronoUnit.MINUTES) >= frequency - 1) {
         leaderboard.updateData();

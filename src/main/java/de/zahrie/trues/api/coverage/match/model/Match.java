@@ -20,10 +20,10 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-@Setter
 @RequiredArgsConstructor
 @Table("coverage")
 public abstract class Match implements AMatch, Comparable<Match>, Id {
+  @Setter
   protected int id;
   protected final Playday playday;
   protected final MatchFormat format;
@@ -36,21 +36,25 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   protected Participator[] participators;
 
   public Participator[] getParticipators() {
-    if (participators == null) participators = new Query<>(Participator.class)
-        .where("coverage", this).descending("first").entityList().toArray(Participator[]::new);
+    if (participators == null) this.participators = new Query<>(Participator.class).where("coverage", this)
+        .descending("first").entityList().toArray(Participator[]::new);
     return participators;
   }
-
+  protected MatchResult expectedResult;
   protected List<MatchLog> logs;
 
   public List<MatchLog> getLogs() {
-    if (logs == null) logs = new Query<>(MatchLog.class).where("coverage", this).entityList();
+    if (logs == null) this.logs = determineLog();
     return logs;
   }
 
   public List<MatchLog> getLogs(MatchLogAction action) {
     if (logs == null) logs = new Query<>(MatchLog.class).where("coverage", this).and("action", action).entityList();
     return logs;
+  }
+
+  public void clearLogs() {
+    logs.clear();
   }
 
   protected MatchResult matchResult;
@@ -96,7 +100,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
    */
   public void updateResult() {
     if (result != null) {
-      setResult(MatchResult.fromResultString(result.toString(), this));
+      setResult(MatchResult.fromResultString(result, this));
     }
   }
 
@@ -109,7 +113,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   }
 
   private void setResult(MatchResult result) {
-    if (result == null || getMatchResult().equals(result)) return;
+    if (result == null || getResult().equals(result)) return;
     this.result = result.toString();
     new Query<>(Match.class).col("result", result.toString()).update(id);
     getHome().setWins(result.getHomeScore());
@@ -121,12 +125,18 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   public MatchResult ofTeam(@NonNull Team team) {
     if (getParticipator(team) == null) return null;
-    if (getHome().getTeam().equals(team)) return getMatchResult();
-    return new MatchResult(getMatchResult().getGuestScore(), getMatchResult().getHomeScore(), getMatchResult().getMaxGames(), getMatchResult().getPlayed());
+    if (getHome().getTeam().equals(team)) return getResult();
+    return new MatchResult(getResult().getGuestScore(), getResult().getHomeScore(), getResult().getMaxGames(), getResult().getPlayed());
   }
 
-  public String getExpectedResult() {
-    return getMatchResult().expectResultOf(this) + (isRunning() ? "*" : "");
+  public MatchResult getExpectedResult() {
+    if (getResult().getPlayed()) return getResult();
+    if (expectedResult != null) this.expectedResult = getResult().expectResultOf(this);
+    return expectedResult;
+  }
+
+  public String getExpectedResultString() {
+    return getExpectedResult() + (isRunning() ? "*" : "");
   }
 
   @Override

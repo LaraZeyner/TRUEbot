@@ -1,25 +1,32 @@
 package de.zahrie.trues.api.scheduler;
 
-import de.zahrie.trues.util.io.log.Console;
-
 public abstract class ScheduledTask {
   private final Schedule schedule;
-  private boolean isRunning;
+  private Thread thread = null;
 
   public ScheduledTask() {
     this.schedule = getClass().asSubclass(this.getClass()).getAnnotation(Schedule.class);
-    this.isRunning = false;
   }
 
-  public abstract void execute();
+  public abstract void execute() throws InterruptedException;
 
-  public void handleTask() {
-    if (!isRunning && new ScheduleComparer(schedule).test()) {
-      this.isRunning = true;
-      new Console(getClass().getSimpleName()).entering();
+  protected abstract String name();
+
+  private boolean notValid() {
+    return !new ScheduleComparer(schedule).test();
+  }
+
+  public void start() {
+    if (thread != null && thread.isAlive() || notValid()) return;
+    this.thread = new Thread(null, this::run, name());
+    thread.start();
+  }
+
+  public void run() {
+    try {
       execute();
-      new Console(getClass().getSimpleName()).exiting();
-      this.isRunning = false;
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
   }
 }

@@ -14,7 +14,7 @@ public class BotConfigurator extends ListenerAdapter {
   private JDABuilder builder;
 
   public JDA run() {
-    final var json = JSON.fromFile("connect.json");
+    final var json = JSON.read("connect.json");
     final var apiKey = json.getString("discord");
     this.builder = JDABuilder.create(apiKey, ConfigLoader.getIntents());
     return this.configure();

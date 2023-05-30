@@ -84,7 +84,7 @@ public class TeamAnalyzer extends AnalyzeManager {
         .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
         .join(new JoinQuery<>(Performance.class, Player.class))
         .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
-    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1._teamperf.game", performanceQuery.getAdditionalParameters())));
+    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
 
   @Override

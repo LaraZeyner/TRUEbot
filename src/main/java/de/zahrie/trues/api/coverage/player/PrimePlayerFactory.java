@@ -1,52 +1,61 @@
 package de.zahrie.trues.api.coverage.player;
 
-import com.merakianalytics.orianna.types.core.summoner.Summoner;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.riot.Xayah;
-import lombok.extern.java.Log;
+import de.zahrie.trues.api.riot.Zeri;
+import de.zahrie.trues.util.Util;
+import de.zahrie.trues.util.io.log.Console;
+import lombok.NonNull;
+import lombok.experimental.ExtensionMethod;
+import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
+import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import org.jetbrains.annotations.Nullable;
 
-@Log
+@ExtensionMethod(Util.class)
 public final class PrimePlayerFactory {
-
+  /**
+   * @return Spieler von der Primeid
+   */
   @Nullable
-  public static PRMPlayer getPlayer(int primeId) {
-    final PRMPlayer prmPlayer = new Query<>(PRMPlayer.class).where("prm_id", primeId).entity();
+  public static PRMPlayer getPlayer(int playerId) {
+    final PRMPlayer prmPlayer = new Query<>(PRMPlayer.class).where("prm_id", playerId).entity();
     if (prmPlayer != null) return prmPlayer;
-    return new PlayerLoader(primeId).handleMissingPlayer();
+
+    return PlayerLoader.create(playerId).avoidNull(PlayerLoader::getPlayer);
   }
+
 
   @Nullable
   public static PRMPlayer getPrimePlayer(int primeId, String summonerName) {
-    final PRMPlayer player = getPlayer(primeId);
+    PRMPlayer player = new Query<>(PRMPlayer.class).where("prm_id", primeId).entity();
+    if (summonerName == null) return player;
+
     if (player != null) {
       updatePrmAccount(player, summonerName);
-      return player;
+    } else {
+      player = createPlayer(summonerName, primeId);
+      if (player != null) player.setPrmUserId(primeId);
     }
-
-    final PRMPlayer p = determinePlayer(summonerName, primeId);
-    if (p != null) {
-      p.setPrmUserId(primeId);
-    }
-    return p;
+    return player;
   }
 
-  private static void updatePrmAccount(PRMPlayer player, String summonerName) {
-    final Summoner summoner = Xayah.summonerNamed(summonerName).get();
-    final String puuid = summoner.getPuuid();
+  private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull String summonerName) {
+    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    final String puuid = summoner == null ? player.getPuuid() : summoner.getPUUID();
     if (!player.getPuuid().equals(puuid) && puuid != null) {
       player.setPuuidAndName(puuid, summoner.getName());
     }
   }
 
   @Nullable
-  private static PRMPlayer determinePlayer(String summonerName, int primeId) {
-    final String puuid = Xayah.summonerNamed(summonerName).get().getPuuid();
-    if (puuid != null) {
-      return new PRMPlayer(puuid, summonerName, primeId).create();
+  private static PRMPlayer createPlayer(String summonerName, int primeId) {
+    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    if (summoner != null) {
+      final String puuid = summoner.getPUUID();
+      if (puuid != null) return new PRMPlayer(summonerName, puuid, primeId).create();
     }
+
     final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(summonerName);
     if (prmPlayer != null) prmPlayer.setPrmUserId(primeId);
     return prmPlayer;
@@ -56,7 +65,7 @@ public final class PrimePlayerFactory {
   private static Player performNoPuuid(String summonerName) {
     final Player player = determineExistingPlayerFromName(summonerName);
     if (player == null) {
-      log.config("Der Spieler existiert nicht");
+      new Console("Der Spieler existiert nicht").info();
       return null;
     }
 

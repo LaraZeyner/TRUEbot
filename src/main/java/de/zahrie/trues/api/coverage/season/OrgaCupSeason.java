@@ -48,21 +48,6 @@ public class OrgaCupSeason extends Season implements Entity<OrgaCupSeason> {
         Lobbyname: 'TRUE M<id> TEAM1 vs TEAM2 G<1-5>' Passwort: 'truecup'
         """;
 
-  public static String getRules() {
-    return """
-        Du darfst nur in Teams spielen, die sich nicht begegnen.
-        Stand-ins dürfen höchstens 100 LP über dem ersetzten Spieler sein.
-        
-        Gruppenspiele: Single-Round-Robin 'Two-Games'
-        Elimination: 'Best of Three' (Finale Bo5)
-        Einigt euch vor dem offiziellen Termin auf einen Termin.
-        Nicht ausgespielte Spiele werden 0:0 gewertet.
-
-        Lineup-Deadline: 24 Stunden vorher
-        Lobbyname: 'TRUE M<id> TEAM1 vs TEAM2 G<1-5>' Passwort: 'truecup'
-        """;
-  }
-
   @Override
   public boolean isBetable() {
     return super.isBetable();

@@ -7,6 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Msg {
   String value() default "keine Daten";
   String error() default "Dir fehlen die nötigen Rechte.";
+  String description() default "keine Daten";
   boolean ephemeral() default true;
-  Embed[] embeds() default {};
 }

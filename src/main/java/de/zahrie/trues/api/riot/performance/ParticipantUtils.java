@@ -1,31 +1,42 @@
 package de.zahrie.trues.api.riot.performance;
 
-import com.merakianalytics.orianna.types.common.Side;
-import com.merakianalytics.orianna.types.core.match.Match;
-import com.merakianalytics.orianna.types.core.match.Participant;
-import com.merakianalytics.orianna.types.core.match.Team;
+import java.util.List;
+
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.champion.Champion;
-import de.zahrie.trues.api.riot.champion.ChampionFactory;
+import de.zahrie.trues.api.riot.match.Side;
+import no.stelar7.api.r4j.basic.constants.types.lol.TeamType;
+import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
+import no.stelar7.api.r4j.pojo.lol.match.v5.MatchParticipant;
+import no.stelar7.api.r4j.pojo.lol.match.v5.MatchTeam;
 
 public class ParticipantUtils {
-  public static Lane getPlayedLane(Participant participant) {
+  public static List<MatchParticipant> getParticipants(LOLMatch match, TeamType side) {
+    return match.getParticipants().stream().filter(matchParticipant -> matchParticipant.getTeam().equals(side)).toList();
+  }
+
+  public static Lane getPlayedLane(MatchParticipant participant) {
     return Lane.transform(participant.getLane());
   }
 
-  public static Champion getSelectedChampion(Participant participant) {
-    return ChampionFactory.getChampion(participant.getChampion());
+  public static Champion getSelectedChampion(MatchParticipant participant) {
+    return new Query<>(Champion.class).entity(participant.getChampionId());
   }
 
-  public static Participant getOpponent(Participant participant, Match match) {
+  public static MatchParticipant getOpponent(MatchParticipant participant, LOLMatch match) {
     final Lane playedLane = getPlayedLane(participant);
-    final Side side = participant.getTeam().getSide();
-    final Team opposingTeam = side.equals(Side.BLUE) ? match.getBlueTeam() : match.getRedTeam();
-    return opposingTeam.getParticipants().stream().filter(part -> getPlayedLane(part).equals(playedLane)).findFirst().orElse(null);
+    final Side side = Side.valueOf(participant.getTeam().name());
+
+    final MatchTeam opposingTeam = side.getOpponent(match);
+    if (opposingTeam == null) return null;
+
+    final List<MatchParticipant> participants = ParticipantUtils.getParticipants(match, opposingTeam.getTeamId());
+    return participants.stream().filter(part -> getPlayedLane(part).equals(playedLane)).findFirst().orElse(null);
   }
 
-  public static Matchup getMatchup(Participant participant, Match match) {
-    final Participant otherParticipant = getOpponent(participant, match);
-    final Side side = participant.getTeam().getSide();
+  public static Matchup getMatchup(MatchParticipant participant, LOLMatch match) {
+    final MatchParticipant otherParticipant = getOpponent(participant, match);
+    final Side side = Side.ofId(participant.getTeam().getValue());
     return new Matchup(
         getPlayedLane(participant),
         side.equals(Side.BLUE) ? participant : otherParticipant,
@@ -33,6 +44,6 @@ public class ParticipantUtils {
     );
   }
 
-  public record Matchup(Lane lane, Participant blue, Participant red) {
+  public record Matchup(Lane lane, MatchParticipant blue, MatchParticipant red) {
   }
 }

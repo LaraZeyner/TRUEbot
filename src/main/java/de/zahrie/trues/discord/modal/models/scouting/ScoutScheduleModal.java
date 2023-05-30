@@ -1,5 +1,7 @@
 package de.zahrie.trues.discord.modal.models.scouting;
 
+import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
@@ -16,12 +18,18 @@ public class ScoutScheduleModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create("Scouting: Team-Schedule")
-        .addComponents(getTeamIdField(100)).build();
+        .single("1", "gegnerisches Team:", "TeamID oder voller Name (sofern bekannt)", 100).get();
   }
 
   @Override
   public boolean execute(ModalInteractionEvent event) {
-    ScoutingManager.custom(getTeamIdOrName(), event, Scouting.ScoutingType.SCHEDULE);
+    Team team2 = null;
+    final Integer anInt = getInt("1");
+    if (anInt != null) team2 = new Query<>(Team.class).where("prm_id", anInt).entity();
+    if (team2 == null) team2 = new Query<>(Team.class).where("team_name", anInt).entity();
+    if (team2 == null) return reply("Der Gegner konnte nicht gefunden werden.");
+
+    ScoutingManager.custom(team2, event, Scouting.ScoutingType.SCHEDULE);
     return true;
   }
 }

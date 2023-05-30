@@ -1,14 +1,12 @@
 package de.zahrie.trues.api.discord.util;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.discord.user.DiscordUser;
-import net.dv8tion.jda.api.Permission;
+import de.zahrie.trues.util.Const;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
@@ -48,53 +46,21 @@ public final class Nunu extends Willump {
   }
 
   public static class DiscordChannel {
-
     public static TextChannel getAdminChannel() {
-      return Nunu.DiscordChannel.getTextChannel("admin-chat");
+      return Nunu.getInstance().getClient().getTextChannelById(Const.ADMIN_CHANNEL);
     }
 
     public static AudioChannel getVoiceChannel(Member member) {
       final GuildVoiceState voiceState = member.getVoiceState();
       return voiceState == null ? null : voiceState.getChannel();
     }
-    public static VoiceChannel getVoiceChannel(long id) {
-      return Nunu.getInstance().getGuild().getVoiceChannelById(id);
-    }
 
     public static GuildChannel getChannel(long id) {
       return Nunu.getInstance().getGuild().getGuildChannelById(id);
     }
 
-    public static TextChannel getTextChannel(String name) {
-      return Nunu.getInstance().getGuild().getTextChannelCache().stream()
-          .filter(voiceChannel -> voiceChannel.getName().toLowerCase().contains(name.toLowerCase())).findFirst().orElse(null);
-    }
-
-    public static boolean limitTo(VoiceChannel voiceChannel, int amount) {
-      if (amount < 0 || amount > 99) {
-        return false;
-      }
-      voiceChannel.getManager().setUserLimit(amount).queue();
-      return true;
-    }
-
     public static void move(Member member, AudioChannel channel) {
       Nunu.getInstance().getGuild().moveVoiceMember(member, channel).queue();
-    }
-
-    public static VoiceChannel getChannelLike(String regex, Member invoker) {
-      return Nunu.getInstance().getGuild().getVoiceChannelCache().stream()
-          .filter(voiceChannel -> voiceChannel.getName().toLowerCase().contains(regex.toLowerCase()))
-          .filter(voiceChannel -> invoker.getPermissions(voiceChannel).contains(Permission.VOICE_CONNECT))
-          .findFirst().orElse(null);
-    }
-  }
-
-  public static class DiscordMessager {
-    public static void dm(DiscordUser user, String content) {
-      user.getMember().getUser().openPrivateChannel()
-          .flatMap(privateChannel -> privateChannel.sendMessage(content))
-          .queue();
     }
   }
 }

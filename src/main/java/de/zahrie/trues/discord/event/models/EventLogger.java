@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.override.GenericPermissionOverrideEvent;
 import net.dv8tion.jda.api.events.guild.update.GenericGuildUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
-import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.events.role.GenericRoleEvent;
@@ -47,11 +46,6 @@ public class EventLogger extends ListenerAdapter {
   }
 
   private String determineDetails(GenericEvent event) {
-    if (event instanceof GenericMessageEvent messageDeleteEvent) {
-      final String[] msg = new String[1];
-      messageDeleteEvent.getChannel().retrieveMessageById(messageDeleteEvent.getMessageId()).queue(message -> msg[0] = message.getContentDisplay());
-      return msg[0];
-    }
     if (event instanceof CommandInteraction guildBanEvent) return guildBanEvent.getName() + " " + guildBanEvent.getCommandString();
     return event.getClass().getSimpleName();
   }

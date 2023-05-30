@@ -113,8 +113,19 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
     return sqlFields;
   }
 
-  protected void setValues(PreparedStatement statement, List<Object> parameters, String q) throws SQLException {
-    final List<Object> values = query == null ? getValues(q) : parameters;
+  protected void setValues(PreparedStatement statement, List<Object> parameters, String q, boolean force) throws SQLException {
+    List<Object> values = query == null ? getValues(q) : parameters;
+    if (force) {
+      values = getValues(q);
+      int parameterIndex = 0;
+      for (int i = 0; i < values.size(); i++) {
+        final Object o = values.get(i);
+        if (o.equals("?")) {
+          values.set(i, parameters.get(parameterIndex));
+          parameterIndex++;
+        }
+      }
+    }
     if (values.isEmpty()) return;
 
     for (int i = 0; i < values.size(); i++) {
@@ -140,9 +151,9 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
 
         switch (listing.value()) {
           case CUSTOM -> statement.setString(pos, parameterEnum.toString());
-          case UPPER -> statement.setString(pos, parameterEnum.toString().toUpperCase());
-          case LOWER -> statement.setString(pos, parameterEnum.toString().toLowerCase());
-          case CAPITALIZE -> statement.setString(pos, StringUtils.capitalizeEnum(parameterEnum.toString().toLowerCase()));
+          case UPPER -> statement.setString(pos, parameterEnum.name().toUpperCase());
+          case LOWER -> statement.setString(pos, parameterEnum.name().toLowerCase());
+          case CAPITALIZE -> statement.setString(pos, StringUtils.capitalizeEnum(parameterEnum.name().toLowerCase()));
           case ORDINAL -> statement.setByte(pos, (byte) (parameterEnum.ordinal() + listing.start()));
         }
 

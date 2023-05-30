@@ -6,7 +6,6 @@ import java.util.List;
 import de.zahrie.trues.api.coverage.ABetable;
 import de.zahrie.trues.api.coverage.EventDTO;
 import de.zahrie.trues.api.coverage.match.model.AScheduleable;
-import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.stage.model.SignupStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
@@ -67,6 +66,7 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
 
   @Override
   public String getSignupStatusForTeam(PRMTeam team) {
+    if (team == null) return "kein Team gefunden";
     if (team.getSignupForSeason(this) != null) return "angemeldet";
     return getStages().stream().filter(stage -> stage instanceof SignupStage).findFirst()
         .map(stage -> stage.getRange().hasStarted() ? "Anmeldung gestartet" : "Anmeldung " +
@@ -77,11 +77,6 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
   @Override
   @NonNull
   public List<EventDTO> getEvents() {
-    final List<Stage> stagesEvents = getStages();
-    final List<EventDTO> events = new ArrayList<>(stagesEvents.stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList());
-    final List<Playday> playdaysEvents = new Query<>(Playday.class).where("season", this).entityList();
-    final List<EventDTO> pdEvents = playdaysEvents.stream().map(playday -> new EventDTO(playday.getRange(), "Spieltag " + playday.getIdx(), true)).toList();
-    if (!pdEvents.isEmpty()) events.addAll(pdEvents);
-    return events.stream().sorted().toList();
+    return new ArrayList<>(getStages().stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList()).stream().sorted().toList();
   }
 }

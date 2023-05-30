@@ -10,12 +10,12 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Option;
 import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.util.StringUtils;
-import de.zahrie.trues.util.io.NamedQueries;
+import de.zahrie.trues.util.io.SelectionQueries;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @Command(name = "wetten", descripion = "Eine Wette auf ein Spiel abgeben", perm = @Perm(PermissionRole.EVERYONE), options = {
-    @Option(name = "match", description = "kommende Matches", completion = NamedQueries.UPCOMING_MATCHES),
+    @Option(name = "match", description = "kommende Matches", completion = SelectionQueries.UPCOMING_MATCHES),
     @Option(name = "ergebnis", description = "Wette eingeben"),
     @Option(name = "menge", description = "Wettmenge eingeben")
 })

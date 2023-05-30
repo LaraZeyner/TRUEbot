@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,11 +15,9 @@ import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
-import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.database.query.SQLField;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -62,6 +61,7 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
 
   @Override
   public PRMTeam create() {
+    if (refresh == null) this.refresh = LocalDateTime.of(1, Month.JANUARY, 1, 0, 0);
     Query<PRMTeam> q = new Query<>(PRMTeam.class).key("prm_id", prmId)
         .col("team_name", name).col("team_abbr", abbreviation).col("refresh", refresh).col("highlight", highlight).col("last_team_mmr", lastMMR);
     if (record != null) q = q.col("total_wins", record.wins()).col("total_losses", record.losses()).col("seasons", record.seasons());
@@ -82,12 +82,11 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
 
   @Nullable
   public PRMLeague getLastLeague() {
-    return new Query<>(LeagueTeam.class)
-        .field(SQLField.get("league", Integer.class))
-        .join(new JoinQuery<>(LeagueTeam.class, League.class, "league", JoinQuery.JoinType.INNER))
-        .join(new JoinQuery<>(LeagueTeam.class, Stage.class, "_league.stage", JoinQuery.JoinType.INNER))
-        .where("team", this).and(Condition.Comparer.NOT_EQUAL, "_stage.department", "Playoffs")
-        .descending("_league._stage.startTime").convert(PRMLeague.class);
+    return new Query<>(PRMLeague.class, "SELECT _league.* FROM league_team as _leagueteam " +
+        "INNER JOIN coverage_group as _league ON _leagueteam.league = _league.coverage_group_id " +
+        "INNER JOIN coverage_stage as _stage ON _league.stage = _stage.coverage_stage_id " +
+        "WHERE (team = ? and _stage.department <> ? and _league.department = ?) ORDER BY _stage.stage_start DESC LIMIT 1")
+        .entity(List.of(this, "Playoffs", "prime"));
   }
 
   public void setScore(League division, String score) {

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 @AllArgsConstructor
 @Getter
@@ -20,9 +19,9 @@ public abstract class DiscordChannel implements ADiscordChannel, Id {
   protected final long discordId; // discord_id
   protected final DiscordChannelType channelType; // channel_type
   protected String name; // channel_name
-  protected PermissionChannelType permissionType; // permission_type
+  protected ChannelType permissionType; // permission_type
 
-  public DiscordChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType) {
+  public DiscordChannel(long discordId, String name, ChannelType permissionType, net.dv8tion.jda.api.entities.channel.ChannelType channelType) {
     this.discordId = discordId;
     this.name = name;
     this.permissionType = permissionType;
@@ -40,14 +39,9 @@ public abstract class DiscordChannel implements ADiscordChannel, Id {
     Database.connection().commit();
   }
 
-  public void setPermissionType(PermissionChannelType permissionType) {
+  public void setPermissionType(ChannelType permissionType) {
     this.permissionType = permissionType;
     new Query<>(DiscordChannel.class).col("permission_type", permissionType).update(id);
-  }
-
-  public void updatePermissions() {
-    final PermissionChannelType.ChannelPattern channelPattern = permissionType.getPattern();
-    channelPattern.getData().forEach(((group, rolePattern) -> updateForGroup(group)));
   }
 
   public boolean updatePermission(Role role) {

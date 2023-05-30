@@ -3,30 +3,26 @@ package de.zahrie.trues.api.discord.builder.embed;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomColumn;
-import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
+import de.zahrie.trues.api.discord.command.slash.Column;
 import de.zahrie.trues.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record EmbedQueryBuilder(EmbedCreator creator, List<CustomQuery> queries, List<CustomEmbedData> embedData) {
+public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
   public EmbedCreator build() {
-    for (CustomQuery query : queries) {
-      final List<Object[]> entries = query.getQuery().contains(".") ? new Query<>(query.getQuery()).list() :
-          embedData.stream().filter(data -> data.key().equals(query.getQuery()))
-          .map(CustomEmbedData::data).findFirst().orElse(null);
-      if (!handleNoData(query, entries)) handleData(query, Util.nonNull(entries));
-    }
+    if (query.getHeadTitle() != null) creator.add(query.getHeadTitle(), query.getHeadDescription(), false);
+    final List<Object[]> entries = query.build();
+    if (!handleNoData(query, entries)) handleData(query, Util.nonNull(entries));
     return creator;
   }
 
-  private void handleData(CustomQuery query, @NotNull List<Object[]> entries) {
+  private void handleData(SimpleCustomQuery query, @NotNull List<Object[]> entries) {
     for (int i = 0; i < entries.get(0).length; i++) {
       final String content = determineColumnEntry(entries, i);
-      final CustomColumn column = query.getColumns().get(i);
-      final boolean inline = i != 0 || column.isInline();
-      creator.add(column.getValue(), content, inline);
+      final Column column = query.getColumns().get(i);
+      final boolean inline = query.getColumns().size() > 1;
+      creator.add(column.value(), content, inline);
     }
   }
 
@@ -37,9 +33,9 @@ public record EmbedQueryBuilder(EmbedCreator creator, List<CustomQuery> queries,
         .collect(Collectors.joining("\n"));
   }
 
-  private boolean handleNoData(CustomQuery query, @Nullable List<Object[]> list) {
+  private boolean handleNoData(SimpleCustomQuery query, @Nullable List<Object[]> list) {
     if (list != null && !list.isEmpty()) return false;
-    creator.add(query.getColumns().get(0).getValue(), "keine Daten", true);
+    creator.add(query.getColumns().get(0).value(), "keine Daten", true);
     return true;
   }
 }

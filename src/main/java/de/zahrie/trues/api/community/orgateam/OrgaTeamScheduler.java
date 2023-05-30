@@ -12,6 +12,7 @@ public record OrgaTeamScheduler(OrgaTeam team) {
     final var limitTime = LocalDateTime.now().plusMinutes(30);
     final List<TeamCalendar> calendarEntries = new Query<>(TeamCalendar.class).where("orga_team", team).and("calendar_end", limitTime)
         .entityList();
+    if (team.getTeam() == null) return List.of();
     team.getTeam().getMatches().getUpcomingMatches().stream()
         .map(match -> new TeamCalendar(match.getExpectedTimeRange(), String.valueOf(match.getId()), TeamCalendar.TeamCalendarType.MATCH, team, -1).create())
         .forEach(calendarEntries::add);

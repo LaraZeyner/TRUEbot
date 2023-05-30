@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
-import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.NamedQuery;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
 import de.zahrie.trues.api.discord.util.Nunu;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -18,11 +19,11 @@ public class PublicLeaderboard extends Leaderboard {
   private final long channelID;
   private final List<Long> messageIds;
 
-  public PublicLeaderboard(CustomQuery.Queries customQuery, long channelID) {
+  public PublicLeaderboard(SimpleCustomQuery customQuery, long channelID) {
     this(customQuery, channelID, new ArrayList<>());
   }
 
-  private PublicLeaderboard(CustomQuery.Queries customQuery, long channelID, List<Long> messageIds) {
+  private PublicLeaderboard(SimpleCustomQuery customQuery, long channelID, List<Long> messageIds) {
     super(customQuery);
     this.channelID = channelID;
     this.messageIds = messageIds;
@@ -70,20 +71,18 @@ public class PublicLeaderboard extends Leaderboard {
 
   public JSONObject toJSON() {
     final var leaderboardData = new JSONObject();
-    leaderboardData.put("key", customQuery.name());
+    leaderboardData.put("key", customQuery.getName());
     leaderboardData.put("channelId", channelID);
     leaderboardData.put("messageIds", new JSONArray(messageIds));
-    leaderboardData.put("parameters", new JSONArray(customQuery.getCustomQuery().getParameters()));
+    leaderboardData.put("parameters", new JSONArray(customQuery.getParameters().stream().map(param -> (String) param).toList()));
     return leaderboardData;
   }
   
   public static PublicLeaderboard fromJSON(JSONObject entry) {
-    final PublicLeaderboard leaderboard = new PublicLeaderboard(
-        CustomQuery.Queries.valueOf("key"),
+    final List<String> parameters = IntStream.range(0, entry.getJSONArray("parameters").length()).mapToObj(entry.getJSONArray("parameters")::getString).toList();
+    return new PublicLeaderboard(
+        SimpleCustomQuery.params(NamedQuery.valueOf("key"), parameters.stream().map(string -> (Object) string).toList()),
         entry.getLong("channelId"),
         IntStream.range(0, entry.getJSONArray("messageIds").length()).mapToObj(entry.getJSONArray("messageIds")::getLong).toList());
-    final List<String> parameters = IntStream.range(0, entry.getJSONArray("parameters").length()).mapToObj(entry.getJSONArray("parameters")::getString).toList();
-    leaderboard.getCustomQuery().getCustomQuery().setParameters(parameters);
-    return leaderboard;
   }
 }

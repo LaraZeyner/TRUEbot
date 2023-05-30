@@ -1,6 +1,5 @@
 package de.zahrie.trues.api.scouting;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,7 +63,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
     final Query<Performance> performanceQuery = gameTypeString(new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
         .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
-    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1._teamperf.game", performanceQuery.getAdditionalParameters())));
+    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
 
   @Override
@@ -73,7 +72,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
       case PRM_ONLY -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CUSTOM);
       case PRM_CLASH -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
       case TEAM_GAMES -> query.join(new JoinQuery<>(Performance.class, Player.class))
-        .join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` WHERE (_game.game_type <= 2 and player = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(player(), Util.avoidNull(player().getTeam(), 0)))));
+          .join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` WHERE (_game.game_type <= 2 and player = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(player(), Util.avoidNull(player().getTeam(), 0)))));
     }
     return query;
   }
@@ -121,31 +120,28 @@ public class PlayerAnalyzer extends AnalyzeManager {
   }
 
   private List<PlayerAnalyzerData> handlePicks() {
-    final var time = LocalDateTime.now().minusDays(days);
-
     List<Object[]> presentPicks = selection().get("champion", Champion.class).get("count(selection_id)", Integer.class).groupBy("champion").descending("count(selection_id)").list();
     if (presentPicks.isEmpty()) {
+      final Query<Performance> performanceQuery = new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
+          .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+          .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart());
       presentPicks = new Query<>(Selection.class).get("champion", Champion.class).get("count(selection_id)", Integer.class)
-          .where(Condition.inSubquery("game", new Query<>(Performance.class).get("_teamperf.game", Game.class)
-              .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf"))
-              .join(new JoinQuery<>(TeamPerf.class, Game.class))
-              .where("player", player()).and("_game.start_time", time)
-              .groupBy("lane").ascending("count(performance_id)")
-          )).groupBy("champion").descending("count(selection_id)").list();
+          .join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())))
+          .groupBy("champion").descending("count(selection_id)").list();
     }
 
     final List<Object[]> picksList = performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).groupBy("champion").descending("count(performance_id)").list();
-    final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objs -> (Champion) objs[0], objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
+    final Map<Champion, Integer> pickMap = picksList.stream().collect(Collectors.toMap(objs -> new Query<>(Champion.class).entity(objs[0]), objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
 
     final List<Object[]> mmList = player().analyze(ScoutingGameType.MATCHMADE, days).performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).groupBy("champion").descending("count(performance_id)").list();
-    final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objs -> (Champion) objs[0], objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
+    final Map<Champion, Integer> mmMap = mmList.stream().collect(Collectors.toMap(objs -> new Query<>(Champion.class).entity(objs[0]), objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
     final List<Object[]> winsList = player().analyze(ScoutingGameType.MATCHMADE, days).performance().get("champion", Champion.class).get("count(performance_id)", Integer.class).where("_teamperf.win", true).groupBy("champion").descending("count(performance_id)").list();
-    final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objs -> (Champion) objs[0], objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
+    final Map<Champion, Integer> winsMap = winsList.stream().collect(Collectors.toMap(objs -> new Query<>(Champion.class).entity(objs[0]), objs -> ((Long) objs[1]).intValue(), (a, b) -> b));
     final List<Object[]> games = performance().get("count(performance_id)", Integer.class).list();
     final Long amountOfGames = ((Long) games.get(0)[0]);
     final Map<Champion, PlayerAnalyzerData> data = new HashMap<>();
     for (final Object[] presentPick : presentPicks) {
-      final Champion champion = (Champion) presentPick[0];
+      final Champion champion = new Query<>(Champion.class).entity(presentPick[0]);
       final int occurrences = ((Long) presentPick[1]).intValue();
       final int picks = pickMap.getOrDefault(champion, 0);
       final int mmGames = mmMap.getOrDefault(champion, 0);
@@ -155,7 +151,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
       }
     }
     for (Object[] objs : picksList) {
-      final Champion champion = (Champion) objs[0];
+      final Champion champion = new Query<>(Champion.class).entity(objs[0]);
       final int amount = ((Long) (objs[1])).intValue();
       if (!data.containsKey(champion) && amount >= 10) {
         data.put(champion, new PlayerAnalyzerData(champion, 0, 0, amount, winsMap.get(champion)));

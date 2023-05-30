@@ -14,8 +14,8 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
+import de.zahrie.trues.util.Util;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -23,7 +23,6 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@AllArgsConstructor
 @Getter
 @Setter
 @Table("orga_team")
@@ -36,13 +35,25 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   private String abbreviationCreation; // team_abbr_created
   @Getter(AccessLevel.PACKAGE)
   private CustomDiscordGroup group; // team_role
-  private Team team; // team
+  private Integer teamId; // team
   private Byte place = 0; // orga_place
   private Byte standins = 4; // stand_ins
+
+  private Team team;
 
   public OrgaTeam(String nameCreation, String abbreviationCreation) {
     this.nameCreation = nameCreation;
     this.abbreviationCreation = abbreviationCreation;
+  }
+
+  public OrgaTeam(int id, String nameCreation, String abbreviationCreation, CustomDiscordGroup group, Integer teamId, Byte place, Byte standins) {
+    this.id = id;
+    this.nameCreation = nameCreation;
+    this.abbreviationCreation = abbreviationCreation;
+    this.group = group;
+    this.teamId = teamId;
+    this.place = place;
+    this.standins = standins;
   }
 
   public static OrgaTeam get(List<Object> objects) {
@@ -51,7 +62,7 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
         (String) objects.get(1),
         (String) objects.get(2),
         new Query<>(CustomDiscordGroup.class).entity(objects.get(3)),
-        new Query<>(Team.class).entity(objects.get(4)),
+        (Integer) objects.get(4),
         SQLUtils.byteValue(objects.get(5)),
         SQLUtils.byteValue(objects.get(6))
     );
@@ -103,8 +114,14 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   public void setTeam(Team team) {
     team.setOrgaTeam(this);
     this.team = team;
+    this.teamId = Util.avoidNull(team, Team::getId);
     team.setOrgaTeamId(id);
     new Query<>(OrgaTeam.class).col("team", team).update(id);
+  }
+
+  public Team getTeam() {
+    if (team == null) this.team = new Query<>(Team.class).entity(teamId);
+    return team;
   }
 
   public List<Membership> getActiveMemberships() {

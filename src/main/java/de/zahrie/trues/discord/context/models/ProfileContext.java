@@ -4,33 +4,25 @@ import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.NamedQuery;
 import de.zahrie.trues.api.discord.command.context.Context;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
-import de.zahrie.trues.api.discord.command.slash.annotations.Column;
-import de.zahrie.trues.api.discord.command.slash.annotations.DBQuery;
-import de.zahrie.trues.api.discord.command.slash.annotations.Embed;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
-import de.zahrie.trues.api.riot.game.GameType;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
 @Context("Profil ansehen")
 public class ProfileContext extends ContextCommand {
   @Override
-  @Msg(value = "Profil von {}", embeds = {
-      @Embed(description = "Nutzerlevel: **{}**", queries = {
-          @DBQuery(query = "riot-account", columns = {@Column("Riot-Account")}),
-          @DBQuery(query = "prm-team", columns = {@Column("Prime League Team")}),
-          @DBQuery(query = "prm-games", columns = {@Column("Spielzeit"), @Column("Matchup"), @Column("Stats")})
-      })
-  })
+  @Msg(value = "Profil von {}", description = "Nutzerlevel: **{}**")
   protected boolean execute(UserContextInteractionEvent event) {
-    final String mention = getTargetMember().getAsMention();
+    final String mention = getTarget().getNickname();
     if (getTarget() == null) return reply("Dieser Account existiert nicht.");
+
     final Player player = getTarget().getPlayer();
     if (player != null) {
-      addEmbedData("riot-account", new Object[]{player.toString()});
+      addEmbedData(NamedQuery.PROFILE_RIOT_ACCOUNT, new Object[]{player.toString()});
       if (player.getTeam() != null) handleTeamData(player.getTeam());
-      addEmbedData("prm-games", player.getLastGames(GameType.TOURNAMENT));
+      addEmbed(NamedQuery.PROFILE_PRM_GAMES, player.getPuuid());
     }
     return sendMessage(mention);
   }
@@ -45,7 +37,7 @@ public class ProfileContext extends ContextCommand {
         score = currentLeague.getScore().toString();
       }
     }
-    addEmbedData("prm-team",
+    addEmbedData(NamedQuery.PROFILE_PRM_TEAM,
         new Object[]{"Teamname:", team.getFullName()},
         new Object[]{"Aktuelle Division:", divisionName},
         new Object[]{"Aktuelle Platzierung:", score});

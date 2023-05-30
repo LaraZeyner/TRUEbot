@@ -51,9 +51,6 @@ public class LeagueLoader extends GamesportsLoader {
   private final PRMLeague league;
   private final String url;
 
-  /**
-   * @param url url besitzt keine -
-   */
   public LeagueLoader(@NotNull PRMLeague prmLeague) {
     super(URLType.LEAGUE, prmLeague.getUrl().between("/prm/", "/").intValue(), prmLeague.getUrl().between("/group/", "/").intValue(),
         prmLeague.getUrl().after("/", -1).intValue());

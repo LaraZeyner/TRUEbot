@@ -48,7 +48,7 @@ public record Rank(RankTier tier, Division division, byte points) implements Com
     return Integer.compare(o.getMMR(), getMMR());
   }
 
-  @Listing(Listing.ListingType.CAPITALIZE)
+  @Listing(Listing.ListingType.ORDINAL)
   public enum RankTier implements Comparable<RankTier> {
     UNRANKED, IRON, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, MASTER, GRANDMASTER, CHALLENGER;
 

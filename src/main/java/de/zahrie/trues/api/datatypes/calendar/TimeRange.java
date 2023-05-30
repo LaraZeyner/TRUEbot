@@ -11,21 +11,24 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-@AllArgsConstructor
 @ExtensionMethod(DateTimeUtils.class)
 public class TimeRange implements Comparable<TimeRange> {
   private final LocalDateTime startTime;
   private final LocalDateTime endTime;
 
   public TimeRange(LocalDateTime startTime, Duration duration) {
+    this(startTime, startTime.plus(duration));
+  }
+
+  public TimeRange(LocalDateTime startTime, LocalDateTime endTime) {
     this.startTime = startTime;
-    this.endTime = startTime.plus(duration);
+    if (endTime != null && endTime.isBefore(startTime)) endTime = endTime.plusDays(1);
+    this.endTime = endTime;
   }
 
   public String display() {
@@ -111,7 +114,7 @@ public class TimeRange implements Comparable<TimeRange> {
     timeRanges.sort(TimeRange::compareTo);
     if (timeRanges.size() < 2) return timeRanges;
     TimeRange rangeOld = timeRanges.get(0);
-    for (TimeRange range : timeRanges.subList(1, timeRanges.size())) {
+    for (TimeRange range : new ArrayList<>(timeRanges).subList(1, timeRanges.size())) {
       if (rangeOld.getEndTime().isAfterEqual(range.getStartTime())) {
         rangeOld = new TimeRange(rangeOld.getStartTime().min(range.getStartTime()), rangeOld.getEndTime().max(range.getEndTime()));
       } else {

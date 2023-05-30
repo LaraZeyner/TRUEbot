@@ -18,22 +18,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-@Setter
 @Table("coverage_stage")
 public abstract class Stage implements ABetable, AEventable, Comparable<Stage>, AScheduleable, AStage, Id {
+  @Setter
   protected int id;
-  protected final Season season; // season
+  protected final int seasonId; // season
   protected TimeRange range;  // stage_start, stage_end
   protected Long discordEventId; // discord_event
 
+  protected Season season;
+
+  public Season getSeason() {
+    if (season == null) this.season = new Query<>(Season.class).entity(seasonId);
+    return season;
+  }
+
   public Stage(Season season, TimeRange range) {
     this.season = season;
+    this.seasonId = season.getId();
     this.range = range;
   }
 
-  public Stage(int id, Season season, TimeRange range, Long discordEventId) {
+  public Stage(int id, int seasonId, TimeRange range, Long discordEventId) {
     this.id = id;
-    this.season = season;
+    this.seasonId = seasonId;
     this.range = range;
     this.discordEventId = discordEventId;
   }

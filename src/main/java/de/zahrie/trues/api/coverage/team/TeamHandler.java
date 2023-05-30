@@ -38,6 +38,8 @@ public class TeamHandler extends TeamModel implements Serializable {
   }
 
   public void update() {
+    if (TeamLoader.loadedTeams.contains(team)) return;
+
     final List<HTML> stages = html.findAll("section", "league-team-stage");
     updateResult(stages);
     updateRecordAndSeasons();
@@ -47,14 +49,17 @@ public class TeamHandler extends TeamModel implements Serializable {
     final double averageMMR = team.getPlayers().stream().map(Player::getLastRelevantRank).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
     team.setLastMMR((int) Math.round(averageMMR));
     team.update();
+
+    TeamLoader.loadedTeams.add(team);
   }
 
-  public void loadDivision() {
+  public League loadDivision() {
     final League currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
     if (currentLeague instanceof PRMLeague prmLeague) {
       final LeagueLoader leagueLoader = new LeagueLoader(prmLeague);
       leagueLoader.load().updateAll();
     }
+    return currentLeague;
   }
 
   private void handleStarterMatches(List<HTML> stages) {

@@ -52,9 +52,7 @@ public abstract class SlashCommand extends Replyer {
   public SlashCommand() {
     super(SlashCommandInteractionEvent.class);
     final Command annotation = getClass().asSubclass(this.getClass()).getAnnotation(Command.class);
-    if (annotation == null) {
-      return;
-    }
+    if (annotation == null) return;
 
     this.name = annotation.name();
     this.description = annotation.descripion();
@@ -91,7 +89,7 @@ public abstract class SlashCommand extends Replyer {
 
   private void handleCommand(String fullCommandName, SlashCommandInteractionEvent event) {
     if (fullCommandName.startsWith(name)) {
-      if (!defered) {
+      if (!defered && !hasModal()) {
         final var annotation = getMessage();
         event.deferReply(annotation == null || annotation.ephemeral()).queue();
         defered = true;
@@ -105,6 +103,8 @@ public abstract class SlashCommand extends Replyer {
       }
     }
 
+    if (defered) this.defered = false;
+
     if (fullCommandName.split(" ").length == 1) {
       return;
     }
@@ -113,7 +113,7 @@ public abstract class SlashCommand extends Replyer {
         .ifPresent(validSubCommand -> validSubCommand.handleCommand(fullCommandName.substring(fullCommandName.indexOf(" ")), event));
 
     if (!end) {
-      reply("Internal Error", true);
+      reply("Internal Error");
     }
   }
 

@@ -17,6 +17,8 @@ import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
 import de.zahrie.trues.util.Const;
+import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,25 +36,31 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     this(orgaTeam, participator, match, determineThreadChannel(orgaTeam, participator, match));
   }
 
+  @Nullable
   private static ThreadChannel determineThreadChannel(OrgaTeam orgaTeam, Participator participator, Match match) {
     final AtomicReference<ThreadChannel> thread = new AtomicReference<>();
     final TeamChannel scoutingChannel = orgaTeam.getChannels().get(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return null;
+
     final Team team = participator.getTeam();
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
     if (participator.getMessageId() == null) {
       textChannel.sendMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog())
           .queue(message -> {
-            textChannel.createThreadChannel(Const.THREAD_CHANNEL_START + team.getAbbreviation() + " (" + team.getId() + ")", message.getIdLong()).queue();
+            textChannel.createThreadChannel(Const.THREAD_CHANNEL_START + team.getAbbreviation() + " (" + team.getId() + ")", message.getIdLong()).queue(thread::set);
             participator.setMessageId(message.getIdLong());
           });
-      participator.update();
+    } else {
+      textChannel.retrieveMessageById(participator.getMessageId()).queue(
+          message -> thread.set(message.getStartedThread()),
+          throwable -> new DevInfo(participator.getMessageId() + " konnte nicht gefunden werden.").with(Console.class).severe(throwable));
     }
-    textChannel.retrieveMessageById(participator.getMessageId()).queue(message -> thread.set(message.getStartedThread()));
     return thread.get();
   }
 
   public void sendCustom(IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
+    if (participator.getTeam() == null) return;
+
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(type.getTitleStart() + participator.getTeam().getName())
         .setDescription("Lineup: opgg und porofessor coming soon\nTyp: ");
@@ -63,14 +71,15 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   public void update() {
     forceUpdate();
     final Participator opponent = match.getOpponent(participator.getTeam());
-    if (opponent != null && opponent.getTeam().getOrgaTeam() != null) {
-      final Scouting opponentScouting = ScoutingManager.forTeam(opponent.getTeam().getOrgaTeam());
+    final Team team = opponent.getTeam();
+    if (team == null) return;
+
+    if (team.getOrgaTeam() != null) {
+      final Scouting opponentScouting = ScoutingManager.forTeam(team.getOrgaTeam());
       if (opponentScouting != null) opponentScouting.forceUpdate();
     }
-    if (participator.getDiscordEventId() == null) {
-      if (!(participator.getMatch() instanceof PRMMatch) || participator.getMatch().getStatus().ordinal() >= EventStatus.SCHEDULING_CONFIRM.ordinal()) {
-        participator.createScheduledEvent();
-      }
+    if (participator.getDiscordEventId() == null && (!(participator.getMatch() instanceof PRMMatch) || participator.getMatch().getStatus().ordinal() >= EventStatus.SCHEDULING_CONFIRM.ordinal())) {
+      participator.createScheduledEvent();
     }
   }
 
@@ -92,6 +101,8 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   public void send(ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
+    if (participator.getTeam() == null) return;
+
     final TeamChannel scoutingChannel = orgaTeam.getChannels().get(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return;
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
@@ -104,6 +115,9 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   }
 
   private void handleEmbed(ThreadChannel threadChannel, ScoutingType type, ScoutingGameType gameType, int days, int page) {
+    if (participator.getTeam() == null) return;
+
+    if (threadChannel.isArchived()) threadChannel.getManager().setArchived(false).queue();
     final Message msg = MessageHistory.getHistoryFromBeginning(threadChannel).complete().getRetrievedHistory().stream()
         .filter(message -> !message.getEmbeds().isEmpty())
         .filter(message -> message.getEmbeds().stream().anyMatch(embed -> embed.getTitle() != null && embed.getTitle().startsWith(type.getTitleStart())))

@@ -15,6 +15,15 @@ public class JoinQuery<E extends Id, J extends Id> {
   private String alias;
   private Query<E> innerQuery;
 
+
+  protected Class<E> getTargetClass() {
+    return targetClass;
+  }
+
+  public Query<E> getInnerQuery() {
+    return innerQuery;
+  }
+
   public JoinQuery(Query<E> innerQuery) {
     this.innerQuery = innerQuery;
   }

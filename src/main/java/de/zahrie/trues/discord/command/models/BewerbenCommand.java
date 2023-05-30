@@ -10,7 +10,7 @@ import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.discord.modal.ModalRegisterer;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Command(name = "bewerben", descripion = "bei uns bewerben", perm = @Perm(PermissionRole.EVERYONE), options = {
+@Command(name = "bewerben", descripion = "bei uns bewerben", perm = @Perm(PermissionRole.REGISTERED), options = {
     @Option(name = "als", description = "Art der Bewerbung", choices = {"Teammitglied", "Staffmitglied"})
 })
 public class BewerbenCommand extends SlashCommand {
@@ -18,8 +18,12 @@ public class BewerbenCommand extends SlashCommand {
   @UseView({ModalRegisterer.APPLY, ModalRegisterer.APPLY_STAFF})
   public boolean execute(SlashCommandInteractionEvent event) {
     final ApplicationType type = find("als").toEnum(ApplicationType.class);
+    if (type.equals(ApplicationType.TEAMMITGLIED) && getInvoker().getPlayer() == null)
+      return reply("Du musst zunächst deinen League-Account registrieren. Schreibe mir dafür **lol name: dasistmeinname**. " +
+          "Alternativ kannst du auch den Command **/settings** nutzen.");
+
     final boolean isAdvanced = getInvoker().isEvenOrAbove(DiscordGroup.TEAM_CAPTAIN);
-    return sendModal(isAdvanced, type.equals(ApplicationType.TEAMMITGLIED) ? 1 : 2);
+    return sendModal(isAdvanced, type.equals(ApplicationType.TEAMMITGLIED) ? 0 : 1);
   }
 
   private enum ApplicationType {

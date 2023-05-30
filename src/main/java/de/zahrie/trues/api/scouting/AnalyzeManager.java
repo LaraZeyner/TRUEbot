@@ -40,7 +40,7 @@ public abstract class AnalyzeManager {
     for (Object[] o : list) {
       if (o[0] == null) continue;
       final Lane lane = (o[0].toString()).toEnum(Lane.class);
-      if (lane.equals(Lane.UNKNOWN)) continue;
+      if (lane == null || lane.equals(Lane.UNKNOWN)) continue;
 
       final int amount = ((Long) o[1]).intValue();
       final PlayerLane pl = new PlayerLane(playerLane.player(), lane, playerLane.gameType(), playerLane.days());
@@ -52,8 +52,8 @@ public abstract class AnalyzeManager {
 
   protected final Team team;
   protected final List<Player> players;
-  protected ScoutingGameType gameType;
-  protected int days;
+  protected final ScoutingGameType gameType;
+  protected final int days;
 
   public AnalyzeManager(Team team, List<Player> players) {
     this(team, new SortedList<>(players), ScoutingGameType.TEAM_GAMES, 180);

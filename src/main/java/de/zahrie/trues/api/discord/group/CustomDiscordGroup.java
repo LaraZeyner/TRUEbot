@@ -16,25 +16,25 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 
 @Getter
-@Setter
 @Table("discord_group")
 public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
   @Serial
   private static final long serialVersionUID = 2036772268090427497L;
 
+  @Setter
   private int id; // discord_group_id
   private final long discordId; // discord_id
   private String name; // role_name
   private final GroupType type; // role_type
   private final boolean fixed; // fixed
-  @Getter(AccessLevel.NONE)
-  private int orgaTeamId;
+  private Integer orgaTeamId;
+
   @Setter(AccessLevel.NONE)
-  private OrgaTeam team;
+  private OrgaTeam orgaTeam;
 
   public OrgaTeam getOrgaTeam() {
-    if (team == null) this.team = new Query<>(OrgaTeam.class).where("team", this).entity();
-    return team;
+    if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).where("team", this).entity();
+    return orgaTeam;
   }
 
   public CustomDiscordGroup(long discordId, String name, GroupType type, boolean fixed, OrgaTeam team) {
@@ -42,7 +42,7 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
     this.name = name;
     this.type = type;
     this.fixed = fixed;
-    this.team = team;
+    this.orgaTeam = team;
   }
 
   public CustomDiscordGroup(int id, long discordId, String name, GroupType type, boolean fixed, int orgaTeamId) {
@@ -70,22 +70,13 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
     final CustomDiscordGroup discordGroup = new Query<>(CustomDiscordGroup.class).key("discord_id", discordId)
         .col("role_name", name).col("role_type", type).col("fixed", fixed)
         .insert(this);
-    if (team != null) team.setGroup(discordGroup);
+    if (orgaTeam != null) orgaTeam.setGroup(discordGroup);
     return discordGroup;
-  }
-
-  public void setId(int id) {
-    this.id = id;
   }
 
   public void setName(String name) {
     if (!this.name.equals(name)) new Query<>(CustomDiscordGroup.class).col("role_name", name).update(id);
     this.name = name;
-  }
-
-  public void setOrgaTeamId(int orgaTeamId) {
-    if (orgaTeamId != this.orgaTeamId) team = null;
-    this.orgaTeamId = orgaTeamId;
   }
 
   public Role determineRole() {

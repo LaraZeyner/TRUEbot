@@ -24,7 +24,7 @@ public class RoleGranterBase {
   protected final DiscordUser invoker;
 
   public RoleGranterBase(DiscordUser target) {
-    this(null, target);
+    this(target, null);
   }
 
   public RoleGranterBase(DiscordUser target, DiscordUser invoker) {
@@ -50,7 +50,9 @@ public class RoleGranterBase {
 
   public Set<DiscordGroup> getGroups() {
     final Set<DiscordGroup> activeGroups = invoker.getActiveGroups();
-    return activeGroups.stream().flatMap(activeGroup -> activeGroup.getAssignable().stream()).collect(Collectors.toSet());
+    return activeGroups.stream().filter(Objects::nonNull)
+        .flatMap(activeGroup -> activeGroup.getAssignable().stream())
+        .collect(Collectors.toSet());
   }
 
   public Set<DiscordGroup> getMemberGroups() {
@@ -146,7 +148,7 @@ public class RoleGranterBase {
     if (!groups.remove(group)) {
       return;
     }
-    if (groups.stream().map(DiscordGroup::getDepartment).noneMatch(department -> department.equals(group.getDepartment()))) {
+    if (group.getDepartment() != null && groups.stream().map(DiscordGroup::getDepartment).filter(Objects::nonNull).noneMatch(department -> department.equals(group.getDepartment()))) {
       final DiscordGroup departmentGroup = group.getDepartment().getGroup();
       if (departmentGroup != null && !departmentGroup.equals(group)) {
         removeRole(departmentGroup.getRole());

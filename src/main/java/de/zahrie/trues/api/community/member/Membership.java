@@ -14,7 +14,6 @@ import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -76,9 +75,9 @@ public class Membership implements Entity<Membership>, Comparable<Membership> {
   public void removeFromTeam(OrgaTeam team) {
     this.orgaTeam = null;
     this.active = false;
-    new Query<>(Membership.class).col("orga_team", null).col("active", false).update(id);
+    new Query<>(Membership.class).col("active", false).update(id);
     new RoleGranter(user).removeTeamRole(this, team);
-    Nunu.DiscordMessager.dm(user, "Du wurdest aus dem Team **" + team.getName() + "** entfernt. Du kannst aber jederzeit gerne eine neue Bewerbung schreiben. Solltest du Probleme oder Fragen haben kannst du mir jederzeit schreiben.");
+    user.dm("Du wurdest aus dem Team **" + team.getName() + "** entfernt. Du kannst aber jederzeit gerne eine neue Bewerbung schreiben. Solltest du Probleme oder Fragen haben kannst du mir jederzeit schreiben.");
   }
 
   public void setId(int id) {

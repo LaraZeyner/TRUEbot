@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 @ExtensionMethod(DiscordUserFactory.class)
 public class ApplicationFactory {
   public static Application create(@NonNull DiscordUser user, @NonNull TeamRole role, @NonNull TeamPosition position) {
-    return create(user, role, position, null, null);
+    return create(user, role, position, null, false);
   }
 
   /**
@@ -94,14 +94,13 @@ public class ApplicationFactory {
   }
 
   /**
-   * Zuständig für TeamCaptain, Spieler, Mentor, Substitude,
+   * Zuständig für TeamCaptain, Spieler, Substitude,
    */
   public static void updateTeamRoleRole(DiscordUser user) {
     final List<Membership> currentTeams = MembershipFactory.getCurrentTeams(user);
     final RoleGranter granter = new RoleGranter(user);
     handleTeamRole(granter, currentTeams, DiscordGroup.TEAM_CAPTAIN, Membership::isCaptain);
     handleTeamRole(granter, currentTeams, DiscordGroup.SUBSTITUDE, member -> member.getRole().equals(TeamRole.SUBSTITUTE) || member.getRole().equals(TeamRole.TRYOUT));
-    handleTeamRole(granter, currentTeams, DiscordGroup.MENTOR, member -> member.getRole().equals(TeamRole.MAIN) && member.getPosition().equals(TeamPosition.MENTOR));
     handleTeamRole(granter, currentTeams, DiscordGroup.PLAYER, member -> member.getRole().equals(TeamRole.MAIN) && member.getPosition().ordinal() < 5);
   }
 

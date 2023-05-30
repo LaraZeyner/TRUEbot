@@ -4,58 +4,65 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
-import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
 import de.zahrie.trues.api.discord.builder.InfoPanelBuilder;
-import de.zahrie.trues.api.discord.builder.embed.CustomEmbedData;
-import de.zahrie.trues.api.discord.builder.modal.ModalHandler;
-import de.zahrie.trues.api.discord.builder.queryCustomizer.CustomQuery;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.NamedQuery;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
+import de.zahrie.trues.api.discord.command.InputHandler;
 import de.zahrie.trues.api.discord.command.context.UseView;
-import de.zahrie.trues.api.discord.command.slash.annotations.Embed;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.util.Const;
+import de.zahrie.trues.util.StringUtils;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 
 @Data
 @ExtensionMethod(StringUtils.class)
 public abstract class Replyer {
-  private final Class<? extends IReplyCallback> clazz;
-  private final List<CustomEmbedData> customEmbedData = new ArrayList<>();
+  protected final Class<? extends IReplyCallback> clazz;
+  protected final List<SimpleCustomQuery> customEmbedData = new ArrayList<>();
   protected String name;
   protected IReplyCallback event;
   protected boolean end = false;
 
-  protected void addEmbedData(String key, List<Object[]> data) {
-    customEmbedData.add(new CustomEmbedData(key, data));
+  protected void addEmbed(NamedQuery namedQuery, Object... parameters) {
+    customEmbedData.add(SimpleCustomQuery.params(namedQuery, Arrays.asList(parameters)));
   }
 
-  protected void addEmbedData(String key, Object[]... data) {
-    customEmbedData.add(new CustomEmbedData(key, Arrays.stream(data).toList()));
+  protected void addEmbedData(NamedQuery namedQuery, List<Object[]> customData) {
+    customEmbedData.add(SimpleCustomQuery.custom(namedQuery, customData));
+  }
+
+  protected void addEmbedData(NamedQuery namedQuery, Object[]... customData) {
+    customEmbedData.add(SimpleCustomQuery.custom(namedQuery, Arrays.asList(customData)));
   }
 
   protected boolean reply(String message) {
-    return reply(message, true);
+    return reply(message, null);
   }
 
-  protected boolean reply(String message, boolean ephemeral) {
+  protected boolean reply(String message, Boolean ephemeral) {
     try {
-      event.reply(message).setEphemeral(ephemeral).queue();
+      WebhookMessageCreateAction<Message> msg = event.getHook().sendMessage(message);
+      if (ephemeral != null) msg = msg.setEphemeral(ephemeral);
+      msg.queue();
       end = true;
       return true;
-    } catch (RejectedExecutionException exception) {
+    } catch (RejectedExecutionException ignored) {
       return false;
     }
   }
@@ -65,10 +72,9 @@ public abstract class Replyer {
       reply("Internal Error");
       return null;
     }
+
     final Member invoker = event.getMember();
-    if (invoker == null) {
-      reply("Du existierst nicht");
-    }
+    if (invoker == null) reply("Du existierst nicht");
     return invoker;
   }
 
@@ -79,10 +85,10 @@ public abstract class Replyer {
   protected Msg getMessage() {
     try {
       return getClass().asSubclass(this.getClass())
-          .getMethod("execute", clazz)
+          .getDeclaredMethod("execute", clazz)
           .getAnnotation(Msg.class);
     } catch (NoSuchMethodException ignored) {
-      reply("Internal Error", true);
+      reply("Internal Error");
     }
     return null;
   }
@@ -102,27 +108,19 @@ public abstract class Replyer {
   }
 
   private boolean performMsg(boolean error, Msg annotation, Object[] data) {
-    String output = error ? annotation.error() : annotation.value();
-    if (annotation.embeds().length == 0) {
-      return reply(output.format(data), annotation.ephemeral());
-    }
-    final List<EmbedWrapper> wrappers = new ArrayList<>();
-    for (Embed embed : annotation.embeds()) {
-      if (!embed.value().equals("")) {
-        output = embed.value();
-      }
-      final String title = output.format(data);
-      final String description = embed.description().format(output.count("{}"), data);
-      final var builder = new InfoPanelBuilder(title, description, Arrays.stream(embed.queries()).map(CustomQuery::fromDBQuery).toList(), customEmbedData);
-      wrappers.add(builder.build());
-    }
+    final String output = error ? annotation.error() : annotation.value();
+    if (customEmbedData.isEmpty() && annotation.description().equals("keine Daten")) return reply(output.format(data), annotation.ephemeral());
 
-    final List<String> wrapperChains = new ArrayList<>();
+    final List<EmbedWrapper> wrappers = new ArrayList<>();
+    final var builder = new InfoPanelBuilder(output, annotation.description(), customEmbedData);
+    wrappers.add(builder.build());
+
+    final List<String> wrapperStrings = new ArrayList<>();
     StringBuilder out = new StringBuilder();
     for (EmbedWrapper wrapper : wrappers) {
       for (String t : wrapper.merge()) {
         if (out.length() + t.length() > Const.DISCORD_MESSAGE_MAX_CHARACTERS) {
-          wrapperChains.add(out.toString());
+          wrapperStrings.add(out.toString());
           out = new StringBuilder(t);
         } else {
           out.append(t);
@@ -132,38 +130,29 @@ public abstract class Replyer {
     }
 
     out.append("zuletzt aktualisiert ").append(TimeFormat.DEFAULT.now());
-    wrapperChains.add(out.toString());
+    wrapperStrings.add(out.toString());
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();
 
-    ReplyCallbackAction message;
-    if (!wrapperChains.isEmpty()) {
+    final WebhookMessageCreateAction<?> message;
+    if (!wrapperStrings.isEmpty()) {
+      message = event.getHook().sendMessage(wrapperStrings.get(0)).addEmbeds(wrapperEmbeds);
 
-      message = event.reply(wrapperChains.get(0));
-      if (!wrapperEmbeds.isEmpty()) {
-        message = message.setEmbeds(wrapperEmbeds);
+      if (wrapperStrings.size() > 1 && !annotation.ephemeral()) {
+        IntStream.range(1, wrapperStrings.size()).forEach(i ->
+            ((SlashCommandInteractionEvent) event).getChannel().sendMessage(wrapperStrings.get(i)).queue());
       }
-      if (wrapperChains.size() > 1 && !annotation.ephemeral()) {
-        for (int i = 1; i < wrapperChains.size(); i++) {
-          final String msg = wrapperChains.get(i);
-          ((SlashCommandInteractionEvent) event).getChannel().sendMessage(msg).queue();
 
-        }
-      }
-    } else if (!wrapperEmbeds.isEmpty()) {
-      message = event.replyEmbeds(wrapperEmbeds);
-    } else {
-      message = event.reply("no Data");
-    }
+    } else if (!wrapperEmbeds.isEmpty()) message = event.getHook().sendMessageEmbeds(wrapperEmbeds);
+    else message = event.getHook().sendMessage("no Data");
 
-    message = message.setEphemeral(annotation.ephemeral());
-    message.queue();
+    message.setEphemeral(annotation.ephemeral()).queue();
     end = true;
     return true;
   }
 
   protected boolean sendModal() {
-    return sendModal(false, 1);
+    return sendModal(false, 0);
   }
 
   protected boolean sendModal(int index) {
@@ -171,7 +160,7 @@ public abstract class Replyer {
   }
 
   protected boolean sendModal(boolean someBool) {
-    return sendModal(someBool, 1);
+    return sendModal(someBool, 0);
   }
 
   protected boolean sendModal(boolean someBool, int index) {
@@ -183,7 +172,7 @@ public abstract class Replyer {
       return false;
     }
     final String modalId = view.value()[index];
-    final Modal modal = new ModalHandler.Find(getInvoker(), getTarget()).getModal(modalId, someBool);
+    final Modal modal = new InputHandler.Find(getInvoker(), getTarget(), event).getModal(modalId, someBool);
     if (modal == null) {
       return false;
     }
@@ -198,7 +187,7 @@ public abstract class Replyer {
   private UseView getModalView() {
     try {
       return getClass().asSubclass(this.getClass())
-          .getMethod("execute", clazz)
+          .getDeclaredMethod("execute", clazz)
           .getAnnotation(UseView.class);
     } catch (NoSuchMethodException ignored) {  }
     return null;
@@ -220,5 +209,16 @@ public abstract class Replyer {
 
   protected DiscordUser getTarget() {
     return getTargetMember() == null ? null : DiscordUserFactory.getDiscordUser(getTargetMember());
+  }
+
+  protected boolean hasModal() {
+    try {
+      final UseView execute = getClass().asSubclass(this.getClass())
+          .getDeclaredMethod("execute", clazz)
+          .getAnnotation(UseView.class);
+      return execute != null;
+    } catch (NoSuchMethodException exception) {
+      throw new RuntimeException(exception);
+    }
   }
 }

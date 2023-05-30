@@ -6,9 +6,12 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.database.connector.Database;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.util.Nunu;
-import de.zahrie.trues.api.riot.Xayah;
+import de.zahrie.trues.api.scouting.AnalyzeManager;
+import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.util.Connectable;
 import de.zahrie.trues.util.Const;
 import lombok.extern.java.Log;
@@ -42,11 +45,8 @@ public final class LoadupManager implements Connectable {
     consoleHandler.setLevel(Level.FINE);
     Logger.getAnonymousLogger().addHandler(consoleHandler);
 
-    Database.Connector.connect();
+    Database.connect();
     log.info("Datenbank geladen");
-
-    Xayah.getInstance().connect();
-    log.info("Riot-API geladen");
 
     Nunu.getInstance().connect();
     log.info("System gestartet in " + (System.currentTimeMillis() - initMillis) + " Millisekunden.");
@@ -62,6 +62,14 @@ public final class LoadupManager implements Connectable {
   public void restart() {
     this.disconnectingMillis = System.currentTimeMillis();
     askForDisconnect(true);
+    reset();
+  }
+
+  private void reset() {
+    AnalyzeManager.reset();
+    RiotPlayerAnalyzer.reset();
+    TeamLoader.reset();
+    Query.reset();
   }
 
   public void askForDisconnect(Boolean restart) {
@@ -72,9 +80,8 @@ public final class LoadupManager implements Connectable {
   }
 
   private void doDisconnect() {
-    Xayah.getInstance().disconnect();
     Nunu.getInstance().disconnect();
-    Database.Connector.disconnect();
+    Database.disconnect();
     instance = null;
     log.info("System beendet in " + (System.currentTimeMillis() - disconnectingMillis) + " Millisekunden.");
     handleRestart();

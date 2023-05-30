@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @Table(value = "calendar", department = "team")
 @ExtensionMethod(StringUtils.class)
-public class TeamCalendar extends EventCalendar implements Entity<TeamCalendar>, DTO {
+public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO {
   @Serial
   private static final long serialVersionUID = -8449986995823183145L;
 
@@ -51,7 +51,7 @@ public class TeamCalendar extends EventCalendar implements Entity<TeamCalendar>,
         (int) objects.get(0),
         new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
         (String) objects.get(4),
-        (Long) objects.get(5),
+        (Long) objects.get(6),
         new SQLEnum<>(TeamCalendarType.class).of(objects.get(5)),
         new Query<>(OrgaTeam.class).entity(objects.get(8))
     );

@@ -10,12 +10,11 @@ import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.channel.DiscordChannelType;
-import de.zahrie.trues.api.discord.channel.PermissionChannelType;
+import de.zahrie.trues.api.discord.channel.ChannelType;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 @Getter
 @Setter
@@ -27,13 +26,13 @@ public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
   private final OrgaTeam orgaTeam; // orga_team
   private final TeamChannelType teamChannelType; // teamchannel_type
 
-  public TeamChannel(long discordId, String name, PermissionChannelType permissionType, ChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
+  public TeamChannel(long discordId, String name, ChannelType permissionType, net.dv8tion.jda.api.entities.channel.ChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
     super(discordId, name, permissionType, channelType);
     this.orgaTeam = orgaTeam;
     this.teamChannelType = teamChannelType;
   }
 
-  private TeamChannel(int id, long discordId, DiscordChannelType channelType, String name, PermissionChannelType permissionType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
+  private TeamChannel(int id, long discordId, DiscordChannelType channelType, String name, ChannelType permissionType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
     super(id, discordId, channelType, name, permissionType);
     this.orgaTeam = orgaTeam;
     this.teamChannelType = teamChannelType;
@@ -45,7 +44,7 @@ public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
         (long) objects.get(2),
         new SQLEnum<>(DiscordChannelType.class).of(objects.get(3)),
         (String) objects.get(4),
-        new SQLEnum<>(PermissionChannelType.class).of(objects.get(5)),
+        new SQLEnum<>(ChannelType.class).of(objects.get(5)),
         new Query<>(OrgaTeam.class).entity( objects.get(6)),
         new SQLEnum<>(TeamChannelType.class).of(objects.get(7))
     );
@@ -67,11 +66,5 @@ public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
       return true;
     }
     return super.updatePermission(role);
-  }
-
-  @Override
-  public void updateForGroup(DiscordGroup group) {
-    final Role role = orgaTeam.getRoleManager().getRole();
-    uFr(role, group);
   }
 }

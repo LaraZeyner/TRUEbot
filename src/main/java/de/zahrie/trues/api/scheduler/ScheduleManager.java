@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.zahrie.trues.api.discord.builder.leaderboard.LeaderboardHandler;
 import de.zahrie.trues.discord.scheduler.ScheduleRegisterer;
 
 public class ScheduleManager {
@@ -14,8 +13,7 @@ public class ScheduleManager {
     new Timer().scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
-        tasks.forEach(ScheduledTask::handleTask);
-        LeaderboardHandler.handleLeaderboards();
+        tasks.forEach(ScheduledTask::start);
       }
     }, 0, 60_000L);
   }

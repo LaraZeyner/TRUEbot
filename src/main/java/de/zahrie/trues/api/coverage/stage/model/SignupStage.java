@@ -19,14 +19,14 @@ public class SignupStage extends Stage implements Entity<SignupStage>, WaitingSt
     super(season, range);
   }
 
-  public SignupStage(int id, Season season, TimeRange range, Long discordEventId) {
-    super(id, season, range, discordEventId);
+  public SignupStage(int id, int seasonId, TimeRange range, Long discordEventId) {
+    super(id, seasonId, range, discordEventId);
   }
 
   public static SignupStage get(List<Object> objects) {
     return new SignupStage(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(2)),
+        (int) objects.get(2),
         new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
         (Long) objects.get(5)
     );
@@ -34,7 +34,7 @@ public class SignupStage extends Stage implements Entity<SignupStage>, WaitingSt
 
   @Override
   public SignupStage create() {
-    return new Query<>(SignupStage.class).key("season", season)
+    return new Query<>(SignupStage.class).key("season", seasonId)
         .col("stage_start", range.getStartTime()).col("stage_end", range.getEndTime()).col("discord_event", discordEventId)
         .insert(this);
   }

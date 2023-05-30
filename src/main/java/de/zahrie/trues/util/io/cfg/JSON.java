@@ -1,19 +1,21 @@
 package de.zahrie.trues.util.io.cfg;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import lombok.NonNull;
 import org.json.JSONObject;
 
 public final class JSON extends JSONObject {
-
-  public static JSON fromFile(String fileName) {
+  public static JSON read(@NonNull String fileName) {
     try {
-      final var path = Path.of(ClassLoader.getSystemResource(fileName).toURI());
-      final String content = Files.readString(path);
+      final String content = Files.readString(getPath(fileName));
       return new JSON(content);
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException(e);
@@ -22,10 +24,20 @@ public final class JSON extends JSONObject {
 
   public static void write(String fileName, String content) {
     try {
-      final var path = Path.of(ClassLoader.getSystemResource(fileName).toURI());
-      Files.writeString(path, content, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+      Files.writeString(getPath(fileName), content, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  @NonNull
+  private static Path getPath(@NonNull String fileName) throws URISyntaxException, FileNotFoundException {
+    if (Files.exists(Paths.get("./resources/"))) {
+      return Paths.get("./resources/" + fileName);
+    } else {
+      final URL resource = JSON.class.getResource("/" + fileName);
+      if (resource == null) throw new FileNotFoundException("File " + fileName + " konnte nicht gefunden werden.");
+      return Path.of(resource.toURI());
     }
   }
 

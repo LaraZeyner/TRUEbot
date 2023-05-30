@@ -4,28 +4,28 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.riot.performance.TeamPerf;
 import de.zahrie.trues.util.Util;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @Getter
-@Setter
 @Table("game")
+@ExtensionMethod(SQLUtils.class)
 public class Game implements Entity<Game>, Comparable<Game> {
   @Serial
   private static final long serialVersionUID = -1636645398510925983L;
 
+  @Setter
   private int id; // game_id
   private final String gameId; // game_index
   private final LocalDateTime start; // start_time
@@ -33,17 +33,39 @@ public class Game implements Entity<Game>, Comparable<Game> {
   private final GameType type; // game_type
   private boolean orgaGame = false; // orgagame
 
-  public List<TeamPerf> getTeamPerformances() {
-    return new Query<>(TeamPerf.class).where("game", this).entityList();
-  }
+  private List<Selection> selections;
 
   public List<Selection> getSelections() {
-    return new Query<>(Selection.class).where("game", this).entityList();
+    if (selections == null) this.selections = new Query<>(Selection.class).where("game", this).entityList();
+    return selections;
+  }
+
+  public boolean addSelection(Selection selection) {
+    return getSelections().add(selection);
+  }
+  private List<TeamPerf> teamPerformances;
+
+  public List<TeamPerf> getTeamPerformances() {
+    if (teamPerformances == null) this.teamPerformances = new Query<>(TeamPerf.class).where("game", this).entityList();
+    return teamPerformances;
+  }
+
+  public boolean addTeamPerformance(TeamPerf teamPerf) {
+    return getTeamPerformances().add(teamPerf);
+  }
+
+  private Game(int id, String gameId, LocalDateTime start, int durationInSeconds, GameType type, boolean orgaGame) {
+    this.id = id;
+    this.gameId = gameId;
+    this.start = start;
+    this.durationInSeconds = durationInSeconds;
+    this.type = type;
+    this.orgaGame = orgaGame;
   }
 
   public static Game get(List<Object> objects) {
     return new Game(
-        (int) objects.get(0),
+        objects.get(0).intValue(),
         (String) objects.get(1),
         (LocalDateTime) objects.get(2),
         (int) objects.get(3),

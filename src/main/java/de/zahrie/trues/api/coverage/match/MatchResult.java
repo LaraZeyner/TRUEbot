@@ -7,8 +7,8 @@ import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.MatchFormat;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
@@ -26,24 +26,18 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode
 @ExtensionMethod(StringUtils.class)
 public final class MatchResult implements Comparable<MatchResult> {
-  public static final MatchResult ZERO = new MatchResult(0, 0);
-
   public static MatchResult fromResultString(String resultString, Match match) {
     return fromResultString(resultString, match.getFormat(), match.getLogs(MatchLogAction.REPORT));
   }
 
-  public static MatchResult fromResultString(String resultString, MatchFormat format, int matchId) {
-    final List<MatchLog> reportedLogs = new Query<>(MatchLog.class).where("coverage", matchId).and("action", MatchLogAction.REPORT).entityList();
-    return fromResultString(resultString, format, reportedLogs);
-  }
-
   public static MatchResult fromResultString(String resultString, MatchFormat format, List<MatchLog> logs) {
-    if (resultString.matches("\\d+:\\d+")) {
-      return new MatchResult(resultString.before(":").intValue(), resultString.after(":").intValue(), format.ordinal(), true);
+    if (resultString.strip().matches("\\d+:\\d+")) {
+      return new MatchResult(resultString.strip().before(":").intValue(), resultString.after(":").intValue(), format.ordinal(), true);
     }
 
     if (!resultString.equals("-:-")) {
       new DevInfo(resultString).with(Console.class).error(new IllegalArgumentException("Das Ergebnis ist nicht gültig!"));
+      System.out.println(resultString);
       return null;
     }
 
@@ -74,7 +68,9 @@ public final class MatchResult implements Comparable<MatchResult> {
     final int maxGames = Math.max((maxGames1 == null ? 0 : maxGames1), this.maxGames == null ? 0 : this.maxGames);
     final int newHome = homeScore + matchResult.homeScore;
     final int newGuest = guestScore + matchResult.guestScore;
-    return new MatchResult(newHome, newGuest, maxGames == 0 ? null : maxGames, newHome + newGuest >= maxGames || played);
+    Boolean newPlayed = newHome + newGuest >= maxGames;
+    if (!newPlayed) newPlayed = played;
+    return new MatchResult(newHome, newGuest, maxGames == 0 ? null : maxGames, newPlayed);
   }
 
   public Boolean wasAcurate(Match match) {
@@ -133,8 +129,8 @@ public final class MatchResult implements Comparable<MatchResult> {
    * @return Wert zwischen 0 und 1 <p> Wie hoch die Chance, dass home ein Game gewinnt
    */
   private double determineGamePercentage(Match match) {
-    final Integer homeMMR = Util.avoidNull(match.getHome(), 0, participator -> participator.getTeamLineup().getMmr());
-    final Integer guestMMR = Util.avoidNull(match.getGuest(), 0, participator -> participator.getTeamLineup().getMmr());
+    final Integer homeMMR = Util.avoidNull(match.getHome(), 0, Participator::getLineupMMR);
+    final Integer guestMMR = Util.avoidNull(match.getGuest(), 0, Participator::getLineupMMR);
 
     final double percentage = (homeMMR + guestMMR == 0) ? 0 : homeMMR * 1. / (guestMMR + homeMMR);
     if (percentage < .5 - Const.PREDICTION_FACTOR) return percentage / (2 - Const.PREDICTION_FACTOR * 4);

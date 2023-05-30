@@ -48,21 +48,21 @@ public class DiscordChannelFactory {
     if (teamChannel != null) teamChannel.forceDelete();
   }
 
-  private static PermissionChannelType determineChannelType(GuildChannel initialChannel) {
-    if (!(initialChannel instanceof final ICategorizableChannel channel)) return PermissionChannelType.PUBLIC;
+  private static ChannelType determineChannelType(GuildChannel initialChannel) {
+    if (!(initialChannel instanceof final ICategorizableChannel channel)) return ChannelType.PUBLIC;
 
     final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(channel);
-    if (team != null) return initialChannel instanceof AudioChannel ? PermissionChannelType.TEAM_VOICE : PermissionChannelType.TEAM_CHAT;
+    if (team != null) return initialChannel instanceof AudioChannel ? ChannelType.TEAM_VOICE : ChannelType.TEAM_CHAT;
 
     final Category category = channel.getParentCategory();
-    if (category == null) return PermissionChannelType.PUBLIC;
+    if (category == null) return ChannelType.PUBLIC;
 
     return switch (category.getName()) {
-      case "Social Media" -> PermissionChannelType.SOCIALS;
-      case "Events" -> PermissionChannelType.EVENTS;
-      case "Orga Intern" -> channel instanceof AudioChannel ? PermissionChannelType.ORGA_INTERN_VOICE : PermissionChannelType.ORGA_INTERN;
-      case "Content" -> channel instanceof AudioChannel ? PermissionChannelType.CONTENT_INTERN_VOICE : PermissionChannelType.CONTENT_INTERN;
-      default -> PermissionChannelType.PUBLIC;
+      case "Social Media" -> ChannelType.SOCIALS;
+      case "Events" -> ChannelType.EVENTS;
+      case "Orga Intern" -> channel instanceof AudioChannel ? ChannelType.ORGA_INTERN_VOICE : ChannelType.ORGA_INTERN;
+      case "Content" -> channel instanceof AudioChannel ? ChannelType.CONTENT_INTERN_VOICE : ChannelType.CONTENT_INTERN;
+      default -> ChannelType.PUBLIC;
     };
   }
 }

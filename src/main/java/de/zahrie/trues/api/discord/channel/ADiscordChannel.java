@@ -1,52 +1,65 @@
 package de.zahrie.trues.api.discord.channel;
 
-import java.util.Set;
-
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.util.Nunu;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.PermissionOverride;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import org.jetbrains.annotations.Nullable;
 
 public interface ADiscordChannel {
   long getDiscordId();
+
   DiscordChannelType getChannelType();
+
   String getName();
+
   void setName(String name);
-  PermissionChannelType getPermissionType();
-  void setPermissionType(PermissionChannelType permissionType);
+
+  ChannelType getPermissionType();
+
+  void setPermissionType(ChannelType permissionType);
 
   default void updatePermissions() {
-    final PermissionChannelType.ChannelPattern channelPattern = getPermissionType().getPattern();
-    channelPattern.getData().forEach(((group, rolePattern) -> updateForGroup(group)));
+    final IPermissionContainer channel = getChannel();
+    for (ChannelType.APermissionOverride permission : getPermissionType().getPermissions()) {
+      final IPermissionHolder permissionHolder = determineHolder(channel, permission.permissionHolder());
+      if (permissionHolder == null) continue;
+
+      channel.getManager().putPermissionOverride(permissionHolder, permission.getAllowed(), permission.getDenied()).queue();
+    }
   }
 
   default void updateForGroup(DiscordGroup group) {
-    uFr(group.getRole(), group);
+    final IPermissionHolder holder = group.equals(DiscordGroup.TEAM_ROLE_PLACEHOLDER) ?
+        detemineRoleOfChannel((ICategorizableChannel) getChannel()) : determineHolder(getChannel(), group.getRole());
+    final ChannelType.APermissionOverride permission = getPermissionType().getTeamPermission();
+    if (holder == null) return;
+
+    getChannel().getManager().putPermissionOverride(holder, permission.getAllowed(), permission.getDenied()).queue();
   }
 
-  default void uFr(Role role, DiscordGroup group) {
-    final ChannelRolePattern rolePattern = getPermissionType().getPattern().getData().get(group);
-    final PermissionOverride override = getChannel().getPermissionOverride(role);
-    if (override == null) {
-      getChannel().getManager().putPermissionOverride(role, rolePattern.getAllowed(), rolePattern.getDenied()).queue();
-      return;
-    }
-    final Set<Permission> allowed = rolePattern.getAllowed();
-    final Set<Permission> pattern = getPermissionType().getPattern().getData().get(DiscordGroup.EVERYONE).getDenied();
-    if (!rolePattern.isRevokeAll()) {
-      pattern.retainAll(rolePattern.getRevokeDenials());
-    }
-    allowed.addAll(pattern);
-    final Set<Permission> denied = rolePattern.getDenied();
-    allowed.removeAll(denied);
-    if (getChannel() instanceof AudioChannel) {
-      allowed.remove(Permission.VIEW_CHANNEL);
-      denied.remove(Permission.VIEW_CHANNEL);
-    }
-    override.getManager().setPermissions(allowed, denied).queue();
+  @Nullable
+  private static IPermissionHolder determineHolder(IPermissionContainer channel, IPermissionHolder holder) {
+    return holder instanceof Role role && OrgaTeamFactory.isRoleOfTeam(role) && channel instanceof ICategorizableChannel categorizableChannel ?
+        detemineRoleOfChannel(categorizableChannel) : holder;
+  }
+
+  @Nullable
+  private static Role detemineRoleOfChannel(ICategorizableChannel categorizableChannel) {
+    assert categorizableChannel.getParentCategory() != null;
+    final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(categorizableChannel.getParentCategory());
+    if (teamChannel == null) return null;
+
+    final OrgaTeam team = teamChannel.getOrgaTeam();
+    if (team == null) return null;
+
+    return team.getRoleManager().getRole();
   }
 
   default IPermissionContainer getChannel() {

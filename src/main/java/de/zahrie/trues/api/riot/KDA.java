@@ -2,13 +2,11 @@ package de.zahrie.trues.api.riot;
 
 import java.util.Set;
 
-import com.merakianalytics.orianna.types.core.match.Participant;
-import com.merakianalytics.orianna.types.core.match.ParticipantStats;
+import no.stelar7.api.r4j.pojo.lol.match.v5.MatchParticipant;
 
 public record KDA(short kills, short deaths, short assists) {
-  public static KDA fromParticipant(Participant participant) {
-    final ParticipantStats stats = participant.getStats();
-    return new KDA((short) stats.getKills(), (short) stats.getDeaths(), (short) stats.getAssists());
+  public static KDA fromParticipant(MatchParticipant participant) {
+    return new KDA((short) participant.getKills(), (short) participant.getDeaths(), (short) participant.getAssists());
   }
 
   public static KDA sum(Set<KDA> kdas) {

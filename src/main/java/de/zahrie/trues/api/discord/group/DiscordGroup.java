@@ -16,56 +16,46 @@ import net.dv8tion.jda.api.entities.Role;
 @Getter
 @Listing(Listing.ListingType.UPPER)
 public enum DiscordGroup implements Roleable {
-  EVERYONE(0, "@everyone", 1094596402098733129L, GroupTier.EVERYONE, Department.NONE, GroupType.DEFAULT, Set.of()),
-  REGISTERED(1, "Bestätigt", 1094596402098733134L, GroupTier.REGISTERED, Department.NONE, GroupType.PINGABLE, Set.of()),
-  APPLICANT(2, "Bewerber", 1094596402581078049L, GroupTier.APPLICANT, Department.NONE, GroupType.PINGABLE, Set.of()),
-  TRYOUT(3, "Tryout", 1094596402581078050L, GroupTier.TRYOUT, Department.NONE, GroupType.PINGABLE, Set.of()),
-  SUBSTITUDE(4, "Substitude", 1094596402581078051L, GroupTier.SUBSTITUDE, Department.NONE, GroupType.PINGABLE, Set.of()),
-  EVENT_PLANNING(5, "Eventplanung", 1094596402614653066L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  CASTER(6, "Cast", 1094596402597863479L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  DEVELOPER(7, "Developer", 1094596402581078053L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  SOCIAL_MEDIA(8, "Social Media", 1094596402597863478L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  PLAYER(9, "Spieler", 1094596402581078052L, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  MENTOR(10, "Mentor", 1094596402597863477L, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  ANALYST(11, "Analyst", 1094596402597863476L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  DRAFT_COACH(12, "Draft Coach", 1094596402597863475L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  LANE_COACH(13, "Lane Coach", 1094596402597863474L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  MENTAL_COACH(14, "Mental Coach", 1094596402581078055L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  STRATEGIC_COACH(15, "Strategic Coach", 1094596402581078054L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  EVENT_LEAD(16, "Head of Event", 1094596402635603988L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  SOCIAL_MEDIA_LEAD(17, "Head of Social Media", 1094596402614653069L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  TEAM_CAPTAIN(18, "Captain", 1094596402614653067L, GroupTier.LEADER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  TEAM_BUILDING(19, "Teamaufbau", 1094596402614653068L, GroupTier.LEADER, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  EVENT_MANAGER(20, "Event Management", 1094596402635603989L, GroupTier.MANAGEMENT, Department.EVENT, GroupType.PINGABLE, Set.of()),
-  COMMUNITY_MANAGER(21, "Community Management", 1094596402635603991L, GroupTier.MANAGEMENT, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  COACHING_MANAGER(22, "Team Management", 1094596402635603990L, GroupTier.MANAGEMENT, Department.COACHING, GroupType.PINGABLE, Set.of()),
-  ORGA_LEADER(23, "Leitung Community", 1094596402656583770L, GroupTier.ORGA_LEADER, Department.ALL, GroupType.PINGABLE, Set.of()),
+  EVERYONE(0, "@everyone", 540216137628254223L, GroupTier.EVERYONE, Department.NONE, GroupType.DEFAULT, Set.of()),
+  REGISTERED(1, "Bestätigt", 1031835432691961866L, GroupTier.REGISTERED, Department.NONE, GroupType.PINGABLE, Set.of()),
+  APPLICANT(2, "Bewerber", 1028923616290676776L, GroupTier.APPLICANT, Department.NONE, GroupType.PINGABLE, Set.of()),
+  TRYOUT(3, "Tryout", 1031833582932611072L, GroupTier.TRYOUT, Department.NONE, GroupType.PINGABLE, Set.of()),
+  SUBSTITUDE(4, "Substitude", 1049255537960824902L, GroupTier.SUBSTITUDE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  EVENT_PLANNING(5, "Eventplanung", 1110091981536903218L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  CASTER(6, "Caster", 1035210811611820053L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
+  DEVELOPER(7, "Developer", 1024587566198042666L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  SOCIAL_MEDIA(8, "Social Media", 1035215111922655292L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  PLAYER(9, "Spieler", 1013025140222726164L, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  ANALYST(11, "Analyst", 1035214858402140231L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  LANE_COACH(13, "Individueller Coach", 1035214651669102612L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  MENTAL_COACH(14, "Mental Coach", 1035214604814520401L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  TEAM_COACH(15, "Team Coach", 1035214448996130886L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  TEAM_CAPTAIN(18, "Teamcaptain", 1030764031423815760L, GroupTier.LEADER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  TEAM_MANAGER(19, "Teamaufbau", 1094596402614653068L, GroupTier.MANAGEMENT, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  EVENT_MANAGER(20, "Event Management", 1080159663036841995L, GroupTier.MANAGEMENT, Department.EVENT, GroupType.PINGABLE, Set.of()),
+  ORGA_LEADER(23, "Leitung Community", 1084395080472866846L, GroupTier.ORGA_LEADER, Department.ALL, GroupType.PINGABLE, Set.of()),
   TEAM_ROLE_PLACEHOLDER(24, "", -1, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  TOP(50, "Top", 1094596402560127063L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  JUNGLE(51, "Jungle", 1094596402560127062L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  MIDDLE(52, "Middle", 1094596402560127061L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  BOTTOM(53, "Bottom", 1094596402560127060L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  SUPPORT(54, "Support", 1094596402560127059L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  TOP_HELP(55, "Top-Selbsthilfe", 1094596402560127058L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  JUNGLE_HELP(56, "Jungle-Selbsthilfe", 1094596402560127057L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  MIDDLE_HELP(57, "Middle-Selbsthilfe", 1094596402534948873L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  BOTTOM_HELP(58, "Bottom-Selbsthilfe", 1094596402534948872L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
-  SUPPORT_HELP(59, "Support-Selbsthilfe", 1094596402534948871L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
+  TOP(50, "Top", 1004701482626580630L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  JUNGLE(51, "Jungle", 1004701701284053143L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  MIDDLE(52, "Middle", 1004701741700358284L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  BOTTOM(53, "Bottom", 1004701775254790215L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  SUPPORT(54, "Support", 1004701819605368894L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  HELP(55, "Selbsthilfe", 1072087015782371328L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
 
 
-  ORGA_MEMBER(101, "Ein TRUE", 1094596402635603995L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.ORGA_MEMBER, Set.of()),
-  STAFF(102, "Staff", 1094596402635603996L, GroupTier.LEADER, Department.NONE, GroupType.STAFF, Set.of()),
-  ADMIN(103, "Admin", 1094596402635603997L, GroupTier.MANAGEMENT, Department.NONE, GroupType.ADMIN, Set.of()),
+  ORGA_MEMBER(101, "Ein TRUE", 1035215421625864273L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.ORGA_MEMBER, Set.of()),
+  STAFF(102, "Staff", 655022311123976192L, GroupTier.LEADER, Department.NONE, GroupType.STAFF, Set.of()),
+  ADMIN(103, "Admin", 924432953440886854L, GroupTier.MANAGEMENT, Department.NONE, GroupType.ADMIN, Set.of()),
 
 
-  EVENT(201, "Event&Content", 1094596402635603992L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.CONTENT, Set.of()),
-  TEAMS(202, "Teams", 1094596402635603993L, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
-  COACHING(203, "Teamentwicklung", 1094596402635603994L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
+  EVENT(201, "Event&Content", 1035195791767240746L, GroupTier.ORGA_MEMBER, Department.EVENT, GroupType.CONTENT, Set.of()),
+  TEAMS(202, "Teams", 1086230822580912169L, GroupTier.ORGA_MEMBER, Department.TEAMS, GroupType.PINGABLE, Set.of()),
+  COACHING(203, "Teamentwicklung", 1086231152458727474L, GroupTier.ORGA_MEMBER, Department.COACHING, GroupType.PINGABLE, Set.of()),
 
 
-  VIP(1000, "VIP", 1094596402656583771L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
-  FRIEND(1001, "Family & Friends", 1094596402581078048L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
-  SCRIMPARTNER(1002, "Scrimpartner", 1094596402581078047L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of());
+  VIP(1000, "VIP", 974340225763516476L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  FRIEND(1001, "Family&Friends", 972956350558662726L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  SCRIMPARTNER(1002, "Scrimpartner", 974004880761053314L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE, Set.of());
 
   private final int id;
   private final String name;
@@ -103,6 +93,7 @@ public enum DiscordGroup implements Roleable {
   }
 
   public boolean isAbove(DiscordGroup discordGroup) {
+    if (discordGroup == null) return false;
     return discordGroup.getTier().getPermissionId() < tier.getPermissionId();
   }
 

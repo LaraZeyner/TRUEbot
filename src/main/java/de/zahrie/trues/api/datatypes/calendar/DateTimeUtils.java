@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
+import org.joda.time.DateTime;
+
 public class DateTimeUtils {
   public static long getMinutes(Duration duration) {
     return Math.round(duration.getSeconds() / 60.);
@@ -50,5 +52,9 @@ public class DateTimeUtils {
   public static LocalDateTime fromEpoch(int epochSeconds) {
     final Instant instant = Instant.ofEpochSecond(epochSeconds);
     return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+  }
+
+  public static DateTime toJoda(LocalDateTime localDateTime) {
+    return new DateTime(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
   }
 }

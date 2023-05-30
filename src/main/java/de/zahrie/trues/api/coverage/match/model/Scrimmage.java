@@ -2,11 +2,11 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.match.MatchResult;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
+import de.zahrie.trues.api.coverage.match.log.MatchLog;
+import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.playday.PlaydayFactory;
@@ -25,7 +25,7 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
   private static final long serialVersionUID = -6736012840442317674L;
 
   public Scrimmage(LocalDateTime start) {
-    this(PlaydayFactory.current(), MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, MatchResult.ZERO.toString());
+    this(PlaydayFactory.current(), MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, "-:-");
   }
 
   public Scrimmage(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result) {
@@ -55,14 +55,18 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
 
   @Override
   public Scrimmage create() {
-    return new Query<>(Scrimmage.class)
+    final Scrimmage match = new Query<>(Scrimmage.class)
         .col("matchday", playday).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
         .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result)
-        .insert(this, match -> {
-          match.getLogs().addAll(determineLog());
-          Arrays.stream(participators).forEach(Participator::create);
-          return true;
-        });
+        .insert(this);
+    if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
+      new MatchLog(LocalDateTime.now(), this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
+    }
+    final Participator home = new Participator(match, true).create();
+    final Participator guest = new Participator(match, false).create();
+    if (home.getId() != 0 && guest.getId() != 0) this.participators = new Participator[]{home, guest};
+    else this.participators = null;
+    return match;
   }
 
   @Override
