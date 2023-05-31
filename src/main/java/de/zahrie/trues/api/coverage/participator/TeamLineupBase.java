@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.coverage.participator;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,9 +77,8 @@ public abstract class TeamLineupBase {
   }
 
   public boolean setOrderedLineup(@NotNull String opGgUrl, @NotNull List<Player> players) {
-    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "")
-        .replace("%20", " ")
-        .replace("%2C", ",").split(",");
+    opGgUrl = URLDecoder.decode(opGgUrl, StandardCharsets.UTF_8);
+    final String[] split = opGgUrl.replace("https://www.op.gg/multisearch/euw?summoners=", "").split(",");
     for (int i = 0; i < split.length; i++) {
       if (i > 4) break;
 

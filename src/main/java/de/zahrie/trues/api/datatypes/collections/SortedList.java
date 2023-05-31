@@ -81,4 +81,9 @@ public class SortedList<E> extends AbstractList<E> {
     this.data = new LinkedHashSet<>(list);
     return this;
   }
+
+  @Override
+  public void clear() {
+    data.clear();
+  }
 }

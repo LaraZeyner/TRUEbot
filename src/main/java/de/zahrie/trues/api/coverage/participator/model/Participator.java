@@ -74,7 +74,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   }
 
   public int getLineupMMR() {
-    return Util.avoidNull(getTeam(), 0, Team::getLastMMR);
+    return Util.avoidNull(getTeam(), 0, team -> Util.avoidNull(team.getLastMMR(), 0));
   }
 
   public Participator(Match match, boolean home) {
@@ -139,6 +139,9 @@ public class Participator implements Entity<Participator>, Comparable<Participat
 
   @Override
   public Participator create() {
+    if (team == null && teamId == null) {
+      System.out.println("PAUSE");
+    }
     final League league = route == null ? null : route.getLeague();
     final ParticipatorRoute.RouteType routeType = route == null ? null : route.getType();
     final Short routeValue = route == null ? null : route.getValue();
@@ -183,6 +186,9 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   }
 
   public void setTeam(@Nullable Team team) {
+    if (team == null) {
+      System.out.println("PAUSE");
+    }
     if (getMatch().checkAddParticipatingTeam(this, team)) {
       new Query<>(Lineup.class).where("coverage_team", this).delete(List.of());
       this.team = team;

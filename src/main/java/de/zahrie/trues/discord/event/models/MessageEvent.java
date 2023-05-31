@@ -33,8 +33,6 @@ import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
-import net.dv8tion.jda.api.events.message.GenericMessageEvent;
-import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -45,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see net.dv8tion.jda.api.events.message.GenericMessageEvent
  * @see net.dv8tion.jda.api.events.message.MessageBulkDeleteEvent
- * @see MessageDeleteEvent
+ * @see net.dv8tion.jda.api.events.message.MessageDeleteEvent
  * @see net.dv8tion.jda.api.events.message.MessageEmbedEvent
  * @see MessageReceivedEvent
  * @see MessageUpdateEvent
@@ -68,7 +66,7 @@ public class MessageEvent extends ListenerAdapter {
 
 
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannelId(event.getChannel().getIdLong());
-    if (teamChannel != null) handleSchedulingEntry(event, event.getMessage());
+    if (teamChannel != null) handleSchedulingEntry(event.getMessage());
 
     if (event.getChannel() instanceof ThreadChannel threadChannel) {
       final String channelName = threadChannel.getName();
@@ -109,18 +107,10 @@ public class MessageEvent extends ListenerAdapter {
   @Override
   public void onMessageUpdate(MessageUpdateEvent event) {
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannelId(event.getChannel().getIdLong());
-    if (teamChannel != null) handleSchedulingEntry(event, event.getMessage());
+    if (teamChannel != null) handleSchedulingEntry(event.getMessage());
   }
 
-  @Override
-  public void onMessageDelete(MessageDeleteEvent event) {
-    final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannelId(event.getChannel().getIdLong());
-    if (teamChannel != null) {
-      event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> handleSchedulingEntry(event, message));
-    }
-  }
-
-  private void handleSchedulingEntry(GenericMessageEvent event, Message message) {
+  private void handleSchedulingEntry(Message message) {
     List<User> users = message.getMentions().getUsers();
     if (users.isEmpty()) users = List.of(message.getAuthor());
     if (SchedulingHandler.isRepeat(message.getContentDisplay())) {
@@ -133,8 +123,7 @@ public class MessageEvent extends ListenerAdapter {
 
     for (User user : users) {
       final DiscordUser discordUser = user.getMember().getDiscordUser();
-      if (event instanceof MessageDeleteEvent) discordUser.getScheduling().delete(timeRanges);
-      else discordUser.getScheduling().add(timeRanges);
+      discordUser.getScheduling().add(timeRanges);
       discordUser.dm("Deine Anwesenheitszeiten wurden aktualisiert. Aktuelle Anwesenheiten:\n" +
           discordUser.getScheduling().getAvailabilities());
     }

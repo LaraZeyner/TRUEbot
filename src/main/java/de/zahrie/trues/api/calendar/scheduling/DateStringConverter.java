@@ -75,7 +75,7 @@ public record DateStringConverter(String input) {
 
   @Nullable
   static DayOfWeek determineDayOfWeek(String day) {
-    day = StringUtils.capitalizeFirst(StringUtils.keep(day, 2));
+    day = StringUtils.capitalizeFirst(day);
     try {
       final TemporalAccessor temporalAccessor = DateTimeFormatter.ofPattern("E").withLocale(Locale.GERMANY).parse(day + ".");
       return DayOfWeek.from(temporalAccessor);

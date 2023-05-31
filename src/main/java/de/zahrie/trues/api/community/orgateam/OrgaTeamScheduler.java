@@ -14,7 +14,7 @@ public record OrgaTeamScheduler(OrgaTeam team) {
         .entityList();
     if (team.getTeam() == null) return List.of();
     team.getTeam().getMatches().getUpcomingMatches().stream()
-        .map(match -> new TeamCalendar(match.getExpectedTimeRange(), String.valueOf(match.getId()), TeamCalendar.TeamCalendarType.MATCH, team, -1).create())
+        .map(match -> new TeamCalendar(match.getExpectedTimeRange(), String.valueOf(match.getId()), TeamCalendar.TeamCalendarType.MATCH, team, -1))
         .forEach(calendarEntries::add);
 
     return calendarEntries;

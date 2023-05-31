@@ -52,6 +52,7 @@ public class ScrimCreateModal extends ModalImpl {
     final LocalDateTime time = StringUtils.getDateTime(getString("3"));
     if (time == null) return reply("Das Datum ist fehlerhaft.");
 
+    team2.setRefresh(time);
     final Scrimmage scrimmage = new Scrimmage(time).create();
 
     final Participator home = scrimmage.addParticipator(team, true);

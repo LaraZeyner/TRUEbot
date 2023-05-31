@@ -208,15 +208,21 @@ public class TeamInfo {
 
   private MessageEmbed getNextMatch() {
     final Match nextMatch = orgaTeam.getTeam() == null ? null : orgaTeam.getTeam().getMatches().getNextMatch(true);
-    final String matchType = nextMatch == null ? "kein Match" : (nextMatch.getTypeString() + " gegen " + nextMatch.getOpponentOf(orgaTeam.getTeam()).getName());
+    final String matchType;
+    if (nextMatch == null) {
+      matchType = "kein Match";
+    } else {
+      final Team opponentOf = nextMatch.getOpponentOf(orgaTeam.getTeam());
+      matchType = (nextMatch.getTypeString() + " gegen " + (opponentOf == null ? "kein Gegner" : opponentOf.getName()));
+    }
     final String url = nextMatch instanceof PRMMatch primeMatch ? primeMatch.get().getURL() : null;
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Nächstes Match: " + matchType, url)
         .setDescription(nextMatch == null ? "kein Match" : TimeFormat.DISCORD.of(nextMatch.getStart()))
         .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     if (nextMatch != null) {
-      determineMatchLineupFields("gegnerisches Team", nextMatch, orgaTeam.getTeam()).forEach(builder::addField);
-      determineMatchLineupFields("eigenes Team", nextMatch, orgaTeam.getTeam()).forEach(builder::addField);
+      determineMatchLineupFields(nextMatch, nextMatch.getOpponentOf(orgaTeam.getTeam())).forEach(builder::addField);
+      determineMatchLineupFields(nextMatch, orgaTeam.getTeam()).forEach(builder::addField);
       builder.addField("Matchlog:", "hier findet ihr den vollständigen Matchlog", false);
       new MatchLogBuilder(nextMatch, orgaTeam.getTeam()).getFields().forEach(builder::addField);
     }
@@ -224,7 +230,7 @@ public class TeamInfo {
     return builder.build();
   }
 
-  private List<MessageEmbed.Field> determineMatchLineupFields(String title, Match match, Team team) {
+  private List<MessageEmbed.Field> determineMatchLineupFields(Match match, Team team) {
     final Participator participator = match.getParticipator(team);
     final TeamLineupBase lineup = participator.getTeamLineup();
     final List<Player> players = lineup.getFixedLineups().stream().map(Lineup::getPlayer).toList();

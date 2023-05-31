@@ -27,8 +27,8 @@ import org.jetbrains.annotations.Nullable;
  * 12h <br>
  */
 public record DateTimeStringConverter(String input) {
-  private static final List<String> DAY_PATTERNS = List.of("\\d.", "\\d{2}.", "\\d{2}.\\d{2}.", "\\d{2}.\\d{2}.\\d{4}");
-  private static final List<String> TIME_PATTERNS = List.of("\\d{2}h", "\\d{2}:\\d{2}", "\\d{2}:\\d{2}:\\d{2}", "\\d{2}:\\d{2}h", "\\d{2}:\\d{2}:\\d{2}h");
+  private static final List<String> DAY_PATTERNS = List.of("\\d\\.", "\\d{2}\\.", "\\d{2}\\.\\d{2}\\.", "\\d{2}\\.\\d{2}\\.\\d{4}");
+  private static final List<String> TIME_PATTERNS = List.of("\\dh", "\\d{2}h", "\\d{2}:\\d{2}", "\\d{2}:\\d{2}:\\d{2}", "\\d{2}:\\d{2}h", "\\d{2}:\\d{2}:\\d{2}h");
   @Nullable
   public LocalDateTime toTime() {
     final TimeRange timeRange = toRangeList().stream().findFirst().orElse(null);
@@ -68,7 +68,7 @@ public record DateTimeStringConverter(String input) {
 
         if (DAY_PATTERNS.stream().noneMatch(subSection::matches) && DateStringConverter.determineDayOfWeek(subSection) == null &&
         TIME_PATTERNS.stream().noneMatch(subSection::matches)) {
-          trashLines += subSection.length();
+          trashLines += (subSection.length() + 1);
         }
        }
     }

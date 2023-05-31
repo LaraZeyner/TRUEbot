@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
@@ -38,6 +39,7 @@ public class TeamImpl extends Team implements Entity<TeamImpl> {
 
   @Override
   public TeamImpl create() {
+    if (refresh == null) this.refresh = LocalDateTime.of(1, Month.JANUARY, 1, 0, 0);
     final TeamImpl team = new Query<>(TeamImpl.class)
         .col("team_name", name).col("team_abbr", abbreviation).col("refresh", refresh).col("highlight", highlight)
         .col("last_team_mmr", lastMMR)

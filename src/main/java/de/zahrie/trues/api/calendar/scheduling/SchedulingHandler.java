@@ -19,7 +19,8 @@ import de.zahrie.trues.api.discord.user.DiscordUser;
 
 public record SchedulingHandler(DiscordUser user) {
   public static boolean isRepeat(String input) {
-    return Arrays.stream(input.replace("\n", " ").split(" ")).allMatch(section -> section.equals("repeat") || section.contains("@"));
+    return Arrays.stream(input.replace("\n", " ").split(" "))
+        .allMatch(section -> section.equals("repeat") || section.contains("@"));
   }
 
   public void repeat() {
@@ -29,14 +30,14 @@ public record SchedulingHandler(DiscordUser user) {
         .where("discord_user", user)
         .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
         .and(Condition.between("date(startTime", start, end)).entityList()
-        .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), "", user).create());
+        .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), null, user).create());
   }
 
   public void add(List<TimeRange> ranges) {
     if (ranges == null || ranges.isEmpty()) return;
 
     delete(ranges);
-    TimeRange.combine(ranges).forEach(betterTimeRange -> new SchedulingCalendar(betterTimeRange, "", user).create());
+    TimeRange.combine(ranges).forEach(betterTimeRange -> new SchedulingCalendar(betterTimeRange, null, user).create());
   }
 
   public void delete(List<TimeRange> ranges) {

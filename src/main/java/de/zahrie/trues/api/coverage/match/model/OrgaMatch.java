@@ -69,10 +69,12 @@ public class OrgaMatch extends LeagueMatch implements Entity<OrgaMatch> {
     if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
       new MatchLog(LocalDateTime.now(), this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
     }
-    final Participator home = new Participator(match, true).create();
-    final Participator guest = new Participator(match, false).create();
-    if (home.getId() != 0 && guest.getId() != 0) this.participators = new Participator[]{home, guest};
-    else this.participators = null;
+    if (match.getParticipators().length == 0) {
+      final Participator home = new Participator(match, true).create();
+      final Participator guest = new Participator(match, false).create();
+      if (home.getId() != 0 && guest.getId() != 0) this.participators = new Participator[]{home, guest};
+      else this.participators = null;
+    }
     return match;
   }
 
