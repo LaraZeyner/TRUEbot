@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Team;
@@ -18,10 +19,10 @@ import lombok.experimental.ExtensionMethod;
 
 @ExtensionMethod(StringUtils.class)
 public abstract class AnalyzeManager {
-  private static final Map<PlayerLane, LaneGames> laneExperience = new HashMap<>();
+  private static Map<PlayerLane, LaneGames> laneExperience = new ConcurrentHashMap<>();
 
   public static void reset() {
-    laneExperience.clear();
+    laneExperience = new HashMap<>();
   }
 
   public static void delete(Player player) {

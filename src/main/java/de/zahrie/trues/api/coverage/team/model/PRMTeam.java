@@ -18,6 +18,7 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @Setter
 @Table(value = "team", department = "prime")
-@ExtensionMethod(SQLUtils.class)
+@ExtensionMethod({SQLUtils.class, StringUtils.class})
 public class PRMTeam extends Team implements Entity<PRMTeam> {
   @Serial
   private static final long serialVersionUID = -8914567031452407982L;
@@ -74,9 +75,9 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
     final PRMSeason lastPRMSeason = SeasonFactory.getLastPRMSeason();
     if (lastPRMSeason == null) return null;
     return new Query<>(LeagueTeam.class)
-        .join(new JoinQuery<>(LeagueTeam.class, League.class, "league", JoinQuery.JoinType.INNER))
-        .join(new JoinQuery<>(League.class, Stage.class, "stage", JoinQuery.JoinType.INNER))
-        .where("team", this).and("_stage.season", lastPRMSeason.getId())
+        .join(new JoinQuery<>(LeagueTeam.class, League.class))
+        .join(new JoinQuery<>(League.class, Stage.class).col("stage"))
+        .where("team", this).and("_stage.season", lastPRMSeason)
         .descending("_stage.stage_start").entity();
   }
 
@@ -89,20 +90,24 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
         .entity(List.of(this, "Playoffs", "prime"));
   }
 
-  public void setScore(League division, String score) {
+  public boolean setScore(League division, String score) {
     final TeamScore teamScore;
     if (score.equals("Disqualifiziert")) {
       teamScore = null;
     } else {
-      final String place = score.split("\\.")[0];
-      final short placeInteger = Short.parseShort(place);
+      String place = score.split("\\.")[0];
+      if (place.contains(":")) place = place.after(":");
+      final short placeInteger = Short.parseShort(place.strip());
       final String wins = score.split("\\(")[1].split("/")[0];
-      final short winsInteger = Short.parseShort(wins);
+      final short winsInteger = Short.parseShort(wins.strip());
       final String losses = score.split("/")[1].split("\\)")[0];
-      final short lossesInteger = Short.parseShort(losses);
+      final short lossesInteger = Short.parseShort(losses.strip());
       teamScore = new TeamScore(placeInteger, winsInteger, lossesInteger);
     }
+    final LeagueTeam currentLeague = getCurrentLeague();
+    boolean toCreate = currentLeague == null || !currentLeague.getLeague().equals(division);
     new LeagueTeam(division, this, teamScore).create();
+    return toCreate;
   }
 
   public void setRecord(String record, short seasons) {

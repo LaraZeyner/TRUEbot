@@ -140,7 +140,7 @@ public abstract class Team implements ATeam, Id, Comparable<Team> {
 
   public Match nextOrLastMatch() {
     final List<Match> matches = new Query<>(Participator.class).field(SQLField.get("_coverage.coverage_id", Integer.class))
-        .join(new JoinQuery<>(Participator.class, Match.class, "coverage"))
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .where("team", this).and("_coverage.active", true)
         .ascending("_coverage.start")
         .convertList(Match.class).stream().toList();

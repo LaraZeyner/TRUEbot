@@ -25,7 +25,7 @@ public class StringDataHandler {
   }
 
   public String createHeader() {
-    final Object[] head = query.getColumns().stream().map(Column::value).toArray();
+    final Object[] head = query.getColumns().stream().map(Column::name).toArray();
     final StringBuilder headString = new StringBuilder(create(head, false) + "\n");
     for (int i = 0; i < this.lengths.size(); i++) {
       headString.append("-".repeat(this.lengths.get(i).getLength() + (i == 0 || i == this.lengths.size() - 1 ? 1 : 2)));

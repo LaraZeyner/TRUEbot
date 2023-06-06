@@ -80,7 +80,7 @@ public abstract class SlashCommand extends Replyer {
 
   public void handleAutoCompletion(CommandAutoCompleteInteractionEvent event) {
     completions.stream().filter(completion -> completion.optionName().equals(event.getFocusedOption().getName()))
-        .findFirst().ifPresent(completion -> event.replyChoices(completion.getData()).queue());
+        .findFirst().ifPresent(completion -> event.replyChoices(completion.getData().subList(0, Math.min(25, completion.getData().size()))).queue());
   }
 
   public void handleCommand(SlashCommandInteractionEvent event) {
@@ -89,7 +89,7 @@ public abstract class SlashCommand extends Replyer {
 
   private void handleCommand(String fullCommandName, SlashCommandInteractionEvent event) {
     if (fullCommandName.startsWith(name)) {
-      if (!defered && !hasModal()) {
+      if (!defered && hasNoModal()) {
         final var annotation = getMessage();
         event.deferReply(annotation == null || annotation.ephemeral()).queue();
         defered = true;

@@ -3,22 +3,21 @@ package de.zahrie.trues.api.coverage.season;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Table(value = "coverage_season", department = "prime")
 public class PRMSeason extends Season implements Entity<PRMSeason> {
   @Serial
   private static final long serialVersionUID = -3519857892120876511L;
 
-  private int prmId; // season_id
+  private final int prmId; // season_id
 
   public PRMSeason(int id, String name, String fullName, TimeRange range, boolean active, int prmId) {
     super(id, name, fullName, range, active);
@@ -41,5 +40,16 @@ public class PRMSeason extends Season implements Entity<PRMSeason> {
     return new Query<>(PRMSeason.class)
         .key("season_name", name).key("season_full", fullName).key("season_id", prmId)
         .col("season_start", range.getStartTime()).col("season_end", range.getEndTime()).col("active", active).insert(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof final PRMSeason prmSeason)) return false;
+    return this == o || getPrmId() == prmSeason.getPrmId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), getPrmId());
   }
 }

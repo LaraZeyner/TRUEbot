@@ -57,7 +57,9 @@ public final class PrimePlayerFactory {
     }
 
     final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(summonerName);
-    if (prmPlayer != null) prmPlayer.setPrmUserId(primeId);
+    if (prmPlayer != null) {
+      prmPlayer.setPrmUserId(primeId);
+    }
     return prmPlayer;
   }
 

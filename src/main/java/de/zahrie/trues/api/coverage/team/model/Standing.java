@@ -21,22 +21,16 @@ public record Standing(int wins, int losses) implements Serializable, Comparable
 
   @Override
   public String toString() {
-    return wins + " : " + losses;
+    return format(Format.LONG);
   }
 
-  public String format(Format format) {
-    if (format.equals(Format.LONG)) {
-      return wins + " : " + losses;
-    }
-
-    if (format.equals(Format.SHORT)) {
-      return wins + ":" + losses;
-    }
-
-    if (format.equals(Format.ADDITIONAL)) {
-      return wins + ":" + losses + " (" + getWinrate() + ")";
-    }
-    return null;
+  public String format(@NotNull Format format) {
+    return switch (format) {
+      case ADDITIONAL -> wins + ":" + losses + " (" + getWinrate() + ")";
+      case SHORT -> wins + ":" + losses;
+      case LONG -> wins + " : " + losses;
+      case MEDIUM -> wins + " - " + getWinrate();
+    };
   }
 
   @Override

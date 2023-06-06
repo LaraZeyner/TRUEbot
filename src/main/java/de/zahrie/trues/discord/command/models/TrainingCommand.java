@@ -44,7 +44,7 @@ public class TrainingCommand extends SlashCommand {
     if (textChannel == null) return sendMessage();
 
     final String typeString = find("typ").string();
-    textChannel.sendMessage("**Neues " + typeString + " am " + TimeFormat.DEFAULT.of(start) + "**\n" + details)
+    textChannel.sendMessage("**Neues " + typeString + " am " + TimeFormat.DEFAULT_FULL.of(start) + "**\n" + details)
         .queue(message -> textChannel.createThreadChannel(typeString + " am " + TimeFormat.DAY_LONG.of(start))
             .queue(threadChannel -> new TeamCalendar(timeRange, details, type, getLocatedTeam(), threadChannel.getIdLong()).create()));
     return sendMessage();

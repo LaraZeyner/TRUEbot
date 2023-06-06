@@ -14,6 +14,7 @@ import de.zahrie.trues.discord.context.ContextRegisterer;
 import de.zahrie.trues.discord.event.EventRegisterer;
 import de.zahrie.trues.discord.event.models.EventLogger;
 import de.zahrie.trues.util.Connectable;
+import de.zahrie.trues.util.Const;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -40,14 +41,17 @@ public class Willump implements Connectable {
     try {
       client.awaitReady();
       this.guild = client.getGuildById(ConfigLoader.getGuildId());
-      /*Nunu.getInstance().getGuild().updateCommands().addCommands(commands.stream().map(SlashCommand::commandData).toList())
-          .addCommands(context.stream().map(contextCommand -> Commands.context(contextCommand.getType(), contextCommand.getName())).toList()).queue();*/
+      if (Const.REGISTER_COMMANDS) {
+        Nunu.getInstance().getGuild().updateCommands()
+            .addCommands(commands.stream().map(SlashCommand::commandData).toList())
+            .addCommands(context.stream().map(ContextCommand::commandData).toList())
+            .queue();
+      }
       LeaderboardHandler.handleLeaderboards();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
 
-    System.out.println("DONE");
     new Query<>("UPDATE discord_user SET joined = null WHERE joined is not null").update(List.of());
     ScheduleManager.run();
   }

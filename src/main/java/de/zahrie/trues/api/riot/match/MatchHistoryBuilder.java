@@ -16,6 +16,11 @@ public record MatchHistoryBuilder(Summoner summoner, LocalDateTime start, List<S
     this(summoner, start, new ArrayList<>());
   }
 
+  public MatchHistoryBuilder all() {
+    handleMatchList(null, null);
+    return this;
+  }
+
   public MatchHistoryBuilder with(GameQueueType queueType) {
     handleMatchList(queueType, null);
     return this;

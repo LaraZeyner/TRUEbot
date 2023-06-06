@@ -33,6 +33,7 @@ import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PlayerRank;
+import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
 import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.OrgaCupSeason;
 import de.zahrie.trues.api.coverage.season.PRMSeason;
@@ -125,11 +126,11 @@ public class TeamInfo {
         if (participatingTeam == null) continue;
 
         final MatchResult resultHandler = results.containsKey(participatingTeam) ? results.get(participatingTeam) :
-            new MatchResult(0, 0);
+            new MatchResult(match, 0, 0);
         final MatchResult realresultHandler = realresults.containsKey(participatingTeam) ? realresults.get(participatingTeam) :
-            new MatchResult(0, 0);
-        final MatchResult resultHandler2 = match.getExpectedResult().ofTeam(match, participatingTeam);
-        final MatchResult resultHandler3 = match.getResult().ofTeam(match, participatingTeam);
+            new MatchResult(match, 0, 0);
+        final MatchResult resultHandler2 = match.getExpectedResult().ofTeam(participatingTeam);
+        final MatchResult resultHandler3 = match.getResult().ofTeam(participatingTeam);
         if (resultHandler2 != null) results.put(participatingTeam, resultHandler.add(resultHandler2));
         if (resultHandler3 != null) realresults.put(participatingTeam, realresultHandler.add(resultHandler3));
       }
@@ -144,10 +145,11 @@ public class TeamInfo {
         .add("Standing", match -> match.getHomeAbbr() + " vs " + match.getGuestAbbr())
         .add("Prognose", Match::getExpectedResultString)
         .build().forEach(builder::addField));
-    final int correct = (int) lastLeague.getMatches().stream().filter(match -> match.getResult().wasAcurate(match)).count();
-    final int incorrect = (int) lastLeague.getMatches().stream().filter(match -> Boolean.FALSE.equals(match.getResult().wasAcurate(match))).count();
+    final int correct = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
+        .filter(bool -> bool).count();
+    final int incorrect = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
+        .filter(bool -> !bool).count();
     builder.addField("Fehlerrate", new Standing(correct, incorrect).getWinrate().toString(), false);
-    // System.out.println(builder.length());
     return builder.build();
   }
 
@@ -157,7 +159,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(currentSeason == null ? "keine Season" : (currentSeason.getFullName() + " - TRUE-Cup - " + currentSeason.getSignupStatusForTeam((PRMTeam) orgaTeam.getTeam())))
         .setDescription("Aktueller Spielplan im TRUE-Cup")
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now())
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now())
         .addField("Kurzregeln", /* OrgaCupSeason.RULES + */"Stand-in Slots verbleibend: " + orgaTeam.getStandins(), false);
 
     if (currentSeason == null) return builder
@@ -187,7 +189,6 @@ public class TeamInfo {
     final List<Match> games = orgaTeam.getTeam() == null ? List.of() : orgaTeam.getTeam().getMatches().getMatchesOf(lastSeason).stream().filter(Match::isRunning).toList();
     getFieldsOfGames("kommende Spiele", games);
 
-    // System.out.println(builder.length());
     return builder.build();
   }
 
@@ -219,14 +220,13 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Nächstes Match: " + matchType, url)
         .setDescription(nextMatch == null ? "kein Match" : TimeFormat.DISCORD.of(nextMatch.getStart()))
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
     if (nextMatch != null) {
       determineMatchLineupFields(nextMatch, nextMatch.getOpponentOf(orgaTeam.getTeam())).forEach(builder::addField);
       determineMatchLineupFields(nextMatch, orgaTeam.getTeam()).forEach(builder::addField);
       builder.addField("Matchlog:", "hier findet ihr den vollständigen Matchlog", false);
       new MatchLogBuilder(nextMatch, orgaTeam.getTeam()).getFields().forEach(builder::addField);
     }
-    // System.out.println(builder.length());
     return builder.build();
   }
 
@@ -237,7 +237,8 @@ public class TeamInfo {
     return List.of(
         new MessageEmbed.Field(team.getFullName(), "Team", false),
         new MessageEmbed.Field("Lineup", players.stream().map(Player::getSummonerName).collect(Collectors.joining("\n")), true),
-        new MessageEmbed.Field("Elo (" + lineup.getAverageRank().toString() + ")", players.stream().map(Player::getLastRank).map(PlayerRank::toString).collect(Collectors.joining("\n")), true)
+        new MessageEmbed.Field("Elo (" + lineup.getAverageRank().toString() + ")", players.stream().map(Player::getRanks)
+            .map(PlayerRankHandler::getCurrent).map(PlayerRank::toString).collect(Collectors.joining("\n")), true)
     );
   }
 
@@ -255,15 +256,15 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(orgaTeam.getName() + " (" + orgaTeam.getAbbreviation() + recordAndSeasons + ")")
         .setDescription(standingPRM + " || " + standingTRUE)
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
     final double averageMMR = orgaTeam.getMainMemberships().stream().map(membership -> membership.getUser().getPlayer())
-        .filter(Objects::nonNull).mapToInt(player -> player.getLastRelevantRank().getRank().getMMR()).average().orElse(0);
+        .filter(Objects::nonNull).mapToInt(player -> player.getRanks().getLastRelevant().getRank().getMMR()).average().orElse(0);
     final Rank teamRank = PlayerRank.fromMMR((int) averageMMR);
 
     new EmbedFieldBuilder<>(orgaTeam.getActiveMemberships().stream().sorted().toList())
         .add("Position", Membership::getPositionString)
         .add("Spieler (og.gg)", membership -> membership.getUser().getNickname())
-        .add("Elo (" + teamRank + ")", membership -> membership.getUser().getPlayer() != null ? membership.getUser().getPlayer().getLastRank().toString() : "nicht registriert")
+        .add("Elo (" + teamRank + ")", membership -> membership.getUser().getPlayer() != null ? membership.getUser().getPlayer().getRanks().getCurrent().toString() : "nicht registriert")
         .build().forEach(builder::addField);
 
     new EmbedFieldBuilder<>(orgaTeam.getScheduler().getCalendarEntries())
@@ -294,7 +295,6 @@ public class TeamInfo {
           .add("Event", Calendar::getDetails)
           .build().forEach(builder::addField);
     }
-    // System.out.println(builder.length());
     return builder.build();
   }
 
@@ -302,7 +302,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Terminplanung")
         .setDescription("Terminplanung für " + orgaTeam.getName())
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
 
     final DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
     for (int i = 0; i < 7; i++) {
@@ -319,7 +319,6 @@ public class TeamInfo {
           .add("Zeiten oder Ersatz", list -> list.get(1))
           .build().forEach(builder::addField);
     }
-    // System.out.println(builder.length());
     return builder.build();
   }
 }

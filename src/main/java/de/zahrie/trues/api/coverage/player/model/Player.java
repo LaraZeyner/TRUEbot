@@ -1,13 +1,9 @@
 package de.zahrie.trues.api.coverage.player.model;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import de.zahrie.trues.api.coverage.season.PRMSeason;
-import de.zahrie.trues.api.coverage.season.Season;
-import de.zahrie.trues.api.coverage.season.SeasonFactory;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
@@ -19,7 +15,6 @@ import de.zahrie.trues.api.scouting.PlayerAnalyzer;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.util.Util;
-import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +27,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
   protected Integer discordUserId; // discord_user
   protected Integer teamId; // team
   protected LocalDateTime updated; // updated
-  protected final boolean played; // played
+  protected boolean played; // played
 
   protected DiscordUser discordUser;
 
@@ -45,6 +40,12 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     this.discordUser = discordUser;
     this.discordUserId = Util.avoidNull(discordUser, DiscordUser::getId);
     new Query<>(Player.class).col("discord_user", discordUser).update(id);
+    loadGames(LoaderGameType.CLASH_PLUS);
+  }
+
+  public void setPlayed(boolean played) {
+    if (this.played != played) new Query<>(Player.class).col("played", played).update(id);
+    this.played = played;
   }
 
   protected Team team;
@@ -55,10 +56,20 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
   }
 
   public void setTeam(Team team) {
+    if (getTeam() == team) return;
+    if (teamId != null && teamId == team.getId()) return;
+
     this.team = team;
     this.teamId = Util.avoidNull(team, Team::getId);
-    if (team != null) team.getPlayers().add(this);
+    if (team != null) {
+      team.getPlayers().add(this);
+      if (team instanceof PRMTeam prmTeam && prmTeam.getCurrentLeague().getLeague().isOrgaLeague()) {
+        System.out.println("NEUER SPIELER");
+        loadGames(LoaderGameType.CLASH_PLUS);
+      }
+    }
     new Query<>(Player.class).col("team", team).update(id);
+
   }
 
   public Player(String summonerName, String puuid) {
@@ -106,36 +117,11 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     new Query<>(Player.class).col("updated", updated).update(id);
   }
 
-  public List<PlayerRank> getRanks() {
-    return new Query<>(PlayerRank.class).where("player", this).entityList();
-  }
+  private PlayerRankHandler ranks;
 
-  public PlayerRank getRankInSeason() {
-    final PRMSeason lastSeason = SeasonFactory.getLastPRMSeason();
-    if (lastSeason == null) {
-      new DevInfo().warn(new NoSuchElementException("Die letzte Season wurde nicht gefunden."));
-      return null;
-    }
-    return getRankInSeason(lastSeason);
-  }
-
-  public PlayerRank getRankInSeason(Season season) {
-    return new Query<>(PlayerRank.class).where("player", this).and("season", season).entity();
-  }
-
-  public PlayerRank getLastRank() {
-    return getLastRank(Rank.RankTier.UNRANKED, Division.IV);
-  }
-
-  public PlayerRank getLastRank(Rank.RankTier tier, Division division) {
-    return getRanks().stream().max(Comparator.naturalOrder()).orElse(new PlayerRank(this, tier, division, (byte) 0, 0, 0));
-  }
-
-  public PlayerRank getLastRelevantRank() {
-    return getRanks().stream().sorted(Comparator.reverseOrder())
-        .filter(rank -> rank.getWinrate().getGames() >= 50)
-        .filter(rank -> rank.getSeason().getRange().getEndTime().getYear() >= LocalDateTime.now().getYear() - 1)
-        .findFirst().orElse(getLastRank(Rank.RankTier.SILVER, Division.I));
+  public PlayerRankHandler getRanks() {
+    if (ranks == null) this.ranks = new PlayerRankHandler(this);
+    return ranks;
   }
 
   private PlayerAnalyzer analyzer;
@@ -148,12 +134,12 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     return new PlayerAnalyzer(this, type, days);
   }
 
-  public void loadGames(boolean onlyClashPlus) {
-    new RiotPlayerAnalyzer(this).analyze(onlyClashPlus);
+  public void loadGames(LoaderGameType gameType) {
+    new RiotPlayerAnalyzer(this).analyze(gameType, false);
   }
 
-  public void loadGames(boolean onlyClashPlus, boolean force) {
-    new RiotPlayerAnalyzer(this).analyze(onlyClashPlus, force);
+  public void forceLoadMatchmade() {
+    new RiotPlayerAnalyzer(this).analyze(LoaderGameType.MATCHMADE, true);
   }
 
   @Override
@@ -169,7 +155,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
 
   @Override
   public String toString() {
-    return summonerName + " | " + getLastRank();
+    return summonerName + " | " + getRanks().getCurrent();
   }
 
   public List<Object[]> getLastGames(GameType gameType) {

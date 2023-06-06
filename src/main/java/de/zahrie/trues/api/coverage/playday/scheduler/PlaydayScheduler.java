@@ -10,6 +10,7 @@ import de.zahrie.trues.api.coverage.stage.model.PlayStage;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.datatypes.calendar.WeekdayTime;
+import de.zahrie.trues.api.datatypes.calendar.WeekdayTimeRange;
 
 public record PlaydayScheduler(PlaydayRange playday, LocalDateTime defaultTime, SchedulingRange scheduling) {
   public static PlaydayScheduler create(Stage stage, int index, LeagueTier tier) {
@@ -19,7 +20,8 @@ public record PlaydayScheduler(PlaydayRange playday, LocalDateTime defaultTime, 
     final var playdayRange = new PlaydayRange(playdayTimeRange.getStartTime(), playdayTimeRange.getEndTime());
 
     final var scheduling = new Scheduling(config.options());
-    final TimeRange schedulingTimeRange = scheduling.range(tier).nextOrCurrent(stage, index);
+    final WeekdayTimeRange range = scheduling.range(tier);
+    final TimeRange schedulingTimeRange = range.nextOrCurrent(stage, index);
     final var schedulingRange = new SchedulingRange(schedulingTimeRange.getStartTime(), schedulingTimeRange.getEndTime());
 
     final WeekdayTime timeOffset = scheduling.defaultTime(tier);

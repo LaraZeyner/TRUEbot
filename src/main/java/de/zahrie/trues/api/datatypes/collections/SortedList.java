@@ -40,6 +40,11 @@ public class SortedList<E> extends AbstractList<E> {
     this(c, null);
   }
 
+  public SortedList(Collection<? extends E> c, boolean sorted) {
+    this(c, null);
+    this.sorted = sorted;
+  }
+
   public SortedList(Collection<? extends E> collection, Comparator<? super E> comparator) {
     this.data = new LinkedHashSet<>(collection);
     this.comparator = comparator;
@@ -48,7 +53,7 @@ public class SortedList<E> extends AbstractList<E> {
   @Override
   public void add(int index, E element) {
     data.add(element);
-    if (sorted) sort();
+    if (sorted || comparator != null) sort();
   }
 
   @Override

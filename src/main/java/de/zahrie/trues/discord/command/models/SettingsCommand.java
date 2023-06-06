@@ -41,7 +41,7 @@ public class SettingsCommand extends SlashCommand {
   }
 
   private DiscordUser determineTarget(OptionMapping userMapping) {
-    if (userMapping == null || !getInvoker().isAbove(DiscordGroup.SUBSTITUDE)) {
+    if (userMapping == null || !getInvoker().isAbove(DiscordGroup.SUBSTITUTE)) {
       return getInvoker();
     }
     final Member target = userMapping.getAsMember();

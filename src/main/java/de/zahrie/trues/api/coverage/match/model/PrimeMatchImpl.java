@@ -9,11 +9,14 @@ import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.discord.scouting.Scouting;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 
 @RequiredArgsConstructor
+@ExtensionMethod(DateTimeUtils.class)
 public class PrimeMatchImpl {
   private final PRMMatch match;
 
@@ -22,8 +25,7 @@ public class PrimeMatchImpl {
   }
 
   public boolean updateLogs(LocalDateTime timestamp, String userWithTeam, MatchLogAction action, String details) {
-    final LocalDateTime lastLogTime = getLastLogTime();
-    if (timestamp.isBefore(lastLogTime) || action.equals(MatchLogAction.LINEUP_PLAYER_READY)) return false;
+    if (timestamp.isBeforeEqual(getLastLogTime()) || action.equals(MatchLogAction.LINEUP_PLAYER_READY)) return false;
 
     final Participator participator = LogFactory.handleUserWithTeam(match, userWithTeam);
     final var log = new MatchLog(timestamp, match, action, details, participator).create();
@@ -34,6 +36,7 @@ public class PrimeMatchImpl {
     if (participator != null && log.getAction().equals(MatchLogAction.LINEUP_SUBMIT)) {
       participator.getTeamLineup().setLineup(log, false);
     }
+
     match.getOrgaTeams().stream().map(ScoutingManager::forTeam).filter(Objects::nonNull).forEach(Scouting::sendLog);
     return true;
   }

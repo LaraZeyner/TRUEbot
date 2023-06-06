@@ -3,13 +3,14 @@ package de.zahrie.trues.api.coverage.match.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import de.zahrie.trues.api.community.betting.Bet;
+import de.zahrie.trues.api.community.betting.BetFactory;
 import de.zahrie.trues.api.coverage.match.MatchResult;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
@@ -49,12 +50,14 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   }
 
   public List<MatchLog> getLogs(MatchLogAction action) {
-    if (logs == null) logs = new Query<>(MatchLog.class).where("coverage", this).and("action", action).entityList();
-    return logs;
+    if (logs == null) this.logs = determineLog();
+    return logs.stream().filter(log -> log.getAction().equals(action)).toList();
   }
 
-  public void clearLogs() {
-    logs.clear();
+  public boolean addLog(@NonNull MatchLog matchLog) {
+    if (matchLog.getId() == 0) this.logs = null;
+    else return logs.add(matchLog);
+    return false;
   }
 
   protected MatchResult matchResult;
@@ -99,9 +102,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
    * Für die Matchlogs
    */
   public void updateResult() {
-    if (result != null) {
-      setResult(MatchResult.fromResultString(result, this));
-    }
+    if (result != null) setResult(MatchResult.fromResultString(result, this));
   }
 
   /**
@@ -120,18 +121,32 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     getGuest().setWins(result.getGuestScore());
     if (matchResult.getPlayed()) {
       setStatus(EventStatus.PLAYED);
+      analyseBets();
     }
   }
 
-  public MatchResult ofTeam(@NonNull Team team) {
-    if (getParticipator(team) == null) return null;
-    if (getHome().getTeam().equals(team)) return getResult();
-    return new MatchResult(getResult().getGuestScore(), getResult().getHomeScore(), getResult().getMaxGames(), getResult().getPlayed());
+  private void analyseBets() {
+    final List<Bet> bets = new Query<>(Bet.class).where("coverage", this.getId()).entityList();
+    for (final Bet bet : bets) {
+      int gain = bet.getAmount() * -1;
+      if (!bet.getOutcome().equals(result)) {
+        bet.getUser().dm("Falscher Tipp für _" + this + "_. Du hast **" + bet.getAmount() + "** TRUEs verloren.");
+      } else {
+        final double quote = BetFactory.quote(matchResult);
+        final int won = (int) Math.round(bet.getAmount() * quote);
+        gain += won;
+        bet.getUser().addPoints(won);
+        bet.getUser().dm("Richtiger Tipp für _" + this + "_. Du hast **" + bet.getAmount() + "** TRUEs (Quote: " +
+            Math.round(quote * 10.) / 10 + ") gewonnen.");
+      }
+
+      bet.setDifference(gain);
+    }
   }
 
   public MatchResult getExpectedResult() {
     if (getResult().getPlayed()) return getResult();
-    if (expectedResult != null) this.expectedResult = getResult().expectResultOf(this);
+    if (expectedResult == null) this.expectedResult = getResult().expectResult();
     return expectedResult;
   }
 

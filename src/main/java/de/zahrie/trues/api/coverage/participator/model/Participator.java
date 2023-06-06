@@ -1,17 +1,11 @@
 package de.zahrie.trues.api.coverage.participator.model;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
-import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.coverage.league.model.League;
-import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.TeamLineup;
 import de.zahrie.trues.api.coverage.team.model.Team;
@@ -21,15 +15,12 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
-import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.util.Util;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
-import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,13 +38,13 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     return new Participator(match, false, new TeamImpl("Administration", "Admin"));
   }
 
+  @Setter
   private int id; // coverage_team_id
   private final int matchId; // coverage
   private final boolean home; // first
   private final ParticipatorRoute route;
   private Integer teamId; // team
   private short wins = 0; // wins
-  @Setter(AccessLevel.PRIVATE)
   private Long discordEventId; // discord_event
   private Long messageId; // discord_message
 
@@ -137,11 +128,15 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     return new TeamLineup(this, gameType, days);
   }
 
+  public void setDiscordEventId(Long discordEventId) {
+    if (!Objects.equals(this.discordEventId, discordEventId)) {
+      new Query<>(Participator.class).col("discord_event", discordEventId).update(id);
+    }
+    this.discordEventId = discordEventId;
+  }
+
   @Override
   public Participator create() {
-    if (team == null && teamId == null) {
-      System.out.println("PAUSE");
-    }
     final League league = route == null ? null : route.getLeague();
     final ParticipatorRoute.RouteType routeType = route == null ? null : route.getType();
     final Short routeValue = route == null ? null : route.getValue();
@@ -157,38 +152,12 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     setWins((short) 0);
   }
 
-  public void createScheduledEvent() {
-    if (teamId == null) return;
-
-    final OrgaTeam orgaTeam = Objects.requireNonNull(getTeam()).getOrgaTeam();
-    if (orgaTeam == null) return;
-    if (getMatch().getStart().isBefore(LocalDateTime.now())) return;
-
-    final TeamChannel teamChannel = orgaTeam.getChannels().get(TeamChannelType.PRACTICE);
-    if (teamChannel == null) return;
-
-    final IPermissionContainer practiceChannel = teamChannel.getChannel();
-    Nunu.getInstance().getGuild().createScheduledEvent(getMatch().toString(), practiceChannel,
-            getMatch().getStart().atZone(ZoneId.systemDefault()).toOffsetDateTime())
-        .setDescription(new MatchLogBuilder(getMatch(), getTeam()).toString())
-        .setEndTime(getMatch().getExpectedTimeRange().getEndTime().atZone(ZoneId.systemDefault()).toOffsetDateTime())
-        .queue(scheduledEvent -> setDiscordEventId(scheduledEvent.getIdLong()));
-    new Query<>(Participator.class).col("discord_event", discordEventId).update(id);
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public void setMessageId(Long messageId) {
     this.messageId = messageId;
     new Query<>(Participator.class).col("discord_message", messageId).update(id);
   }
 
   public void setTeam(@Nullable Team team) {
-    if (team == null) {
-      System.out.println("PAUSE");
-    }
     if (getMatch().checkAddParticipatingTeam(this, team)) {
       new Query<>(Lineup.class).where("coverage_team", this).delete(List.of());
       this.team = team;
@@ -231,5 +200,12 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   @Override
   public int hashCode() {
     return Objects.hash(getId(), getMatchId(), getTeamId());
+  }
+
+  private ScheduledEventHandler event;
+
+  public ScheduledEventHandler getEvent() {
+    if (event == null) this.event = new ScheduledEventHandler(this);
+    return event;
   }
 }

@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.ApplicationCalendar;
 import de.zahrie.trues.api.calendar.scheduling.SchedulingHandler;
-import de.zahrie.trues.api.community.application.Application;
-import de.zahrie.trues.api.community.application.ApplicationFactory;
+import de.zahrie.trues.api.community.application.ApplicationHandler;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.coverage.player.model.Player;
@@ -45,7 +44,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   private int digitsWritten = 0; // msg_digits
   private int secondsOnline = 0; // seconds_online
   private boolean active = false; // active
-  private LocalDateTime lastTimeJoined; // joined
+  private LocalDateTime lastTimeJoined; // joined#
   private Integer acceptedBy; // accepted
   private short notification = 0; // notification
   private LocalDate birthday; // birthday
@@ -97,7 +96,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   public void setAcceptedBy(DiscordUser acceptedBy) {
     this.acceptedBy = acceptedBy.getId();
     new Query<>(DiscordUser.class).col("accepted", acceptedBy).update(id);
-    ApplicationFactory.updateApplicationStatus(this);
+    getApplications().updateApplicationStatus();
   }
 
   public DiscordUser getAcceptedBy() {
@@ -160,10 +159,6 @@ public class DiscordUser implements Entity<DiscordUser> {
 
   public List<Membership> getMainMemberships() {
     return new Query<>(Membership.class).where("discord_user", this).and("role", TeamRole.MAIN).entityList();
-  }
-
-  public List<Application> getApplications() {
-    return new Query<>(Application.class).where("discord_user", this).entityList();
   }
 
   public Member getMember() {
@@ -239,6 +234,12 @@ public class DiscordUser implements Entity<DiscordUser> {
     setLastTimeJoined(stillOnline ? LocalDateTime.now() : null);
   }
 
+  public void addPoints(int points) {
+    if (points == 0) return;
+    this.points += points;
+    new Query<>(DiscordUser.class).col("points", this.points).update(id);
+  }
+
   public void addMessage(String content) {
     this.messagesSent++;
     this.digitsWritten += content.length();
@@ -251,5 +252,12 @@ public class DiscordUser implements Entity<DiscordUser> {
   public SchedulingHandler getScheduling() {
     if (scheduling == null) this.scheduling = new SchedulingHandler(this);
     return scheduling;
+  }
+
+  private ApplicationHandler applications;
+
+  public ApplicationHandler getApplications() {
+    if (applications == null) this.applications = new ApplicationHandler(this);
+    return applications;
   }
 }

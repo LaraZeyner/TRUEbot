@@ -13,13 +13,11 @@ public class Const {
     public static final String PLAYOFF_NAME = "Playoff";
   }
 
+  public static final boolean REGISTER_COMMANDS = false;
   public static final int DISCORD_MESSAGE_MAX_CHARACTERS = 2000;
-  public static final int LOG_LEVEL = 500;
-  public static final String TIMEOUT_MESSAGE = "SLEEPY TIME";
   public static final String THREAD_CHANNEL_START = "Scouting vs. ";
-  public static final int PLAYER_MMR_DEFAULT_VALUE = 1200; // Silver I 0 LP
 
-  public static final double PREDICTION_FACTOR = .03;
+  public static final double PREDICTION_FACTOR = .015;
 
   public static final boolean SAVE_LOGS = false;
   public static final long DEV_LOGGING_CHANNEL = 1110145279753212036L;

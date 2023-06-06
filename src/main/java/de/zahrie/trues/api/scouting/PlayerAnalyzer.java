@@ -54,14 +54,16 @@ public class PlayerAnalyzer extends AnalyzeManager {
   @Override
   public Query<Performance> performance() {
     return gameTypeString(new Query<>(Performance.class)
-        .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
+        .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
   }
 
   @Override
   public Query<Selection> selection() {
     final Query<Performance> performanceQuery = gameTypeString(new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
-        .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
+        .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
     return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
@@ -109,8 +111,17 @@ public class PlayerAnalyzer extends AnalyzeManager {
   }
 
   private MessageEmbed.Field getPlayerHeadField(Lane lane) {
-    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player().getSummonerName() + "(" + getGames() + " Games - " + player().getLastRank().toString() + ")", "KDA: TBD - Gold: TBD - Damage: TBD - CS/VS: TBD", false);
-    //TODO (Abgie) 30.03.2023: Playerstats
+    final Object[] data = player().analyze(ScoutingGameType.MATCHMADE, days).performance()
+        .get("concat(avg(_performance.kills), ' / ', avg(_performance.deaths), ' / ', avg(_performance.assists))", String.class)
+        .get("concat(round(avg(_performance.gold) * 100 / avg(_teamperf.total_gold), 1), ' %')", String.class)
+        .get("concat(round(avg(_performance.damage) * 100 / avg(_teamperf.total_damage), 1), ' %')", String.class)
+        .get("concat(round(avg(_performance.creeps), 0), '')", String.class)
+        .get("concat(round(avg(_performance.vision), 0), '')", String.class)
+        .single();
+    String csOrVision = (String) (lane.equals(Lane.UTILITY) ? data[4] : data[3]);
+    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player().getSummonerName() + "(" + getGames() + " Games - " +
+        player().getRanks().getCurrent() + ")",
+        "KDA: " + data[0] + " - Gold: " + data[1] + " - Damage: " + data[2] + " - CS/VS: " + csOrVision, false);
   }
 
   private List<PlayerMatchupData> handleMatchups() {
@@ -123,7 +134,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
     List<Object[]> presentPicks = selection().get("champion", Champion.class).get("count(selection_id)", Integer.class).groupBy("champion").descending("count(selection_id)").list();
     if (presentPicks.isEmpty()) {
       final Query<Performance> performanceQuery = new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
-          .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+          .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
           .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart());
       presentPicks = new Query<>(Selection.class).get("champion", Champion.class).get("count(selection_id)", Integer.class)
           .join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())))
@@ -165,8 +176,8 @@ public class PlayerAnalyzer extends AnalyzeManager {
     return ((Long) (performance().get("count(performance_id)", Integer.class).single()[0])).intValue();
   }
 
-  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames,
-                                   int matchMadeWins) implements Comparable<PlayerAnalyzerData> {
+  public record PlayerAnalyzerData(Champion champion, double presence, int competitiveGames, int matchMadeGames, int matchMadeWins)
+      implements Comparable<PlayerAnalyzerData> {
     public String getChampionString() {
       return champion.getName();
     }

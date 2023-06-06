@@ -11,6 +11,7 @@ import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
+import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PlayerRank;
 import de.zahrie.trues.api.coverage.player.model.Rank;
@@ -105,6 +106,7 @@ public abstract class TeamLineupBase {
       if (player != null) {
         final Lane lane = ordered ? Lane.values()[i + 1] : Lane.UNKNOWN;
         new Lineup(participator, player, lane).create();
+        player.loadGames(LoaderGameType.CLASH_PLUS);
       }
     }
     updateLineups();

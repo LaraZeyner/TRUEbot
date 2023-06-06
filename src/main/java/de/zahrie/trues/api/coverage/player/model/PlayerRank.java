@@ -65,8 +65,12 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
     return rank.toString() + (rank.tier().equals(Rank.RankTier.UNRANKED) ? "" : " - (" + getWinrate().format(Format.ADDITIONAL) + ")");
   }
 
-  public PlayerRank(Player player, Rank.RankTier tier, Division division, byte points, int wins, int losses) {
-    this.season = SeasonFactory.getLastPRMSeason();
+  public PlayerRank(Player player, Rank rank, int wins, int losses) {
+    this(player, rank.tier(), rank.division(), rank.points(), wins, losses);
+  }
+
+  public PlayerRank(Player player, Rank.RankTier tier, Rank.Division division, short points, int wins, int losses) {
+    this.season = SeasonFactory.getCurrentSeason();
     this.seasonId = season.getId();
     this.playerId = player.getId();
     this.player = player;
@@ -89,7 +93,7 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
         (int) objects.get(0),
         (int) objects.get(1),
         (int) objects.get(2),
-        new Rank(Tier.valueOf(new SQLEnum<>(Rank.RankTier.class).of(objects.get(3)).name()), new SQLEnum<>(Division.class).of(objects.get(4)), objects.get(5).byteValue()),
+        new Rank(Tier.valueOf(new SQLEnum<>(Rank.RankTier.class).of(objects.get(3)).name()), new SQLEnum<>(Rank.Division.class).of(objects.get(4)), objects.get(5).shortValue()),
         (int) objects.get(6),
         (int) objects.get(7)
     );
@@ -104,6 +108,6 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
 
   @Override
   public int compareTo(@NotNull PlayerRank o) {
-    return rank.compareTo(o.getRank());
+    return -season.compareTo(o.getSeason());
   }
 }

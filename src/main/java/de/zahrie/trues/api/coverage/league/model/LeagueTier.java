@@ -42,7 +42,7 @@ public enum LeagueTier {
   public static LeagueTier fromIndex(int index) {
     if (index > 8) return Division_8;
     if (index < 3) return Division_3_Playoffs;
-    return Arrays.stream(LeagueTier.values()).filter(tier -> tier.index == index).findFirst().orElse(null);
+    return Arrays.stream(LeagueTier.values()).filter(tier -> tier.index != null && tier.index == index).findFirst().orElse(null);
   }
 
   private final Integer index;

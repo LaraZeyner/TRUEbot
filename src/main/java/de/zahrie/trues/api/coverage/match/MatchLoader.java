@@ -12,10 +12,10 @@ import de.zahrie.trues.api.coverage.playday.PlaydayFactory;
 import de.zahrie.trues.api.coverage.playday.config.SchedulingRange;
 import de.zahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.zahrie.trues.api.coverage.season.PRMSeason;
-import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.log.Console;
@@ -46,7 +46,7 @@ public class MatchLoader extends GamesportsLoader {
 
   MatchLoader create() {
     final String seasonName = html.find("h1").text().before(":");
-    final PRMSeason season = SeasonFactory.getSeason(seasonName);
+    final PRMSeason season = new Query<>(PRMSeason.class).where("season_full", seasonName).entity();
     if (season == null) {
       new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
       return null;
@@ -57,7 +57,7 @@ public class MatchLoader extends GamesportsLoader {
     final String divisionURL = division.find("a").getAttribute("href");
     final int stageId = divisionURL.between("/group/", "-").intValue();
     final int divisionId = divisionURL.between("/", "-", 8).intValue();
-    final PRMLeague league = LeagueFactory.getGroup(season, divisionName, stageId, divisionId);
+    final PRMLeague league = LeagueFactory.getGroup(season, divisionName.strip(), stageId, divisionId);
 
     final Playday playday = getPlayday(league);
     final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());

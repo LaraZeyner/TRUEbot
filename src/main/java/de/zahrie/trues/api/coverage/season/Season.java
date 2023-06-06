@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.season;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.ABetable;
 import de.zahrie.trues.api.coverage.EventDTO;
@@ -25,14 +26,19 @@ import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 @Getter
-@Setter
 @Table("coverage_season")
 public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
+  @Setter
   protected int id;
   protected final String name; // season_name
   protected final String fullName; // season_full
   protected TimeRange range; // season_start, season_end
-  protected boolean active; // active
+  protected final boolean active; // active
+
+  @Override
+  public void setRange(TimeRange range) {
+    this.range = range;
+  }
 
   @Override
   public List<Stage> getStages() {
@@ -78,5 +84,16 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
   @NonNull
   public List<EventDTO> getEvents() {
     return new ArrayList<>(getStages().stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList()).stream().sorted().toList();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof final Season season)) return false;
+    return this == o || getId() == season.getId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
   }
 }

@@ -1,19 +1,12 @@
 package de.zahrie.trues.api.community.application;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.message.Emote;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 @Getter
@@ -48,20 +41,11 @@ public enum TeamPosition {
     return name;
   }
 
-  @NotNull
-  public static ActionRow TEAM_ACTION_ROW() {
-    final List<SelectOption> selectOptions = Arrays.stream(TeamPosition.values())
-        .filter(position -> position.ordinal() <= TEAM_COACH.ordinal())
-        .map(TeamPosition::toSelectOption).filter(Objects::nonNull).toList();
-    return ActionRow.of(StringSelectMenu.create("app-position").setPlaceholder("Position im Team").addOptions(selectOptions)
-        .addOption("andere", "OTHER").build());
+  public boolean isTeam() {
+    return ordinal() <= TEAM_COACH.ordinal();
   }
 
-  @NotNull
-  public static ActionRow ORGA_ACTION_ROW() {
-    final List<SelectOption> selectOptions = Arrays.stream(TeamPosition.values())
-        .filter(position -> position.ordinal() >= TEAM_COACH.ordinal())
-        .map(TeamPosition::toSelectOption).filter(Objects::nonNull).toList();
-    return ActionRow.of(StringSelectMenu.create("app-position").setPlaceholder("Position in der Orga").addOptions(selectOptions).build());
+  public boolean isOrga() {
+    return ordinal() >= TEAM_COACH.ordinal();
   }
 }

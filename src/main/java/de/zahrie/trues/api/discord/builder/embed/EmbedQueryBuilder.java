@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
   public EmbedCreator build() {
-    if (query.getHeadTitle() != null) creator.add(query.getHeadTitle(), query.getHeadDescription(), false);
+    // if (query.getHeadTitle() != null) creator.add(query.getHeadTitle(), query.getHeadDescription(), false);
     final List<Object[]> entries = query.build();
     if (!handleNoData(query, entries)) handleData(query, Util.nonNull(entries));
     return creator;
@@ -22,7 +22,7 @@ public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
       final String content = determineColumnEntry(entries, i);
       final Column column = query.getColumns().get(i);
       final boolean inline = query.getColumns().size() > 1;
-      creator.add(column.value(), content, inline);
+      creator.add(column.name(), content, inline);
     }
   }
 
@@ -35,7 +35,7 @@ public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
 
   private boolean handleNoData(SimpleCustomQuery query, @Nullable List<Object[]> list) {
     if (list != null && !list.isEmpty()) return false;
-    creator.add(query.getColumns().get(0).value(), "keine Daten", true);
+    if (!query.getColumns().get(0).ignore()) creator.add(query.getColumns().get(0).name(), "keine Daten", false);
     return true;
   }
 }

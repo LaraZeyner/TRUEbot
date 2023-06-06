@@ -27,7 +27,7 @@ public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) 
 
   private String getDescription() {
     if (matchLogs.isEmpty()) {
-      return "Match erstellt - Ausweichtermin am: **" + TimeFormat.DEFAULT.of(match.getStart()) + "**";
+      return "Match erstellt - Ausweichtermin am: **" + TimeFormat.DEFAULT_FULL.of(match.getStart()) + "**";
     }
     final MatchLog log = matchLogs.get(0);
     return log.getAction().getOutput() + "( von " + log.getParticipator().getTeam().getName() + " )\n" + log.detailsOutput();

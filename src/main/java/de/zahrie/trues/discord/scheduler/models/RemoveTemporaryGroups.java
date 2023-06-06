@@ -11,7 +11,6 @@ import de.zahrie.trues.api.discord.group.RoleGranter;
 import de.zahrie.trues.api.discord.user.DiscordUserGroup;
 import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
-import de.zahrie.trues.util.io.log.Console;
 
 @Schedule(minute = "0")
 public class RemoveTemporaryGroups extends ScheduledTask {
@@ -26,7 +25,6 @@ public class RemoveTemporaryGroups extends ScheduledTask {
           .min(Comparator.comparing(Membership::getTimestamp))
           .ifPresent(om -> om.getOrgaTeam().getRoleManager().removeRole(toRemove.getUser()));
     }
-    new Console("Substitute-Rollen bearbeitet").info();
   }
 
   @Override

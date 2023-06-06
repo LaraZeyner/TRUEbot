@@ -32,7 +32,7 @@ public class LeagueLoader extends GamesportsLoader {
     final int divisionId = url.between("/", "-", 8).intValue();
     final PRMSeason season = SeasonFactory.getSeason(seasonId);
     if (season == null) {
-      new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
+      new DevInfo("Season " + seasonId + " wurde nicht erstellt.").with(Console.class).warn();
       return null;
     }
     return LeagueFactory.getGroup(season, name, stageId, divisionId);
@@ -55,9 +55,10 @@ public class LeagueLoader extends GamesportsLoader {
     super(URLType.LEAGUE, prmLeague.getUrl().between("/prm/", "/").intValue(), prmLeague.getUrl().between("/group/", "/").intValue(),
         prmLeague.getUrl().after("/", -1).intValue());
     this.url = prmLeague.getUrl();
-    final PRMSeason season = SeasonFactory.getSeason(url.between("/prm/", "/").intValue());
+    final Integer seasonId = url.between("/prm/", "/").intValue();
+    final PRMSeason season = SeasonFactory.getSeason(seasonId);
     if (season == null) {
-      new DevInfo("Season wurde nicht erstellt.").with(Console.class).warn();
+      new DevInfo("Season " + seasonId + " wurde nicht erstellt.").with(Console.class).warn();
       this.league = null;
     } else {
       final int divisionId = url.after("/", -1).intValue();

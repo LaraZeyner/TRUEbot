@@ -25,31 +25,25 @@ public class Application implements Entity<Application> {
 
   private final TeamPosition position;
   private LocalDateTime appTimestamp = LocalDateTime.now();
-  /**
-   * Kann drei Werte annehmen <br>
-   * <code>true</code> = warte auf Vorstellungsgespräch <br>
-   * <code>false</code> = Vorstellungsgespräch abgehalten <br>
-   * <code>null</code> = abgelehnt
-   */
-  private Boolean waiting;
+  private boolean active;
 
   private String appNotes;
 
-  public Application(DiscordUser user, TeamRole role, TeamPosition position, Boolean waiting, String appNotes) {
+  public Application(DiscordUser user, TeamRole role, TeamPosition position, boolean active, String appNotes) {
     this.user = user;
     this.role = role;
     this.position = position;
-    this.waiting = waiting;
+    this.active = active;
     this.appNotes = appNotes;
   }
 
-  public Application(int id, DiscordUser user, TeamRole role, TeamPosition position, LocalDateTime appTimestamp, Boolean waiting, String appNotes) {
+  public Application(int id, DiscordUser user, TeamRole role, TeamPosition position, LocalDateTime appTimestamp, boolean active, String appNotes) {
     this.id = id;
     this.user = user;
     this.role = role;
     this.position = position;
     this.appTimestamp = appTimestamp;
-    this.waiting = waiting;
+    this.active = active;
     this.appNotes = appNotes;
   }
 
@@ -65,7 +59,7 @@ public class Application implements Entity<Application> {
         new SQLEnum<>(TeamRole.class).of(objects.get(2)),
         new SQLEnum<>(TeamPosition.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
-        (Boolean) objects.get(5),
+        (boolean) objects.get(5),
         (String) objects.get(6)
     );
   }
@@ -74,7 +68,7 @@ public class Application implements Entity<Application> {
   public Application create() {
     return new Query<>(Application.class)
         .key("discord_user", user).key("position", position)
-        .col("lineup_role", role).col("app_timestamp", appTimestamp).col("waiting", waiting).col("app_notes", appNotes)
+        .col("lineup_role", role).col("app_timestamp", appTimestamp).col("waiting", active).col("app_notes", appNotes)
         .insert(this);
   }
 }

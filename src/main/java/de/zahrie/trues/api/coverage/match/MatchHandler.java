@@ -3,6 +3,7 @@ package de.zahrie.trues.api.coverage.match;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
+import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
@@ -70,6 +72,7 @@ public class MatchHandler extends MatchModel implements Serializable {
     boolean updated = false;
     Collections.reverse(logs);
     boolean changeScore = false;
+    boolean updatePlayers = false;
     for (HTML html : logs) {
       final List<HTML> cells = html.findAll("td");
       if (cells.isEmpty()) continue;
@@ -80,9 +83,14 @@ public class MatchHandler extends MatchModel implements Serializable {
       final var action = MatchLogAction.valueOf(cells.get(2).text().upper());
       final String details = cells.get(3).text();
       updated = match.get().updateLogs(dateTime, userWithTeam, action, details) || updated;
+
+      if (EventStatus.SCORE_REPORT.equals(action.getStatus()) || action.equals(MatchLogAction.PLAYED)) updatePlayers = true;
       if (action.equals(MatchLogAction.CHANGE_SCORE)) changeScore = true;
     }
     if (changeScore) match.updateResult();
+    if (updatePlayers) Arrays.stream(match.getParticipators()).filter(participator -> participator.getTeam() != null)
+        .flatMap(participator -> participator.getTeamLineup().getSetPlayers().stream())
+        .forEach(player -> player.loadGames(LoaderGameType.TOURNAMENT));
     return updated;
   }
 

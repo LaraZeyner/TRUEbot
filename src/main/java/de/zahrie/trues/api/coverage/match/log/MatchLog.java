@@ -19,6 +19,8 @@ import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.util.StringUtils;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -26,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table("coverage_log")
 @ExtensionMethod(StringUtils.class)
 public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
@@ -39,16 +42,11 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
   private final String details; // details
   private final Participator participator; // coverage_team
 
-  public MatchLog(LocalDateTime timestamp, Match match, MatchLogAction action, String details, Participator participator) {
-    this.timestamp = timestamp;
-    this.match = match;
-    this.action = action;
-    this.details = details;
-    this.participator = participator;
+  public MatchLog(Match match, MatchLogAction action, String details, Participator participator) {
+    this(LocalDateTime.now(), match, action, details, participator);
   }
 
-  public MatchLog(int id, LocalDateTime timestamp, Match match, MatchLogAction action, String details, Participator participator) {
-    this.id = id;
+  public MatchLog(LocalDateTime timestamp, Match match, MatchLogAction action, String details, Participator participator) {
     this.timestamp = timestamp;
     this.match = match;
     this.action = action;
@@ -69,12 +67,10 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
 
   @Override
   public MatchLog create() {
-    final var matchlog = (MatchLog) new Query<>(MatchLog.class)
-        .key("log_time", timestamp).key("coverage", match).key("action", action).key("details", details).key("coverage_team", participator)
-        .insert(this);
-    if (matchlog.getId() == 0) match.clearLogs();
-    else match.getLogs().add(matchlog);
-    return matchlog;
+    return new Query<>(MatchLog.class)
+        .key("log_time", timestamp).key("coverage", match).key("action", action).key("details", details)
+        .key("coverage_team", participator)
+        .insert(this, match::addLog);
   }
 
   public Participator getParticipator() {

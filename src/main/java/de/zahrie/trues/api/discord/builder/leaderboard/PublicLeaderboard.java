@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,34 +30,31 @@ public class PublicLeaderboard extends Leaderboard {
     this.messageIds = messageIds;
   }
 
-  void add(Message message) {
+  void add(@NotNull Message message) {
     messageIds.add(message.getIdLong());
+    System.out.println("MESSAGE ADDED");
   }
 
   public void updateData() {
     final GuildChannel eventChannel = Nunu.DiscordChannel.getChannel(channelID);
-    if (!(eventChannel instanceof MessageChannel messageChannel)) {
-      return;
-    }
-    final EmbedWrapper data = super.getData(List.of());
+    if (!(eventChannel instanceof MessageChannel messageChannel)) return;
+
+    final EmbedWrapper data = getDataList();
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
     final List<String> merge = data.merge();
-    for (int i = 0; i < merge.size(); i++) {
-      final String str = merge.get(i);
-      final Long messageId = messageIds.get(i);
-      messageChannel.retrieveMessageById(messageId).queue(message -> message.editMessage(str).queue());
+    if (merge.isEmpty() || merge.get(0).isBlank()) {
+      messageChannel.retrieveMessageById(messageIds.get(0)).queue(message -> message.editMessageEmbeds(wrapperEmbeds).queue());
+      return;
     }
-    for (int i = 0; i < messageIds.size(); i++) {
-      final Long messageId = messageIds.get(i);
-      final int finalI = i;
-      messageChannel.retrieveMessageById(messageId).queue(message -> {
-        if (merge.size() > finalI) message.editMessage(merge.get(finalI)).queue();
-        fromTo(finalI, messageIds.size(), wrapperEmbeds, message);
-      });
+    for (int i = 0; i < merge.size(); i++) {
+      final String content = merge.get(i);
+      if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty())
+        messageChannel.retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).setEmbeds(wrapperEmbeds).queue());
+      else messageChannel.retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).queue());
     }
   }
 
-  private void fromTo(int page, int maxPages, List<MessageEmbed> embeds, Message message) {
+  private void fromTo(int page, int maxPages, @NotNull List<MessageEmbed> embeds, Message message) {
     final int embedPages = (int) Math.ceil(embeds.size() / 10.);
     final int firstRemainingPage = maxPages - embedPages;
     if (page >= firstRemainingPage) {
@@ -78,10 +76,11 @@ public class PublicLeaderboard extends Leaderboard {
     return leaderboardData;
   }
   
+  @NotNull
   public static PublicLeaderboard fromJSON(JSONObject entry) {
     final List<String> parameters = IntStream.range(0, entry.getJSONArray("parameters").length()).mapToObj(entry.getJSONArray("parameters")::getString).toList();
     return new PublicLeaderboard(
-        SimpleCustomQuery.params(NamedQuery.valueOf("key"), parameters.stream().map(string -> (Object) string).toList()),
+        SimpleCustomQuery.params(NamedQuery.valueOf(entry.getString("key")), parameters.stream().map(string -> (Object) string).toList()),
         entry.getLong("channelId"),
         IntStream.range(0, entry.getJSONArray("messageIds").length()).mapToObj(entry.getJSONArray("messageIds")::getLong).toList());
   }

@@ -7,6 +7,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -162,6 +163,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   private <R> T executeUpdate(String query, boolean insert, T entity, Function<T, R> action, Function<T, R> otherWise, List<Object> parameters) {
+    return executeUpdate(query, insert, entity, action, otherWise, parameters, false);
+  }
+
+  private <R> T executeUpdate(String query, boolean insert, T entity, Function<T, R> action, Function<T, R> otherWise, List<Object> parameters, boolean retry) {
     final Connection connection = Database.connection().getConnection();
     if (Const.SHOW_SQL) new Console(query).debug();
     try (final PreparedStatement statement = insert ? connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(query)) {
@@ -191,6 +196,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
         }
       }
       return entity;
+    } catch (SQLNonTransientConnectionException exception) {
+      if (retry) throw new RuntimeException(exception);
+      Database.reconnect();
+      return executeUpdate(query, insert, entity, action, otherWise, parameters, true);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
       new DevInfo("Query nicht zulässig: " + query).with(Console.class).severe(exception);
@@ -216,6 +225,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   public List<Object[]> list(List<Object> parameters, boolean force) {
+    return list(parameters, force, false);
+  }
+
+  private List<Object[]> list(List<Object> parameters, boolean force, boolean retry) {
     List<? extends Class<?>> clazzes = new ArrayList<>(fields.stream().filter(sqlField -> sqlField instanceof SQLReturnField).map(o -> (SQLReturnField) o)
         .map(SQLReturnField::getReturnType).toList());
 
@@ -235,6 +248,10 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
         }
       }
       return out;
+    } catch (SQLNonTransientConnectionException exception) {
+      if (retry) throw new RuntimeException(exception);
+      Database.reconnect();
+      return list(parameters, force, true);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + selectQuery).severe(exception);
       new DevInfo("Query nicht zulässig: " + selectQuery).with(Console.class).severe(exception);
@@ -304,7 +321,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   private List<T> determineEntityList(List<Object[]> objectList) {
     if (targetId == null) throw new NullPointerException("Entity kann nicht generiert werden");
 
-    final List<T> out = new SortedList<>(false);
+    final List<T> out = new SortedList<>();
     try {
       if (Entity.class.isAssignableFrom(targetId)) {
         final Method getMethod = targetId.getMethod("get", List.class);

@@ -1,7 +1,6 @@
 package de.zahrie.trues.api.discord.user;
 
 import de.zahrie.trues.api.community.application.Application;
-import de.zahrie.trues.api.community.application.ApplicationFactory;
 import de.zahrie.trues.api.community.application.TeamPosition;
 import de.zahrie.trues.api.community.application.TeamRole;
 import de.zahrie.trues.api.community.member.Membership;
@@ -26,7 +25,7 @@ public class DiscordUserFactory {
   }
 
   public static Application apply(DiscordUser user, TeamRole role, TeamPosition position, String appNotes) {
-    return ApplicationFactory.create(user, role, position, appNotes, true);
+    return user.getApplications().create(role, position, appNotes, true);
   }
 
   public static void addOrgaRole(DiscordUser user, TeamRole role, TeamPosition position) {

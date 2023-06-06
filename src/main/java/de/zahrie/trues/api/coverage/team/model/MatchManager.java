@@ -17,7 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 public record MatchManager(Team team) {
   public List<Match> getUpcomingMatches() {
-    return new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class, JoinQuery.JoinType.LEFT, "match"))
+    return new Query<>(Participator.class)
+        .join(new JoinQuery<>(Participator.class, Match.class, JoinQuery.JoinType.LEFT).col("coverage"))
         .where("team", team).and("_match.result", "-:-")
         .ascending("_match.coverage_start").convertList(Match.class);
   }
@@ -31,11 +32,11 @@ public record MatchManager(Team team) {
   @NonNull
   public List<Match> getNextMatches(boolean avoidCalibration) {
     final List<Match> nextMatches = new Query<>(Participator.class)
-        .join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .where("team", team).and("_match.result", "-:-")
         .ascending("_match.coverage_start")
         .include(new Query<>(Participator.class).get("_match.*", Object[].class)
-            .join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
+            .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
             .where("team", team).and(Condition.Comparer.NOT_EQUAL, "_match.result", "-:-")
             .descending("_match.coverage_start")
         ).convertList(Match.class);
@@ -55,8 +56,9 @@ public record MatchManager(Team team) {
   }
 
   public List<Match> getMatchesOf(Stage stage) {
-    return new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class))
-        .join(new JoinQuery<>(Match.class, Playday.class, "matchday"))
+    return new Query<>(Participator.class)
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
+        .join(new JoinQuery<>(Match.class, Playday.class).col("matchday"))
         .where("team", team).and("_playday.stage", stage)
         .ascending("_match.coverage_start").convertList(Match.class);
   }

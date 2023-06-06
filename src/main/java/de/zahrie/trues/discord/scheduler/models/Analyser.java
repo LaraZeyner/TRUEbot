@@ -11,18 +11,20 @@ import de.zahrie.trues.api.coverage.match.UpcomingDataFactory;
 import de.zahrie.trues.api.coverage.match.model.ATournament;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
+import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
+import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.stage.model.CalibrationStage;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.scheduler.Schedule;
 import de.zahrie.trues.api.scheduler.ScheduledTask;
 import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
-import de.zahrie.trues.util.io.log.Console;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 
@@ -31,27 +33,29 @@ import lombok.experimental.ExtensionMethod;
 public class Analyser extends ScheduledTask {
   @Override
   public void execute() {
-    final long start = System.currentTimeMillis();
     RiotPlayerAnalyzer.reset();
     TeamLoader.reset();
     Database.connection().commit(false);
     new Query<>(OrgaTeam.class).entityList().stream().map(OrgaTeam::getTeam).filter(Objects::nonNull)
-        .flatMap(team -> team.getPlayers().stream()).forEach(player -> player.loadGames(false));
+        .flatMap(team -> team.getPlayers().stream()).forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
 
     PlayerFactory.registeredPlayers().stream().filter(player -> player.getTeam() == null || player.getTeam().getOrgaTeam() == null)
-        .forEach(player -> player.loadGames(false, false));
-    new Query<>(Player.class, "SELECT player.* FROM player JOIN team t on player.team = t.team_id WHERE refresh >= now()").entityList().forEach(player -> player.loadGames(false));
+        .forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
+    /*new Query<>(Player.class, "SELECT player.* FROM player JOIN team t on player.team = t.team_id WHERE refresh >= now()").entityList().forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));*/
     Database.connection().commit(true);
     handleNextMatches();
 
     RiotPlayerAnalyzer.reset();
-    new Console("Riot analyse dauerte " + Math.round((System.currentTimeMillis() - start) / 60_000.) + " Minuten.").info();
+    System.out.println("REPPPPPPPPPEATTTTTTTTTTTTT!!!!!!!!!");
   }
 
   private static void handleNextMatches() {
     final List<Integer> upcomingMatches = UpcomingDataFactory.getInstance().getMatches().stream().map(Match::getId).toList();
     for (Match match : getNextOrgaMatches()) {
-      if (upcomingMatches.contains(match.getId())) continue;
+      if (upcomingMatches.contains(match.getId())) {
+        updateScouting(match);
+        continue;
+      }
 
       if (match instanceof PRMMatch primeMatch) {
         new MatchLoader(primeMatch).load().update();
@@ -66,20 +70,29 @@ public class Analyser extends ScheduledTask {
       }
 
       for (Participator participator : match.getParticipators()) {
-        participator.getTeamLineup().getLineup().forEach(lineup -> lineup.getPlayer().loadGames(false));
+        if (participator.getTeam() == null) continue;
+
+        final SortedList<Player> players = new SortedList<>(participator.getTeam().getPlayers());
+        players.addAll(participator.getTeamLineup().getLineup().stream().map(Lineup::getPlayer).toList());
+
+        players.forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
         Database.connection().commit();
       }
 
-      for (OrgaTeam orgaTeam : match.getOrgaTeams()) {
-        final Match nextMatch = orgaTeam.getTeam().getMatches().getNextMatch(true);
-        if (nextMatch == null) continue;
-        if (nextMatch.getId() != match.getId()) continue;
+      updateScouting(match);
+    }
+  }
 
-        final Participator opponent = match.getOpponent(orgaTeam.getTeam());
-        if (opponent == null) continue;
+  private static void updateScouting(Match match) {
+    for (OrgaTeam orgaTeam : match.getOrgaTeams()) {
+      final Match nextMatch = orgaTeam.getTeam().getMatches().getNextMatch(true);
+      if (nextMatch == null) continue;
+      if (nextMatch.getId() != match.getId()) continue;
 
-        ScoutingManager.addForTeam(orgaTeam, opponent, nextMatch);
-      }
+      final Participator opponent = match.getOpponent(orgaTeam.getTeam());
+      if (opponent == null) continue;
+
+      ScoutingManager.addForTeam(orgaTeam, opponent, nextMatch);
     }
   }
 

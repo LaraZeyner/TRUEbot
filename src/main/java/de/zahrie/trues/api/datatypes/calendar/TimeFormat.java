@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.datatypes.calendar;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -54,8 +55,25 @@ public enum TimeFormat {
   DAY_LONG("dd.MM.YYYY", ""),
   DAY_STANDARD("YYYY-MM-dd", ""),
   DISCORD("<t:1234567890:R>", ""),
-  DEFAULT("E, d. MMM YYYY HH:mm", ""),
+  DEFAULT_FULL("E, d. MMM YYYY HH:mm", ""),
+  DEFAULT_SHORT("E, HH:mm", ""),
+  DEFAULT("E, d. MMM HH:mm", ""),
+  SYSTEM("YYYY-MM-dd HH:mm:ss", ""),
   WEEKLY("EE., HH", " Uhr");
+
+  public static String AUTO(LocalDate date) {
+    return AUTO(LocalDateTime.of(date, LocalTime.MIN));
+  }
+
+  public static String AUTO(LocalDateTime time) {
+    final Duration duration = Duration.between(time, LocalDateTime.now());
+    if (duration.getSeconds() < 45 * 60) return DISCORD.of(time);
+    else if (time.toLocalDate().equals(LocalDate.now())) return HOUR.of(time);
+    else if (duration.getSeconds() < 24 * 60 * 60) return DISCORD.of(time);
+    else if (duration.getSeconds() < 7 * 24 * 60 * 60) return DEFAULT_SHORT.of(time);
+    else if (duration.getSeconds() < 25 * 24 * 60 * 60) return DISCORD.of(time);
+    else return DEFAULT.of(time);
+  }
 
   private final String format;
   private final String suffix;

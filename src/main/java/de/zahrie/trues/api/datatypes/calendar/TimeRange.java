@@ -33,7 +33,7 @@ public class TimeRange implements Comparable<TimeRange> {
 
   public String display() {
     final LocalDateTime now = LocalDateTime.now();
-    final TimeFormat format = startTime.isAfter(now.plusWeeks(3)) || startTime.isBefore(now.minusWeeks(3)) ? TimeFormat.DEFAULT : TimeFormat.DISCORD;
+    final TimeFormat format = startTime.isAfter(now.plusWeeks(3)) || startTime.isBefore(now.minusWeeks(3)) ? TimeFormat.DEFAULT_FULL : TimeFormat.DISCORD;
     return format.of(startTime);
   }
 

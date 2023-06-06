@@ -22,21 +22,21 @@ public abstract class Numeric<E extends Number> extends Number implements Compar
 
   @Override
   public int intValue() {
-    return 0;
+    return value.intValue();
   }
 
   @Override
   public long longValue() {
-    return 0;
+    return value.longValue();
   }
 
   @Override
   public float floatValue() {
-    return 0;
+    return value.floatValue();
   }
 
   @Override
   public double doubleValue() {
-    return 0;
+    return value;
   }
 }

@@ -32,10 +32,6 @@ public interface ASeason extends Comparable<ASeason> {
 
   boolean isActive();
 
-  void setRange(de.zahrie.trues.api.datatypes.calendar.TimeRange range);
-
-  void setActive(boolean active);
-
   @Override
   default int compareTo(@NotNull ASeason o) {
     return getRange().compareTo(o.getRange());

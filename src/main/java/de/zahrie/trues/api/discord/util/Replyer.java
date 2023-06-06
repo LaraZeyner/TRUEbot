@@ -129,7 +129,7 @@ public abstract class Replyer {
       }
     }
 
-    out.append("zuletzt aktualisiert ").append(TimeFormat.DEFAULT.now());
+    out.append("zuletzt aktualisiert ").append(TimeFormat.DEFAULT_FULL.now());
     wrapperStrings.add(out.toString());
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();
@@ -148,6 +148,7 @@ public abstract class Replyer {
 
     message.setEphemeral(annotation.ephemeral()).queue();
     end = true;
+    customEmbedData.clear();
     return true;
   }
 
@@ -211,12 +212,12 @@ public abstract class Replyer {
     return getTargetMember() == null ? null : DiscordUserFactory.getDiscordUser(getTargetMember());
   }
 
-  protected boolean hasModal() {
+  protected boolean hasNoModal() {
     try {
       final UseView execute = getClass().asSubclass(this.getClass())
           .getDeclaredMethod("execute", clazz)
           .getAnnotation(UseView.class);
-      return execute != null;
+      return execute == null;
     } catch (NoSuchMethodException exception) {
       throw new RuntimeException(exception);
     }

@@ -20,7 +20,8 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
 
   public static Query<Performance> get(Player player, ScoutingGameType gameType, @Nullable Lane lane, @Nullable Champion champion) {
     final var query = new Query<>(Performance.class)
-        .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
+        .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .where("player", player);
     if (lane != null) query.where("lane", lane);
     if (champion != null) query.where("champion", champion);
@@ -30,11 +31,11 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
       case TEAM_GAMES -> query.join(new JoinQuery<>(Performance.class, Player.class))
           .where("_player.team", player.getTeam())
           .and(Condition.inSubquery("t_perf", new Query<>(Performance.class).distinct("t_perf", Integer.class)
-                  .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf"))
+                  .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
                   .join(new JoinQuery<>(TeamPerf.class, Game.class))
                   .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH).and("player", player)
                   .include(new Query<>(Performance.class).distinct("t_perf", Integer.class)
-                      .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf"))
+                      .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
                       .join(new JoinQuery<>(TeamPerf.class, Game.class))
                       .join(new JoinQuery<>(Performance.class, Player.class))
                       .where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.RANKED_FLEX).and("player", player)

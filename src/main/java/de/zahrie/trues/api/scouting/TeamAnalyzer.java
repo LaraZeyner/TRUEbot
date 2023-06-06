@@ -73,7 +73,8 @@ public class TeamAnalyzer extends AnalyzeManager {
   @Override
   public Query<Performance> performance() {
     return gameTypeString(new Query<>(Performance.class)
-        .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
+        .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .join(new JoinQuery<>(Performance.class, Player.class))
         .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
   }
@@ -81,7 +82,8 @@ public class TeamAnalyzer extends AnalyzeManager {
   @Override
   public Query<Selection> selection() {
     final Query<Performance> performanceQuery = gameTypeString(new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
-        .join(new JoinQuery<>(Performance.class, TeamPerf.class, "t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
+        .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .join(new JoinQuery<>(Performance.class, Player.class))
         .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
     return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
@@ -123,7 +125,7 @@ public class TeamAnalyzer extends AnalyzeManager {
   public List<Match> getMatches() {
     final LocalDateTime startTime = LocalDateTime.now().minusDays(days);
     return new Query<>(Participator.class).get("coverage", Match.class)
-        .join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .keep("team", team)
         .where(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", startTime).or("_match.result", "-:-")
         .ascending("_match.coverage_start").convertList(Match.class);

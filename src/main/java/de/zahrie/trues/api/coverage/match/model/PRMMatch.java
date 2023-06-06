@@ -71,7 +71,7 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
         .col("scheduling_end", range.getEndTime())
         .insert(this);
     if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
-      new MatchLog(LocalDateTime.now(), this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
+      new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
     }
     if (match.getParticipators().length == 0) {
       final Participator home = new Participator(match, true).create();

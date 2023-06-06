@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public final class SimpleCustomQuery {
   private final NamedQuery namedQuery;
   private final List<Object> parameters;
+  @Deprecated
   private List<Object[]> customData;
   private final int frequencyInMinutes;
 
@@ -49,6 +50,7 @@ public final class SimpleCustomQuery {
     return this;
   }
 
+  @Deprecated
   public SimpleCustomQuery custom(List<Object[]> customData) {
     this.customData = customData;
     return this;
@@ -86,6 +88,15 @@ public final class SimpleCustomQuery {
   @NonNull
   public String getName() {
     return namedQuery.name();
+  }
+
+  @Nullable
+  public List<List<Object[]>> getData() {
+    return namedQuery.getCustom();
+  }
+
+  public NamedQuery getNamedQuery() {
+    return namedQuery;
   }
 
   public int getFrequencyInMinutes() {

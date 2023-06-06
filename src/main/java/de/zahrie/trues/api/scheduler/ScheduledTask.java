@@ -1,20 +1,25 @@
 package de.zahrie.trues.api.scheduler;
 
+import java.time.Duration;
+
+import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.zahrie.trues.util.io.cfg.JSON;
+import lombok.Getter;
+
 public abstract class ScheduledTask {
   private final Schedule schedule;
   private Thread thread = null;
+  @Getter
+  private int loops = 0;
+  @Getter
+  private Duration duration = Duration.ZERO;
 
   public ScheduledTask() {
     this.schedule = getClass().asSubclass(this.getClass()).getAnnotation(Schedule.class);
   }
 
   public abstract void execute() throws InterruptedException;
-
   protected abstract String name();
-
-  private boolean notValid() {
-    return !new ScheduleComparer(schedule).test();
-  }
 
   public void start() {
     if (thread != null && thread.isAlive() || notValid()) return;
@@ -22,11 +27,27 @@ public abstract class ScheduledTask {
     thread.start();
   }
 
-  public void run() {
+  private boolean notValid() {
+    return !new ScheduleComparer(schedule).test();
+  }
+
+  private void run() {
     try {
+      final long start = System.currentTimeMillis();
       execute();
+      final Duration duration = Duration.ofMillis(System.currentTimeMillis() - start);
+      this.duration = this.duration.plus(duration);
+      this.loops++;
+      final String performanceData = getPerformanceData(duration);
+      ScheduleManager.lastLines.put(name(), performanceData);
+      JSON.append("thread-performance.txt", performanceData);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String getPerformanceData(Duration duration) {
+    final int average = (int) Math.round(this.duration.getSeconds() * 1. / loops);
+    return "\n[" + TimeFormat.SYSTEM.now() + "] " + name() + " run " + duration.getSeconds() + " seconds (avg. " + average + ") - " + loops + "x";
   }
 }

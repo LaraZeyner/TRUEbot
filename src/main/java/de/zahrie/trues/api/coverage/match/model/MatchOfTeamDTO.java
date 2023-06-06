@@ -20,7 +20,7 @@ public record MatchOfTeamDTO(Match match, Team team) implements DTO {
 
   public static Query<Participator> get(Team team, LocalDateTime start) {
     return new Query<>(Participator.class).get("coverage", Match.class).get("team", Team.class)
-        .join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .keep("team", team)
         .where(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", start).or("_match.status", EventStatus.PLAYED)
         .ascending("_match.coverage_start");

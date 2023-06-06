@@ -46,7 +46,7 @@ public record DateStringConverter(String input) {
   @Nullable
   private LocalDate handleDateString(String section) {
     if (StringUtils.erase(section, 1).contains(".")) {
-      if (section.endsWith(".")) section = StringUtils.erase(section, -1);
+      if (section.endsWith(".")) section = StringUtils.erase(section, 1);
       if (StringUtils.intValue(section.replace(".", "")) == -1) return null;
       final String[] splitted = section.split("\\.");
       int day = StringUtils.intValue(section);

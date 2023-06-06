@@ -11,6 +11,8 @@ import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchHandler;
 import de.zahrie.trues.api.coverage.match.MatchLoader;
+import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
+import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
 import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.player.model.Player;
@@ -41,12 +43,12 @@ public class TeamHandler extends TeamModel implements Serializable {
     if (TeamLoader.loadedTeams.contains(team)) return;
 
     final List<HTML> stages = html.findAll("section", "league-team-stage");
-    updateResult(stages);
+    final boolean created = updateResult(stages);
     updateRecordAndSeasons();
-    if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) {
-      handleStarterMatches(stages);
-    }
-    final double averageMMR = team.getPlayers().stream().map(Player::getLastRelevantRank).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
+    if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) handleStarterMatches(stages);
+
+    if (created) team.getPlayers().forEach(player -> player.loadGames(LoaderGameType.CLASH_PLUS));
+    final double averageMMR = team.getPlayers().stream().map(Player::getRanks).map(PlayerRankHandler::getLastRelevant).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
     team.setLastMMR((int) Math.round(averageMMR));
     team.update();
 
@@ -86,14 +88,13 @@ public class TeamHandler extends TeamModel implements Serializable {
     }
   }
 
-  private void updateResult(List<HTML> stages) {
-    if (stages.isEmpty()) {
-      return;
-    }
+  private boolean updateResult(List<HTML> stages) {
+    if (stages.isEmpty()) return false;
+
     final String result = stages.get(stages.size() - 1)
         .find("ul", "content-icon-info")
         .findAll("li").get(1).text().replace("Ergebnis", "");
-    team.setScore(determineDivision(stages), result);
+    return team.setScore(determineDivision(stages), result);
   }
 
   private PRMLeague determineDivision(List<HTML> stages) {

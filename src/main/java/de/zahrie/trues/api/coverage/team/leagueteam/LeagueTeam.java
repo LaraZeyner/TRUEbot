@@ -77,8 +77,8 @@ public class LeagueTeam implements Entity<LeagueTeam>, Comparable<LeagueTeam> {
         if (participatingTeam == null) continue;
 
         final MatchResult resultHandler = results.containsKey(participatingTeam) ? results.get(participatingTeam) :
-            new MatchResult(0, 0);
-        final MatchResult resultHandler2 = match.getResult().ofTeam(match, participatingTeam);
+            new MatchResult(match, 0, 0);
+        final MatchResult resultHandler2 = match.getResult().ofTeam(participatingTeam);
         if (resultHandler2 != null) results.put(participatingTeam, resultHandler.add(resultHandler2));
       }
     }

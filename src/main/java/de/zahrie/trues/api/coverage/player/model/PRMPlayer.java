@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import de.zahrie.trues.api.coverage.player.PlayerHandler;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -43,10 +44,13 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
 
   @Override
   public PRMPlayer create() {
-    return new Query<>(PRMPlayer.class).key("lol_puuid", puuid)
+    boolean notExisting = (prmUserId != null && new Query<>(PRMPlayer.class).where("prm_id", prmUserId).entity(List.of()) == null);
+    final PRMPlayer player = new Query<>(PRMPlayer.class).key("lol_puuid", puuid)
         .col("lol_name", summonerName).col("discord_user", discordUserId).col("team", teamId).col("updated", updated).col("played", played)
         .col("prm_id", prmUserId)
         .insert(this);
+    if (notExisting) new PlayerHandler(null, this).updateElo();
+    return player;
   }
 
   public void setPrmUserId(Integer prmUserId) {

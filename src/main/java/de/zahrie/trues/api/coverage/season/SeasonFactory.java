@@ -13,12 +13,6 @@ public final class SeasonFactory {
   }
 
   @Nullable
-  public static PRMSeason getSeason(String seasonName) {
-    return new Query<>(PRMSeason.class).where("season_name", seasonName).entity();
-
-  }
-
-  @Nullable
   public static PRMSeason getLastPRMSeason() {
     return new Query<>(PRMSeason.class).where("season_start <= now()").descending("season_start").entity();
   }
@@ -34,6 +28,24 @@ public final class SeasonFactory {
   public static PRMSeason getCurrentPRMSeason() {
     final PRMSeason last = getLastPRMSeason();
     return Util.nonNull(last).getRange().hasEnded() ? getUpcomingPRMSeason() : last;
+  }
+
+  @Nullable
+  public static Season getLastSeason() {
+    return new Query<>(Season.class).where("season_start <= now()").descending("season_start").entity();
+  }
+
+  @Nullable
+  public static Season getUpcomingSeason() {
+    return new Query<>(Season.class)
+        .where(Condition.between("now()", "season_start", "season_end")).or("season_start >= now()")
+        .ascending("season_start").entity();
+  }
+
+  @Nullable
+  public static Season getCurrentSeason() {
+    final Season last = getLastSeason();
+    return Util.nonNull(last).getRange().hasEnded() ? getUpcomingSeason() : last;
   }
 
   @Nullable

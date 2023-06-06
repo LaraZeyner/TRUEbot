@@ -11,6 +11,6 @@ public record AutoCompletion (String optionName, String query) {
   }
 
   public List<Object[]> getObjects() {
-    return new Query<>(query).list();
+    return new Query<>(query).list(25);
   }
 }

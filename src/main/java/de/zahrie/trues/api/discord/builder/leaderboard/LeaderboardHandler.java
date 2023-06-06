@@ -34,7 +34,7 @@ public class LeaderboardHandler {
     leaderboards.forEach((leaderboard, last) -> {
       final int frequency = leaderboard.getCustomQuery().getFrequencyInMinutes();
       if (frequency == 0) return;
-      if (Duration.between(last, dateTime).get(ChronoUnit.MINUTES) >= frequency - 1) {
+      if (Duration.between(last, dateTime).get(ChronoUnit.SECONDS) / 60 >= frequency - 1) {
         leaderboard.updateData();
         leaderboards.replace(leaderboard, LocalDateTime.now());
       }

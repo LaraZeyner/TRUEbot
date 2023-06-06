@@ -61,6 +61,8 @@ public class MessageEvent extends ListenerAdapter {
       handleSettings(event);
       return;
     }
+
+    if (event.getMember() == null) return;
     final DiscordUser user = DiscordUserFactory.getDiscordUser(Util.nonNull(event.getMember()));
     user.addMessage(event.getMessage().getContentDisplay());
 
@@ -151,11 +153,9 @@ public class MessageEvent extends ListenerAdapter {
 
   private static void handleLineup(@NotNull ThreadChannel threadChannel, Match match, String value, boolean home) {
     final Participator participator = home ? match.getHome() : match.getGuest();
-    participator.getTeamLineup().setOrderedLineup(value);
+    final boolean success = participator.getTeamLineup().setOrderedLineup(value);
     participator.forceUpdate();
-    if (value.equals("-:-") || Pattern.compile("\\d+:\\d+").matcher(value).matches()) {
-      threadChannel.sendMessage("Neues Lineup festgelegt.").queue();
-    }
+    if (success) threadChannel.sendMessage("Neues Lineup festgelegt.").queue();
   }
 
   private static void handleStart(@NotNull ThreadChannel threadChannel, Match match, String value) {

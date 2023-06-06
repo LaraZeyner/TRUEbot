@@ -3,32 +3,24 @@ package de.zahrie.trues.api.coverage.player.model;
 import com.merakianalytics.orianna.types.common.Tier;
 import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.util.StringUtils;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
 @Log
-public record Rank(RankTier tier, Division division, byte points) implements Comparable<Rank> {
-  Rank(Tier tier, Division division, byte points) {
+public record Rank(RankTier tier, Division division, short points) implements Comparable<Rank> {
+  Rank(Tier tier, Division division, short points) {
     this(RankTier.valueOf(tier.name()), division, points);
   }
 
   public static Rank fromMMR(int mmr) {
-    RankTier rankTier = mmr / 500 > 9 ? RankTier.CHALLENGER : RankTier.values()[mmr / 500];
-    final Division division;
-    final byte points;
-    if (rankTier.ordinal() < RankTier.MASTER.ordinal() && mmr % 500 > 400) {
-      if (mmr % 500 < 450) {
-        division = Division.I;
-        points = 100;
-      } else {
-        division = Division.IV;
-        rankTier = RankTier.values()[rankTier.ordinal() + 1];
-        points = 0;
-      }
-    } else {
-      division = rankTier.ordinal() >= RankTier.MASTER.ordinal() || mmr % 500 == 400 ? Division.I : Division.values()[3 - ((mmr / 100) % 5)];
-      points = (byte) (rankTier.ordinal() >= RankTier.MASTER.ordinal() ? mmr - (RankTier.MASTER.ordinal() * 500) : (mmr % 100));
-    }
+    final int tierIndex = mmr / 400;
+    final RankTier rankTier = tierIndex > 9 ? RankTier.CHALLENGER : RankTier.values()[tierIndex];
+
+    final int divisionIndex = 4 - ((mmr - (tierIndex * 400)) / 100);
+    final Division division = rankTier.ordinal() >= RankTier.MASTER.ordinal() ? Division.I : Division.values()[divisionIndex];
+    final short points = (short) ((mmr >= RankTier.MASTER.ordinal() * 400) ? (mmr - RankTier.MASTER.ordinal() * 400) : mmr % 100);
     return new Rank(rankTier, division, points);
   }
 
@@ -40,7 +32,7 @@ public record Rank(RankTier tier, Division division, byte points) implements Com
   }
 
   public int getMMR() {
-    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 500 : tier.ordinal() * 500 + 300 - division.getPoints()) + points;
+    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 400 : tier.ordinal() * 400 + 300 - division.getPoints()) + points;
   }
 
   @Override
@@ -56,5 +48,18 @@ public record Rank(RankTier tier, Division division, byte points) implements Com
     public String toString() {
       return StringUtils.capitalizeFirst(name());
     }
+  }
+
+  @Listing(Listing.ListingType.ORDINAL)
+  @RequiredArgsConstructor
+  @Getter
+  public enum Division {
+    ZERO(0),
+    I(300),
+    II(200),
+    III(100),
+    IV(0);
+    private final int points;
+
   }
 }

@@ -78,23 +78,16 @@ public class RoleGranterBase {
   }
 
   public void updateRelatedRoles(DiscordUser user) {
-    //TODO (Abgie) 21.03.2023: never used
     final Set<DiscordGroup> departmentGroups = user.getActiveGroups().stream().map(group -> group.getDepartment().getGroup()).filter(Objects::nonNull).collect(Collectors.toSet());
     for (DiscordGroup pingableGroup : Department.ALL.getPingableGroups()) {
-      if (departmentGroups.contains(pingableGroup)) {
-        addRole(pingableGroup.getRole());
-      } else {
-        removeRole(pingableGroup.getRole());
-      }
+      if (departmentGroups.contains(pingableGroup)) addRole(pingableGroup.getRole());
+      else removeRole(pingableGroup.getRole());
     }
 
     final Set<DiscordGroup> orgaGroups = user.getActiveGroups().stream().flatMap(group -> group.getTier().getInheritedGroups().stream()).collect(Collectors.toSet());
     for (DiscordGroup group : List.of(DiscordGroup.ORGA_MEMBER, DiscordGroup.STAFF, DiscordGroup.ADMIN)) {
-      if (orgaGroups.contains(group)) {
-        addRole(group.getRole());
-      } else {
-        removeRole(group.getRole());
-      }
+      if (orgaGroups.contains(group)) addRole(group.getRole());
+      else removeRole(group.getRole());
     }
   }
 

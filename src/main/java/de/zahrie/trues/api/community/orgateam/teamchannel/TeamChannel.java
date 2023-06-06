@@ -45,7 +45,7 @@ public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
         new SQLEnum<>(DiscordChannelType.class).of(objects.get(3)),
         (String) objects.get(4),
         new SQLEnum<>(ChannelType.class).of(objects.get(5)),
-        new Query<>(OrgaTeam.class).entity( objects.get(6)),
+        new Query<>(OrgaTeam.class).entity(objects.get(6)),
         new SQLEnum<>(TeamChannelType.class).of(objects.get(7))
     );
   }

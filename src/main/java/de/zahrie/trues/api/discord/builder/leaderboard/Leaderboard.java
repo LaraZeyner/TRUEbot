@@ -9,41 +9,48 @@ import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 public class Leaderboard {
   protected final SimpleCustomQuery customQuery;
 
-  public void createNewPublic(List<SimpleCustomQuery> customEmbedData, SlashCommandInteractionEvent event) {
+  public PublicLeaderboard createNewPublic(@NotNull SlashCommandInteractionEvent event) {
     final MessageChannelUnion eventChannel = event.getChannel();
     final PublicLeaderboard publicLeaderboard = new PublicLeaderboard(customQuery, eventChannel.getIdLong());
 
-    final List<Object[]> objects = customEmbedData.stream().flatMap(simpleCustomQuery -> simpleCustomQuery.build().stream()).toList();
-    final EmbedWrapper data = getData(objects);
-    final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
-    for (String chain : data.merge()) eventChannel.sendMessage(chain).queue(publicLeaderboard::add);
-    if (!wrapperEmbeds.isEmpty()) eventChannel.sendMessageEmbeds(wrapperEmbeds).queue(publicLeaderboard::add);
-
-    LeaderboardHandler.add(publicLeaderboard);
-  }
-
-  public void buildNew(List<SimpleCustomQuery> customEmbedData, SlashCommandInteractionEvent event) {
-    final List<Object[]> objects = customEmbedData.stream().flatMap(simpleCustomQuery -> simpleCustomQuery.build().stream()).toList();
-    final EmbedWrapper data = getData(objects);
+    final EmbedWrapper data = getDataList();
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
     final List<String> merge = data.merge();
-    for (int i = 0; i < merge.size(); i++) {
-      final String chain = merge.get(i);
-      if (i == 0) {
-        event.reply(chain).setEphemeral(false).queue();
-        continue;
-      }
-      event.getChannel().sendMessage(chain).queue();
+    if ((merge.isEmpty() || merge.get(0).isBlank()) && wrapperEmbeds.isEmpty()) {
+      eventChannel.sendMessage("keine Daten").queue(publicLeaderboard::add);
     }
-    if (!wrapperEmbeds.isEmpty()) event.getChannel().sendMessageEmbeds(wrapperEmbeds.subList(0, Math.min(wrapperEmbeds.size(), 10))).queue();
+    for (int i = 0; i < merge.size(); i++) {
+      final String content = merge.get(i);
+      if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty())
+        eventChannel.sendMessage(content).addEmbeds(wrapperEmbeds).queue(publicLeaderboard::add);
+      else
+        eventChannel.sendMessage(content).queue(publicLeaderboard::add);
+    }
+    return publicLeaderboard;
   }
 
-  protected EmbedWrapper getData(List<Object[]> customEmbedData) {
-    return new InfoPanelBuilder(customQuery.getHeadTitle(), customQuery.getHeadDescription(), List.of(customQuery.custom(customEmbedData))).build();
+  public void buildNew(SlashCommandInteractionEvent event) {
+    final EmbedWrapper data = getDataList();
+    final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
+    final String first = data.merge().get(0);
+    if (first.isBlank()) {
+      event.getHook().sendMessageEmbeds(wrapperEmbeds).queue();
+    } else if (wrapperEmbeds.isEmpty()) {
+      event.getHook().sendMessage(first).queue();
+    } else {
+      event.getHook().sendMessage(first).addEmbeds(wrapperEmbeds).queue();
+    }
+  }
+
+  protected EmbedWrapper getDataList() {
+    final List<List<Object[]>> data = customQuery.getData();
+    final List<SimpleCustomQuery> queries = data == null ? List.of(customQuery) : data.stream().map(d -> SimpleCustomQuery.custom(customQuery.getNamedQuery(), d)).toList();
+    return new InfoPanelBuilder(customQuery.getHeadTitle(), customQuery.getHeadDescription(), queries).build();
   }
 }

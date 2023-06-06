@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.coverage.stage.model;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.ABetable;
 import de.zahrie.trues.api.coverage.AEventable;
@@ -71,6 +72,18 @@ public abstract class Stage implements ABetable, AEventable, Comparable<Stage>, 
     if (this instanceof GroupStage) return "Gruppenphase";
     if (this instanceof PlayoffStage) return "Playoffs";
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final Stage stage)) return false;
+    return getId() == stage.getId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
   }
 
   @RequiredArgsConstructor

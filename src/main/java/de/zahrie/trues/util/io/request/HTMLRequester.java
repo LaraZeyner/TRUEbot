@@ -22,8 +22,11 @@ public record HTMLRequester(URL url) {
     try (final Scanner scanner = new Scanner(this.url.openStream(), StandardCharsets.UTF_8).useDelimiter("\\A")) {
       return scanner.hasNext() ? scanner.next() : "";
     } catch (IOException e) {
-      log.severe("No URL requested: " + url.getPath());
-      log.throwing(getClass().getName(), "determineContent", e);
+      if (!Request.errorUrls.contains(url.getPath())) {
+        Request.errorUrls.add(url.getPath());
+        log.severe("No URL requested: " + url.getPath());
+        log.throwing(getClass().getName(), "determineContent", e);
+      }
     }
     return "";
   }

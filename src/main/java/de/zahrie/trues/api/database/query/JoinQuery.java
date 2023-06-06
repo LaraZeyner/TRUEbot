@@ -10,11 +10,9 @@ import lombok.experimental.ExtensionMethod;
 public class JoinQuery<E extends Id, J extends Id> {
   private Class<E> targetClass;
   private Class<J> joinedClass;
-  private String column;
   private JoinType joinType;
-  private String alias;
+  private String column, column2, alias;
   private Query<E> innerQuery;
-
 
   protected Class<E> getTargetClass() {
     return targetClass;
@@ -29,62 +27,31 @@ public class JoinQuery<E extends Id, J extends Id> {
   }
 
   public JoinQuery(Class<E> targetClass, Class<J> joinedClass) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
-    this.column = joinedClass.getAnnotation(Table.class).value();
-    this.joinType = JoinType.INNER;
-    this.alias = joinedClass.getSimpleName().toLowerCase();
-  }
-
-  /**
-   * @param columnOrAlias Alias wenn mit _ gestartet
-   */
-  public JoinQuery(Class<E> targetClass, Class<J> joinedClass, String columnOrAlias) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
-    this.column = columnOrAlias.startsWith("_") ? joinedClass.getAnnotation(Table.class).value() : columnOrAlias;
-    this.joinType = JoinType.INNER;
-    this.alias = (columnOrAlias.startsWith("_") && !columnOrAlias.contains(".")) ? columnOrAlias : joinedClass.getSimpleName().toLowerCase();
+    this(targetClass, joinedClass, JoinType.INNER);
   }
 
   public JoinQuery(Class<E> targetClass, Class<J> joinedClass, JoinType joinType) {
+    this.joinType = joinType;
     this.targetClass = targetClass;
     this.joinedClass = joinedClass;
-    this.column = joinedClass.getAnnotation(Table.class).value();
-    this.joinType = joinType;
+    this.column = joinedClass.getSimpleName().toLowerCase();
+    this.column2 = null;
     this.alias = joinedClass.getSimpleName().toLowerCase();
   }
 
-  public JoinQuery(Class<E> targetClass, Class<J> joinedClass, String column, JoinType joinType) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
-    this.column = column;
-    this.joinType = joinType;
-    this.alias = joinedClass.getSimpleName().toLowerCase();
+  public JoinQuery<E, J> as(String alias) {
+    this.alias = alias;
+    return this;
   }
 
-  public JoinQuery(Class<E> targetClass, Class<J> joinedClass, String column, String alias) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
+  public JoinQuery<E, J> col(String column) {
     this.column = column;
-    this.joinType = JoinType.INNER;
-    this.alias = alias;
+    return this;
   }
 
-  public JoinQuery(Class<E> targetClass, Class<J> joinedClass, JoinType joinType, String alias) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
-    this.column = joinedClass.getAnnotation(Table.class).value();
-    this.joinType = joinType;
-    this.alias = alias;
-  }
-
-  public JoinQuery(Class<E> targetClass, Class<J> joinedClass, String column, JoinType joinType, String alias) {
-    this.targetClass = targetClass;
-    this.joinedClass = joinedClass;
-    this.column = column;
-    this.joinType = joinType;
-    this.alias = alias;
+  public JoinQuery<E, J> ref(String reference) {
+    this.column2 = reference;
+    return this;
   }
 
   @Override
@@ -92,10 +59,10 @@ public class JoinQuery<E extends Id, J extends Id> {
     if (innerQuery != null) return innerQuery.query;
     final String joinedTableName = joinedClass.getAnnotation(Table.class).value();
     String joinedTableAlias = "_" + (this.alias.startsWith("_") ? this.alias.substring(1) : this.alias);
-    if (column.contains(".")) joinedTableAlias = column.before(".");
+    if (column.contains(".")) joinedTableAlias = "_" + column.after(".");
     final String col = column.contains(".") ? column : "`_" + targetClass.getSimpleName().toLowerCase() + "`.`" + column + "`";
-    return joinType.toString() + joinedTableName + "` as `" + joinedTableAlias + "` ON " + col + " = `" + joinedTableAlias +
-        "`.`" + joinedTableName + "_id`";
+    final String col2 = joinedTableAlias + "`.`" + (column2 != null ? column2 : joinedTableName + "_id") + "`";
+    return joinType.toString() + joinedTableName + "` as `" + joinedTableAlias + "` ON " + col + " = `" + col2;
   }
 
   public List<Object> getParams() {

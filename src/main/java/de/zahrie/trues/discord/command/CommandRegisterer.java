@@ -11,6 +11,7 @@ import de.zahrie.trues.discord.command.models.ChannelEditCommand;
 import de.zahrie.trues.discord.command.models.FollowMeCommand;
 import de.zahrie.trues.discord.command.models.LimitCommand;
 import de.zahrie.trues.discord.command.models.LineupCommand;
+import de.zahrie.trues.discord.command.models.QuotesCommand;
 import de.zahrie.trues.discord.command.models.ScoutCommand;
 import de.zahrie.trues.discord.command.models.ScrimCommand;
 import de.zahrie.trues.discord.command.models.SettingsCommand;
@@ -35,6 +36,7 @@ public class CommandRegisterer implements Registerer<List<SlashCommand>> {
         new FollowMeCommand(),
         new LimitCommand(),
         new LineupCommand(),
+        new QuotesCommand(),
         new StatsCommand(),
         new SettingsCommand(),
         new ScoutCommand(),

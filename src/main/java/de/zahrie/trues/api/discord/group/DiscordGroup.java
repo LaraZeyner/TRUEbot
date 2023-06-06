@@ -20,7 +20,7 @@ public enum DiscordGroup implements Roleable {
   REGISTERED(1, "Bestätigt", 1031835432691961866L, GroupTier.REGISTERED, Department.NONE, GroupType.PINGABLE, Set.of()),
   APPLICANT(2, "Bewerber", 1028923616290676776L, GroupTier.APPLICANT, Department.NONE, GroupType.PINGABLE, Set.of()),
   TRYOUT(3, "Tryout", 1031833582932611072L, GroupTier.TRYOUT, Department.NONE, GroupType.PINGABLE, Set.of()),
-  SUBSTITUDE(4, "Substitude", 1049255537960824902L, GroupTier.SUBSTITUDE, Department.NONE, GroupType.PINGABLE, Set.of()),
+  SUBSTITUTE(4, "Substitude", 1049255537960824902L, GroupTier.SUBSTITUDE, Department.NONE, GroupType.PINGABLE, Set.of()),
   EVENT_PLANNING(5, "Eventplanung", 1110091981536903218L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),
   CASTER(6, "Caster", 1035210811611820053L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.PINGABLE, Set.of()),
   DEVELOPER(7, "Developer", 1024587566198042666L, GroupTier.LEADER, Department.EVENT, GroupType.PINGABLE, Set.of()),

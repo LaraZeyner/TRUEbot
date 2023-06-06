@@ -67,10 +67,9 @@ public class MatchSideAnalyzer {
 
   private void handleTeamOfTeamPerf(TeamPerf teamPerformance) {
     if (teamPerformance.getTeam() == null) {
-      //TODO (Abgie) 21.05.2023: Player
-      final Map<Integer, Long> teams = ParticipantUtils.getParticipants(match, team.getTeamId()).stream()
-          .map(p -> PlayerFactory.findPlayer(p.getPuuid()))
-          .filter(Objects::nonNull)
+      final List<Player> players = ParticipantUtils.getParticipants(match, team.getTeamId()).stream()
+          .map(p -> PlayerFactory.findPlayer(p.getPuuid())).filter(Objects::nonNull).toList();
+      final Map<Integer, Long> teams = players.stream()
           .map(Player::getTeamId)
           .filter(Objects::nonNull)
           .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
@@ -79,7 +78,10 @@ public class MatchSideAnalyzer {
       if (maxEntry.getValue() > 2) {
         final Integer teamId = maxEntry.getKey();
         final Team t = new Query<>(Team.class).entity(teamId);
-        if (t.getOrgaTeam() != null) game.setOrgaGame(true);
+        if (t.getOrgaTeam() != null) {
+          game.setOrgaGame(true);
+          if (game.getType().equals(GameType.TOURNAMENT)) players.forEach(player -> player.setPlayed(true));
+        }
         teamPerformance.setTeam(t);
       }
     }

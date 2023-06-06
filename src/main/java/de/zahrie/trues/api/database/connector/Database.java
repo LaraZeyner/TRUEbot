@@ -60,6 +60,11 @@ public final class Database {
     connection = null;
   }
 
+  public static void reconnect() {
+    disconnect();
+    connect();
+  }
+
   @Data
   public static class DatabaseConnection {
     private final Connection connection;

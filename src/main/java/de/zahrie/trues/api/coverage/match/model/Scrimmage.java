@@ -59,9 +59,8 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
         .col("matchday", playday).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
         .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result)
         .insert(this);
-    if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
-      new MatchLog(LocalDateTime.now(), this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
-    }
+    new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
+
     if (match.getParticipators().length == 0) {
       final Participator home = new Participator(match, true).create();
       final Participator guest = new Participator(match, false).create();
@@ -77,6 +76,6 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
   }
 
   public String display() {
-    return getId() + " | " + TimeFormat.DEFAULT.of(getStart()) + " | " + getHomeName() + " vs. " + getGuestName();
+    return getId() + " | " + TimeFormat.DEFAULT_FULL.of(getStart()) + " | " + getHomeName() + " vs. " + getGuestName();
   }
 }

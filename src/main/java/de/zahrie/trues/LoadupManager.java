@@ -10,6 +10,7 @@ import de.zahrie.trues.api.coverage.team.TeamLoader;
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.api.scheduler.ScheduleManager;
 import de.zahrie.trues.api.scouting.AnalyzeManager;
 import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.util.Connectable;
@@ -70,6 +71,7 @@ public final class LoadupManager implements Connectable {
     RiotPlayerAnalyzer.reset();
     TeamLoader.reset();
     Query.reset();
+    ScheduleManager.reset();
   }
 
   public void askForDisconnect(Boolean restart) {

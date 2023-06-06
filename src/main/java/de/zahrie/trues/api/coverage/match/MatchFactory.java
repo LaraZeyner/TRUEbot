@@ -32,7 +32,8 @@ public final class MatchFactory {
   }
 
   public static List<Team> getNextTeams() {
-    return new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class, "coverage", "_match"))
+    return new Query<>(Participator.class)
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .where(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", LocalDateTime.now()).or("result", "-:-")
         .or("result", "-:-")
         .ascending("_match.coverage_start").convertList(Match.class)

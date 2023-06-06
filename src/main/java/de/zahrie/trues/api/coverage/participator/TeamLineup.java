@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.scouting.PlayerAnalyzer;
 import de.zahrie.trues.api.scouting.TeamAnalyzer;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
@@ -24,10 +25,6 @@ public class TeamLineup extends TeamLineupBase {
   private final int days;
   private List<Lineup> lineup;
   private Map<Lane, Map<Player, Integer>> games;
-
-  public TeamLineup(Participator participator) {
-    this(participator, ScoutingGameType.TEAM_GAMES, 180);
-  }
 
   public TeamLineup(Participator participator, ScoutingGameType gameType, int days) {
     super(participator);
@@ -126,8 +123,15 @@ public class TeamLineup extends TeamLineupBase {
 
   public List<Player> getValidPlayers() {
     final var players = new SortedList<>(participator.getTeamLineup().getStoredLineups().stream().map(Lineup::getPlayer));
-    if (players.size() < 5) players.addAll(participator.getTeam().getPlayers());
+    if (players.size() < 5) {
+      final Team team = participator.getTeam();
+      if (team != null) players.addAll(team.getPlayers());
+    }
     return players;
+  }
+
+  public List<Player> getSetPlayers() {
+    return new Query<>(Player.class).get("player", Player.class).where("coverage_team", participator).entityList();
   }
 
   public List<Player> getValidPlayers(Lane lane) {
