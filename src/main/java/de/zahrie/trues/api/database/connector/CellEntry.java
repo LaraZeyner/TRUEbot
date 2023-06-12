@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.database.connector;
 
+import java.math.BigDecimal;
+
 import de.zahrie.trues.api.discord.command.slash.Column;
 
 public record CellEntry(Object entry) {
@@ -14,12 +16,10 @@ public record CellEntry(Object entry) {
   }
 
   public String round(int amount) {
-    if (this.entry instanceof Double || this.entry instanceof Float) {
-      final double d = (double) this.entry;
-      if (d != 0) {
-        return String.valueOf(Math.round(d * Math.pow(10, amount)) / Math.pow(10, amount));
-      }
-    }
+    if (!(this.entry instanceof BigDecimal decimal)) return this.toString();
+
+    final double d = decimal.doubleValue();
+    if (d != 0) return String.valueOf(Math.round(d * Math.pow(10, amount)) / Math.pow(10, amount));
     return this.toString();
   }
 

@@ -39,7 +39,7 @@ public class TeamHandler extends TeamModel implements Serializable {
     super(html, url, team, players);
   }
 
-  public void update() {
+  public void update(boolean ignore) {
     if (TeamLoader.loadedTeams.contains(team)) return;
 
     final List<HTML> stages = html.findAll("section", "league-team-stage");
@@ -47,12 +47,16 @@ public class TeamHandler extends TeamModel implements Serializable {
     updateRecordAndSeasons();
     if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) handleStarterMatches(stages);
 
-    if (created) team.getPlayers().forEach(player -> player.loadGames(LoaderGameType.CLASH_PLUS));
+    if (created && !ignore) team.getPlayers().forEach(player -> player.loadGames(LoaderGameType.CLASH_PLUS));
     final double averageMMR = team.getPlayers().stream().map(Player::getRanks).map(PlayerRankHandler::getLastRelevant).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
     team.setLastMMR((int) Math.round(averageMMR));
     team.update();
 
     TeamLoader.loadedTeams.add(team);
+  }
+
+  public void update() {
+    update(false);
   }
 
   public League loadDivision() {
@@ -68,8 +72,7 @@ public class TeamHandler extends TeamModel implements Serializable {
     stages.get(stages.size() - 1)
         .find("ul", "league-stage-matches")
         .findAll("li").stream()
-        .map(match -> match.find("div").text().between("(", ")") + " -> " +
-            Integer.parseInt(match.find("a").getAttribute("href").between("/matches/", "-")))
+        .map(match -> match.find("a").getAttribute("href").between("/matches/", "-"))
         .map(Integer::parseInt)
         .map(MatchFactory::getMatch).filter(Objects::nonNull)
         .map(MatchLoader::new).map(MatchLoader::load)

@@ -4,33 +4,43 @@ import java.util.List;
 
 import de.zahrie.trues.api.discord.builder.embed.EmbedQueryBuilder;
 import de.zahrie.trues.api.discord.builder.embed.EmbedCreator;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.Alternative;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
 import de.zahrie.trues.api.discord.builder.string.StringCreator;
 import de.zahrie.trues.api.discord.builder.string.StringQueryBuilder;
+import de.zahrie.trues.util.Util;
 
-public record InfoPanelBuilder(String title, String description, List<SimpleCustomQuery> queries) {
+public record InfoPanelBuilder(String title, String description, List<SimpleCustomQuery> queries, Alternative alternative) {
   public EmbedWrapper build() {
+    final Integer altIndex = Util.avoidNull(alternative, Alternative::index);
+    int index = 0;
     EmbedWrapper wrapper = EmbedWrapper.of();
     EmbedCreator currentEmbedCreator = null;
     StringCreator currentStringCreator = null;
 
-    for (SimpleCustomQuery query : queries) {
+    for (int i = 0; i < queries.size(); i++) {
+      final int finalI = i;
+      final String altName = Util.avoidNull(alternative, a -> a.names().get(finalI));
+      final SimpleCustomQuery query = queries.get(i);
       if (query.getColumns().size() > 3) {
-        if (currentStringCreator == null) currentStringCreator = new StringCreator(query.isEnumerated(), this.title, this.description);
+        if (currentStringCreator == null)
+          currentStringCreator = new StringCreator(query.getEnumeration(), this.title, this.description, index);
         if (currentEmbedCreator != null) {
           wrapper = wrapper.embed(currentEmbedCreator.build());
+          index = currentEmbedCreator.getIndex();
           currentEmbedCreator = null;
         }
-        currentStringCreator = new StringQueryBuilder(currentStringCreator, query).build();
+        currentStringCreator = new StringQueryBuilder(currentStringCreator, query, index).build(altIndex, altName);
         continue;
       }
 
-      if (currentEmbedCreator == null) currentEmbedCreator = new EmbedCreator(query.isEnumerated(), this.title, this.description);
+      if (currentEmbedCreator == null) currentEmbedCreator = new EmbedCreator(query.getEnumeration(), this.title, this.description, index);
       if (currentStringCreator != null) {
         wrapper = wrapper.content(currentStringCreator.build());
+        index = currentStringCreator.getIndex();
         currentStringCreator = null;
       }
-      currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, query).build();
+      currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, query).build(altIndex, altName);
     }
 
     if (currentEmbedCreator != null) wrapper = wrapper.embed(currentEmbedCreator.build());

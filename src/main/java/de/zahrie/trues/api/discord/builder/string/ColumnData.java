@@ -20,7 +20,7 @@ public class ColumnData {
   }
 
   public void add(int length) {
-    this.subLengths.add(length);
+    subLengths.add(length);
   }
 
   public boolean isTwoInOne() {

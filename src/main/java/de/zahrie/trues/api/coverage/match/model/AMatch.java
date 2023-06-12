@@ -118,13 +118,13 @@ public interface AMatch extends ABetable {
     return true;
   }
 
-  default Participator addParticipator(Team team, boolean home) {
+  default Participator addParticipator(Team team, boolean home, Team other) {
     final Participator existing = getParticipator(team);
     if (existing != null) return getParticipator(team);
 
-    if (isOrgagame()) {
-      team.setRefresh(getStart());
-      if (this instanceof PRMMatch) team.setHighlight(true);
+    if (!(this instanceof Scrimmage) && isOrgagame()) {
+      if (team.getOrgaTeam() == null) team.setRefresh(getStart());
+      if (this instanceof PRMMatch) List.of(team, other).forEach(t -> t.setHighlight(true));
     }
     getParticipator(home).setTeam(team);
     handleNotifications();

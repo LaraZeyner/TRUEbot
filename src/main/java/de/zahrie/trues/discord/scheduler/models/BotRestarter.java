@@ -21,15 +21,16 @@ public class BotRestarter extends ScheduledTask {
     JSON.write("thread-performance.txt", "NEUSTART AT " + TimeFormat.SYSTEM.now() + "\n" +
         collect + "\n=======================================");
 
-    LoadupManager.getInstance().restart();
-    new Console("Bot neu gestartet.").info();
     for (PRMTeam team : new Query<>(PRMTeam.class, "SELECT * FROM team WHERE highlight = true").entityList()) {
       final TeamLoader teamLoader = new TeamLoader(team);
       final TeamHandler load = teamLoader.load();
-      if (load != null) load.update();
+      if (load != null) load.update(true);
     }
 
     ClashLoader.loadAllClashes();
+
+    LoadupManager.getInstance().restart();
+    new Console("Bot neu gestartet.").info();
   }
 
   @Override

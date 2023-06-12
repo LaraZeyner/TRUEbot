@@ -64,11 +64,10 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
 
   @Override
   public PRMMatch create() {
-    final PRMMatch match = new Query<>(PRMMatch.class)
+    final PRMMatch match = new Query<>(PRMMatch.class).key("match_id", matchId)
         .col("matchday", playday).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
         .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result).col("coverage_group", league)
-        .col("coverage_index", matchIndex).col("match_id", matchId).col("scheduling_start", range.getStartTime())
-        .col("scheduling_end", range.getEndTime())
+        .col("coverage_index", matchIndex).col("scheduling_start", range.getStartTime()).col("scheduling_end", range.getEndTime())
         .insert(this);
     if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
       new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();

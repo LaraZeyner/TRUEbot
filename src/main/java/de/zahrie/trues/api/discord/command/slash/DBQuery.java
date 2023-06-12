@@ -2,32 +2,23 @@ package de.zahrie.trues.api.discord.command.slash;
 
 import java.util.List;
 
-public record DBQuery(String title, String description, List<Column> columns, List<String> params, boolean enumerated) {
-  public DBQuery(List<Column> columns) {
-    this(null, null, columns, List.of(), false);
-  }
+import de.zahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
 
-  public DBQuery(List<Column> columns, boolean enumerated) {
-    this(null, null, columns, List.of(), enumerated);
-  }
-
-  public DBQuery(List<Column> columns, List<String> params) {
-    this(null, null, columns, params, false);
-  }
-
-  public DBQuery(List<Column> columns, List<String> params, boolean enumerated) {
-    this(null, null, columns, params, enumerated);
-  }
-
+public record DBQuery(String title, String description, List<Column> columns, List<String> params, Enumeration enumeration) {
   public DBQuery(String title, String description, List<Column> columns) {
-    this(title, description, columns, List.of(), false);
+    this(title, description, columns, List.of(), Enumeration.NONE);
   }
 
-  public DBQuery(String title, String description, List<Column> columns, boolean enumerated) {
-    this(title, description, columns, List.of(), enumerated);
+  public DBQuery(String title, String description, List<Column> columns, Enumeration enumeration) {
+    this(title, description, columns, List.of(), enumeration);
   }
 
   public DBQuery(String title, String description, List<Column> columns, List<String> params) {
-    this(title, description, columns, params, false);
+    this(title, description, columns, params, Enumeration.NONE);
+  }
+
+  public void setColumnName(int index, String name) {
+    final Column column = columns.get(index);
+    column.setName(name);
   }
 }

@@ -63,7 +63,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     this.teamId = Util.avoidNull(team, Team::getId);
     if (team != null) {
       team.getPlayers().add(this);
-      if (team instanceof PRMTeam prmTeam && prmTeam.getCurrentLeague().getLeague().isOrgaLeague()) {
+      if (team instanceof PRMTeam prmTeam && prmTeam.getCurrentLeague() != null && prmTeam.getCurrentLeague().getLeague().isOrgaLeague()) {
         System.out.println("NEUER SPIELER");
         loadGames(LoaderGameType.CLASH_PLUS);
       }

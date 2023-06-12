@@ -159,7 +159,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(currentSeason == null ? "keine Season" : (currentSeason.getFullName() + " - TRUE-Cup - " + currentSeason.getSignupStatusForTeam((PRMTeam) orgaTeam.getTeam())))
         .setDescription("Aktueller Spielplan im TRUE-Cup")
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now())
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now())
         .addField("Kurzregeln", /* OrgaCupSeason.RULES + */"Stand-in Slots verbleibend: " + orgaTeam.getStandins(), false);
 
     if (currentSeason == null) return builder
@@ -220,7 +220,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Nächstes Match: " + matchType, url)
         .setDescription(nextMatch == null ? "kein Match" : TimeFormat.DISCORD.of(nextMatch.getStart()))
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     if (nextMatch != null) {
       determineMatchLineupFields(nextMatch, nextMatch.getOpponentOf(orgaTeam.getTeam())).forEach(builder::addField);
       determineMatchLineupFields(nextMatch, orgaTeam.getTeam()).forEach(builder::addField);
@@ -256,7 +256,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(orgaTeam.getName() + " (" + orgaTeam.getAbbreviation() + recordAndSeasons + ")")
         .setDescription(standingPRM + " || " + standingTRUE)
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     final double averageMMR = orgaTeam.getMainMemberships().stream().map(membership -> membership.getUser().getPlayer())
         .filter(Objects::nonNull).mapToInt(player -> player.getRanks().getLastRelevant().getRank().getMMR()).average().orElse(0);
     final Rank teamRank = PlayerRank.fromMMR((int) averageMMR);
@@ -302,7 +302,7 @@ public class TeamInfo {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Terminplanung")
         .setDescription("Terminplanung für " + orgaTeam.getName())
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
 
     final DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
     for (int i = 0; i < 7; i++) {

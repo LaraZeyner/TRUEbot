@@ -130,7 +130,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle(type.getTitleStart() + participator.getTeam().getName())
         .setDescription("Datum: " + TimeFormat.DEFAULT_FULL.of(match.getStart()) + "\nWinchance: " + winPercent + "\nErwartetes Lineup: opgg und porofessor coming soon\nTyp: " + match.getClass().getSimpleName())
-        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now());
+        .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
     new ScoutingEmbedHandler(participator, gameType, days, page).get(type).forEach(builder::addField);
     final MessageEmbed embed = builder.build();
 

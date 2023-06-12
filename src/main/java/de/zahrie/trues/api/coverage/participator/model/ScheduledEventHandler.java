@@ -11,8 +11,11 @@ import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.StringUtils;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record ScheduledEventHandler(Participator participator) {
@@ -53,23 +56,30 @@ public record ScheduledEventHandler(Participator participator) {
         .queue(scheduledEvent -> participator.setDiscordEventId(scheduledEvent.getIdLong()));
   }
 
+  @NotNull
   private String description() {
     String description = new MatchLogBuilder(participator.getMatch(), participator.getTeam()).toString();
     if (participator.getMatch() instanceof LeagueMatch leagueMatch)
       description += "https://www.primeleague.gg/leagues/matches/" + leagueMatch.getMatchId();
-    return description;
+    return StringUtils.keep(description, 1000);
   }
 
+  @NotNull
+  @Contract(" -> new")
   private OffsetDateTime start() {
     return participator.getMatch().getStart().atZone(ZoneId.systemDefault()).toOffsetDateTime();
   }
 
+  @NotNull
+  @Contract(" -> new")
   private OffsetDateTime end() {
     return participator.getMatch().getExpectedTimeRange().getEndTime().atZone(ZoneId.systemDefault()).toOffsetDateTime();
   }
 
+  @NotNull
   private String title() {
-    return participator.getMatch().toString();
+    final String title = participator.getMatch().toString();
+    return StringUtils.keep(title, 100);
   }
 
   private GuildChannel practiceChannel() {

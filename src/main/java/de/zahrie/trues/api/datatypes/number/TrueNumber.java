@@ -22,9 +22,9 @@ public class TrueNumber extends Calculateable<TrueNumber> {
   public String percentValue() {
     if (value == 0) return "0%";
     if (value < 0) return "-" + new TrueNumber(value * -1).percentValue();
-    if (value < 0.01) return String.valueOf(value * 100).substring(1, 4) + "%";
+    if (value < 0.01) return "."  + String.valueOf(value * 100).substring(1, 4) + "%";
     if (value < 0.1) return String.valueOf(value * 100).substring(0, 3) + "%";
-    return round(2).intValue() + "%";
+    return round(2).multiply(100).intValue() + "%";
   }
 
   public TrueNumber round(int digits) {

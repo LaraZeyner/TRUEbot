@@ -59,9 +59,6 @@ public record RiotPlayerAnalyzer(Player player) {
     AnalyzeManager.delete(player);
 
     if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
-    /*final SortedList<Integer> pls = new SortedList<>(currentPlayers);
-    pls.remove(player.getId());
-    currentPlayers = Collections.synchronizedList(pls);*/
     currentPlayers.remove(Integer.valueOf(player.getId()));
     Database.connection().commit(null);
   }
@@ -81,7 +78,7 @@ public record RiotPlayerAnalyzer(Player player) {
       if (game != null && game.getType().equals(GameType.RANKED_SOLO)) hasPlayedRanked = true;
     }
 
-    if (gameType.equals(LoaderGameType.MATCHMADE)/* && history.size() > 20*/) {
+    if (gameType.equals(LoaderGameType.MATCHMADE) && history.size() > 20) {
       System.out.println(player.getSummonerName() + " (" + Util.avoidNull(player.getTeam(), "null", Team::getName) + ") -> " + (System.currentTimeMillis() - start) / 1000.0 + " für " + history.size());
     }
     return hasPlayedRanked;

@@ -64,7 +64,8 @@ public class MatchHandler extends MatchModel implements Serializable {
   public void updateTeams() {
     for (int i = 0; i < Math.min(2, teams.size()); i++) {
       final PRMTeam selected = teams.get(i);
-      match.addParticipator(selected, i == 0);
+      final PRMTeam other = i == 0 ? teams.get(1) : teams.get(0);
+      match.addParticipator(selected, i == 0, other);
     }
   }
 

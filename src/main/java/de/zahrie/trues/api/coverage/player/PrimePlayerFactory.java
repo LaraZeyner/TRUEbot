@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.player;
 
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Zeri;
 import de.zahrie.trues.util.Util;
@@ -43,6 +44,13 @@ public final class PrimePlayerFactory {
   private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull String summonerName) {
     final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
     final String puuid = summoner == null ? player.getPuuid() : summoner.getPUUID();
+
+    final Player lolPuuid = new Query<>(Player.class).where("lol_puuid", puuid)
+        .and(Condition.Comparer.NOT_EQUAL, "player_id", player.getId()).entity();
+    if (lolPuuid != null) {
+      lolPuuid.setPuuidAndName(null, null);
+    }
+
     if (!player.getPuuid().equals(puuid) && puuid != null) {
       player.setPuuidAndName(puuid, summoner.getName());
     }

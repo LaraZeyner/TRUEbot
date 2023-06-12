@@ -84,6 +84,7 @@ public final class Condition extends AbstractSQLField {
   @RequiredArgsConstructor
   public enum Comparer {
     EQUAL(" = "),
+    LIKE(" LIKE "),
     GREATER_THAN(" > "),
     SMALLER_THAN(" < "),
     GREATER_EQUAL(" >= "),

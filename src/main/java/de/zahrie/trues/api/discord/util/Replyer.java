@@ -112,7 +112,7 @@ public abstract class Replyer {
     if (customEmbedData.isEmpty() && annotation.description().equals("keine Daten")) return reply(output.format(data), annotation.ephemeral());
 
     final List<EmbedWrapper> wrappers = new ArrayList<>();
-    final var builder = new InfoPanelBuilder(output, annotation.description(), customEmbedData);
+    final var builder = new InfoPanelBuilder(output, annotation.description(), customEmbedData, null);
     wrappers.add(builder.build());
 
     final List<String> wrapperStrings = new ArrayList<>();
@@ -129,7 +129,7 @@ public abstract class Replyer {
       }
     }
 
-    out.append("zuletzt aktualisiert ").append(TimeFormat.DEFAULT_FULL.now());
+    out.append("zuletzt aktualisiert ").append(TimeFormat.AUTO.now());
     wrapperStrings.add(out.toString());
 
     final List<MessageEmbed> wrapperEmbeds = wrappers.stream().flatMap(wrapper -> wrapper.getEmbeds().stream()).toList();

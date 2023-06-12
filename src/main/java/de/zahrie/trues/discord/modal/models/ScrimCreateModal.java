@@ -55,10 +55,10 @@ public class ScrimCreateModal extends ModalImpl {
     team2.setRefresh(time);
     final Scrimmage scrimmage = new Scrimmage(time).create();
 
-    final Participator home = scrimmage.addParticipator(team, true);
+    final Participator home = scrimmage.addParticipator(team, true, team2);
     if (handleTeamsLineup(home, true)) return errorMessage();
 
-    final Participator guest = scrimmage.addParticipator(team2, false);
+    final Participator guest = scrimmage.addParticipator(team2, false, team);
     if (handleTeamsLineup(guest, false)) return errorMessage();
 
     return reply("Das Scrim wurde hinzugefügt.");

@@ -4,36 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.zahrie.trues.api.database.connector.CellEntry;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
 import de.zahrie.trues.api.discord.command.slash.Column;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
 public class StringDataHandler {
-  private final List<ColumnData> lengths = new ArrayList<>();
   private final SimpleCustomQuery query;
   private final List<Object[]> entries;
-  private int index = 0;
+  private final List<ColumnData> lengths;
+  private int index;
 
-  public String create(int entryIndex) {
-    if (index == 0) {
-      init();
-      index = 1;
-    }
-    final Object[] entry = this.entries.get(entryIndex);
-    return create(entry, query.isEnumerated());
+  public StringDataHandler(SimpleCustomQuery query, List<Object[]> entries) {
+    this.query = query;
+    this.entries = entries;
+    this.lengths = determineLengths();
   }
 
-  public String createHeader() {
-    final Object[] head = query.getColumns().stream().map(Column::name).toArray();
-    final StringBuilder headString = new StringBuilder(create(head, false) + "\n");
-    for (int i = 0; i < this.lengths.size(); i++) {
-      headString.append("-".repeat(this.lengths.get(i).getLength() + (i == 0 || i == this.lengths.size() - 1 ? 1 : 2)));
-    }
-    return headString + "\n";
-  }
-
-  private void init() {
+  @NotNull
+  private List<ColumnData> determineLengths() {
+    final List<ColumnData> lengths = new ArrayList<>();
     for (int j = 0; j < entries.get(0).length; j++) {
       final int i = j;
       final Column column = query.getColumns().get(i);
@@ -42,36 +32,66 @@ public class StringDataHandler {
           .max(Integer::compare).orElse(column.maxLength()));
       if (column.withPrevious()) {
         final int lastIndex = lengths.size() - 1;
-        lengths.get(lastIndex).add(maxRowLength + 3);
+        lengths.get(lastIndex).add(maxRowLength);
         continue;
       }
       lengths.add(new ColumnData(j, maxRowLength));
     }
+    return lengths;
   }
 
-  private String create(Object[] entry, boolean enumerate) {
+  public String createHeader(int index, Integer colIndex, String name) {
+    this.index = index;
+    final Object[] head = query.getColumns().stream().map(Column::name).toArray();
+    if (name != null) head[colIndex] = name;
+    this.index--;
+    final StringBuilder headString = new StringBuilder(create(head, null) + "\n");
+    headString.append(handleEnumeration(null, ""));
+    for (int i = 0; i < lengths.size(); i++) {
+      if (i > 0) headString.append("+");
+      headString.append("-".repeat(lengths.get(i).getLength() + (i == 0 || i == lengths.size() - 1 ? 1 : 2)));
+    }
+    return headString.toString();
+  }
+
+  public String create(int entryIndex, int index) {
+    this.index = index;
+    final Object[] entry = entries.get(entryIndex);
+    return create(entry, query.getEnumeration());
+  }
+
+  private String create(Object[] entry, Enumeration enumeration) {
     final List<String> keys = new ArrayList<>();
     for (ColumnData wrapper : lengths) {
       final int index = wrapper.getIndex();
       Column column = query.getColumns().get(index);
       final var baseEntry = new CellEntry(entry[index]);
-      String cell = String.format((column.left() ? "" : "-") + "%" + wrapper.getSubLengths().get(0) + "s", baseEntry.round(column));
+      String cell;
+      if (enumeration != null) {
+        final boolean left = baseEntry.entry() instanceof String;
+        cell = (column.left() ? "" : " - ") + String.format("%" + (left ? "-" : "") + wrapper.getSubLengths().get(0) + "s", baseEntry.round(column));
+      } else {
+        cell = String.format("%" + wrapper.getLength() + "s", baseEntry.round(column));
+      }
       if (wrapper.isTwoInOne()) {
         final var additional = new CellEntry(entry[index + 1]);
         column = query.getColumns().get(index + 1);
-        final String cell2 = String.format((column.left() ? "" : "-") + "%" + wrapper.getSubLengths().get(1) + "s", additional.round(column));
-        cell += " (" + cell2 + ")";
+        if (enumeration != null) {
+          final boolean left = baseEntry.entry() instanceof String;
+          final String cell2 = (column.left() ? "" : " - ") + String.format("%" + (left ? "-" : "") + wrapper.getSubLengths().get(1) + "s", additional.round(column));
+          cell += cell2;
+        }
       }
       keys.add(cell);
     }
     final String data = String.join(" | ", keys);
-    return handleEnumeration(enumerate, data);
+    return handleEnumeration(enumeration, data);
   }
 
-  private String handleEnumeration(boolean enumerate, String data) {
-    if (enumerate) {
-      data = index + ". " + data;
-    }
+  private String handleEnumeration(Enumeration enumeration, String data) {
+    final int leadingSpaces = String.valueOf(entries.size()).length() - String.valueOf(index).length();
+    if (enumeration != null) data = " ".repeat(leadingSpaces) + index + ". " + data;
+    else if (!query.getEnumeration().equals(Enumeration.NONE)) data = " ".repeat(String.valueOf(entries.size()).length() + 2) + data;
     this.index++;
     return data;
   }

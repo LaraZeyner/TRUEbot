@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <table class="striped">
@@ -49,6 +50,7 @@ import lombok.extern.java.Log;
 @Log
 @ExtensionMethod(StringUtils.class)
 public enum TimeFormat {
+  AUTO("null", ""),
   DAY("dd.MM.", ""),
   HOUR_SHORT("HH", ""),
   HOUR("HH:mm", ""),
@@ -61,11 +63,31 @@ public enum TimeFormat {
   SYSTEM("YYYY-MM-dd HH:mm:ss", ""),
   WEEKLY("EE., HH", " Uhr");
 
-  public static String AUTO(LocalDate date) {
-    return AUTO(LocalDateTime.of(date, LocalTime.MIN));
+  private final String format;
+
+  private final String suffix;
+  public String of(LocalDate date) {
+    return of(LocalDateTime.of(date, LocalTime.MIN));
   }
 
-  public static String AUTO(LocalDateTime time) {
+  public String of(LocalDateTime time) {
+    if (equals(AUTO)) return handleAuto(time);
+    if (equals(DISCORD)) return "<t:" + time.atZone(ZoneId.systemDefault()).toEpochSecond() + ":R>";
+    return time.format(DateTimeFormatter.ofPattern(format)) + suffix;
+  }
+
+  public LocalDateTime of(String text) {
+    if (equals(AUTO)) throw new IllegalArgumentException("AUTO nicht zulässig.");
+    if (equals(DISCORD)) return DateTimeUtils.fromEpoch(text.between("<t:", ":R>").intValue());
+    return LocalDateTime.parse(text, DateTimeFormatter.ofPattern(format));
+  }
+
+  @NotNull
+  public String now() {
+    return of(LocalDateTime.now());
+  }
+
+  private String handleAuto(LocalDateTime time) {
     final Duration duration = Duration.between(time, LocalDateTime.now());
     if (duration.getSeconds() < 45 * 60) return DISCORD.of(time);
     else if (time.toLocalDate().equals(LocalDate.now())) return HOUR.of(time);
@@ -73,26 +95,5 @@ public enum TimeFormat {
     else if (duration.getSeconds() < 7 * 24 * 60 * 60) return DEFAULT_SHORT.of(time);
     else if (duration.getSeconds() < 25 * 24 * 60 * 60) return DISCORD.of(time);
     else return DEFAULT.of(time);
-  }
-
-  private final String format;
-  private final String suffix;
-
-  public String of(LocalDateTime time) {
-    if (equals(DISCORD)) return "<t:" + time.atZone(ZoneId.systemDefault()).toEpochSecond() + ":R>";
-    return time.format(DateTimeFormatter.ofPattern(format)) + suffix;
-  }
-
-  public String of(LocalDate date) {
-    return of(LocalDateTime.of(date, LocalTime.MIN));
-  }
-
-  public LocalDateTime of(String text) {
-    if (equals(DISCORD)) return DateTimeUtils.fromEpoch(text.between("<t:", ":R>").intValue());
-    return LocalDateTime.parse(text, DateTimeFormatter.ofPattern(format));
-  }
-
-  public String now() {
-    return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format));
   }
 }

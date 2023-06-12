@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.scouting.PlayerAnalyzer;
 import de.zahrie.trues.api.scouting.TeamAnalyzer;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
@@ -131,7 +132,8 @@ public class TeamLineup extends TeamLineupBase {
   }
 
   public List<Player> getSetPlayers() {
-    return new Query<>(Player.class).get("player", Player.class).where("coverage_team", participator).entityList();
+    return new Query<>(Lineup.class).join(new JoinQuery<>(Lineup.class, Player.class)).where("coverage_team", participator)
+        .convertList(Player.class);
   }
 
   public List<Player> getValidPlayers(Lane lane) {

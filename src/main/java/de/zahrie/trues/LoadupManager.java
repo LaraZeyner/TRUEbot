@@ -96,5 +96,4 @@ public final class LoadupManager implements Connectable {
       connect();
     }
   }
-// TODO SeasonLoader.load();
 }

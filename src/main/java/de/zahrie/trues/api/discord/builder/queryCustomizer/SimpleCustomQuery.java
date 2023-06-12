@@ -4,6 +4,7 @@ package de.zahrie.trues.api.discord.builder.queryCustomizer;
 import java.util.List;
 
 import de.zahrie.trues.api.discord.command.slash.Column;
+import de.zahrie.trues.api.discord.command.slash.DBQuery;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,8 +67,13 @@ public final class SimpleCustomQuery {
     return namedQuery.getDbQuery().columns();
   }
 
-  public boolean isEnumerated() {
-    return namedQuery.getDbQuery().enumerated();
+  @NonNull
+  public DBQuery getQuery() {
+    return namedQuery.getDbQuery();
+  }
+
+  public Enumeration getEnumeration() {
+    return namedQuery.getDbQuery().enumeration();
   }
 
   @Nullable

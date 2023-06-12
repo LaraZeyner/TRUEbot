@@ -41,9 +41,25 @@ public class LeaderboardHandler {
     });
   }
 
-  public static void add(PublicLeaderboard leaderboard) {
-    leaderboards.put(leaderboard, LocalDateTime.now());
-    write();
+  public static String add(PublicLeaderboard leaderboard) {
+    return add(leaderboard, 0);
+  }
+
+  private static String add(PublicLeaderboard leaderboard, int iteration) {
+    if (leaderboard.required != 0 && leaderboard.required == leaderboard.getMessageIds().size()) {
+      leaderboards.put(leaderboard, LocalDateTime.now());
+      write();
+      return "Das Leaderboard konnte erfolgreich gespeichert werden";
+    }
+
+    if (iteration == 30*60) return "Das Leaderboard konnte nicht gespeichert werden und wird sich nicht aktualisieren.";
+
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    return add(leaderboard, iteration + 1);
   }
 
   private static void write() {

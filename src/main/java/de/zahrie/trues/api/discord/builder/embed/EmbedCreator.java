@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
 import de.zahrie.trues.util.StringUtils;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,12 +17,12 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
   private EmbedBuilder currentEmbed;
   private int remainingSpace = MessageEmbed.EMBED_MAX_LENGTH_BOT;
 
-  public EmbedCreator(boolean enumerated, String title, String description) {
-    super(enumerated, title, description);
+  public EmbedCreator(Enumeration enumeration, String title, String description, int startingIndex) {
+    super(enumeration, title, description, startingIndex);
   }
 
-  public EmbedCreator(boolean enumerated, String title, String description, Color color) {
-    super(enumerated, title, description, color);
+  public EmbedCreator(Enumeration enumeration, String title, String description, Color color, int startingIndex) {
+    super(enumeration, title, description, color, startingIndex);
   }
 
   public List<MessageEmbed> build() {
@@ -67,7 +68,7 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
     for (int i = 0; i < rows; i++) {
       final List<String> row = columnValues.stream().map(string -> string.before("\n")).toList();
       int requiredSpace = row.stream().map(String::length).reduce(0, Integer::sum);
-      if (enumerated) requiredSpace += 2 + String.valueOf(rows + 1).length();
+      if (!enumeration.equals(Enumeration.NONE)) requiredSpace += 2 + String.valueOf(rows + 1).length();
       if (requiredSpace > remainingSpace) {
         createNewEmbed();
         remainingSpace -= columns.stream().mapToInt(c -> c.name().length()).sum();
@@ -78,12 +79,13 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
         toBeAdd = new ArrayList<>(row);
       } else {
         for (int j = 0; j < columns.size(); j++) {
-          final String add = ((!toBeAdd.get(j).isBlank()) ? "\n" : "") + ((j == 0 && enumerated) ? i+1 + ": " : "") + row.get(j);
+          final String add = ((!toBeAdd.get(j).isBlank()) ? "\n" : "") + ((j == 0 && !enumeration.equals(Enumeration.NONE)) ? index + ": " : "") + row.get(j);
           remainingSpace -= add.length();
           toBeAdd.set(j, toBeAdd.get(j) + add);
         }
       }
       columnValues = columnValues.stream().map(string -> string.after("\n")).toList();
+      index++;
     }
 
     addFields(columns, toBeAdd);
@@ -122,7 +124,7 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
 
     this.remainingSpace = MessageEmbed.EMBED_MAX_LENGTH_BOT;
 
-    final String footer = "zuletzt aktualisiert " + TimeFormat.DEFAULT_FULL.now();
+    final String footer = "zuletzt aktualisiert " + TimeFormat.DEFAULT.now();
     this.currentEmbed = new EmbedBuilder().setFooter(footer);
     this.remainingSpace -= footer.length();
 

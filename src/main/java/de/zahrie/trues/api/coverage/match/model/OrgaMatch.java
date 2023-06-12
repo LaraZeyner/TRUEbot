@@ -60,11 +60,10 @@ public class OrgaMatch extends LeagueMatch implements Entity<OrgaMatch> {
 
   @Override
   public OrgaMatch create() {
-    final OrgaMatch match = new Query<>(OrgaMatch.class)
+    final OrgaMatch match = new Query<>(OrgaMatch.class).key("match_id", matchId)
         .col("matchday", playday).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
         .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result).col("coverage_group", league)
-        .col("coverage_index", matchIndex).col("match_id", matchId).col("scheduling_start", range.getStartTime())
-        .col("scheduling_end", range.getEndTime())
+        .col("coverage_index", matchIndex).col("scheduling_start", range.getStartTime()).col("scheduling_end", range.getEndTime())
         .insert(this);
     new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
     if (match.getParticipators().length == 0) {

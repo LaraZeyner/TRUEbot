@@ -5,20 +5,29 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
+import de.zahrie.trues.api.discord.builder.queryCustomizer.Alternative;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.NamedQuery;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.SimpleCustomQuery;
 import de.zahrie.trues.api.discord.util.Nunu;
+import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.log.DevInfo;
+import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class PublicLeaderboard extends Leaderboard {
   private final long channelID;
+  private MessageChannel channel;
+  @Getter
   private final List<Long> messageIds;
+
+  protected int required;
 
   public PublicLeaderboard(SimpleCustomQuery customQuery, long channelID) {
     this(customQuery, channelID, new ArrayList<>());
@@ -30,28 +39,70 @@ public class PublicLeaderboard extends Leaderboard {
     this.messageIds = messageIds;
   }
 
-  void add(@NotNull Message message) {
-    messageIds.add(message.getIdLong());
-    System.out.println("MESSAGE ADDED");
+  public MessageChannel getChannel() {
+    if (channel == null) {
+      final GuildChannel eventChannel = Nunu.DiscordChannel.getChannel(channelID);
+      if (!(eventChannel instanceof MessageChannel messageChannel)) {
+        new DevInfo("Leaderboard-Error").with(Console.class).warn(new IllegalStateException("Der Channel muss ein MessageChannel sein!"));
+        return null;
+      }
+      this.channel = messageChannel;
+    }
+    return channel;
+  }
+
+  public void createNewPublic() {
+    if (getChannel() == null) {
+      new DevInfo("Channel konnte nicht gefunden werden").with(Console.class).warn(new NullPointerException("Kein Channel für Leaderboard"));
+      return;
+    }
+
+    final Alternative alternative = customQuery.getNamedQuery().getAlternative();
+    final EmbedWrapper data = getDataList(alternative);
+    final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
+    final List<String> merge = data.merge();
+    this.required = Math.max(1, merge.size());
+    if ((merge.isEmpty() || merge.get(0).isBlank()) && wrapperEmbeds.isEmpty())
+      channel.sendMessage("keine Daten").queue(this::addMessage);
+    for (int i = 0; i < merge.size(); i++) {
+      final String content = merge.get(i);
+      final MessageCreateAction msg = channel.sendMessage(content);
+      if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty()) msg.addEmbeds(wrapperEmbeds);
+      msg.queue(this::addMessage);
+    }
   }
 
   public void updateData() {
-    final GuildChannel eventChannel = Nunu.DiscordChannel.getChannel(channelID);
-    if (!(eventChannel instanceof MessageChannel messageChannel)) return;
+    if (getChannel() == null) return;
 
-    final EmbedWrapper data = getDataList();
+    final Alternative alternative = customQuery.getNamedQuery().getAlternative();
+    final EmbedWrapper data = getDataList(alternative);
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
     final List<String> merge = data.merge();
     if (merge.isEmpty() || merge.get(0).isBlank()) {
-      messageChannel.retrieveMessageById(messageIds.get(0)).queue(message -> message.editMessageEmbeds(wrapperEmbeds).queue());
+      getChannel().retrieveMessageById(messageIds.get(0)).queue(message -> message.editMessageEmbeds(wrapperEmbeds).queue());
       return;
     }
     for (int i = 0; i < merge.size(); i++) {
+      if (messageIds.size() < merge.size()) {
+        delete().createNewPublic();
+      }
+
       final String content = merge.get(i);
       if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty())
-        messageChannel.retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).setEmbeds(wrapperEmbeds).queue());
-      else messageChannel.retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).queue());
+        getChannel().retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).setEmbeds(wrapperEmbeds).queue());
+      else getChannel().retrieveMessageById(messageIds.get(i)).queue(message -> message.editMessage(content).setEmbeds().queue());
     }
+  }
+
+  void addMessage(@NotNull Message message) {
+    messageIds.add(message.getIdLong());
+  }
+
+  PublicLeaderboard delete() {
+    getMessageIds().forEach(msgId -> getChannel().retrieveMessageById(msgId).complete().delete().queue());
+    messageIds.clear();
+    return this;
   }
 
   private void fromTo(int page, int maxPages, @NotNull List<MessageEmbed> embeds, Message message) {
@@ -75,7 +126,7 @@ public class PublicLeaderboard extends Leaderboard {
     leaderboardData.put("parameters", new JSONArray(customQuery.getParameters().stream().map(param -> (String) param).toList()));
     return leaderboardData;
   }
-  
+
   @NotNull
   public static PublicLeaderboard fromJSON(JSONObject entry) {
     final List<String> parameters = IntStream.range(0, entry.getJSONArray("parameters").length()).mapToObj(entry.getJSONArray("parameters")::getString).toList();
