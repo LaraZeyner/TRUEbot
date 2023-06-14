@@ -15,7 +15,6 @@ public enum Department {
   NONE(200),
   EVENT(201),
   TEAMS(202),
-  COACHING(203),
   ALL(210);
 
   private final Integer id;
@@ -23,7 +22,7 @@ public enum Department {
 
   public List<DiscordGroup> getPingableGroups() {
     if (id == 200) return List.of();
-    if (id == 210) return List.of(DiscordGroup.EVENT, DiscordGroup.TEAMS, DiscordGroup.COACHING);
+    if (id == 210) return List.of(DiscordGroup.EVENT, DiscordGroup.TEAMS);
     return List.of(DiscordGroup.of(id));
   }
 

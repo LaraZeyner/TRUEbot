@@ -12,11 +12,11 @@ import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchHandler;
 import de.zahrie.trues.api.coverage.match.MatchLoader;
 import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
-import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
-import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PlayerRank;
+import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
+import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.signup.SignupFactory;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
@@ -42,7 +42,7 @@ public class TeamHandler extends TeamModel implements Serializable {
   public void update(boolean ignore) {
     if (TeamLoader.loadedTeams.contains(team)) return;
 
-    final List<HTML> stages = html.findAll("section", "league-team-stage");
+    final List<HTML> stages = html.findAll("section", HTML.STAGE);
     final boolean created = updateResult(stages);
     updateRecordAndSeasons();
     if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) handleStarterMatches(stages);
@@ -70,7 +70,7 @@ public class TeamHandler extends TeamModel implements Serializable {
 
   private void handleStarterMatches(List<HTML> stages) {
     stages.get(stages.size() - 1)
-        .find("ul", "league-stage-matches")
+        .find("ul", HTML.MATCHES)
         .findAll("li").stream()
         .map(match -> match.find("a").getAttribute("href").between("/matches/", "-"))
         .map(Integer::parseInt)
@@ -80,7 +80,7 @@ public class TeamHandler extends TeamModel implements Serializable {
   }
 
   private void updateRecordAndSeasons() {
-    List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li").stream()
+    List<String> teamInfos = html.find("div", HTML.TEAM_HEAD).findAll("li").stream()
         .map(HTML::text).map(str -> str.after(":")).toList();
     teamInfos = teamInfos.subList(3, teamInfos.size());
     if (teamInfos.size() == 4) {
@@ -95,19 +95,14 @@ public class TeamHandler extends TeamModel implements Serializable {
     if (stages.isEmpty()) return false;
 
     final String result = stages.get(stages.size() - 1)
-        .find("ul", "content-icon-info")
+        .find("ul", HTML.ICON_INFO)
         .findAll("li").get(1).text().replace("Ergebnis", "");
     return team.setScore(determineDivision(stages), result);
   }
 
   private PRMLeague determineDivision(List<HTML> stages) {
-    final String divisionName = stages.get(stages.size() - 1)
-        .find("ul", "content-icon-info")
-        .find("li").find("a").text();
-    final String divisionUrl = stages.get(stages.size() - 1)
-        .find("ul", "content-icon-info")
-        .find("li").find("a").getAttribute("href");
-    return LeagueLoader.season(divisionUrl, divisionName);
+    final HTML content = stages.get(stages.size() - 1).find("ul", HTML.ICON_INFO).find("li").find("a");
+    return LeagueLoader.season(content.getAttribute("href"), content.text());
   }
 
 }

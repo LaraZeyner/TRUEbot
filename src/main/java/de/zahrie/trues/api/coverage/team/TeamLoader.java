@@ -73,15 +73,15 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   public PRMPlayer getPlayer(int prmId) {
-    List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li").stream()
+    List<String> teamInfos = html.find("div", HTML.TEAM_HEAD).findAll("li").stream()
         .map(HTML::text).map(str -> str.after(":")).toList();
     teamInfos = teamInfos.subList(3, teamInfos.size());
     if (teamInfos.size() == 4) return null;
 
-    for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
+    for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
       if (primeId == prmId) {
-        final String summonerName = user.find("div", "txt-info").find("span").text();
+        final String summonerName = user.find("div", HTML.DESCRIPTION).find("span").text();
         final PRMPlayer primePlayer = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
         if (primePlayer != null) primePlayer.setTeam(team);
         return primePlayer;
@@ -91,15 +91,15 @@ public class TeamLoader extends GamesportsLoader {
   }
 
   private List<PRMPlayer> getPlayers() {
-    List<String> teamInfos = html.find("div", "content-portrait-head").findAll("li").stream()
+    List<String> teamInfos = html.find("div", HTML.TEAM_HEAD).findAll("li").stream()
         .map(HTML::text).map(str -> str.after(":")).toList();
     teamInfos = teamInfos.subList(3, teamInfos.size());
     if (teamInfos.size() == 4) return List.of();
 
     final var players = new ArrayList<PRMPlayer>();
-    for (HTML user : html.find("ul", "content-portrait-grid-l").findAll("li")) {
+    for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
-      final String summonerName = user.find("div", "txt-info").find("span").text();
+      final String summonerName = user.find("div", HTML.DESCRIPTION).find("span").text();
       final PRMPlayer player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
       if (player != null) {
         player.setTeam(team);

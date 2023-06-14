@@ -4,21 +4,16 @@ import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.channel.ChannelType;
-import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
+import de.zahrie.trues.api.discord.channel.DiscordChannelType;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
-import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.log.DevInfo;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
-import net.dv8tion.jda.api.entities.IPermissionHolder;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(StringUtils.class)
@@ -65,10 +60,10 @@ public class OrgaTeamChannelHandler {
     if (category == null) createChannels();
     else {
       switch (channelType) {
-        case SCOUTING -> ChannelKind.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.SCOUTING, team);
-        case INFO -> ChannelKind.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.INFO, team);
-        case CHAT -> ChannelKind.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.CHAT, team);
-        case VOICE, PRACTICE -> ChannelKind.VOICE.createTeamChannel((Category) category.getChannel(), TeamChannelType.PRACTICE, team);
+        case SCOUTING -> DiscordChannelType.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.SCOUTING, team);
+        case INFO -> DiscordChannelType.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.INFO, team);
+        case CHAT -> DiscordChannelType.TEXT.createTeamChannel((Category) category.getChannel(), TeamChannelType.CHAT, team);
+        case VOICE, PRACTICE -> DiscordChannelType.VOICE.createTeamChannel((Category) category.getChannel(), TeamChannelType.PRACTICE, team);
         case CATEGORY -> createChannels();
       }
     }
@@ -77,10 +72,10 @@ public class OrgaTeamChannelHandler {
 
   void createChannels() {
     Nunu.getInstance().getGuild().createCategory(team.getChannels().getCategoryName()).queue(category -> {
-      ChannelKind.TEXT.createTeamChannel(category, TeamChannelType.CHAT, team);
-      ChannelKind.TEXT.createTeamChannel(category, TeamChannelType.INFO, team);
-      ChannelKind.TEXT.createTeamChannel(category, TeamChannelType.SCOUTING, team);
-      ChannelKind.VOICE.createTeamChannel(category, TeamChannelType.PRACTICE, team);
+      DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.CHAT, team);
+      DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.INFO, team);
+      DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.SCOUTING, team);
+      DiscordChannelType.VOICE.createTeamChannel(category, TeamChannelType.PRACTICE, team);
     });
   }
 
@@ -90,49 +85,8 @@ public class OrgaTeamChannelHandler {
   @NonNull
   public static TeamChannel createTeamChannelEntity(@NonNull GuildChannel channel, @NonNull OrgaTeam team) {
     final TeamChannelType channelType = TeamChannelType.fromChannel(channel);
-    final ChannelType permissionChannelType = channelType.getPermissionType();
-    return new TeamChannel(channel.getIdLong(), channel.getName(), permissionChannelType, channel.getType(), team, channelType).forceCreate();
-  }
-
-  @RequiredArgsConstructor
-  @Getter
-  @ExtensionMethod(DiscordChannelFactory.class)
-  public enum ChannelKind {
-    FORUM(false),
-    NEWS(false),
-    STAGE(true),
-    TEXT(false),
-    VOICE(true);
-
-    private final boolean voice;
-
-    public void createChannel(String name, Category category, ChannelType type) {
-      getAction(name, category, type, null).queue();
-    }
-
-    public void createTeamChannel(Category category, TeamChannelType teamChannelType, OrgaTeam team) {
-      getAction(teamChannelType.getDefaultName(), category, teamChannelType.getPermissionType(), team).queue();
-    }
-
-    private ChannelAction<? extends GuildChannel> getAction(String name, Category category, ChannelType type, OrgaTeam team) {
-      final ChannelAction<? extends GuildChannel> channelAction = switch (this) {
-        case FORUM -> Util.nonNull(category).createForumChannel(name);
-        case NEWS -> Util.nonNull(category).createNewsChannel(name);
-        case STAGE -> Util.nonNull(category).createStageChannel(name);
-        case TEXT -> Util.nonNull(category).createTextChannel(name);
-        case VOICE -> Util.nonNull(category).createVoiceChannel(name);
-      };
-
-      channelAction.clearPermissionOverrides().queue();
-      for (ChannelType.APermissionOverride permission : type.getPermissions()) {
-        IPermissionHolder permissionHolder = permission.permissionHolder();
-        if (permissionHolder instanceof Role role && OrgaTeamFactory.isRoleOfTeam(role)) {
-          permissionHolder = team.getRoleManager().getRole();
-        }
-
-        channelAction.addPermissionOverride(permissionHolder, permission.getAllowed(), permission.getDenied()).queue();
-      }
-      return channelAction;
-    }
+    final DiscordChannelType discordChannelType = DiscordChannelType.valueOf(channel.getType().name());
+    final ChannelType type = channelType.equals(TeamChannelType.VOICE) ? ChannelType.ORGA_INTERN : ChannelType.TEAM;
+    return new TeamChannel(channel.getIdLong(), channel.getName(), type, discordChannelType, team, channelType).forceCreate();
   }
 }

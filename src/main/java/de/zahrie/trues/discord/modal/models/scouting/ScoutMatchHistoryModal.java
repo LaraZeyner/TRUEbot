@@ -18,9 +18,11 @@ import de.zahrie.trues.discord.modal.ModalRegisterer;
 import de.zahrie.trues.discord.scouting.Scouting;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
 import de.zahrie.trues.util.Util;
+import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.jetbrains.annotations.Nullable;
 
 @View(value = ModalRegisterer.SCOUT_PLAYER_HISTORY)
 @ExtensionMethod(DiscordUserFactory.class)
@@ -28,43 +30,34 @@ public class ScoutMatchHistoryModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create("Scouting: Spieler-Matchhistory")
-        .single("1", "Lane/Summonername:", "Lane/Name ...", 16)
-        .single("2", "Champion:", "Championname eintragen ...", 16)
-        .single("3", "Scouting-Typ:", Arrays.stream(ScoutingGameType.values()).toList())
-        .single("4", "Lane:", Lane.ITERATE).get();
+        .required("1", "Lane/Summonername:", "Lane/Name des Spielers angeben", 16)
+        .optional("2", "Champion:", "Championname eintragen ...", 16)
+        .required("3", "Scouting-Typ:", Arrays.stream(ScoutingGameType.values()).toList())
+        .optional("4", "Lane:", Lane.ITERATE).get();
   }
 
   @Override
-  public boolean execute(ModalInteractionEvent event) {
-    final Object positionOrName = getLolPositionOrSummonername();
-    final Champion champion = new Query<>(Champion.class).where("champion_name", getString("2")).entity();
-    final ScoutingGameType gameType = getEnum(ScoutingGameType.class, "3");
-    final Lane lane2 = getEnum(Lane.class, "4");
+  public boolean execute(@NonNull ModalInteractionEvent event) {
+    final Lane lane = getEnum(Lane.class, "1");
+    final Player player = determinePlayer(event, lane);
+    if (player == null) return reply("Der Spieler wurde nicht gefunden");
 
-    Player player = null;
-    Lane lane = null;
-    if (positionOrName instanceof Lane selectedLane) {
-      final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(event.getGuildChannel());
-      final Scouting scouting = ScoutingManager.forTeam(team);
-      if (scouting != null) {
-        player = scouting.participator().getTeamLineup().getFixedLineups().stream()
-            .filter(lineup -> lineup.getLane().equals(selectedLane))
-            .map(Lineup::getPlayer).findFirst().orElse(null);
-        lane = selectedLane;
-      }
-    } else if (positionOrName instanceof Player pl) {
-      player = pl;
-    }
-    if (player != null) {
-      ScoutingManager.handlePlayerHistory(event, player, champion, Util.avoidNull(gameType, ScoutingGameType.TEAM_GAMES), lane == null ? lane2 : lane);
-      return true;
-    }
-    reply("Der Spieler wurde nicht gefunden");
-    return false;
+    final ScoutingGameType gameType = getEnum(ScoutingGameType.class, "3");
+    final Champion champion = getString("2") == null ? null :
+        new Query<>(Champion.class).where("champion_name", getString("2")).entity();
+    final Lane lane2 = getEnum(Lane.class, "4");
+    ScoutingManager.handlePlayerHistory(event, player, champion, Util.avoidNull(gameType, ScoutingGameType.TEAM_GAMES), Util.avoidNull(lane2, lane));
+    return true;
   }
 
-  private Object getLolPositionOrSummonername() {
-    final Lane lane = getEnum(Lane.class, "4");
-    return lane != null ? lane : PlayerFactory.getPlayerFromName(getString("4"));
+  @Nullable
+  private Player determinePlayer(@NonNull ModalInteractionEvent event, @Nullable Lane lane) {
+    if (lane == null) return getString("4") == null ? null : PlayerFactory.getPlayerFromName(getString("1"));
+    else {
+      final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(event.getGuildChannel());
+      final Scouting scouting = ScoutingManager.forTeam(team);
+      return scouting == null ? null : scouting.participator().getTeamLineup().getFixedLineups().stream()
+          .filter(lineup -> lineup.getLane().equals(lane)).map(Lineup::getPlayer).findFirst().orElse(null);
+    }
   }
 }

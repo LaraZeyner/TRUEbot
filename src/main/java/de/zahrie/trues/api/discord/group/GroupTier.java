@@ -24,11 +24,12 @@ public enum GroupTier {
 
   private final int permissionId;
 
+  /**
+   * Bearbeitbare Rollen (via Rollen bearbeiten)
+   */
   public Set<DiscordGroup> getAssignable() {
     return switch (this) {
-      case ORGA_MEMBER -> Set.of(DiscordGroup.FRIEND);
-      case LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER);
-      case MANAGEMENT, ORGA_LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER, DiscordGroup.ANALYST, DiscordGroup.LANE_COACH, DiscordGroup.MENTAL_COACH, DiscordGroup.TEAM_COACH);
+      case LEADER, MANAGEMENT, ORGA_LEADER -> Set.of(DiscordGroup.FRIEND, DiscordGroup.SCRIMPARTNER);
       default -> Set.of();
     };
   }

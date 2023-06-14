@@ -9,6 +9,7 @@ import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.log.Console;
+import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
@@ -24,7 +25,7 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
     final PlayerLoader loader = new PlayerLoader(primeId);
     if (loader.html == null || loader.html.text() == null) return null;
 
-    final String attribute = loader.html.find("ul", "content-icon-info-l")
+    final String attribute = loader.html.find("ul", HTML.ICON_INFO)
         .find("li").find("a").getAttribute("href");
     if (attribute == null) return null;
 
@@ -55,7 +56,7 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
   }
 
   public void handleLeftTeam() {
-    final String attribute = html.find("ul", "content-icon-info-l")
+    final String attribute = html.find("ul", HTML.ICON_INFO + "-l")
         .find("li").find("a").getAttribute("href");
     if (attribute == null) return;
 

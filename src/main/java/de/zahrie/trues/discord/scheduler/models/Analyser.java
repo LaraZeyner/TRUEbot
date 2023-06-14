@@ -41,12 +41,10 @@ public class Analyser extends ScheduledTask {
 
     PlayerFactory.registeredPlayers().stream().filter(player -> player.getTeam() == null || player.getTeam().getOrgaTeam() == null)
         .forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
-    /*new Query<>(Player.class, "SELECT player.* FROM player JOIN team t on player.team = t.team_id WHERE refresh >= now()").entityList().forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));*/
     Database.connection().commit(true);
     handleNextMatches();
 
     RiotPlayerAnalyzer.reset();
-    System.out.println("REPPPPPPPPPEATTTTTTTTTTTTT!!!!!!!!!");
   }
 
   private static void handleNextMatches() {

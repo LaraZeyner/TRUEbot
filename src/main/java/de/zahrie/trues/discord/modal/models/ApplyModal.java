@@ -23,10 +23,10 @@ public class ApplyModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create("Team-Bewerbung erstellen")
-        .single("1", "Rolle im Team", List.of(TeamRole.MAIN, TeamRole.SUBSTITUTE))
-        .multi("2", "Position im Team", Arrays.stream(TeamPosition.values())
+        .required("1", "Rolle im Team", List.of(TeamRole.MAIN, TeamRole.SUBSTITUTE))
+        .requiredMulti("2", "Position im Team", Arrays.stream(TeamPosition.values())
             .filter(position -> position.ordinal() <= TeamPosition.TEAM_COACH.ordinal()).toList())
-        .multi("3", "Beschreibung", "Erzähle uns etwas über dich...", 1000).get();
+        .requiredMulti("3", "Beschreibung", "Erzähle uns etwas über dich...", 1000).get();
   }
 
   @Override

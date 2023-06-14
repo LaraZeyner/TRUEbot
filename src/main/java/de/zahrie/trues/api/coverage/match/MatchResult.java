@@ -112,8 +112,8 @@ public final class MatchResult implements Comparable<MatchResult> {
    * @return Wert zwischen 0 und 1 <p> Wie hoch die Chance, dass home ein Game gewinnt
    */
   private double determineGamePercentage() {
-    final Integer homeMMR = Util.avoidNull(match.getHome(), 0, Participator::getLineupMMR);
-    final Integer guestMMR = Util.avoidNull(match.getGuest(), 0, Participator::getLineupMMR);
+    final Integer homeMMR = Util.avoidNull(match.getHome(), 0, Participator::getMmr);
+    final Integer guestMMR = Util.avoidNull(match.getGuest(), 0, Participator::getMmr);
 
     final double percentage = (homeMMR + guestMMR == 0) ? 0 : homeMMR * 1. / (guestMMR + homeMMR);
     if (percentage < .5 - Const.PREDICTION_FACTOR) return percentage / (2 - Const.PREDICTION_FACTOR * 4);

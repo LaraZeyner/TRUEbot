@@ -1,7 +1,7 @@
 package de.zahrie.trues.discord.event.models;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.discord.channel.DiscordChannel;
+import de.zahrie.trues.api.discord.channel.AbstractDiscordChannel;
 import de.zahrie.trues.api.discord.channel.DiscordChannelFactory;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -66,7 +66,7 @@ public class ChannelEvent extends ListenerAdapter {
   @Override
   public void onChannelUpdateName(ChannelUpdateNameEvent event) {
     final GuildChannel channel = event.getChannel().asGuildChannel();
-    final DiscordChannel discordChannel = DiscordChannelFactory.getDiscordChannel(channel);
+    final AbstractDiscordChannel discordChannel = DiscordChannelFactory.getDiscordChannel(channel);
     discordChannel.setName(event.getNewValue());
   }
 }

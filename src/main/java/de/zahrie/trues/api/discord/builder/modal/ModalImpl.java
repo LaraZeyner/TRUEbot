@@ -5,13 +5,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.discord.scouting.Scouting;
+import de.zahrie.trues.discord.scouting.ScoutingManager;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.ExtensionMethod;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
@@ -23,12 +30,6 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode(callSuper = true)
 @ExtensionMethod(StringUtils.class)
 public abstract class ModalImpl extends ModalBase {
-  protected DiscordUser target;
-
-  public void setTarget(DiscordUser target) {
-    this.target = target;
-  }
-
   public ModalImpl() {
     super();
   }
@@ -38,35 +39,51 @@ public abstract class ModalImpl extends ModalBase {
     return this;
   }
 
-  public ModalImpl single(String index, String title, String description, int length) {
-    builder.addComponents(getRow(index, title, description, length, TextInputStyle.SHORT));
+  public ModalImpl required(String index, String title, String description, int length) {
+    builder.addComponents(getRow(index, title, description, length, TextInputStyle.SHORT, true));
     return this;
   }
 
-  public ModalImpl single(String index, String title, Query<?> description, int length) {
+  public ModalImpl optional(String index, String title, String description, int length) {
+    builder.addComponents(getRow(index, title, description, length, TextInputStyle.SHORT, false));
+    return this;
+  }
+
+  public ModalImpl optional(String index, String title, List<? extends Enum<?>> enums) {
+    final String desc = enums.stream().map(Enum::toString).filter(Objects::nonNull).collect(Collectors.joining(", "));
+    final int length = enums.stream().map(Enum::toString).filter(Objects::nonNull).map(String::length).mapToInt(Integer::intValue).max().orElse(25);
+    return optional(index, title, desc, length);
+  }
+
+  public ModalImpl required(String index, String title, Query<?> description, int length) {
     final String desc = description.list().stream().map(objects -> (String) objects[0]).collect(Collectors.joining(", "));
-    return single(index, title, desc, length);
+    return required(index, title, desc, length);
   }
 
-  public ModalImpl single(String index, String title, List<? extends Enum<?>> enums) {
+  public ModalImpl required(String index, String title, List<? extends Enum<?>> enums) {
     final String desc = enums.stream().map(Enum::toString).filter(Objects::nonNull).collect(Collectors.joining(", "));
     final int length = enums.stream().map(Enum::toString).filter(Objects::nonNull).map(String::length).mapToInt(Integer::intValue).max().orElse(25);
-    return single(index, title, desc, length);
+    return required(index, title, desc, length);
   }
 
-  public ModalImpl multi(String index, String title, String description, int length) {
-    builder.addComponents(getRow(index, title, description, length, TextInputStyle.PARAGRAPH));
+  public ModalImpl requiredMulti(String index, String title, String description, int length) {
+    builder.addComponents(getRow(index, title, description, length, TextInputStyle.PARAGRAPH, true));
     return this;
   }
 
-  public ModalImpl multi(String index, String title, List<? extends Enum<?>> enums) {
-    final String desc = enums.stream().map(Enum::toString).filter(Objects::nonNull).collect(Collectors.joining(", "));
-    final int length = enums.stream().map(Enum::toString).filter(Objects::nonNull).map(String::length).mapToInt(Integer::intValue).max().orElse(25);
-    return multi(index, title, desc, length);
+  public ModalImpl optionalMulti(String index, String title, String description, int length) {
+    builder.addComponents(getRow(index, title, description, length, TextInputStyle.PARAGRAPH, false));
+    return this;
   }
 
-  private ActionRow getRow(String index, String title, String description, int length, TextInputStyle style) {
-    return ActionRow.of(TextInput.create(index, title, style).setPlaceholder(description).setMaxLength(length).build());
+  public ModalImpl requiredMulti(String index, String title, List<? extends Enum<?>> enums) {
+    final String desc = enums.stream().map(Enum::toString).filter(Objects::nonNull).collect(Collectors.joining(", "));
+    final int length = enums.stream().map(Enum::toString).filter(Objects::nonNull).map(String::length).mapToInt(Integer::intValue).max().orElse(25);
+    return requiredMulti(index, title, desc, length);
+  }
+
+  private ActionRow getRow(String index, String title, String description, int length, TextInputStyle style, boolean required) {
+    return ActionRow.of(TextInput.create(index, title, style).setPlaceholder(description).setMaxLength(length).setRequired(required).build());
   }
 
   public Modal get() {
@@ -74,14 +91,19 @@ public abstract class ModalImpl extends ModalBase {
   }
 
   public String getString(String index) {
-    return Util.nonNull(modalEvent().getValue(index)).getAsString();
+    final String string = Util.nonNull(modalEvent().getValue(index)).getAsString();
+    return string.isEmpty() ? null : string;
   }
 
   public Integer getInt(String index) {
+    return getInt(index, null);
+  }
+
+  public Integer getInt(String index, Integer otherwise) {
     try {
       return Integer.parseInt(getString(index));
     } catch (NumberFormatException ignored) {
-      return null;
+      return otherwise;
     }
   }
 
@@ -106,6 +128,23 @@ public abstract class ModalImpl extends ModalBase {
     return new Query<>(DiscordUser.class).entity(targetIdString.intValue());
   }
   //</editor-fold>
+
+  protected Team determineTeam() {
+    Team team2 = null;
+    final Integer anInt = getInt("1");
+    if (anInt != null) team2 = new Query<>(Team.class).where("prm_id", anInt).entity();
+    if (getString("1") != null) {
+      if (team2 == null) team2 = new Query<>(Team.class).where("team_name", getString("1")).entity();
+      if (team2 == null) team2 = new Query<>(Team.class).where("team_abbr", getString("1")).entity();
+    } else {
+      GuildChannel gc = event.getGuildChannel();
+      if (gc instanceof ThreadChannel thread) gc = thread.getParentChannel();
+      final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(gc);
+      final Scouting scouting = ScoutingManager.forTeam(team);
+      if (scouting != null) team2 = scouting.participator().getTeam();
+    }
+    return team2;
+  }
 
   private ModalInteractionEvent modalEvent() {
     return ((ModalInteractionEvent) event);

@@ -77,8 +77,8 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   private Playday getPlayday(PRMLeague league) {
-    final List<HTML> data = html.find("div", "content-match-subtitles")
-        .findAll("div", "txt-subtitle");
+    final List<HTML> data = html.find("div", HTML.MATCH_SUBTITLE)
+        .findAll("div", HTML.SUBTITLE);
     if (data.size() < 2) {
       return PlaydayFactory.fromMatchtime(league.getStage(), getMatchtime());
     }
@@ -88,12 +88,12 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   private LocalDateTime getMatchtime() {
-    final int matchTimeEpoch = html.findId("div", "league-match-time").getAttribute("data-time").intValue();
+    final int matchTimeEpoch = html.findId("div", HTML.MATCH_TIME_2).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
     return DateTimeUtils.fromEpoch(matchTimeEpoch);
   }
 
   private List<PRMTeam> getTeams() {
-    return html.findAll("div", "content-match-head-team-top").stream()
+    return html.findAll("div", HTML.MATCH_TEAMS).stream()
         .map(team -> team.find("a").getAttribute("href"))
         .map(TeamLoader::idFromURL)
         .map(TeamFactory::getTeam)

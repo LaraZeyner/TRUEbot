@@ -9,6 +9,9 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.PlayerRank;
+import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
+import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.season.signup.SeasonSignup;
 import de.zahrie.trues.api.database.connector.Table;
@@ -46,6 +49,13 @@ public abstract class Team implements ATeam, Id, Comparable<Team> {
   protected List<SeasonSignup> signups;
   protected List<Participator> participators;
 
+  public Integer getLastMMR() {
+    if (lastMMR == null) {
+      final double averageMMR = getPlayers().stream().map(Player::getRanks).map(PlayerRankHandler::getLastRelevant).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
+      setLastMMR((int) Math.round(averageMMR));
+    }
+    return lastMMR;
+  }
 
   public OrgaTeam getOrgaTeam() {
     if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).where("team", this).entity();

@@ -1,6 +1,5 @@
 package de.zahrie.trues.discord.scouting;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,25 +20,22 @@ import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.log.Console;
 import de.zahrie.trues.util.io.log.DevInfo;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
-import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import org.jetbrains.annotations.Nullable;
 
-public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match, @Nullable ThreadChannel thread) {
-
-  public Scouting(OrgaTeam orgaTeam, Participator participator, Match match) {
+public record Scouting(OrgaTeam orgaTeam, @NonNull Participator participator, Match match, @Nullable ThreadChannel thread) {
+  public Scouting(OrgaTeam orgaTeam, @NonNull Participator participator, Match match) {
     this(orgaTeam, participator, match, determineThreadChannel(orgaTeam, participator, match));
   }
 
   @Nullable
-  private static ThreadChannel determineThreadChannel(OrgaTeam orgaTeam, Participator participator, Match match) {
+  private static ThreadChannel determineThreadChannel(@NonNull OrgaTeam orgaTeam, Participator participator, Match match) {
     final AtomicReference<ThreadChannel> thread = new AtomicReference<>();
     final TeamChannel scoutingChannel = orgaTeam.getChannels().get(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return null;
@@ -60,16 +56,6 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
     return thread.get();
   }
 
-  public void sendCustom(IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
-    if (participator.getTeam() == null) return;
-
-    final EmbedBuilder builder = new EmbedBuilder()
-        .setTitle(type.getTitleStart() + participator.getTeam().getName())
-        .setDescription("Lineup: opgg und porofessor coming soon\nTyp: ");
-    new ScoutingEmbedHandler(participator, gameType, days, page).get(type).forEach(builder::addField);
-    event.replyEmbeds(builder.build()).queue();
-  }
-
   public void update() {
     forceUpdate();
     final Participator ourTeam = match.getParticipator(orgaTeam.getTeam());
@@ -87,8 +73,8 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
 
   private void forceUpdate() {
     sendLog();
-    send(Scouting.ScoutingType.LINEUP);
-    send(Scouting.ScoutingType.OVERVIEW);
+    send(ScoutingType.LINEUP);
+    send(ScoutingType.OVERVIEW);
     TeamInfoManager.fromTeam(orgaTeam).updateAll();
   }
 
@@ -131,7 +117,7 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
         .setTitle(type.getTitleStart() + participator.getTeam().getName())
         .setDescription("Datum: " + TimeFormat.DEFAULT_FULL.of(match.getStart()) + "\nWinchance: " + winPercent + "\nErwartetes Lineup: opgg und porofessor coming soon\nTyp: " + match.getClass().getSimpleName())
         .setFooter("zuletzt aktualisiert " + TimeFormat.DEFAULT.now());
-    new ScoutingEmbedHandler(participator, gameType, days, page).get(type).forEach(builder::addField);
+    new ScoutingEmbedHandler(participator.getTeam(), participator.getTeamLineup().getLineup(), gameType, days, page).get(type, participator).forEach(builder::addField);
     final MessageEmbed embed = builder.build();
 
     if (msg == null) threadChannel.sendMessageEmbeds(embed).queue();
@@ -149,24 +135,4 @@ public record Scouting(OrgaTeam orgaTeam, Participator participator, Match match
   public int hashCode() {
     return Objects.hash(orgaTeam, participator, match);
   }
-
-  @RequiredArgsConstructor
-  @Getter
-  public enum ScoutingType {
-    CHAMPIONS("Champions von "),
-    HISTORY("Games von "),
-    LINEUP("Lineup von "),
-    MATCHUPS("Natchups von "),
-    OVERVIEW("Übersicht von "),
-    PLAYER_HISTORY("Matchhistory von "),
-    SCHEDULE("Schedule von ");
-    private final String titleStart;
-
-    public static ScoutingType fromKey(String key) {
-      return Arrays.stream(ScoutingType.values())
-          .filter(type -> type.getTitleStart().split(" ")[0].equals(key))
-          .findFirst().orElse(null);
-    }
-  }
-
 }

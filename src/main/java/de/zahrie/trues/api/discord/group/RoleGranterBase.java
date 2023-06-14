@@ -51,7 +51,7 @@ public class RoleGranterBase {
   public Set<DiscordGroup> getGroups() {
     final Set<DiscordGroup> activeGroups = invoker.getActiveGroups();
     return activeGroups.stream().filter(Objects::nonNull)
-        .flatMap(activeGroup -> activeGroup.getAssignable().stream())
+        .flatMap(activeGroup -> activeGroup.getTier().getAssignable().stream())
         .collect(Collectors.toSet());
   }
 

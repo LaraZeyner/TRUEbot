@@ -34,7 +34,7 @@ public interface AMatch extends ABetable {
   List<MatchLog> getLogs();
 
   default List<MatchLog> determineLog() {
-    return new Query<>(MatchLog.class).where("coverage", this).entityList();
+    return new Query<>(MatchLog.class).where("coverage", this).descending("log_time").entityList();
   }
 
   default void handleNotifications() {

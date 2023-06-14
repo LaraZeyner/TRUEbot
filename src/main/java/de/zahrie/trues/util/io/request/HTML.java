@@ -12,6 +12,22 @@ import org.jetbrains.annotations.NotNull;
 
 @ExtensionMethod(StringUtils.class)
 public class HTML {
+  public static final String DESCRIPTION = "txt-info";
+  public static final String ICON_INFO = "quick-info";
+  public static final String MATCH_RESULT = "league-match-result";
+  public static final String MATCH_SUBTITLE = "content-match-subtitles";
+  public static final String MATCH_TEAMS = "content-match-head-team-top";
+  public static final String MATCHES = "league-stage-matches";
+  public static final String MATCH_TIME = "tztime";
+  public static final String MATCH_TIME_2 = "league-match-time";
+  public static final String PLAYDAY = "widget-ticker";
+  public static final String PLAYERS = "content-portrait-grid";
+  public static final String STAGE = "league-team-stage";
+  public static final String SUBTITLE = "txt-subtitle";
+  public static final String TEAM_HEAD = "content-portrait-head";
+  public static final String TIME = "itime ";
+  public static final String TIME_ATTRIBUTE = "data-time";
+
   private final String html;
 
   HTML() {

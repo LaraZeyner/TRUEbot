@@ -13,8 +13,6 @@ import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.player.model.PlayerRank;
-import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.riot.performance.Lane;
 import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.AccessLevel;
@@ -110,11 +108,9 @@ public abstract class TeamLineupBase {
       }
     }
     updateLineups();
+    updateMMR();
   }
 
   protected abstract void updateLineups();
-
-  public Rank getAverageRank() {
-    return PlayerRank.fromMMR(participator.getLineupMMR());
-  }
+  protected abstract void updateMMR();
 }

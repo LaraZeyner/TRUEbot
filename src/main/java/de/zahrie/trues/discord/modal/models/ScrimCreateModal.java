@@ -23,11 +23,11 @@ public class ScrimCreateModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create("Scrim erstellen")
-        .single("1", "Team auswählen:", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
-        .single("2", "gegnerisches Team:", "TeamID oder voller Name (sofern bekannt)", 100)
-        .single("3", "Matchzeit:", "Spielstartzeitpunkt", 30)
-        .multi("4", "euer op.gg:", "Multi-Op.gg eures Teams", 1000)
-        .multi("5", "gegn. op.gg:", "Multi-Op.gg eures Gegners", 1000).get();
+        .required("1", "Team auswählen:", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
+        .required("2", "gegnerisches Team:", "TeamID oder voller Name (sofern bekannt)", 100)
+        .required("3", "Matchzeit:", "Spielstartzeitpunkt", 30)
+        .requiredMulti("4", "euer op.gg:", "Multi-Op.gg eures Teams", 1000)
+        .requiredMulti("5", "gegn. op.gg:", "Multi-Op.gg eures Gegners", 1000).get();
   }
 
   @Override

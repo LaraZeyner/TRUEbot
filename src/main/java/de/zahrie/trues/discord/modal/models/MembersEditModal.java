@@ -22,9 +22,9 @@ public class MembersEditModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create(Util.avoidNull(target.getNickname(), "null").keep(18) + " hinzufügen (nicht Spieler)")
-        .single("1", "Rolle in der Orga", List.of(TeamRole.TRYOUT, TeamRole.MAIN))
-        .multi("2", "Nicht Spieler", Arrays.stream(TeamPosition.values())
-            .filter(position -> position.ordinal() >= TeamPosition.TEAM_COACH.ordinal()).toList()).get();
+        .required("1", "Rolle in der Orga", List.of(TeamRole.TRYOUT, TeamRole.MAIN))
+        .requiredMulti("2", "Nicht Spieler", Arrays.stream(TeamPosition.values())
+            .filter(position -> position.ordinal() >= TeamPosition.COACH.ordinal()).toList()).get();
   }
 
   @Override

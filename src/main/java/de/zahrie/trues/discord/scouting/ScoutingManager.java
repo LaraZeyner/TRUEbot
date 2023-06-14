@@ -31,7 +31,7 @@ public class ScoutingManager {
     scoutings.values().stream().filter(scouting -> scouting.thread() != null).filter(scouting -> scouting.thread().equals(threadChannel)).findFirst().ifPresent(Scouting::update);
   }
 
-  public static void addForTeam(OrgaTeam orgaTeam, Participator participator, Match match) {
+  public static void addForTeam(OrgaTeam orgaTeam, @NonNull Participator participator, Match match) {
     Scouting scouting = forTeam(orgaTeam);
     if (scouting == null || !scouting.match().equals(match)) {
       scouting = new Scouting(orgaTeam, participator, match);
@@ -41,16 +41,16 @@ public class ScoutingManager {
     scouting.update();
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type) {
+  public static void custom(Team team, IReplyCallback event, ScoutingType type) {
     custom(team, event, type, null, 365, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days) {
+  public static void custom(Team team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days) {
     custom(team, event, type, gameType, days, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, Scouting.ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
-    new Scouting(null, new Participator(null, false, team), null, null).sendCustom(event, type, gameType, days, page);
+  public static void custom(Team team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
+    new CustomScouting(team).sendCustom(event, type, gameType, days, page);
   }
 
   public static void handlePlayerHistory(IReplyCallback event, @NonNull Player player, @Nullable Champion champion, @NonNull ScoutingGameType gameType, @Nullable Lane lane) {

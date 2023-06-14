@@ -47,6 +47,11 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   private short wins = 0; // wins
   private Long discordEventId; // discord_event
   private Long messageId; // discord_message
+  private Integer mmr; // lineup_mmr
+
+  public Integer getMmr() {
+    return mmr == null ? Util.avoidNull(getTeam(), 0, Team::getLastMMR) : mmr;
+  }
 
   private Team team;
 
@@ -58,14 +63,9 @@ public class Participator implements Entity<Participator>, Comparable<Participat
 
   private Match match;
 
-  @NonNull
   public Match getMatch() {
     if (match == null) this.match = new Query<>(Match.class).entity(matchId);
     return match;
-  }
-
-  public int getLineupMMR() {
-    return Util.avoidNull(getTeam(), 0, team -> Util.avoidNull(team.getLastMMR(), 0));
   }
 
   public Participator(Match match, boolean home) {
@@ -74,21 +74,21 @@ public class Participator implements Entity<Participator>, Comparable<Participat
 
   public Participator(Match match, boolean home, ParticipatorRoute route) {
     this.match = match;
-    this.matchId = match.getId();
+    this.matchId = match == null ? 0 : match.getId();
     this.home = home;
     this.route = route;
   }
 
   public Participator(Match match, boolean home, @NonNull Team team) {
     this.match = match;
-    this.matchId = match.getId();
+    this.matchId = match == null ? 0 : match.getId();
     this.home = home;
     this.route = null;
     this.team = team;
     this.teamId = team.getId();
   }
 
-  public Participator(int id, int matchId, boolean home, Integer teamId, short wins, ParticipatorRoute route, Long discordEventId, Long messageId) {
+  private Participator(int id, int matchId, boolean home, Integer teamId, short wins, ParticipatorRoute route, Long discordEventId, Long messageId, Integer mmr) {
     this.id = id;
     this.matchId = matchId;
     this.home = home;
@@ -97,6 +97,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     this.route = route;
     this.discordEventId = discordEventId;
     this.messageId = messageId;
+    this.mmr = mmr;
   }
 
   public static Participator get(List<Object> objects) {
@@ -108,7 +109,8 @@ public class Participator implements Entity<Participator>, Comparable<Participat
         objects.get(7).shortValue(),
         new ParticipatorRoute(new Query<>(League.class).entity(objects.get(3)), new SQLEnum<>(ParticipatorRoute.RouteType.class).of(objects.get(4)), objects.get(5).shortValue()),
         (Long) objects.get(8),
-        (Long) objects.get(9)
+        (Long) objects.get(9),
+        (Integer) objects.get(10)
     );
   }
 
@@ -142,7 +144,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     final Short routeValue = route == null ? null : route.getValue();
     return new Query<>(Participator.class).key("coverage", matchId).key("first", home)
         .col("route_group", league).col("route_type", routeType).col("route_value", routeValue)
-        .col("team", teamId).col("wins", wins).col("discord_event", discordEventId).col("discord_message", messageId)
+        .col("team", teamId).col("wins", wins).col("discord_event", discordEventId).col("discord_message", messageId).col("lineup_mmr", mmr)
         .insert(this);
   }
 
@@ -171,6 +173,13 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     if (this.wins != wins) {
       this.wins = (short) wins;
       new Query<>(Participator.class).col("wins", wins).update(id);
+    }
+  }
+
+  public void setMmr(Integer mmr) {
+    if (!Objects.equals(this.mmr, mmr)) {
+      this.mmr = mmr;
+      new Query<>(Participator.class).col("lineup_mmr", wins).update(id);
     }
   }
 

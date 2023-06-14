@@ -73,13 +73,8 @@ public record ApplicationHandler(DiscordUser user) {
   public void updateApplicationStatus() {
     final RoleGranter roleGranter = new RoleGranter(user);
     final boolean isActive = !user.getApplications().active().isEmpty();
-    if (user.getAcceptedBy() == null) {
-      roleGranter.remove(DiscordGroup.TRYOUT);
-      if (isActive) roleGranter.add(DiscordGroup.APPLICANT);
-    } else {
-      roleGranter.remove(DiscordGroup.APPLICANT);
-      if (isActive) roleGranter.add(DiscordGroup.TRYOUT);
-    }
+    if (user.getAcceptedBy() == null) roleGranter.remove(DiscordGroup.TRYOUT);
+    else if (isActive) roleGranter.add(DiscordGroup.TRYOUT);
   }
 
   /**

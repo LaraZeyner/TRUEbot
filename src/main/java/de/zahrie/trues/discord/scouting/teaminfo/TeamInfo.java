@@ -27,7 +27,7 @@ import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
-import de.zahrie.trues.api.coverage.participator.TeamLineupBase;
+import de.zahrie.trues.api.coverage.participator.TeamLineup;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
@@ -232,7 +232,7 @@ public class TeamInfo {
 
   private List<MessageEmbed.Field> determineMatchLineupFields(Match match, Team team) {
     final Participator participator = match.getParticipator(team);
-    final TeamLineupBase lineup = participator.getTeamLineup();
+    final TeamLineup lineup = participator.getTeamLineup();
     final List<Player> players = lineup.getFixedLineups().stream().map(Lineup::getPlayer).toList();
     return List.of(
         new MessageEmbed.Field(team.getFullName(), "Team", false),

@@ -13,7 +13,7 @@ public class TeamRemoveModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create(target.getNickname() + " aus Team entfernen")
-        .single("1", "Team auswählen", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
+        .required("1", "Team auswählen", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
         .get();
   }
 

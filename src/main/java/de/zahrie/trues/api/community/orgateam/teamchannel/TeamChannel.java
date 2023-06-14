@@ -8,9 +8,9 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
-import de.zahrie.trues.api.discord.channel.DiscordChannel;
-import de.zahrie.trues.api.discord.channel.DiscordChannelType;
+import de.zahrie.trues.api.discord.channel.AbstractDiscordChannel;
 import de.zahrie.trues.api.discord.channel.ChannelType;
+import de.zahrie.trues.api.discord.channel.DiscordChannelType;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,14 +19,14 @@ import net.dv8tion.jda.api.entities.Role;
 @Getter
 @Setter
 @Table(value = "discord_channel", department = "team")
-public class TeamChannel extends DiscordChannel implements Entity<TeamChannel> {
+public class TeamChannel extends AbstractDiscordChannel implements Entity<TeamChannel> {
   @Serial
   private static final long serialVersionUID = -1851145520721821488L;
 
   private final OrgaTeam orgaTeam; // orga_team
   private final TeamChannelType teamChannelType; // teamchannel_type
 
-  public TeamChannel(long discordId, String name, ChannelType permissionType, net.dv8tion.jda.api.entities.channel.ChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
+  public TeamChannel(long discordId, String name, ChannelType permissionType, DiscordChannelType channelType, OrgaTeam orgaTeam, TeamChannelType teamChannelType) {
     super(discordId, name, permissionType, channelType);
     this.orgaTeam = orgaTeam;
     this.teamChannelType = teamChannelType;

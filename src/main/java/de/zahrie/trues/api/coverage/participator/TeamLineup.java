@@ -7,17 +7,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
-import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.database.query.JoinQuery;
-import de.zahrie.trues.api.scouting.PlayerAnalyzer;
-import de.zahrie.trues.api.scouting.TeamAnalyzer;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.coverage.player.model.Rank;
+import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.riot.performance.Lane;
+import de.zahrie.trues.api.scouting.PlayerAnalyzer;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
+import de.zahrie.trues.api.scouting.TeamAnalyzer;
+import de.zahrie.trues.util.Util;
 import lombok.Getter;
 
 @Getter
@@ -39,6 +41,15 @@ public class TeamLineup extends TeamLineupBase {
     this.storedLineups = new Query<>(Lineup.class).where("coverage_team", participator).entityList();
     this.games = null;
     this.lineup = null;
+  }
+
+  public void updateMMR() {
+    final int mmr = (int) storedLineups.stream().mapToInt(l -> l.getPlayer().getRanks().getLastRelevant().getRank().getMMR()).average().orElse(-1);
+    participator.setMmr(mmr == -1 ? null : mmr);
+  }
+
+  public Rank getAverageRank() {
+    return Rank.fromMMR(participator.getMmr() == -1 ? Util.avoidNull(participator.getTeam(), 0, team -> Util.avoidNull(team.getLastMMR(), 0)) : participator.getMmr());
   }
 
   public List<Lineup> getLineup() {

@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.discord.channel;
 
+import java.util.List;
+
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
@@ -10,6 +12,7 @@ import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.entities.channel.attribute.IPermissionContainer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface ADiscordChannel {
@@ -27,7 +30,10 @@ public interface ADiscordChannel {
 
   default void updatePermissions() {
     final IPermissionContainer channel = getChannel();
-    for (ChannelType.APermissionOverride permission : getPermissionType().getPermissions()) {
+    final List<ChannelPermissionType.APermissionOverride> permissions = getPermissionType().get(getChannelType()).getPermissions();
+    if (permissions == null) return;
+
+    for (ChannelPermissionType.APermissionOverride permission : permissions) {
       final IPermissionHolder permissionHolder = determineHolder(channel, permission.permissionHolder());
       if (permissionHolder == null) continue;
 
@@ -35,11 +41,11 @@ public interface ADiscordChannel {
     }
   }
 
-  default void updateForGroup(DiscordGroup group) {
+  default void updateForGroup(@NotNull DiscordGroup group) {
     final IPermissionHolder holder = group.equals(DiscordGroup.TEAM_ROLE_PLACEHOLDER) ?
         detemineRoleOfChannel((ICategorizableChannel) getChannel()) : determineHolder(getChannel(), group.getRole());
-    final ChannelType.APermissionOverride permission = getPermissionType().getTeamPermission();
-    if (holder == null) return;
+    final ChannelPermissionType.APermissionOverride permission = getPermissionType().get(getChannelType()).getTeamPermission();
+    if (holder == null || permission == null) return;
 
     getChannel().getManager().putPermissionOverride(holder, permission.getAllowed(), permission.getDenied()).queue();
   }
@@ -51,7 +57,7 @@ public interface ADiscordChannel {
   }
 
   @Nullable
-  private static Role detemineRoleOfChannel(ICategorizableChannel categorizableChannel) {
+  private static Role detemineRoleOfChannel(@NotNull ICategorizableChannel categorizableChannel) {
     assert categorizableChannel.getParentCategory() != null;
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannel(categorizableChannel.getParentCategory());
     if (teamChannel == null) return null;

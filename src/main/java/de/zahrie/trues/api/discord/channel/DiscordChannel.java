@@ -1,53 +1,46 @@
 package de.zahrie.trues.api.discord.channel;
 
-import de.zahrie.trues.api.database.connector.Database;
+import java.io.Serial;
+import java.util.List;
+
 import de.zahrie.trues.api.database.connector.Table;
-import de.zahrie.trues.api.database.query.Id;
+import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
-import de.zahrie.trues.api.discord.group.DiscordGroup;
-import lombok.AllArgsConstructor;
+import de.zahrie.trues.api.database.query.SQLEnum;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.java.Log;
-import net.dv8tion.jda.api.entities.Role;
 
-@AllArgsConstructor
 @Getter
-@Table("discord_channel")
+@Setter
+@Table(value = "discord_channel", department = "other")
 @Log
-public abstract class DiscordChannel implements ADiscordChannel, Id {
-  protected int id; // discord_channel_id
-  protected final long discordId; // discord_id
-  protected final DiscordChannelType channelType; // channel_type
-  protected String name; // channel_name
-  protected ChannelType permissionType; // permission_type
+public class DiscordChannel extends AbstractDiscordChannel implements Entity<DiscordChannel> {
+  @Serial
+  private static final long serialVersionUID = -495599946883173951L;
 
-  public DiscordChannel(long discordId, String name, ChannelType permissionType, net.dv8tion.jda.api.entities.channel.ChannelType channelType) {
-    this.discordId = discordId;
-    this.name = name;
-    this.permissionType = permissionType;
-    this.channelType = DiscordChannelType.valueOf(channelType.name());
+  public DiscordChannel(long discordId, String name, ChannelType permissionType, DiscordChannelType channelType) {
+    super(discordId, name, permissionType, channelType);
+  }
+
+  private DiscordChannel(int id, long discordId, DiscordChannelType channelType, String name, ChannelType permissionType) {
+    super(id, discordId, channelType, name, permissionType);
+  }
+
+  public static DiscordChannel get(List<Object> objects) {
+    return new DiscordChannel(
+        (int) objects.get(0),
+        (long) objects.get(2),
+        new SQLEnum<>(DiscordChannelType.class).of(objects.get(3)),
+        (String) objects.get(4),
+        new SQLEnum<>(ChannelType.class).of(objects.get(5))
+    );
   }
 
   @Override
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-    new Query<>(DiscordChannel.class).col("channel_name", name).update(id);
-    Database.connection().commit();
-  }
-
-  public void setPermissionType(ChannelType permissionType) {
-    this.permissionType = permissionType;
-    new Query<>(DiscordChannel.class).col("permission_type", permissionType).update(id);
-  }
-
-  public boolean updatePermission(Role role) {
-    final DiscordGroup group = DiscordGroup.of(role);
-    if (group == null) return false;
-    updateForGroup(group);
-    return true;
+  public DiscordChannel create() {
+    return new Query<>(DiscordChannel.class).key("discord_id", discordId)
+        .col("channel_type", channelType).col("channel_name", name).col("permission_type", permissionType)
+        .insert(this);
   }
 }

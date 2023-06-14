@@ -1,81 +1,82 @@
 package de.zahrie.trues.api.discord.channel;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-
+import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.database.connector.Listing;
-import de.zahrie.trues.api.datatypes.collections.SortedList;
-import de.zahrie.trues.api.discord.group.DiscordGroup;
-import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.IPermissionHolder;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 @Getter
 @Listing(Listing.ListingType.LOWER)
 @ExtensionMethod(StringUtils.class)
 public enum ChannelType {
-  PUBLIC(1110508527308505158L),
-  SOCIALS(1110511082184921119L),
-  EVENTS(1110512000175439972L),
-  LEADERBOARD(1110514204429013022L),
-  ORGA_INTERN(1110519317302349834L),
-  ORGA_INTERN_VOICE(1110520608757919765L),
-  STAFF_INTERN(1110520957614948433L),
-  CONTENT_INTERN(1110522667112615946L),
-  CONTENT_INTERN_VOICE(1110522667112615946L),
-  TEAM_CATEGORY(924429703002079272L),
-  TEAM_CHAT(1110525496464248904L),
-  TEAM_VOICE(1110523880596062261L);
+  PUBLIC(ChannelPermissionType.PUBLIC, null, null),
+  SOCIALS(ChannelPermissionType.SOCIALS, null, null),
+  EVENTS(ChannelPermissionType.EVENTS, null, null),
+  LEADERBOARD(ChannelPermissionType.LEADERBOARD, null, null),
+  ORGA_INTERN(ChannelPermissionType.ORGA_INTERN, null, ChannelPermissionType.ORGA_INTERN_VOICE),
+  STAFF_INTERN(ChannelPermissionType.STAFF_INTERN, null, null), // ???
+  CONTENT_INTERN(ChannelPermissionType.CONTENT_INTERN, null, ChannelPermissionType.CONTENT_INTERN_VOICE),
+  SUPPORT_TICKET(ChannelPermissionType.SUPPORT_TICKET, null, null),
+  TEAM(ChannelPermissionType.TEAM_CATEGORY, ChannelPermissionType.TEAM_CHAT, ChannelPermissionType.TEAM_VOICE);
 
-  private final long channelId;
+  private final ChannelPermissionType category;
+  private final ChannelPermissionType chat;
+  private final ChannelPermissionType voice;
 
-  @NonNull
-  private List<Long> getViewableRoles() {
-    final GuildChannel channel = Nunu.DiscordChannel.getChannel(channelId);
-    if (channel instanceof AudioChannel) return List.of();
-    if (channel instanceof StandardGuildMessageChannel messageChannel) return messageChannel.getTopic() == null ? List.of() :
-        Arrays.stream(messageChannel.getTopic().before("//").strip().split(",")).map(Long::parseLong).toList();
-    throw new IllegalArgumentException("Hier sollte Schluss sein!");
+  public ChannelPermissionType getCategory() {
+    return category;
   }
 
-  public List<APermissionOverride> getPermissions() {
-    return Nunu.DiscordChannel.getChannel(channelId).getPermissionContainer().getPermissionOverrides().stream().map(permissionOverride -> new APermissionOverride(permissionOverride.getPermissionHolder(), permissionOverride.getAllowed(), permissionOverride.getDenied(), getViewableRoles())).toList();
+  public ChannelPermissionType getChat() {
+    return chat == null ? category : chat;
   }
 
-  public APermissionOverride getTeamPermission() {
-    return getPermissions().stream().filter(permission -> permission.permissionHolder() instanceof Role role
-        && OrgaTeamFactory.isRoleOfTeam(role)).findFirst().orElse(null);
+  public ChannelPermissionType getVoice() {
+    return voice == null ? category : voice;
   }
 
-  public record APermissionOverride(IPermissionHolder permissionHolder, List<Permission> allowed, List<Permission> denied, List<Long> viewable) {
-    public APermissionOverride(IPermissionHolder permissionHolder, EnumSet<Permission> allowed, EnumSet<Permission> denied, List<Long> viewable) {
-      this(permissionHolder, new SortedList<>(allowed), new SortedList<>(denied), viewable);
+  public ChannelPermissionType get(@NotNull DiscordChannelType channelType) {
+    return switch (channelType) {
+      case CATEGORY -> getCategory();
+      case TEXT, NEWS, FORUM -> getChat();
+      case VOICE, STAGE -> getVoice();
+      default -> ChannelPermissionType.NO_CHANGES;
+    };
+  }
+
+  /**
+   * Channel ist noch nicht in der Datenbank
+   */
+  public static ChannelType fromChannel(GuildChannel initialChannel) {
+    if (!(initialChannel instanceof ICategorizableChannel channel)) return PUBLIC;
+
+    final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(channel);
+    if (team != null) {
+      final TeamChannel teamChannel = team.getChannels().get(TeamChannelType.PRACTICE);
+      return initialChannel instanceof AudioChannel && teamChannel != null && teamChannel.getChannel().getIdLong() != initialChannel.getIdLong() ? ORGA_INTERN : TEAM;
     }
 
-    public List<Permission> getAllowed() {
-      final List<Permission> allowed = new SortedList<>(allowed());
-      if (viewable.isEmpty()) allowed.remove(Permission.VIEW_CHANNEL);
-      else if (viewable.contains(permissionHolder.getIdLong())) allowed.add(Permission.VIEW_CHANNEL);
-      return allowed;
-    }
+    final Category category = channel.getParentCategory();
+    if (category == null) return PUBLIC;
 
-    public List<Permission> getDenied() {
-      final List<Permission> denied = new SortedList<>(denied());
-      if (viewable.isEmpty()) denied.remove(Permission.VIEW_CHANNEL);
-      else if (permissionHolder.getIdLong() == DiscordGroup.EVERYONE.getDiscordId()) denied.add(Permission.VIEW_CHANNEL);
-      return denied;
-    }
+    return switch (category.getName()) {
+      case "Social Media" -> SOCIALS;
+      case "Events" -> EVENTS;
+      case "Orga Intern" -> ORGA_INTERN;
+      case "Content" -> CONTENT_INTERN;
+      case "FAQ" -> SUPPORT_TICKET;
+      default -> PUBLIC;
+    };
   }
 }

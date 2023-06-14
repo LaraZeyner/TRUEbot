@@ -108,15 +108,15 @@ public class TeamAnalyzer extends AnalyzeManager {
   public List<ChampionData> handleChampions() {
     final List<Object[]> presence = selection().get("champion", Champion.class).get("count(selection_id)", Integer.class).groupBy("champion").descending("count(selection_id)").list();
     final List<Object[]> stats = performance().get("champion", Champion.class)
-        .get("count(performance_id)", Integer.class).get("sum(if(_teamperf.win, 1, 0))", Integer.class)
-        .get("sum(performance.kills)", Integer.class).get("sum(performance.deaths)", Integer.class)
-        .get("sum(performance.assists)", Integer.class)
-        .groupBy("champion").descending("count(performance_id)").list();
+        .get("count(_performance_id)", Integer.class).get("sum(if(_teamperf.win, 1, 0))", Integer.class)
+        .get("sum(_performance.kills)", Integer.class).get("sum(_performance.deaths)", Integer.class)
+        .get("sum(_performance.assists)", Integer.class)
+        .groupBy("champion").descending("count(_performance_id)").list();
 
     final Map<Champion, ChampionStats> championStats = stats.stream().collect(Collectors.toMap(stat -> (Champion) stat[0],
         stat -> new ChampionStats(new Standing((int) stat[2], (int) stat[1] - (int) stat[2]),
             new KDA((short) stat[3], (short) stat[4], (short) stat[5])), (a, b) -> b));
-    final Object[] games = gameType.teamQuery(team, days).performance().get("count(distinct teamPerformance.game)", Integer.class).single();
+    final Object[] games = gameType.teamQuery(team, days).performance().get("count(distinct _teamPerformance.game)", Integer.class).single();
     final int amountOfGames = (int) games[0];
     return presence.stream().map(objs -> new ChampionData((Champion) objs[0], (int) objs[1] * 1. / amountOfGames, championStats.get((Champion) objs[0]))).toList();
 

@@ -6,7 +6,6 @@ import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.Zeri;
 import de.zahrie.trues.util.Util;
-import de.zahrie.trues.util.io.log.Console;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
@@ -74,10 +73,7 @@ public final class PrimePlayerFactory {
   @Nullable
   private static Player performNoPuuid(String summonerName) {
     final Player player = determineExistingPlayerFromName(summonerName);
-    if (player == null) {
-      new Console("Der Spieler existiert nicht").info();
-      return null;
-    }
+    if (player == null) return null;
 
     new PlayerHandler(null, player).updateName();
     return determineExistingPlayerFromName(summonerName);

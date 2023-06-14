@@ -16,9 +16,13 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.api.discord.channel.DiscordChannel;
+import de.zahrie.trues.api.discord.ticket.Ticket;
+import de.zahrie.trues.api.discord.ticket.TicketMessage;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -64,8 +68,15 @@ public class MessageEvent extends ListenerAdapter {
 
     if (event.getMember() == null) return;
     final DiscordUser user = DiscordUserFactory.getDiscordUser(Util.nonNull(event.getMember()));
-    user.addMessage(event.getMessage().getContentDisplay());
+    final String message = event.getMessage().getContentDisplay();
+    user.addMessage(message);
 
+    final var ticket = new Query<>(Ticket.class).join(new JoinQuery<>(Ticket.class, DiscordChannel.class))
+        .where("_discordchannel.discord_id", event.getChannel().getId()).entity();
+    if (ticket != null) {
+      if (ticket.getCreator().equals(user) && message.equals("end")) event.getChannel().delete().queue();
+      else new TicketMessage(ticket, LocalDateTime.now(), user, message).create();
+    }
 
     final TeamChannel teamChannel = TeamChannelRepository.getTeamChannelFromChannelId(event.getChannel().getIdLong());
     if (teamChannel != null) handleSchedulingEntry(event.getMessage());

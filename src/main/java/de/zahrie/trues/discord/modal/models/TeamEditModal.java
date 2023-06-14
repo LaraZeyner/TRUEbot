@@ -22,11 +22,11 @@ public class TeamEditModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create(Util.avoidNull(target.getNickname(), "null").keep(25) + " für Team bearbeiten")
-        .single("1", "Team auswählen", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
-        .single("2", "Rolle im Team", Arrays.stream(TeamRole.values()).filter(role -> role.getName() != null).toList())
-        .single("3", "Position im Team", Arrays.stream(TeamPosition.values())
+        .required("1", "Team auswählen", new Query<>(OrgaTeam.class).get("team_abbr_created", String.class), 10)
+        .required("2", "Rolle im Team", Arrays.stream(TeamRole.values()).filter(role -> role.getName() != null).toList())
+        .required("3", "Position im Team", Arrays.stream(TeamPosition.values())
             .filter(position -> position.ordinal() <= TeamPosition.TEAM_COACH.ordinal()).toList())
-        .single("4", "Als Capitän?", "ja, nein", 4).get();
+        .required("4", "Als Capitän?", "ja, nein", 4).get();
   }
 
   @Override

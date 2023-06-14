@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.participator.TeamLineup;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
@@ -20,17 +19,17 @@ import de.zahrie.trues.api.scouting.TeamAnalyzer;
 import de.zahrie.trues.util.Util;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public record ScoutingEmbedHandler(Participator participator, ScoutingGameType gameType, int days, int page, TeamLineup teamLineup, Map<Player, PlayerAnalyzer> analyzerMap) {
+public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int days, int page, List<Lineup> lineups, Map<Player, PlayerAnalyzer> analyzerMap) {
 
-  public ScoutingEmbedHandler(Participator participator, ScoutingGameType gameType, int days, int page) {
-    this(participator, gameType, days, page, participator.getTeamLineup(gameType, days), new HashMap<>());
+  public ScoutingEmbedHandler(Team team, List<Lineup> lineups, ScoutingGameType gameType, int days, int page) {
+    this(team, gameType, days, page, lineups, new HashMap<>());
   }
 
-  public List<MessageEmbed.Field> get(Scouting.ScoutingType type) {
+  public List<MessageEmbed.Field> get(ScoutingType type, Participator participator) {
     return switch (type) {
-      case CHAMPIONS -> getChampions(participator, gameType, days);
-      case HISTORY -> getHistory(participator, gameType, days, page);
-      case LINEUP -> getLineup();
+      case CHAMPIONS -> getChampions();
+      case HISTORY -> getHistory();
+      case LINEUP -> getLineup(participator);
       case MATCHUPS -> getMatchups();
       case OVERVIEW -> getOverview();
       case PLAYER_HISTORY -> List.of(); //TODO (Abgie) 17.05.2023:
@@ -40,7 +39,7 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
 
   public List<MessageEmbed.Field> getOverview() {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : teamLineup.getLineup()) {
+    for (Lineup lineup : lineups) {
       if (lineup.getPlayer() == null) fields.add(new MessageEmbed.Field("kein Spieler gefunden", "no Data", false));
       else {
         final PlayerAnalyzer playerAnalyzer = analyzerMap.computeIfAbsent(lineup.getPlayer(), player -> player.analyze(gameType, days));
@@ -52,7 +51,7 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
 
   public List<MessageEmbed.Field> getMatchups() {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : teamLineup.getLineup()) {
+    for (Lineup lineup : lineups) {
       if (lineup.getPlayer() == null) fields.add(new MessageEmbed.Field("kein Spieler gefunden", "no Data", false));
       else {
         final PlayerAnalyzer playerAnalyzer = analyzerMap.computeIfAbsent(lineup.getPlayer(), player -> player.analyze(gameType, days));
@@ -62,13 +61,11 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
     return fields;
   }
 
-  public List<MessageEmbed.Field> getHistory(Participator participator, ScoutingGameType gameType, int days, int page) {
-    final Team team = participator.getTeam();
+  public List<MessageEmbed.Field> getHistory() {
     return team.analyze(gameType, days).analyzeHistory(page);
   }
 
-  public List<MessageEmbed.Field> getChampions(Participator participator, ScoutingGameType gameType, int days) {
-    final Team team = participator.getTeam();
+  public List<MessageEmbed.Field> getChampions() {
     final TeamAnalyzer analyze = team.analyze(gameType, days);
     return new EmbedFieldBuilder<>(analyze.handleChampions())
         .num("Champion", championData -> championData.champion().getName())
@@ -78,7 +75,6 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
   }
 
   public List<MessageEmbed.Field> getSchedule() {
-    final Team team = participator.getTeam();
     final TeamAnalyzer analyze = team.analyze(gameType, days);
     return new EmbedFieldBuilder<>(analyze.getMatches())
         .add("Spielzeit", match -> TimeFormat.DISCORD.of(match.getStart()))
@@ -86,8 +82,9 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
         .add("Ergebnis", match -> match.getResult().toString()).build();
   }
 
-  public List<MessageEmbed.Field> getLineup() {
+  public List<MessageEmbed.Field> getLineup(Participator participator) {
     List<MessageEmbed.Field> fields = new ArrayList<>();
+    if (participator == null) participator = new Participator(null, true, team);
     final TeamLineup lineupCreator = participator.getTeamLineup(gameType, days);
     for (Lane lane : Lane.values()) {
       if (lane.equals(Lane.UNKNOWN)) continue;
@@ -99,25 +96,4 @@ public record ScoutingEmbedHandler(Participator participator, ScoutingGameType g
     }
     return fields;
   }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) return true;
-    if (obj == null || obj.getClass() != this.getClass()) return false;
-    var that = (ScoutingEmbedHandler) obj;
-    return Objects.equals(this.participator, that.participator) &&
-        Objects.equals(this.gameType, that.gameType) &&
-        this.days == that.days &&
-        this.page == that.page;
-  }
-
-  @Override
-  public String toString() {
-    return "ScoutingEmbedHandler[" +
-        "participator=" + participator + ", " +
-        "gameType=" + gameType + ", " +
-        "days=" + days + ", " +
-        "page=" + page + ']';
-  }
-
 }

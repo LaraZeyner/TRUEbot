@@ -165,21 +165,16 @@ public abstract class Replyer {
   }
 
   protected boolean sendModal(boolean someBool, int index) {
-    if (event == null) {
-      return false;
-    }
+    if (event == null) return false;
+
     final UseView view = getModalView();
-    if (view == null) {
-      return false;
-    }
+    if (view == null) return false;
+
     final String modalId = view.value()[index];
     final Modal modal = new InputHandler.Find(getInvoker(), getTarget(), event).getModal(modalId, someBool);
-    if (modal == null) {
-      return false;
-    }
-    if (!(event instanceof GenericCommandInteractionEvent)) {
-      return false;
-    }
+    if (modal == null) return false;
+    if (!(event instanceof GenericCommandInteractionEvent)) return false;
+
     ((GenericCommandInteractionEvent) event).replyModal(modal).queue();
     end = true;
     return true;
@@ -198,12 +193,13 @@ public abstract class Replyer {
     if (event == null) {
       reply("Internal Error");
 
-    } else if (event instanceof UserContextInteractionEvent) {
-      final Member invoker = ((UserContextInteractionEvent) event).getTargetMember();
-      if (invoker == null) {
-        reply("Du existierst nicht");
-      }
+    } else if (event instanceof UserContextInteractionEvent context) {
+      final Member invoker = context.getTargetMember();
+      if (invoker == null) reply("Du existierst nicht");
       return invoker;
+
+    } else if (event instanceof SlashCommandInteractionEvent) {
+      return getInvokingMember();
     }
     return null;
   }

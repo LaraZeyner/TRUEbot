@@ -95,7 +95,7 @@ public class LeagueLoader extends GamesportsLoader {
     }
 
     final List<LeaguePlayday> playdays = new ArrayList<>();
-    final List<HTML> findAllByClass = html.findAll("div", "widget-ticker");
+    final List<HTML> findAllByClass = html.findAll("div", HTML.PLAYDAY);
     for (int i = 0; i < findAllByClass.size(); i++) {
       final HTML playdayHTML = findAllByClass.get(i);
       final List<PRMMatch> primeMatches = playdayHTML.findAll("tr").stream()

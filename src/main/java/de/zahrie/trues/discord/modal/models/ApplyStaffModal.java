@@ -22,9 +22,9 @@ public class ApplyStaffModal extends ModalImpl {
   @Override
   public Modal getModal(boolean value) {
     return create("Staff-Bewerbung erstellen")
-        .multi("1", "Position in der Orga", Arrays.stream(TeamPosition.values())
+        .requiredMulti("1", "Position in der Orga", Arrays.stream(TeamPosition.values())
             .filter(position -> position.ordinal() >= TeamPosition.TEAM_COACH.ordinal()).toList())
-        .multi("2", "Beschreibung", "Erzähle uns etwas über dich...", 1000).get();
+        .requiredMulti("2", "Beschreibung", "Erzähle uns etwas über dich...", 1000).get();
   }
 
   @Override

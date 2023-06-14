@@ -23,6 +23,7 @@ public class Const {
   public static final long DEV_LOGGING_CHANNEL = 1110145279753212036L;
   public static final long TEAM_LOGGING_CHANNEL = 1087093094815633428L;
   public static final long ADMIN_CHANNEL = 1008997272467546112L;
+  public static final long ADMIN_INTERN = 1118121503419027536L;
   public static final boolean SHOW_SQL = false;
 
   public static boolean check() {

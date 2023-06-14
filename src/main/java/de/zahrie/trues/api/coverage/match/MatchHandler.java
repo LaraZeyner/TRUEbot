@@ -49,13 +49,13 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   private void updateMatchtime() {
-    final int epochSeconds = html.find("span", "tztime").getAttribute("data-time").intValue();
+    final int epochSeconds = html.find("span", HTML.MATCH_TIME).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
     final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
     match.setStart(dateTime);
   }
 
   private void updateResult() {
-    final String result = html.find("span", "league-match-result").text();
+    final String result = html.find("span", HTML.MATCH_RESULT).text();
     if (result != null && !result.isEmpty()) {
       match.updateResult(result);
     }
@@ -78,7 +78,7 @@ public class MatchHandler extends MatchModel implements Serializable {
       final List<HTML> cells = html.findAll("td");
       if (cells.isEmpty()) continue;
 
-      final int epochSeconds = html.find("span", "itime ").getAttribute("data-time").intValue();
+      final int epochSeconds = html.find("span", HTML.TIME).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
       final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
       final String userWithTeam = cells.get(1).text();
       final var action = MatchLogAction.valueOf(cells.get(2).text().upper());

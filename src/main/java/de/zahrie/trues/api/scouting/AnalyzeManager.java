@@ -39,9 +39,7 @@ public abstract class AnalyzeManager {
     int lookingFor = 0;
     final List<Object[]> list = playerLane.analyze().performance().get("lane", Lane.class).get("count(performance_id)", Integer.class).groupBy("lane").descending("count(`performance_id`)").list();
     for (Object[] o : list) {
-      if (o[0] == null) continue;
-      final Lane lane = (o[0].toString()).toEnum(Lane.class);
-      if (lane == null || lane.equals(Lane.UNKNOWN)) continue;
+      if (!(o[0] instanceof Lane lane) || lane.equals(Lane.UNKNOWN)) continue;
 
       final int amount = ((Long) o[1]).intValue();
       final PlayerLane pl = new PlayerLane(playerLane.player(), lane, playerLane.gameType(), playerLane.days());

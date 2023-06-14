@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 @Command(name = "lineup", descripion = "Lineup des Gegners angeben", perm = @Perm(PermissionRole.ORGA_MEMBER), options = {
     @Option(name = "opgg", description = "Op.gg-Link", required = false),
-    @Option(name = "top", description = "Op.gg-Link", required = false),
+    @Option(name = "top", description = "ID oder Summonername", required = false),
     @Option(name = "jungle", description = "ID oder Summonername", required = false),
     @Option(name = "middle", description = "ID oder Summonername", required = false),
     @Option(name = "bottom", description = "ID oder Summonername", required = false),
@@ -52,17 +52,14 @@ public class LineupCommand extends SlashCommand {
     if (mostRecentAMatch == null) return reply("Es wurde kein Match gefunden.");
 
     for (Participator participator : mostRecentAMatch.getParticipators()) {
-      if (participator.getTeam().equals(team)) continue;
+      if (team.equals(participator.getTeam())) continue;
       final boolean orderedLineup = determineOrderedLineup(participator);
-      if (!orderedLineup) {
-        return reply("Das Lineup ist nicht vollständig.");
-      }
+      if (!orderedLineup) return reply("Das Lineup ist nicht vollständig.");
+
       final Scouting scouting = ScoutingManager.forTeam(locatedTeam);
       if (scouting != null) scouting.update();
       return sendMessage();
     }
-
-    // TODO (Abgie) 27.03.2023: update Scout-pages
     return reply("Es wurde kein Team gefunden.");
   }
 

@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.discord.builder.modal;
 
+import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.util.Replyer;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 @EqualsAndHashCode(callSuper = true)
 public abstract class ModalBase extends Replyer {
   protected Modal.Builder builder;
+  protected DiscordUser target;
 
   public ModalBase() {
     super(ModalInteractionEvent.class);
@@ -16,6 +18,10 @@ public abstract class ModalBase extends Replyer {
       return;
     }
     this.name = annotation.value();
+  }
+
+  public void setTarget(DiscordUser target) {
+    this.target = target;
   }
 
   public abstract Modal getModal(boolean value);

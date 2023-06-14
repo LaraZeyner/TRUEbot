@@ -14,15 +14,18 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 @Getter
 @Listing(Listing.ListingType.LOWER)
 public enum TeamChannelType {
-  CATEGORY(null, ChannelType.TEAM_CHAT),
-  CHAT("\uD83D\uDCAC︱team-chat", ChannelType.TEAM_CHAT),
-  INFO("\uD83D\uDCCB︱team-info", ChannelType.TEAM_CHAT),
-  PRACTICE("Practice & PRM", ChannelType.TEAM_VOICE),
-  SCOUTING("\uD83D\uDD0E︱scouting", ChannelType.TEAM_CHAT),
-  VOICE(null, ChannelType.ORGA_INTERN_VOICE);
+  CATEGORY(null),
+  CHAT("\uD83D\uDCAC︱team-chat"),
+  INFO("\uD83D\uDCCB︱team-info"),
+  PRACTICE("Practice & PRM"),
+  SCOUTING("\uD83D\uDD0E︱scouting"),
+  VOICE(null);
 
   private final String defaultName;
-  private final ChannelType permissionType;
+
+  public ChannelType getPermissionType() {
+    return equals(VOICE) ? ChannelType.ORGA_INTERN : ChannelType.TEAM;
+  }
 
   public static TeamChannelType fromChannel(GuildChannel channel) {
     return Arrays.stream(TeamChannelType.values()).filter(teamChannelType -> channel.getName().equals(teamChannelType.getDefaultName()))

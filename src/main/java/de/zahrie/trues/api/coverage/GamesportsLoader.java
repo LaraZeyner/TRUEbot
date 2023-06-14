@@ -5,6 +5,7 @@ import de.zahrie.trues.util.io.request.Request;
 import de.zahrie.trues.util.io.request.URLType;
 
 public class GamesportsLoader {
+
   protected final int id;
   protected final HTML html;
   protected final String url;
