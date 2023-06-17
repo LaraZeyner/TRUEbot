@@ -2,6 +2,7 @@ package de.zahrie.trues.api.scouting;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +27,7 @@ public abstract class AnalyzeManager {
   }
 
   public static void delete(Player player) {
-    laneExperience.keySet().removeIf(key -> key.player().equals(player));
+    new HashSet<>(laneExperience.keySet()).stream().filter(lane -> lane.player().equals(player)).forEach(lane -> laneExperience.remove(lane));
   }
 
   protected static int get(Lane lane, Player player, ScoutingGameType gameType, int days) {

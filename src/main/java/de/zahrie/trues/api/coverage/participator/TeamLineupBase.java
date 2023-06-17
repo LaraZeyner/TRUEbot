@@ -41,6 +41,9 @@ public abstract class TeamLineupBase {
       new DevInfo().error(exception);
       throw exception;
     }
+
+    final List<Lineup> fixedLineups = getFixedLineups();
+    if (fixedLineups == null) return null;
     return getFixedLineups().stream().filter(lineup -> lineup.getLane().equals(lane)).findFirst().orElse(null);
   }
 

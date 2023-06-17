@@ -8,6 +8,7 @@ import de.zahrie.trues.discord.command.models.BetCommand;
 import de.zahrie.trues.discord.command.models.BewerbenCommand;
 import de.zahrie.trues.discord.command.models.ChannelCreateCommand;
 import de.zahrie.trues.discord.command.models.ChannelEditCommand;
+import de.zahrie.trues.discord.command.models.EventCommand;
 import de.zahrie.trues.discord.command.models.FollowMeCommand;
 import de.zahrie.trues.discord.command.models.HelpCommand;
 import de.zahrie.trues.discord.command.models.LimitCommand;
@@ -34,6 +35,7 @@ public class CommandRegisterer implements Registerer<List<SlashCommand>> {
         new BewerbenCommand(),
         new ChannelCreateCommand(),
         new ChannelEditCommand(),
+        new EventCommand(),
         new FollowMeCommand(),
         new HelpCommand(),
         new LimitCommand(),

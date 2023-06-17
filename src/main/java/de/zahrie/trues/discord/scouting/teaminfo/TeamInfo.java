@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.Calendar;
-import de.zahrie.trues.api.calendar.EventCalendar;
+import de.zahrie.trues.api.calendar.event.SeasonEventCalendar;
 import de.zahrie.trues.api.calendar.scheduling.TeamTrainingScheduleHandler;
 import de.zahrie.trues.api.community.member.Membership;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
@@ -287,11 +287,11 @@ public class TeamInfo {
           .build().forEach(builder::addField);
     }
 
-    final List<EventCalendar> events = new Query<>(EventCalendar.class)
+    final List<SeasonEventCalendar> events = new Query<>(SeasonEventCalendar.class)
         .where(Condition.Comparer.GREATER_EQUAL, "calendar_end", LocalDateTime.now().plusDays(1)).entityList();
     if (!events.isEmpty()) {
       new EmbedFieldBuilder<>(events.subList(0, Math.min(10, events.size())))
-          .add("Zeitpunkt", eventCalendar -> eventCalendar.getRange().displayRange())
+          .add("Zeitpunkt", matchCalendar -> matchCalendar.getRange().displayRange())
           .add("Event", Calendar::getDetails)
           .build().forEach(builder::addField);
     }

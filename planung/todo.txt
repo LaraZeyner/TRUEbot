@@ -2,10 +2,6 @@ Bugs:
 Mögliche Bugs:
 TODOs:
  - UPDATE EMBEDS ON CHANGE
- - ON TRYOUT ADD: REMOVE LOCAL PERMISSION TO EDIT
- - Getter und Setter prüfen.
-Features deaktivieren:
- - Rollen vergeben
 Ideen:
  - Winrates auslesen
  - Champion Mastery

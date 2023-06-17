@@ -140,8 +140,9 @@ public abstract class Team implements ATeam, Id, Comparable<Team> {
     this.orgaTeam = orgaTeam;
   }
 
-  public void highlight() {
-    setHighlight(!this.highlight);
+  public boolean highlight() {
+    setHighlight(!highlight);
+    return highlight;
   }
 
   public String getFullName() {

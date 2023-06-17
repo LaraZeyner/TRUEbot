@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -456,6 +457,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
       else if (field instanceof LocalDateTime dateTime) data[i] = dateTime;
       else if (field instanceof Timestamp timestamp) data[i] = timestamp.toLocalDateTime();
       else if (field instanceof Date date) data[i] = date.toLocalDate();
+      else if (field instanceof Time time) data[i] = time.toLocalTime();
       else if (field instanceof String) data[i] = field;
       else if (field instanceof Number) data[i] = field;
       else if (field instanceof Boolean) data[i] = field;

@@ -20,7 +20,7 @@ public class SQLOrder extends AbstractSQLField {
 
   @Override
   public String toString() {
-    if (getColumnName().contains("`") || getColumnName().toLowerCase().contains("count(")) return getColumnName() + (descending ? " DESC" : "");
+    if (getColumnName().contains("`") || getColumnName().toLowerCase().contains("count(") || getColumnName().toLowerCase().contains("avg(")) return getColumnName() + (descending ? " DESC" : "");
     final String name = getColumnName().contains(".") ? "`" + getColumnName().before(".") + "`.`" + getColumnName().after(".") + "`" : "`" + getColumnName() + "`";
     return name + (descending ? " DESC" : "");
   }

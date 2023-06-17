@@ -36,11 +36,12 @@ public class TeamLineup extends TeamLineupBase {
   }
 
   public void updateLineups() {
-    if (participator.getMatch().getStatus().equals(EventStatus.PLAYED) && storedLineups != null) return;
-
-    this.storedLineups = new Query<>(Lineup.class).where("coverage_team", participator).entityList();
     this.games = null;
     this.lineup = null;
+    if (participator.getMatch() == null) this.storedLineups = new SortedList<>();
+    if (participator.getMatch() == null || (participator.getMatch().getStatus().equals(EventStatus.PLAYED) && storedLineups != null)) return;
+
+    this.storedLineups = new Query<>(Lineup.class).where("coverage_team", participator).entityList();
   }
 
   public void updateMMR() {
@@ -82,9 +83,10 @@ public class TeamLineup extends TeamLineupBase {
     if (storedLineup != null) return List.of(new LaneGames(storedLineup.getPlayer(), storedLineup.getPlayer().analyze(gameType, days).getLane(lane)));
 
     final Map<Player, Integer> lane1 = new TeamAnalyzer(participator).getLane(lane);
-    final List<Player> players = getStoredLineups().stream().filter(lineup1 -> lineup1.getLane() != Lane.UNKNOWN).map(Lineup::getPlayer).toList();
+    // final List<Player> players = getStoredLineups().stream().filter(lineup1 -> lineup1.getLane() != Lane.UNKNOWN).map(Lineup::getPlayer).toList();
     return lane1.entrySet().stream().map(entry -> new LaneGames(entry.getKey(), entry.getValue()))
-        .filter(laneGames -> !players.contains(laneGames.player())).toList();
+        //.filter(laneGames -> !players.contains(laneGames.player()))
+        .toList();
   }
 
   private List<Lineup> handleLineup() {

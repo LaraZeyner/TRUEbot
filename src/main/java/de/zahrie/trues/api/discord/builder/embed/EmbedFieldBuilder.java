@@ -16,10 +16,6 @@ public class EmbedFieldBuilder<T> {
   private final List<MessageEmbed.Field> fields;
   private final List<T> data;
 
-  public EmbedFieldBuilder() {
-    this(new ArrayList<>(), new ArrayList<>());
-  }
-
   public EmbedFieldBuilder(List<T> data) {
     this(new ArrayList<>(), data);
   }

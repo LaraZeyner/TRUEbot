@@ -24,6 +24,8 @@ public class Const {
   public static final long TEAM_LOGGING_CHANNEL = 1087093094815633428L;
   public static final long ADMIN_CHANNEL = 1008997272467546112L;
   public static final long ADMIN_INTERN = 1118121503419027536L;
+  public static final long EVENT_CHANNEL = 980157099780759622L;
+  public static final long TICKER_CHANNEL = 1072112297717284884L;
   public static final boolean SHOW_SQL = false;
 
   public static boolean check() {

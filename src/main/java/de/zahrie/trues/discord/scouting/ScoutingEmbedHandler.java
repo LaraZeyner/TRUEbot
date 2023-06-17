@@ -30,16 +30,22 @@ public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int day
       case CHAMPIONS -> getChampions();
       case HISTORY -> getHistory();
       case LINEUP -> getLineup(participator);
-      case MATCHUPS -> getMatchups();
-      case OVERVIEW -> getOverview();
-      case PLAYER_HISTORY -> List.of(); //TODO (Abgie) 17.05.2023:
+      case MATCHUPS -> getMatchups(participator);
+      case OVERVIEW -> getOverview(participator);
+      case PLAYER_HISTORY -> List.of();  // not handled here
       case SCHEDULE -> getSchedule();
     };
   }
 
-  public List<MessageEmbed.Field> getOverview() {
+  public List<MessageEmbed.Field> getOverview(Participator participator) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : lineups) {
+    List<Lineup> l = lineups;
+    if (participator == null) {
+      participator = new Participator(null, true, team);
+      final TeamLineup lineupCreator = participator.getTeamLineup(gameType, days);
+      l = lineupCreator.getLineup();
+    }
+    for (Lineup lineup : l) {
       if (lineup.getPlayer() == null) fields.add(new MessageEmbed.Field("kein Spieler gefunden", "no Data", false));
       else {
         final PlayerAnalyzer playerAnalyzer = analyzerMap.computeIfAbsent(lineup.getPlayer(), player -> player.analyze(gameType, days));
@@ -49,9 +55,12 @@ public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int day
     return fields;
   }
 
-  public List<MessageEmbed.Field> getMatchups() {
+  public List<MessageEmbed.Field> getMatchups(Participator participator) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
-    for (Lineup lineup : lineups) {
+
+    if (participator == null) participator = new Participator(null, true, team);
+    final TeamLineup lineupCreator = participator.getTeamLineup(gameType, days);
+    for (Lineup lineup : lineupCreator.getLineup()) {
       if (lineup.getPlayer() == null) fields.add(new MessageEmbed.Field("kein Spieler gefunden", "no Data", false));
       else {
         final PlayerAnalyzer playerAnalyzer = analyzerMap.computeIfAbsent(lineup.getPlayer(), player -> player.analyze(gameType, days));
@@ -67,7 +76,7 @@ public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int day
 
   public List<MessageEmbed.Field> getChampions() {
     final TeamAnalyzer analyze = team.analyze(gameType, days);
-    return new EmbedFieldBuilder<>(analyze.handleChampions())
+    return new EmbedFieldBuilder<>(analyze.handleChampions().stream().filter(championData -> championData.champion() != null).toList())
         .num("Champion", championData -> championData.champion().getName())
         .add("Picks", TeamAnalyzer.ChampionData::getPicksString)
         .add("KDA", TeamAnalyzer.ChampionData::getKDAString)

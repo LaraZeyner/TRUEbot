@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
@@ -111,6 +112,7 @@ public class TimeRange implements Comparable<TimeRange> {
   }
 
   public static List<TimeRange> combine(List<TimeRange> timeRanges) {
+    List<TimeRange> rangesNew = new SortedList<>();
     timeRanges.sort(TimeRange::compareTo);
     if (timeRanges.size() < 2) return timeRanges;
     TimeRange rangeOld = timeRanges.get(0);
@@ -118,12 +120,12 @@ public class TimeRange implements Comparable<TimeRange> {
       if (rangeOld.getEndTime().isAfterEqual(range.getStartTime())) {
         rangeOld = new TimeRange(rangeOld.getStartTime().min(range.getStartTime()), rangeOld.getEndTime().max(range.getEndTime()));
       } else {
-        timeRanges.add(rangeOld);
+        rangesNew.add(rangeOld);
         rangeOld = range;
       }
     }
-    timeRanges.add(rangeOld);
-    return timeRanges;
+    rangesNew.add(rangeOld);
+    return rangesNew;
   }
 
   public static List<TimeRange> intersect(List<TimeRange> ranges1, List<TimeRange> ranges2) {

@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.scouting;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
     return gameTypeString(new Query<>(Performance.class)
         .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
         .join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, Player.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
   }
 
@@ -64,6 +66,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
     final Query<Performance> performanceQuery = gameTypeString(new Query<>(Performance.class).distinct("_teamperf.game", Integer.class)
         .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
         .join(new JoinQuery<>(TeamPerf.class, Game.class))
+        .join(new JoinQuery<>(Performance.class, Player.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
     return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
@@ -73,8 +76,8 @@ public class PlayerAnalyzer extends AnalyzeManager {
     switch (gameType) {
       case PRM_ONLY -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CUSTOM);
       case PRM_CLASH -> query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
-      case TEAM_GAMES -> query.join(new JoinQuery<>(Performance.class, Player.class))
-          .join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` WHERE (_game.game_type <= 2 and player = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(player(), Util.avoidNull(player().getTeam(), 0)))));
+      case TEAM_GAMES ->
+          query.join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` WHERE (_game.game_type <= 2 and player = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(player(), Util.avoidNull(player().getTeam(), 0)))));
     }
     return query;
   }
@@ -102,7 +105,8 @@ public class PlayerAnalyzer extends AnalyzeManager {
   public List<MessageEmbed.Field> analyzeMatchups(Lane lane) {
     final List<MessageEmbed.Field> fields = new ArrayList<>();
     fields.add(getPlayerHeadField(lane));
-    final var data = new EmbedFieldBuilder<>(handleMatchups().stream().sorted().toList())
+    final var data = new EmbedFieldBuilder<>(handleMatchups().stream().filter(championData -> championData.champion() != null)
+        .sorted().toList())
         .add("Matchup", PlayerMatchupData::getChampionString)
         .add("Games", playerMatchupData -> String.valueOf(playerMatchupData.standing().getGames()))
         .add("Winrate", PlayerMatchupData::getWinrate);
@@ -118,16 +122,16 @@ public class PlayerAnalyzer extends AnalyzeManager {
         .get("concat(round(avg(_performance.creeps), 0), '')", String.class)
         .get("concat(round(avg(_performance.vision), 0), '')", String.class)
         .single();
-    String csOrVision = (String) (lane.equals(Lane.UTILITY) ? data[4] : data[3]);
+    final String csOrVision = (String) (lane.equals(Lane.UTILITY) ? data[4] : data[3]);
     return new MessageEmbed.Field(lane.getDisplayName() + ": " + player().getSummonerName() + "(" + getGames() + " Games - " +
         player().getRanks().getCurrent() + ")",
         "KDA: " + data[0] + " - Gold: " + data[1] + " - Damage: " + data[2] + " - CS/VS: " + csOrVision, false);
   }
 
   private List<PlayerMatchupData> handleMatchups() {
-    final List<Object[]> matchupList = performance().get("enemy_champion", Champion.class).get("count(performance_id)", Integer.class).get("avg(_teamperf.win)", Double.class).groupBy(new SQLGroup("champion").having("count(performance_id) > 4")).ascending("avg(_teamperf.win)").list();
-    return matchupList.stream().map(objs -> new PlayerMatchupData((Champion) objs[0],
-        new Standing((int) ((int) objs[1] * (double) objs[2]), (int) ((int) objs[1] * (1 - ((double) objs[2])))))).toList();
+    final List<Object[]> matchupList = performance().get("enemy_champion", Integer.class).get("count(performance_id)", Integer.class).get("avg(_teamperf.win)", Double.class).groupBy(new SQLGroup("champion").having("count(performance_id) > 4")).ascending("avg(_teamperf.win)").list();
+    return matchupList.stream().map(objs -> new PlayerMatchupData(new Query<>(Champion.class).entity(objs[0]),
+        new Standing((int) (((Long) objs[1]).intValue() * ((BigDecimal) objs[2]).doubleValue()), (int) (((Long) objs[1]).intValue() * (1 - (((BigDecimal) objs[2]).doubleValue())))))).toList();
   }
 
   private List<PlayerAnalyzerData> handlePicks() {

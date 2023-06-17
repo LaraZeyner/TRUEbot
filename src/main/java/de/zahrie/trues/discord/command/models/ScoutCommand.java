@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
         choices = {"Übersicht", "Lineup", "Games", "Champions", "Matchups", "Schedule", "Matchhistory"}))
 public class ScoutCommand extends SlashCommand {
   @Override
-  @UseView({ModalRegisterer.SCOUT_OVERVIEW, ModalRegisterer.SCOUT_LINEUP, ModalRegisterer.SCOUT_HISTORY, ModalRegisterer.SCOUT_CHAMPIONS, ModalRegisterer.SCOUT_MATCHUPS, ModalRegisterer.SCOUT_SCHEDULE, ModalRegisterer.SCOUT_PLAYER_HISTORY})
+  @UseView({ModalRegisterer.SCOUT_CHAMPIONS, ModalRegisterer.SCOUT_HISTORY, ModalRegisterer.SCOUT_LINEUP, ModalRegisterer.SCOUT_MATCHUPS, ModalRegisterer.SCOUT_OVERVIEW, ModalRegisterer.SCOUT_PLAYER_HISTORY, ModalRegisterer.SCOUT_SCHEDULE})
   public boolean execute(SlashCommandInteractionEvent event) {
     final String typeString = find("typ").string();
     final ScoutingType type = ScoutingType.fromKey(typeString);

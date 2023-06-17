@@ -2,6 +2,7 @@ package de.zahrie.trues.api.riot.performance;
 
 import java.io.Serial;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.connector.SQLUtils;
@@ -139,5 +140,17 @@ public class TeamPerf implements Entity<TeamPerf> {
     public Objectives(int turrets, int drakes, int inhibs, int heralds, int barons) {
       this((byte) turrets, (byte) drakes, (byte) inhibs, (byte) heralds, (byte) barons);
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final TeamPerf teamPerf)) return false;
+    return getGameId() == teamPerf.getGameId() && getSide() == teamPerf.getSide();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getGameId(), getSide());
   }
 }

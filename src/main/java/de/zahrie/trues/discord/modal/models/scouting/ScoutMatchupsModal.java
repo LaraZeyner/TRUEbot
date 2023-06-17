@@ -32,7 +32,7 @@ public class ScoutMatchupsModal extends ModalImpl {
 
     final ScoutingGameType gameType = getEnum(ScoutingGameType.class, "2");
     final Integer duration = getInt("3", 180);
-    ScoutingManager.custom(team2, event, ScoutingType.PLAYER_HISTORY, gameType, duration);
+    ScoutingManager.custom(team2, event, ScoutingType.MATCHUPS, gameType, duration);
     return true;
   }
 }

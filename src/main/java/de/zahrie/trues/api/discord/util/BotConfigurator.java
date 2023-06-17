@@ -22,7 +22,18 @@ public class BotConfigurator extends ListenerAdapter {
 
   private JDA configure() {
     final JDA discordAPI = builder.setActivity(ConfigLoader.getActivity())
-        .enableCache(CacheFlag.ACTIVITY, CacheFlag.EMOJI, CacheFlag.CLIENT_STATUS, CacheFlag.FORUM_TAGS, CacheFlag.VOICE_STATE, CacheFlag.STICKER, CacheFlag.MEMBER_OVERRIDES, CacheFlag.ROLE_TAGS, CacheFlag.FORUM_TAGS, CacheFlag.ONLINE_STATUS, CacheFlag.SCHEDULED_EVENTS)
+        .enableCache(
+            CacheFlag.ACTIVITY,
+            CacheFlag.CLIENT_STATUS,
+            CacheFlag.EMOJI,
+            CacheFlag.FORUM_TAGS,
+            CacheFlag.MEMBER_OVERRIDES,
+            CacheFlag.ONLINE_STATUS,
+            CacheFlag.ROLE_TAGS,
+            CacheFlag.SCHEDULED_EVENTS,
+            CacheFlag.STICKER,
+            CacheFlag.VOICE_STATE
+        )
         .setChunkingFilter(ChunkingFilter.ALL)
         .setMemberCachePolicy(MemberCachePolicy.ALL)
         .setStatus(ConfigLoader.getStatus())

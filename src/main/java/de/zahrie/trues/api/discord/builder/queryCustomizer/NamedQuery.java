@@ -179,7 +179,7 @@ public enum NamedQuery {
   private List<Object[]> getTeamsOfDivision(String start) {
     return new Query<>(LeagueTeam.class)
         .get("_team.team_name", String.class)
-        .get("CONCAT(_leagueteam.current_place, '. (', _leagueteam.current_wins, ':', _leagueteam.current_losses, ')')", String.class)
+        .get("CONCAT(_leagueteam.current_place, ': (', _leagueteam.current_wins, ':', _leagueteam.current_losses, ')')", String.class)
         .get("CONCAT(_team.total_wins, ' : ', _team.total_losses)", String.class)
         .join(new JoinQuery<>(LeagueTeam.class, League.class))
         .join(new JoinQuery<>(League.class, Stage.class))
@@ -204,7 +204,7 @@ public enum NamedQuery {
         .include(new Query<>(Match.class).where("_match.department", "intern")
             .and(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", lastInternSeason.getRange().getStartTime()))
         .convertList(Match.class);
-    return List.of(matches.stream().map(match -> new Object[]{
+    return List.of(matches.stream().sorted(Match::compareTo).map(match -> new Object[]{
         Util.avoidNull(match.getHome().getTeam(), "null", Team::getName),
         Util.avoidNull(match.getGuest().getTeam(), "null", Team::getName),
         match.getResult().toString().equals("-:-") ? TimeFormat.AUTO.of(match.getStart()) : match.getResult().toString()

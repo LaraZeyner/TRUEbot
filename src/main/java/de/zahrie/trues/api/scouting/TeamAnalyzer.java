@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.scouting;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -97,8 +98,7 @@ public class TeamAnalyzer extends AnalyzeManager {
       case TEAM_GAMES -> {
         if (team == null) query.where(Condition.Comparer.SMALLER_EQUAL, "_game.game_type", GameType.CLASH);
         else {
-          query.join(new JoinQuery<>(Performance.class, Player.class))
-              .join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` WHERE (_game.game_type <= 2 and _player.team = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(team, team))));
+          query.join(new JoinQuery<>(new Query<>(" inner join ((SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN player as _player ON _performance.player = _player.player_id WHERE (_game.game_type <= 2 and _player.team = ?) LIMIT 1000) UNION DISTINCT (SELECT DISTINCT t_perf FROM performance as `_performance` INNER JOIN `team_perf` as `_teamperf` ON `_performance`.`t_perf` = `_teamperf`.`team_perf_id` INNER JOIN `game` as `_game` ON `_teamperf`.`game` = `_game`.`game_id` INNER JOIN `player` as `_player` ON `_performance`.`player` = `_player`.`player_id` WHERE (_game.game_type <= 3 and _player.team = ?) GROUP BY `t_perf`, `_player`.`team` HAVING count(`performance_id`) > 2 LIMIT 1000)) as j1 on _performance.t_perf = j1.t_perf", List.of(team, team))));
         }
       }
     }
@@ -107,17 +107,17 @@ public class TeamAnalyzer extends AnalyzeManager {
 
   public List<ChampionData> handleChampions() {
     final List<Object[]> presence = selection().get("champion", Champion.class).get("count(selection_id)", Integer.class).groupBy("champion").descending("count(selection_id)").list();
-    final List<Object[]> stats = performance().get("champion", Champion.class)
-        .get("count(_performance_id)", Integer.class).get("sum(if(_teamperf.win, 1, 0))", Integer.class)
+    final List<Object[]> stats = performance().get("champion", Integer.class)
+        .get("count(_performance.performance_id)", Integer.class).get("sum(if(_teamperf.win, 1, 0))", Integer.class)
         .get("sum(_performance.kills)", Integer.class).get("sum(_performance.deaths)", Integer.class)
         .get("sum(_performance.assists)", Integer.class)
-        .groupBy("champion").descending("count(_performance_id)").list();
-
-    final Map<Champion, ChampionStats> championStats = stats.stream().collect(Collectors.toMap(stat -> (Champion) stat[0],
-        stat -> new ChampionStats(new Standing((int) stat[2], (int) stat[1] - (int) stat[2]),
-            new KDA((short) stat[3], (short) stat[4], (short) stat[5])), (a, b) -> b));
-    final Object[] games = gameType.teamQuery(team, days).performance().get("count(distinct _teamPerformance.game)", Integer.class).single();
-    final int amountOfGames = (int) games[0];
+        .groupBy("champion").descending("count(_performance.performance_id)").list();
+    final Map<Champion, ChampionStats> championStats = stats.stream().collect(Collectors.toMap(
+        stat -> new Query<>(Champion.class).entity(stat[0]),
+        stat -> new ChampionStats(new Standing(((BigDecimal) stat[2]).intValue(), ((Long) stat[1]).intValue() - ((BigDecimal) stat[2]).intValue()),
+            new KDA(((BigDecimal) stat[3]).shortValue(), ((BigDecimal) stat[4]).shortValue(), ((BigDecimal) stat[5]).shortValue())), (a, b) -> b));
+    final Object[] games = gameType.teamQuery(team, days).performance().get("count(distinct _teamperf.game)", Integer.class).single();
+    final Long amountOfGames = (Long) games[0];
     return presence.stream().map(objs -> new ChampionData((Champion) objs[0], (int) objs[1] * 1. / amountOfGames, championStats.get((Champion) objs[0]))).toList();
 
   }
@@ -170,5 +170,6 @@ public class TeamAnalyzer extends AnalyzeManager {
     }
   }
 
-  public record ChampionStats(Standing standing, KDA kda) { }
+  public record ChampionStats(Standing standing, KDA kda) {
+  }
 }

@@ -16,7 +16,7 @@ public class ParticipantUtils {
   }
 
   public static Lane getPlayedLane(MatchParticipant participant) {
-    return Lane.transform(participant.getLane());
+    return Lane.transform(participant.getChampionSelectLane());
   }
 
   public static Champion getSelectedChampion(MatchParticipant participant) {
@@ -32,18 +32,5 @@ public class ParticipantUtils {
 
     final List<MatchParticipant> participants = ParticipantUtils.getParticipants(match, opposingTeam.getTeamId());
     return participants.stream().filter(part -> getPlayedLane(part).equals(playedLane)).findFirst().orElse(null);
-  }
-
-  public static Matchup getMatchup(MatchParticipant participant, LOLMatch match) {
-    final MatchParticipant otherParticipant = getOpponent(participant, match);
-    final Side side = Side.ofId(participant.getTeam().getValue());
-    return new Matchup(
-        getPlayedLane(participant),
-        side.equals(Side.BLUE) ? participant : otherParticipant,
-        side.equals(Side.RED) ? participant : otherParticipant
-    );
-  }
-
-  public record Matchup(Lane lane, MatchParticipant blue, MatchParticipant red) {
   }
 }

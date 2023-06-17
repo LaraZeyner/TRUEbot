@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Table("discord_user")
+@Table("ticket")
 @ExtensionMethod(SQLUtils.class)
 public class Ticket implements Entity<Ticket> {
   @Serial
@@ -93,7 +93,7 @@ public class Ticket implements Entity<Ticket> {
     setChannel(discordChannel);
     textChannel.sendMessage("Dein Support Ticket wurde erstellt! Du kannst dein Anliegen mit 'end' schließen, was zur Löschung des Channels führt. Anfragen, die länger als eine Woche nicht beantwortet werden und beantwortet sind, werden wir manuell schließen. Alle Nachrichten werden aufgezeichnet, sodass du dir den Verlauf auch später noch anschauen kannst.").queue();
     return new Query<>(Ticket.class)
-        .col("ticket_id", id).col("topic", topic).col("title", title).col("discord_channel", channelId)
+        .col("ticket_id", id).col("topic", topic).col("title", title).col("discordchannel", channelId)
         .insert(this);
   }
 

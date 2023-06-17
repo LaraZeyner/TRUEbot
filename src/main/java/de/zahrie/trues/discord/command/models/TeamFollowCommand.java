@@ -18,11 +18,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 @ExtensionMethod(StringUtils.class)
 public class TeamFollowCommand extends SlashCommand {
   @Override
-  @Msg("Das Team wird verfolgt.")
+  @Msg(value = "**{}** wird verfolgt.", error = "**{}** wird nicht mehr verfolgt.")
   public boolean execute(SlashCommandInteractionEvent event) {
     final Integer teamId = find("id").integer();
-    final PRMTeam PRMTeam = TeamFactory.getTeam(teamId);
-    if (PRMTeam != null) PRMTeam.highlight();
-    return sendMessage();
+    final PRMTeam team = TeamFactory.getTeam(teamId);
+    if (team != null) return send(team.highlight(), team.getName());
+    return reply("Das Team wurde nicht gefunden");
   }
 }

@@ -2,7 +2,9 @@ package de.zahrie.trues.api.coverage.match.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
+import de.zahrie.trues.api.calendar.Calendar;
 import de.zahrie.trues.api.community.betting.Bet;
 import de.zahrie.trues.api.community.betting.BetFactory;
 import de.zahrie.trues.api.coverage.match.MatchResult;
@@ -65,6 +67,27 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   public MatchResult getResult() {
     if (matchResult == null) this.matchResult = MatchResult.fromResultString(result,this);
     return matchResult;
+  }
+
+  protected Integer eventId;
+  protected Calendar event;
+
+  public Calendar getEvent() {
+    if (event == null) {
+      if (eventId == null) {
+      }
+    }
+    return event;
+  }
+
+  public void setEvent(Calendar event) {
+    Integer eId = event != null ? event.getId() : null;
+    if (!Objects.equals(eventId, eId)) {
+      this.event = event;
+      this.eventId = eId;
+      new Query<>(Match.class).col("event", eventId).update(id);
+    }
+
   }
 
   public Match(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result) {

@@ -29,7 +29,7 @@ public record SchedulingHandler(DiscordUser user) {
     new Query<>(SchedulingCalendar.class)
         .where("discord_user", user)
         .and(Condition.Comparer.NOT_EQUAL, "details", "urlaub")
-        .and(Condition.between("date(startTime", start, end)).entityList()
+        .and(Condition.between("date(calendar_start)", start, end)).entityList()
         .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), null, user).create());
   }
 

@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Calendar implements ACalendar, Id, Comparable<Calendar> {
   protected int id; // calendar_id
   protected TimeRange range; // calendar_start, calendar_end
-  protected final String details; // details
+  protected String details; // details
 
   public Calendar(TimeRange timeRange, String details) {
     this.range = timeRange;

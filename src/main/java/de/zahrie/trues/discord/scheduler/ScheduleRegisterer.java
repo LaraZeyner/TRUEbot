@@ -7,6 +7,7 @@ import de.zahrie.trues.api.scheduler.ScheduledTask;
 import de.zahrie.trues.discord.scheduler.models.Analyser;
 import de.zahrie.trues.discord.scheduler.models.BotRestarter;
 import de.zahrie.trues.discord.scheduler.models.EmbedData;
+import de.zahrie.trues.discord.scheduler.models.EventManager;
 import de.zahrie.trues.discord.scheduler.models.LeaderboardUpdater;
 import de.zahrie.trues.discord.scheduler.models.PriorityData;
 import de.zahrie.trues.discord.scheduler.models.RemoveTemporaryGroups;
@@ -19,6 +20,7 @@ public class ScheduleRegisterer implements Registerer<List<ScheduledTask>> {
         new Analyser(),
         new BotRestarter(),
         new EmbedData(),
+        new EventManager(),
         new RemoveTemporaryGroups(),
         new LeaderboardUpdater(),
         new PriorityData(),

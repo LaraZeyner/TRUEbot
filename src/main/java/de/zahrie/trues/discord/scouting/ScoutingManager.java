@@ -60,6 +60,6 @@ public class ScoutingManager {
         .setTitle("Matchhistory von " + player.getSummonerName())
         .setDescription("Gametyp: **" + gameType.getDisplayName() + "**\nChampion: **" + championOutput + "**\nLane: **" + laneOutput + "**");
     player.analyze(gameType, 1000).analyzeGamesWith(champion, lane).forEach(builder::addField);
-    event.replyEmbeds(builder.build()).queue();
+    event.getHook().sendMessageEmbeds(builder.build()).queue();
   }
 }

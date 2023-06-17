@@ -56,7 +56,7 @@ public class ScoutMatchHistoryModal extends ModalImpl {
     else {
       final OrgaTeam team = OrgaTeamFactory.getTeamFromChannel(event.getGuildChannel());
       final Scouting scouting = ScoutingManager.forTeam(team);
-      return scouting == null ? null : scouting.participator().getTeamLineup().getFixedLineups().stream()
+      return scouting == null ? null : scouting.participator().getTeamLineup().getLineup().stream()
           .filter(lineup -> lineup.getLane().equals(lane)).map(Lineup::getPlayer).findFirst().orElse(null);
     }
   }

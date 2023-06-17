@@ -22,7 +22,8 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
     final var query = new Query<>(Performance.class)
         .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
         .join(new JoinQuery<>(TeamPerf.class, Game.class))
-        .where("player", player);
+        .where("player", player)
+        .descending("_game.start_time");
     if (lane != null) query.where("lane", lane);
     if (champion != null) query.where("champion", champion);
     switch (gameType) {
@@ -50,8 +51,10 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
   @Override
   public List<String> getData() {
     return List.of(
-        performance.getTeamPerformance().getGame().getType().name().charAt(1) + ": " + TimeFormat.DISCORD.of(performance.getTeamPerformance().getGame().getStart()),
-        performance.getMatchup().champion().getName() + " vs. " + Util.avoidNull(performance.getMatchup().opponent(), "kein Gegner", Champion::getName),
+        performance.getTeamPerformance().getGame().getType().name().charAt(0) + ": " +
+            TimeFormat.DISCORD.of(performance.getTeamPerformance().getGame().getStart()),
+        performance.getLane().toString().charAt(0) + ": " + performance.getMatchup().champion().getName() + " vs. " +
+            Util.avoidNull(performance.getMatchup().opponent(), "kein Gegner", Champion::getName),
         (performance.getTeamPerformance().isWin() ? "W" : "L") + ": " + performance.getKda().toString()
     );
   }

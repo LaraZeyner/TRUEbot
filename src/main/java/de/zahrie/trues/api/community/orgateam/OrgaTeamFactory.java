@@ -20,6 +20,7 @@ import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,7 @@ public final class OrgaTeamFactory {
    */
   @Nullable
   public static OrgaTeam getTeamFromChannel(@NonNull GuildChannel channel) {
+    if (channel instanceof ThreadChannel threadChannel) return getTeamFromChannel(threadChannel.getParentChannel());
     Category category = null;
     if (channel instanceof ICategorizableChannel categorizableChannel) category = categorizableChannel.getParentCategory();
     if (channel instanceof Category categoryChannel) category = categoryChannel;

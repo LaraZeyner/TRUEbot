@@ -24,7 +24,7 @@ public class ModalRegisterer implements Registerer<List<ModalImpl>> {
   public static final String ROLE_EDIT = "roleedit";
   public static final String MEMBER_EDIT = "memberedit";
   public static final String SCOUT_CHAMPIONS = "scout-champions";
-  public static final String SCOUT_HISTORY = "scout-overview";
+  public static final String SCOUT_HISTORY = "scout-history";
   public static final String SCOUT_LINEUP = "scout-lineup";
   public static final String SCOUT_MATCHUPS = "scout-matchups";
   public static final String SCOUT_OVERVIEW = "scout-overview";

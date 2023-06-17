@@ -19,12 +19,12 @@ public record TimeStringConverter(String input) {
     } else {
       startTime = input;
     }
-    return List.of(getTime(startTime), getTime(endTime));
+    return List.of(new TimeStringConverter(startTime).getTime(), new TimeStringConverter(endTime).getTime());
   }
 
-  private LocalTime getTime(String timeString) {
+  public LocalTime getTime() {
     final String origin = "00:00:00";
-    timeString = timeString.replace("h", "");
+    String timeString = input.replace("h", "");
     timeString = timeString.length() == 1 ? "0" + timeString + ":00:00" : timeString + origin.substring(timeString.length());
     final int hour = StringUtils.intValue(timeString.split(":")[0]);
     final int minute = StringUtils.intValue(timeString.split(":")[1]);

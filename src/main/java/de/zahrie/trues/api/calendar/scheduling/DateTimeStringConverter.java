@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.log.Console;
 import de.zahrie.trues.util.io.log.DevInfo;
+import lombok.NonNull;
+import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -26,9 +29,16 @@ import org.jetbrains.annotations.Nullable;
  * 12:34 <br>
  * 12h <br>
  */
-public record DateTimeStringConverter(String input) {
-  private static final List<String> DAY_PATTERNS = List.of("\\d\\.", "\\d{2}\\.", "\\d{2}\\.\\d{2}\\.", "\\d{2}\\.\\d{2}\\.\\d{4}");
-  private static final List<String> TIME_PATTERNS = List.of("\\dh", "\\d{2}h", "\\d{2}:\\d{2}", "\\d{2}:\\d{2}:\\d{2}", "\\d{2}:\\d{2}h", "\\d{2}:\\d{2}:\\d{2}h");
+@ExtensionMethod(StringUtils.class)
+public final class DateTimeStringConverter {
+  private static final List<String> DAY_PATTERNS = List.of("\\d{1,2}\\.", "\\d{1,2}\\.\\d{1,2}\\.", "\\d{1,2}\\.\\d{1,2}\\.\\d{4}");
+  private static final List<String> TIME_PATTERNS = List.of("\\d{1,2}h", "\\d{1,2}:\\d{1,2}", "\\d{1,2}:\\d{1,2}:\\d{1,2}");
+  private final String input;
+
+  public DateTimeStringConverter(String input) {
+    this.input = input;
+  }
+
   @Nullable
   public LocalDateTime toTime() {
     final TimeRange timeRange = toRangeList().stream().findFirst().orElse(null);
@@ -58,19 +68,20 @@ public record DateTimeStringConverter(String input) {
           DateStringConverter.determineDayOfWeek(subSection) != null)) {
         final List<LocalDate> dates = new DateStringConverter(section).toList();
         days.addAll(dates);
-      } else if (subSections.stream().allMatch(subSection -> TIME_PATTERNS.stream().anyMatch(subSection::matches))) {
+      } else if (isValidTimeRange(section) || subSections.stream().allMatch(subSection -> TIME_PATTERNS.stream().anyMatch(subSection::matches))) {
         times.add(new TimeStringConverter(section).toList());
       }
+
 
       for (String subSection : subSections) {
         subSection = subSection.strip();
         if (subSection.isBlank()) continue;
 
         if (DAY_PATTERNS.stream().noneMatch(subSection::matches) && DateStringConverter.determineDayOfWeek(subSection) == null &&
-        TIME_PATTERNS.stream().noneMatch(subSection::matches)) {
+            TIME_PATTERNS.stream().noneMatch(subSection::matches)) {
           trashLines += (subSection.length() + 1);
         }
-       }
+      }
     }
     if (trashLines > line.length() / 2) return List.of();
 
@@ -85,5 +96,13 @@ public record DateTimeStringConverter(String input) {
       new DevInfo("__" + line + "__ konnte nicht formatiert werden").with(Console.class).severe(exception);
       throw new RuntimeException(exception);
     }
+  }
+
+  private boolean isValidTimeRange(@NonNull String section) {
+    if (!section.contains("-")) return false;
+    if (section.before("-").intValue(null) == null) return false;
+
+    final String after = section.after("-");
+    return TIME_PATTERNS.stream().anyMatch(after::matches);
   }
 }

@@ -183,7 +183,11 @@ public abstract class SlashCommand extends Replyer {
 
     public Integer integer(Integer defaultValue) {
       final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
-      return option == null ? defaultValue : option.getAsInt();
+      try {
+        return option == null ? defaultValue : option.getAsInt();
+      } catch (NumberFormatException ignored) {
+        return null;
+      }
     }
 
     public Member member() {
