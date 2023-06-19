@@ -3,7 +3,9 @@ package de.zahrie.trues.api.riot.game;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
+import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -12,6 +14,7 @@ import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.riot.performance.TeamPerf;
 import de.zahrie.trues.util.Util;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -32,6 +35,13 @@ public class Game implements Entity<Game>, Comparable<Game> {
   private final int durationInSeconds; // duration
   private final GameType type; // game_type
   private boolean orgaGame = false; // orgagame
+  private Integer matchId; // coverage
+  private Match match; // coverage
+
+  public Match getMatch() {
+    if (match == null) this.match = new Query<>(Match.class).entity(matchId);
+    return match;
+  }
 
   private List<Selection> selections;
 
@@ -54,13 +64,14 @@ public class Game implements Entity<Game>, Comparable<Game> {
     return getTeamPerformances().add(teamPerf);
   }
 
-  private Game(int id, String gameId, LocalDateTime start, int durationInSeconds, GameType type, boolean orgaGame) {
+  private Game(int id, String gameId, LocalDateTime start, int durationInSeconds, GameType type, boolean orgaGame, Integer matchId) {
     this.id = id;
     this.gameId = gameId;
     this.start = start;
     this.durationInSeconds = durationInSeconds;
     this.type = type;
     this.orgaGame = orgaGame;
+    this.matchId = matchId;
   }
 
   public static Game get(List<Object> objects) {
@@ -70,7 +81,8 @@ public class Game implements Entity<Game>, Comparable<Game> {
         (LocalDateTime) objects.get(2),
         (int) objects.get(3),
         new SQLEnum<>(GameType.class).of(objects.get(4)),
-        (boolean) objects.get(5)
+        (boolean) objects.get(5),
+        (Integer) objects.get(6)
     );
   }
 
@@ -78,12 +90,20 @@ public class Game implements Entity<Game>, Comparable<Game> {
   public Game create() {
     return new Query<>(Game.class).key("game_index", gameId)
         .col("start_time", start).col("duration", durationInSeconds).col("game_type", type).col("orgagame", orgaGame)
+        .col("coverage", matchId)
         .insert(this);
   }
 
   public void setOrgaGame(boolean orgaGame) {
     if (orgaGame != this.orgaGame) new Query<>(Game.class).col("orgagame", orgaGame).update(id);
     this.orgaGame = orgaGame;
+  }
+
+  public void setMatch(@NonNull Match match) {
+    if (Objects.equals(getMatch(), match)) return;
+    this.matchId = Util.avoidNull(match, Match::getId);
+    this.match = match;
+    new Query<>(Game.class).col("coverage", matchId).update(id);
   }
 
   public boolean hasSelections() {

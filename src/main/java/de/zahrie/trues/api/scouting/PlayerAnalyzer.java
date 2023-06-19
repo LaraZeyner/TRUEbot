@@ -169,7 +169,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
       final Champion champion = new Query<>(Champion.class).entity(objs[0]);
       final int amount = ((Long) (objs[1])).intValue();
       if (!data.containsKey(champion) && amount >= 10) {
-        data.put(champion, new PlayerAnalyzerData(champion, 0, 0, amount, winsMap.get(champion)));
+        data.put(champion, new PlayerAnalyzerData(champion, 0, 0, amount, winsMap.getOrDefault(champion, 0)));
       }
     }
     final List<PlayerAnalyzerData> outputList = data.values().stream().sorted(Comparator.reverseOrder()).toList();

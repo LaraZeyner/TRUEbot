@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.coverage.match.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
@@ -37,5 +38,18 @@ public abstract class LeagueMatch extends Match implements AScheduleable, ATourn
   @Override
   public String toString() {
     return league.getName() + " - " + getHomeAbbr() + " vs. " + getGuestAbbr();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final LeagueMatch that)) return false;
+    if (!super.equals(o)) return false;
+    return getMatchId() == that.getMatchId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), getMatchId());
   }
 }

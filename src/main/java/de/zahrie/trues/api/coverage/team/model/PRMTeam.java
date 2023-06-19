@@ -93,7 +93,7 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
   public boolean setScore(League division, String score) {
     final TeamScore teamScore;
     if (score.equals("Disqualifiziert")) {
-      teamScore = null;
+      teamScore = TeamScore.disqualified();
     } else {
       String place = score.split("\\.")[0];
       if (place.contains(":")) place = place.after(":");
@@ -105,7 +105,7 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
       teamScore = new TeamScore(placeInteger, winsInteger, lossesInteger);
     }
     final LeagueTeam currentLeague = getCurrentLeague();
-    boolean toCreate = currentLeague == null || !currentLeague.getLeague().equals(division);
+    final boolean toCreate = currentLeague == null || !currentLeague.getLeague().equals(division);
     new LeagueTeam(division, this, teamScore).create();
     return toCreate;
   }

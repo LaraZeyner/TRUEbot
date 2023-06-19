@@ -116,8 +116,8 @@ public class TeamInfo {
     builder.setDescription(descriptionPrefix + " Gruppe im Prime League Split");
 
     final Map<Playday, List<LeagueMatch>> playdayMatches = new HashMap<>();
-    Map<Team, MatchResult> results = new LinkedHashMap<>();
-    Map<Team, MatchResult> realresults = new LinkedHashMap<>();
+    final Map<Team, MatchResult> results = new LinkedHashMap<>();
+    final Map<Team, MatchResult> realresults = new LinkedHashMap<>();
     for (LeagueMatch match : lastLeague.getMatches()) {
       if (!playdayMatches.containsKey(match.getPlayday())) playdayMatches.put(match.getPlayday(), new ArrayList<>());
       playdayMatches.get(match.getPlayday()).add(match);
@@ -135,7 +135,7 @@ public class TeamInfo {
         if (resultHandler3 != null) realresults.put(participatingTeam, realresultHandler.add(resultHandler3));
       }
     }
-    List<Map.Entry<Team, MatchResult>> r = results.entrySet().stream().sorted(Map.Entry.comparingByValue()).toList();
+    final List<Map.Entry<Team, MatchResult>> r = results.entrySet().stream().sorted(Map.Entry.comparingByValue()).toList();
     builder.addField("Teamname", r.stream().map(entry -> entry.getKey().getName()).collect(Collectors.joining("\n")), true);
     builder.addField("Standing", r.stream().map(entry -> realresults.get(entry.getKey()).toString()).collect(Collectors.joining("\n")), true);
     builder.addField("Prognose", r.stream().map(entry -> entry.getValue().toString()).collect(Collectors.joining("\n")), true);

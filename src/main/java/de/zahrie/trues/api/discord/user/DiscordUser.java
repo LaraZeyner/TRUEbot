@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
+import de.zahrie.trues.api.database.query.ModifyOutcome;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
@@ -180,6 +182,18 @@ public class DiscordUser implements Entity<DiscordUser> {
     }
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final DiscordUser that)) return false;
+    return getDiscordId() == that.getDiscordId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getDiscordId());
+  }
+
   public void addGroup(DiscordGroup group) {
     addGroup(group, LocalDateTime.now(), 0);
   }
@@ -259,5 +273,15 @@ public class DiscordUser implements Entity<DiscordUser> {
   public ApplicationHandler getApplications() {
     if (applications == null) this.applications = new ApplicationHandler(this);
     return applications;
+  }
+
+  public ModifyOutcome setPlayer(@Nullable Player player) {
+    final Player currentPlayer = getPlayer();
+    final boolean wasChanged = currentPlayer != null;
+    if (Objects.equals(currentPlayer, player)) return ModifyOutcome.NOTHING;
+    if (currentPlayer != null && !currentPlayer.equals(player)) currentPlayer.setDiscordUser(null);
+    if (player == null) return ModifyOutcome.REMOVED;
+    player.setDiscordUser(this);
+    return wasChanged ? ModifyOutcome.CHANGED : ModifyOutcome.ADDED;
   }
 }

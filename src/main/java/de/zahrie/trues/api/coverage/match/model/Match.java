@@ -16,6 +16,7 @@ import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
+import de.zahrie.trues.api.riot.game.Game;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,10 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   public List<MatchLog> getLogs() {
     if (logs == null) this.logs = determineLog();
     return logs;
+  }
+
+  public List<Game> getGames() {
+    return new Query<>(Game.class).where("coverage", this).entityList();
   }
 
   public List<MatchLog> getLogs(MatchLogAction action) {
@@ -185,5 +190,18 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   @Override
   public String toString() {
     return this instanceof LeagueMatch leagueMatch ? leagueMatch.toString() : "Scrim: " + getHomeAbbr() + " vs. " + getGuestAbbr();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (id == 0) return false;
+    if (this == o) return true;
+    if (!(o instanceof final Match match)) return false;
+    return getId() == match.getId();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
   }
 }

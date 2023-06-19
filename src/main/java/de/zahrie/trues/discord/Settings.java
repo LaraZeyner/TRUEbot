@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import de.zahrie.trues.api.calendar.scheduling.DateTimeStringConverter;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.query.ModifyOutcome;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.util.StringUtils;
 import lombok.Data;
@@ -51,11 +52,20 @@ public final class Settings {
   @Getter
   public enum RegistrationAction {
     LOL_NAME((user, userName) -> {
+      if (userName.equals("-1")) {
+        final ModifyOutcome outcome = user.setPlayer(null);
+        return outcome.wasNull() ? "Der Account ist nicht verknüpft." : "Der Account wurde entfernt.";
+      }
       final Player player = PlayerFactory.getPlayerFromName(userName);
       if (player == null) return "Der Name **" + userName + "** konnte nicht gefunden werden.";
-      if (player.getDiscordUser() != null) return "Der Account wurde bereits verknüpft.";
-      player.setDiscordUser(user);
-      return "**" + user.getNickname() + "** wurde mit dem Namen " + userName + " registriert";
+      if (player.getDiscordUser() != null) {
+        if (player.getDiscordUser().equals(user)) return "Du hast diesen Account bereits verbunden";
+        return "Der Account wurde bereits verknüpft. Wende dich an einen Admin";
+      }
+
+      final ModifyOutcome modifyOutcome = user.setPlayer(player);
+      return "**" + user.getNickname() + "** wurde mit dem Namen " + userName + " registriert." +
+          (modifyOutcome.wasNull() ? "" : "\nDer alte Account wurde entfernt.");
     }),
     BDAY((user, birthday) -> {
       final LocalDate birthdate = new DateTimeStringConverter(birthday).toTime().toLocalDate();

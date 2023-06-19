@@ -66,6 +66,10 @@ public abstract class SimpleAbstractQuery<T extends Id> {
     return (Query<T>) this;
   }
 
+  public <E extends Id, J extends Id> Query<T> join(Class<E> valueClass, Class<J> targetClass) {
+    return join(new JoinQuery<>(valueClass, targetClass));
+  }
+
   public <E extends Id, J extends Id> Query<T> join(JoinQuery<E, J> joinSimpleQuery) {
     joins.add(joinSimpleQuery);
     additionalParameters.addAll(joinSimpleQuery.getParams());
@@ -162,12 +166,20 @@ public abstract class SimpleAbstractQuery<T extends Id> {
   }
 
   public Query<T> ascending(String column) {
-    this.order = new SQLOrder(column, false);
+    return ascending(column, true);
+  }
+
+  public Query<T> ascending(String column, boolean nullsFirst) {
+    this.order = new SQLOrder(column, false, nullsFirst);
     return (Query<T>) this;
   }
 
   public Query<T> descending(String column) {
-    this.order = new SQLOrder(column, true);
+    return descending(column, true);
+  }
+
+  public Query<T> descending(String column, boolean nullsFirst) {
+    this.order = new SQLOrder(column, true, nullsFirst);
     return (Query<T>) this;
   }
 

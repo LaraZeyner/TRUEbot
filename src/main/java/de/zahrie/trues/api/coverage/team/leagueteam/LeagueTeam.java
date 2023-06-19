@@ -19,6 +19,7 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ public class LeagueTeam implements Entity<LeagueTeam>, Comparable<LeagueTeam> {
   private final Team team; // team
   private final TeamScore score; // current_place, current_wins, current_losses
 
-  public LeagueTeam(League league, Team team, TeamScore score) {
+  public LeagueTeam(League league, Team team, @NonNull TeamScore score) {
     this.league = league;
     this.team = team;
     this.score = score;
@@ -68,7 +69,6 @@ public class LeagueTeam implements Entity<LeagueTeam>, Comparable<LeagueTeam> {
     return league.getName() + " - " + score.toString();
   }
 
-  @Deprecated
   public TeamScore getExpectedScore() {
     final Map<Team, MatchResult> results = new TreeMap<>();
     for (final LeagueMatch match : league.getMatches()) {

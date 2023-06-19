@@ -37,9 +37,10 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
   }
 
   public void setDiscordUser(DiscordUser discordUser) {
+    if (this.discordUser.equals(discordUser)) return;
     this.discordUser = discordUser;
     this.discordUserId = Util.avoidNull(discordUser, DiscordUser::getId);
-    new Query<>(Player.class).col("discord_user", discordUser).update(id);
+    new Query<>(Player.class).col("discord_user", discordUserId).update(id);
     loadGames(LoaderGameType.CLASH_PLUS);
   }
 

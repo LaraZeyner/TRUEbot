@@ -213,6 +213,11 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     return results.isEmpty() ? null : results.get(0);
   }
 
+  public Object[] single(List<Object> parameters) {
+    final List<Object[]> results = limit(1).list(parameters);
+    return results.isEmpty() ? null : results.get(0);
+  }
+
   public List<Object[]> list(int limit) {
     return limit(limit).list();
   }

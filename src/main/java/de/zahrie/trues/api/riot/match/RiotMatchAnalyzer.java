@@ -3,10 +3,17 @@ package de.zahrie.trues.api.riot.match;
 import java.util.Arrays;
 import java.util.List;
 
+import de.zahrie.trues.api.coverage.match.model.Match;
+import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
+import de.zahrie.trues.api.database.query.Condition;
+import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.game.Game;
 import de.zahrie.trues.api.riot.game.MatchUtils;
+import de.zahrie.trues.api.riot.performance.TeamPerf;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
@@ -32,16 +39,39 @@ public class RiotMatchAnalyzer {
             GameQueueType.ONEFORALL_5X5, GameQueueType.URF)
         .contains(match.getQueue())) return null;
 
-    Game game = createGame();
+    final Game game = createGame();
     if (game == null) return null;
 
     final MatchSideAnalyzer blueSide = new MatchSideAnalyzer(originatedPlayer, match, game, Side.BLUE);
     final MatchSideAnalyzer redSide = new MatchSideAnalyzer(originatedPlayer, match, game, Side.RED);
     this.requiresSelection = requiresSelection(blueSide, redSide);
     this.hasNoSelections = game.hasSelections();
-    handleSide(blueSide);
-    handleSide(redSide);
+    final TeamPerf home = handleSide(blueSide);
+    final TeamPerf guest = handleSide(redSide);
+    if (match.getTournamentCode().isBlank()) return game;
+    handleMatch(game, home, guest);
     return game;
+  }
+
+  public void handleMatch(Game game, TeamPerf home, TeamPerf guest) {
+    assert home != null;
+    assert guest != null;
+    final Match m = findMatch(home, guest);
+    if (m != null) game.setMatch(m);
+  }
+
+  private Match findMatch(@NonNull TeamPerf home, @NonNull TeamPerf guest) {
+    if (home.getTeam() != null && guest.getTeam() != null) {
+      final List<Match> matches = new Query<>(Participator.class).get("_participator.coverage")
+          .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
+          .where("team", home.getTeamId()).and(Condition.Comparer.NOT_EQUAL, "result", "0:0").descending("_match.coverage_start").convertList(Match.class);
+      for (final Match match1 : matches) {
+        if (match1.getParticipator(home.getTeam()) == null) continue;
+        if (match1.getParticipator(guest.getTeam()) == null) continue;
+        return match1;
+      }
+    }
+    return null;
   }
 
   private boolean requiresSelection(MatchSideAnalyzer... sides) {
@@ -52,11 +82,11 @@ public class RiotMatchAnalyzer {
     return max > 2 || (queue.equals(GameQueueType.CLASH) && max > 0);
   }
 
-  private void handleSide(MatchSideAnalyzer analyzer) {
+  private TeamPerf handleSide(MatchSideAnalyzer analyzer) {
     if (requiresSelection) analyzer.analyzeSelections();
-    if (analyzer.getValidParticipants().isEmpty()) return;
+    if (analyzer.getValidParticipants().isEmpty()) return null;
 
-    analyzer.analyze();
+    return analyzer.analyze();
   }
 
   @Nullable

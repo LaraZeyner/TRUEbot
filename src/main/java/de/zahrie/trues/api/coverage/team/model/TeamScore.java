@@ -6,7 +6,11 @@ import java.util.Comparator;
 import de.zahrie.trues.util.Format;
 import org.jetbrains.annotations.NotNull;
 
-public record TeamScore(short place, short wins, short losses) implements Serializable, Comparable<TeamScore> {
+public record TeamScore(Short place, Short wins, Short losses) implements Serializable, Comparable<TeamScore> {
+  public static TeamScore disqualified() {
+    return new TeamScore(null, null, null);
+  }
+
   public Standing getStanding() {
     return new Standing(wins, losses);
   }
@@ -27,5 +31,9 @@ public record TeamScore(short place, short wins, short losses) implements Serial
     return Comparator.comparing(TeamScore::place)
         .thenComparing((TeamScore o1) -> o1.getStanding().getWinrate().rate(), Comparator.reverseOrder())
         .compare(this, o);
+  }
+
+  public boolean isDisqualified() {
+    return place == null && wins == null && losses == null;
   }
 }

@@ -2,6 +2,7 @@ Bugs:
 Mögliche Bugs:
 TODOs:
  - UPDATE EMBEDS ON CHANGE
+ - every entity requires equals
 Ideen:
  - Winrates auslesen
  - Champion Mastery

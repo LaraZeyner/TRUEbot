@@ -1,5 +1,7 @@
 package de.zahrie.trues.api.discord.builder.queryCustomizer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -7,6 +9,7 @@ import java.util.stream.IntStream;
 import de.zahrie.trues.api.community.application.Application;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
@@ -17,6 +20,7 @@ import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
+import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Formatter;
@@ -148,7 +152,31 @@ public enum NamedQuery {
       .where("_game.game_type", GameType.TOURNAMENT).and("_player.lol_puuid", "?")
       .descending("_game.start_time"),
       new DBQuery("Prime League Spiele", "letzte 10 Spiele in der Prime League", List.of(
-          new Column("Spielzeit"), new Column("Matchup"), new Column("Stats")), Enumeration.CONTINUE), null);
+          new Column("Spielzeit"), new Column("Matchup"), new Column("Stats")), Enumeration.CONTINUE), null),
+  TABLE(new Query<>("SELECT * FROM league_team WHERE 0"), new DBQuery("Prime League Tabellen", "Da gibt es ein paar Tabellen", List.of(
+      new Column("#", 1),
+      new Column("Teamname", 30),
+      new Column("Win", 4),
+      new Column("Score", 4),
+      new Column("Kills", 5),
+      new Column("KD", 4),
+      new Column("Gold", 5),
+      new Column("GD", 4),
+      new Column("Damage", 5),
+      new Column("DD", 4),
+      new Column("Creeps", 7),
+      new Column("CD", 5),
+      new Column("Vision", 7),
+      new Column("VD", 5),
+      new Column("Tu", 3),
+      new Column("Dr", 2),
+      new Column("Ih", 2),
+      new Column("He", 2),
+      new Column("Na", 2),
+      new Column("Spielzeit", 5),
+      new Column("Wins", 5),
+      new Column("Losses", 5)
+  ), Enumeration.START), null);
 
   private final Query<?> query;
   private final DBQuery dbQuery;
@@ -160,6 +188,7 @@ public enum NamedQuery {
       case ORGA_SCHEDULE -> handleOrgaGames();
       case ORGA_ELOS -> handleOrgaElo();
       case FACED_TEAMS -> handleFacedTeams();
+      case TABLE -> getTables();
       default -> null;
     };
   }
@@ -230,5 +259,79 @@ public enum NamedQuery {
       }).toList());
     }
     return out;
+  }
+
+  private static List<List<Object[]>> getTables() {
+    final List<List<Object[]>> list = new SortedList<>();
+    for (OrgaTeam orgaTeam : new Query<>(OrgaTeam.class).ascending("orga_place").entityList()) {
+      final Team team = orgaTeam.getTeam();
+      if (!(team instanceof PRMTeam prmTeam)) continue;
+
+      final PRMLeague lastLeague = prmTeam.getLastLeague();
+      if (lastLeague == null) continue;
+
+      final List<Object[]> objects = new SortedList<>();
+      for (LeagueTeam leagueTeam : new Query<>(LeagueTeam.class).where("league", lastLeague).ascending("current_place").entityList()) {
+        final List<Object> objs = new ArrayList<>();
+        objs.add(leagueTeam.getScore().place() + ".");
+        objs.add(leagueTeam.getTeam().getName() + ".");
+        final Query<TeamPerf> q = new Query<>(TeamPerf.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.win, 1 - _teamperf.win)) * 100), '%')", String.class)
+            .get("concat(sum(if(_teamperf.team = ?, _teamperf.win, 0)), ':', sum(if(_teamperf.team = ?, 0, _teamperf.win)))", String.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.kills, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.kills))))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.kills, -_teamperf.kills))", String.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_gold, null)) / 1000), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_gold)) / 1000))", String.class)
+            .get("round(sum(if(_teamperf.team = ?, _teamperf.total_gold, -_teamperf.total_gold)) / 1000)", String.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_damage, null)) / 1000), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_damage)) / 1000))", String.class)
+            .get("round(sum(if(_teamperf.team = ?, _teamperf.total_damage, -_teamperf.total_damage)) / 1000)", String.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_creeps, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_creeps))))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.total_creeps, -_teamperf.total_creeps))", String.class)
+            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_vision, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_vision))))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.total_vision, -_teamperf.total_vision))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.turrets, 0))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.drakes, 0))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.inhibs, 0))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.heralds, 0))", String.class)
+            .get("sum(if(_teamperf.team = ?, _teamperf.barons, 0))", String.class)
+            .get("concat(floor(avg(_game.duration) / 60), ':', lpad(avg(_game.duration) % 60, 2, '0'))", String.class)
+            .get("concat(floor(avg(nullif(if(_teamperf.team = ?, _teamperf.win * _game.duration, 0), 0)) / 60), ':', lpad(avg(nullif(if(_teamperf.team = ?, _teamperf.win * _game.duration, 0), 0)) % 60, 2, '0'))", String.class)
+            .get("concat(floor(avg(nullif(if(_teamperf.team = ?, 0, _teamperf.win * _game.duration), 0)) / 60), ':', lpad(avg(nullif(if(_teamperf.team = ?, 0, _teamperf.win * _game.duration), 0)) % 60, 2, '0'))", String.class)
+            .join(TeamPerf.class, Game.class)
+            .where(Condition.inSubquery("_match.coverage", new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class).col("coverage")).where("_participator.team", leagueTeam.getTeam()).and("_match.coverage_group", lastLeague)));
+        final List<Object> data = Arrays.stream(
+            q.col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .col("?", leagueTeam.getTeam())
+                .single(List.of(leagueTeam.getTeam(), lastLeague))).toList();
+        objs.addAll(data);
+        objects.add(objs.toArray(Object[]::new));
+      }
+      list.add(objects);
+    }
+    return list;
   }
 }
