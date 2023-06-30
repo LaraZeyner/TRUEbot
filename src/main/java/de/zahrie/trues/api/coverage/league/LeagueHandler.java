@@ -44,7 +44,7 @@ public class LeagueHandler extends LeagueModel implements Serializable {
     for (PRMTeam team : teams) {
       final TeamLoader teamLoader = new TeamLoader(team);
       final TeamHandler load = teamLoader.load();
-      if (load != null) load.update();
+      load.update();
     }
   }
 }

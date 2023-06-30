@@ -70,18 +70,18 @@ public enum ChannelPermissionType {
 
   public record APermissionOverride(IPermissionHolder permissionHolder, List<Permission> allowed, List<Permission> denied, List<Long> viewable) {
     public APermissionOverride(IPermissionHolder permissionHolder, EnumSet<Permission> allowed, EnumSet<Permission> denied, List<Long> viewable) {
-      this(permissionHolder, new SortedList<>(allowed), new SortedList<>(denied), viewable);
+      this(permissionHolder, SortedList.of(allowed), SortedList.of(denied), viewable);
     }
 
     public List<Permission> getAllowed() {
-      final List<Permission> allowed = new SortedList<>(allowed());
+      final List<Permission> allowed = SortedList.of(allowed());
       if (viewable.isEmpty()) allowed.remove(Permission.VIEW_CHANNEL);
       else if (viewable.contains(permissionHolder.getIdLong())) allowed.add(Permission.VIEW_CHANNEL);
       return allowed;
     }
 
     public List<Permission> getDenied() {
-      final List<Permission> denied = new SortedList<>(denied());
+      final List<Permission> denied = SortedList.of(denied());
       if (viewable.isEmpty()) denied.remove(Permission.VIEW_CHANNEL);
       else if (permissionHolder.getIdLong() == DiscordGroup.EVERYONE.getDiscordId()) denied.add(Permission.VIEW_CHANNEL);
       return denied;

@@ -36,6 +36,8 @@ public class Willump implements Connectable {
   }
 
   public void connect() {
+    if (client != null) return;
+
     this.client = new BotConfigurator().run();
     handleEvents();
     try {

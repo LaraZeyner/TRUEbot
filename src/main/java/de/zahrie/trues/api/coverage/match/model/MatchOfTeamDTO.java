@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.coverage.match.model;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.log.EventStatus;
@@ -12,8 +13,9 @@ import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.util.Util;
+import org.jetbrains.annotations.NotNull;
 
-public record MatchOfTeamDTO(Match match, Team team) implements DTO {
+public record MatchOfTeamDTO(Match match, Team team) implements DTO<MatchOfTeamDTO> {
   public static Query<Participator> get(Team team) {
     return get(team, LocalDateTime.now().minusDays(180));
   }
@@ -27,11 +29,16 @@ public record MatchOfTeamDTO(Match match, Team team) implements DTO {
   }
 
   @Override
-  public List<String> getData() {
+  public List<Object> getData() {
     return List.of(
         TimeFormat.DISCORD.of(match.getStart()),
         Util.avoidNull(match.getOpponentOf(team), "keine Gegner", Team::getName),
         match.getResult().toString()
     );
+  }
+
+  @Override
+  public int compareTo(@NotNull MatchOfTeamDTO o) {
+    return Comparator.comparing(MatchOfTeamDTO::match).compare(this, o);
   }
 }

@@ -17,6 +17,7 @@ import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.JoinQuery;
+import de.zahrie.trues.api.database.query.ModifyOutcome;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.util.StringUtils;
 import lombok.Getter;
@@ -90,24 +91,18 @@ public class PRMTeam extends Team implements Entity<PRMTeam> {
         .entity(List.of(this, "Playoffs", "prime"));
   }
 
-  public boolean setScore(League division, String score) {
-    final TeamScore teamScore;
-    if (score.equals("Disqualifiziert")) {
-      teamScore = TeamScore.disqualified();
-    } else {
-      String place = score.split("\\.")[0];
-      if (place.contains(":")) place = place.after(":");
-      final short placeInteger = Short.parseShort(place.strip());
-      final String wins = score.split("\\(")[1].split("/")[0];
-      final short winsInteger = Short.parseShort(wins.strip());
-      final String losses = score.split("/")[1].split("\\)")[0];
-      final short lossesInteger = Short.parseShort(losses.strip());
-      teamScore = new TeamScore(placeInteger, winsInteger, lossesInteger);
-    }
+  public ModifyOutcome setScore(League division, String score) {
+    final TeamScore teamScore = TeamScore.of(score);
     final LeagueTeam currentLeague = getCurrentLeague();
-    final boolean toCreate = currentLeague == null || !currentLeague.getLeague().equals(division);
+    final ModifyOutcome outcome;
+    if (currentLeague == null || !currentLeague.getLeague().equals(division))
+      outcome = ModifyOutcome.ADDED;
+    else if (currentLeague.getScore().equals(teamScore))
+      outcome = ModifyOutcome.NOTHING;
+    else outcome = ModifyOutcome.CHANGED;
+
     new LeagueTeam(division, this, teamScore).create();
-    return toCreate;
+    return outcome;
   }
 
   public void setRecord(String record, short seasons) {

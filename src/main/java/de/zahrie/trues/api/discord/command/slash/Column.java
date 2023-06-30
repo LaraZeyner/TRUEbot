@@ -1,118 +1,69 @@
 package de.zahrie.trues.api.discord.command.slash;
 
-import java.util.Objects;
-
+import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 public final class Column {
   @Setter
   private String name;
-  private final boolean left;
-  private final boolean inline;
-  private final int round;
-  private final int maxLength;
-  private final boolean withPrevious;
-  private final boolean ignore;
+  private final Integer maxLength;
+  private String delimiter = null;
+  private boolean inline = true;
+  private Integer round = null;
+  private Align align = Align.AUTO;
+  private boolean ignore = false;
+  private boolean signed = false;
 
-  public Column(String name, boolean left, boolean inline, int round, int maxLength, boolean withPrevious, boolean ignore) {
+  public Column(String name, Integer maxLength) {
     this.name = name;
-    this.left = left;
-    this.inline = inline;
-    this.round = round;
     this.maxLength = maxLength;
-    this.withPrevious = withPrevious;
-    this.ignore = ignore;
   }
 
   public Column(String name) {
-    this(name, true, true, 0, Integer.MAX_VALUE, false, false);
+    this(name, null);
   }
 
-  public Column(String name, boolean ignore) {
-    this(name, true, true, 0, Integer.MAX_VALUE, false, ignore);
+  public Column withPrevious() {
+    return withPrevious(" - ");
   }
 
-  public Column(String name, int maxLength) {
-    this(name, true, true, 0, maxLength, false, false);
+  public Column withPrevious(String delimiter) {
+    this.delimiter = delimiter;
+    return this;
   }
 
-  public Column(String name, int maxLength, boolean ignore) {
-    this(name, true, true, 0, maxLength, false, ignore);
+  public Column outline() {
+    this.inline = false;
+    return this;
   }
 
-  public Column(String name, boolean left, boolean inline, int round) {
-    this(name, left, inline, round, Integer.MAX_VALUE, !left, false);
+  public Column round() {
+    return round(0);
   }
 
-  public Column(String name, boolean left, boolean inline, int round, boolean ignore) {
-    this(name, left, inline, round, Integer.MAX_VALUE, !left, ignore);
+  public Column round(int digits) {
+    this.round = digits;
+    return this;
   }
 
-  public Column(String name, boolean left, boolean inline, int round, int maxLength) {
-    this(name, left, inline, round, maxLength, !left, false);
+  public Column alignLeft() {
+    this.align = Align.LEFT;
+    return this;
   }
 
-  public Column(String name, boolean left, boolean inline, int round, int maxLength, boolean ignore) {
-    this(name, left, inline, round, maxLength, !left, ignore);
+  public Column alignRight() {
+    this.align = Align.RIGHT;
+    return this;
   }
 
-  public String name() {
-    return name;
+  public Column ignore() {
+    this.ignore = true;
+    return this;
   }
 
-  public boolean left() {
-    return left;
+  public Column sign() {
+    this.signed = true;
+    return this;
   }
-
-  public boolean inline() {
-    return inline;
-  }
-
-  public int round() {
-    return round;
-  }
-
-  public int maxLength() {
-    return maxLength;
-  }
-
-  public boolean withPrevious() {
-    return withPrevious;
-  }
-
-  public boolean ignore() {
-    return ignore;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) return true;
-    if (obj == null || obj.getClass() != this.getClass()) return false;
-    var that = (Column) obj;
-    return Objects.equals(this.name, that.name) &&
-        this.left == that.left &&
-        this.inline == that.inline &&
-        this.round == that.round &&
-        this.maxLength == that.maxLength &&
-        this.withPrevious == that.withPrevious &&
-        this.ignore == that.ignore;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, left, inline, round, maxLength, withPrevious, ignore);
-  }
-
-  @Override
-  public String toString() {
-    return "Column[" +
-        "name=" + name + ", " +
-        "left=" + left + ", " +
-        "inline=" + inline + ", " +
-        "round=" + round + ", " +
-        "maxLength=" + maxLength + ", " +
-        "withPrevious=" + withPrevious + ", " +
-        "ignore=" + ignore + ']';
-  }
-
 }

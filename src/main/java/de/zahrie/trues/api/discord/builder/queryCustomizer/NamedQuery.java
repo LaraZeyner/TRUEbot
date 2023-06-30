@@ -1,9 +1,10 @@
 package de.zahrie.trues.api.discord.builder.queryCustomizer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.community.application.Application;
@@ -12,6 +13,7 @@ import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
+import de.zahrie.trues.api.coverage.playday.Playday;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.PlayerRank;
 import de.zahrie.trues.api.coverage.player.model.Rank;
@@ -19,6 +21,7 @@ import de.zahrie.trues.api.coverage.season.OrgaCupSeason;
 import de.zahrie.trues.api.coverage.season.PRMSeason;
 import de.zahrie.trues.api.coverage.season.SeasonFactory;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
+import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTableDTO;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
@@ -107,22 +110,22 @@ public enum NamedQuery {
       new DBQuery("Rekordspieler", "nur Prime League Spiele",
           List.of(
               new Column("League-Account"),
-              new Column("Games", true, true, 0),
-              new Column("", false, true, 0),
-              new Column("KDA-Ratio", true, true, 0),
-              new Column("", false, true, 1),
-              new Column("CS in Tsd.", true, true, 1),
-              new Column("", false, true, 0),
-              new Column("CSD", true, true, 0),
-              new Column("Gold in Tsd.", true, true, 0),
-              new Column("", false, true, 1),
-              new Column("GoldD", true, true, 0),
-              new Column("Dmg in Tsd.", true, true, 0),
-              new Column("", false, true, 1),
-              new Column("DmgD", true, true, 0),
-              new Column("Vision", true, true, 0),
-              new Column("", false, true, 0),
-              new Column("VSD", true, true, 1)
+              new Column("Games").round(),
+              new Column("").withPrevious().round(),
+              new Column("KDA-Ratio").round(),
+              new Column("").withPrevious().round(1),
+              new Column("CS in Tsd.").round(1),
+              new Column("").withPrevious().round(),
+              new Column("CSD").round(),
+              new Column("Gold in Tsd.").round(),
+              new Column("").withPrevious().round(1),
+              new Column("GoldD").round(),
+              new Column("Dmg in Tsd.").round(),
+              new Column("").withPrevious().round(1),
+              new Column("DmgD").round(),
+              new Column("Vision").round(),
+              new Column("").withPrevious().round(),
+              new Column("VSD").round(1)
           ),
           Enumeration.CONTINUE), null
   ),
@@ -155,28 +158,21 @@ public enum NamedQuery {
           new Column("Spielzeit"), new Column("Matchup"), new Column("Stats")), Enumeration.CONTINUE), null),
   TABLE(new Query<>("SELECT * FROM league_team WHERE 0"), new DBQuery("Prime League Tabellen", "Da gibt es ein paar Tabellen", List.of(
       new Column("#", 1),
-      new Column("Teamname", 30),
-      new Column("Win", 4),
-      new Column("Score", 4),
-      new Column("Kills", 5),
-      new Column("KD", 4),
-      new Column("Gold", 5),
-      new Column("GD", 4),
-      new Column("Damage", 5),
-      new Column("DD", 4),
-      new Column("Creeps", 7),
-      new Column("CD", 5),
-      new Column("Vision", 7),
-      new Column("VD", 5),
-      new Column("Tu", 3),
-      new Column("Dr", 2),
-      new Column("Ih", 2),
-      new Column("He", 2),
-      new Column("Na", 2),
-      new Column("Spielzeit", 5),
-      new Column("Wins", 5),
-      new Column("Losses", 5)
-  ), Enumeration.START), null);
+      new Column("Teamname", 20),
+      new Column("Score"),
+      new Column("Kills"),
+      new Column("KD"),
+      new Column("Gold"),
+      new Column("GD"),
+      new Column("Damage"),
+      new Column("DD"),
+      new Column("Creeps"),
+      new Column("CD"),
+      new Column("Vision"),
+      new Column("VD"),
+      new Column("Objectives"),
+      new Column("Spielzeit")
+  ), Enumeration.NONE), null);
 
   private final Query<?> query;
   private final DBQuery dbQuery;
@@ -233,24 +229,29 @@ public enum NamedQuery {
         .include(new Query<>(Match.class).where("_match.department", "intern")
             .and(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", lastInternSeason.getRange().getStartTime()))
         .convertList(Match.class);
-    return List.of(matches.stream().sorted(Match::compareTo).map(match -> new Object[]{
-        Util.avoidNull(match.getHome().getTeam(), "null", Team::getName),
-        Util.avoidNull(match.getGuest().getTeam(), "null", Team::getName),
-        match.getResult().toString().equals("-:-") ? TimeFormat.AUTO.of(match.getStart()) : match.getResult().toString()
-    }).toList());
+    final Map<Playday, List<Match>> matchData = new HashMap<>();
+    for (final Match match : matches) {
+      if (!matchData.containsKey(match.getPlayday())) matchData.put(match.getPlayday(), new ArrayList<>());
+      matchData.get(match.getPlayday()).add(match);
+    }
+    return matchData.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> entry.getValue().stream().sorted(Match::compareTo).map(match -> new Object[]{
+        Util.avoidNull(match.getHome().getTeam(), "null", team -> team.getName().keep(25)),
+        Util.avoidNull(match.getGuest().getTeam(), "null", team -> team.getName().keep(25)),
+        match.getResult().toString().equals("-:-") ? (TimeFormat.AUTO.of(match.getStart()) + (match.getCast() == null ? "" : " (c)")) : match.getResult().toString()
+    }).toList()).toList();
   }
 
   private List<List<Object[]>> handleOrgaElo() {
     final int amount = Rank.RankTier.values().length - 1;
     final List<PlayerRank>[] ranks = new SortedList[amount];
-    IntStream.range(1, Rank.RankTier.values().length).forEach(i -> ranks[i - 1] = new SortedList<>(Comparator.comparing(PlayerRank::getRank).reversed()));
+    IntStream.range(1, Rank.RankTier.values().length).forEach(i -> ranks[i - 1] = SortedList.sorted(Comparator.comparing(PlayerRank::getRank)));
 
     for (Player player : new Query<>(Player.class).where(Condition.notNull("_player.discord_user")).entityList()) {
       final PlayerRank current = player.getRanks().getCurrent();
       final Rank.RankTier tier = current.getRank().tier();
       if (!tier.equals(Rank.RankTier.UNRANKED)) ranks[Rank.RankTier.CHALLENGER.ordinal() - tier.ordinal()].add(current);
     }
-    final List<List<Object[]>> out = new SortedList<>();
+    final List<List<Object[]>> out = SortedList.of();
     for (List<PlayerRank> rank : ranks) {
       out.add(rank.stream().map(playerRank -> new Object[]{
           playerRank.getPlayer().getSummonerName(),
@@ -262,7 +263,7 @@ public enum NamedQuery {
   }
 
   private static List<List<Object[]>> getTables() {
-    final List<List<Object[]>> list = new SortedList<>();
+    final List<List<Object[]>> list = SortedList.of();
     for (OrgaTeam orgaTeam : new Query<>(OrgaTeam.class).ascending("orga_place").entityList()) {
       final Team team = orgaTeam.getTeam();
       if (!(team instanceof PRMTeam prmTeam)) continue;
@@ -270,66 +271,9 @@ public enum NamedQuery {
       final PRMLeague lastLeague = prmTeam.getLastLeague();
       if (lastLeague == null) continue;
 
-      final List<Object[]> objects = new SortedList<>();
-      for (LeagueTeam leagueTeam : new Query<>(LeagueTeam.class).where("league", lastLeague).ascending("current_place").entityList()) {
-        final List<Object> objs = new ArrayList<>();
-        objs.add(leagueTeam.getScore().place() + ".");
-        objs.add(leagueTeam.getTeam().getName() + ".");
-        final Query<TeamPerf> q = new Query<>(TeamPerf.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.win, 1 - _teamperf.win)) * 100), '%')", String.class)
-            .get("concat(sum(if(_teamperf.team = ?, _teamperf.win, 0)), ':', sum(if(_teamperf.team = ?, 0, _teamperf.win)))", String.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.kills, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.kills))))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.kills, -_teamperf.kills))", String.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_gold, null)) / 1000), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_gold)) / 1000))", String.class)
-            .get("round(sum(if(_teamperf.team = ?, _teamperf.total_gold, -_teamperf.total_gold)) / 1000)", String.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_damage, null)) / 1000), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_damage)) / 1000))", String.class)
-            .get("round(sum(if(_teamperf.team = ?, _teamperf.total_damage, -_teamperf.total_damage)) / 1000)", String.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_creeps, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_creeps))))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.total_creeps, -_teamperf.total_creeps))", String.class)
-            .get("concat(round(avg(if(_teamperf.team = ?, _teamperf.total_vision, null))), ':', round(avg(if(_teamperf.team = ?, null, _teamperf.total_vision))))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.total_vision, -_teamperf.total_vision))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.turrets, 0))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.drakes, 0))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.inhibs, 0))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.heralds, 0))", String.class)
-            .get("sum(if(_teamperf.team = ?, _teamperf.barons, 0))", String.class)
-            .get("concat(floor(avg(_game.duration) / 60), ':', lpad(avg(_game.duration) % 60, 2, '0'))", String.class)
-            .get("concat(floor(avg(nullif(if(_teamperf.team = ?, _teamperf.win * _game.duration, 0), 0)) / 60), ':', lpad(avg(nullif(if(_teamperf.team = ?, _teamperf.win * _game.duration, 0), 0)) % 60, 2, '0'))", String.class)
-            .get("concat(floor(avg(nullif(if(_teamperf.team = ?, 0, _teamperf.win * _game.duration), 0)) / 60), ':', lpad(avg(nullif(if(_teamperf.team = ?, 0, _teamperf.win * _game.duration), 0)) % 60, 2, '0'))", String.class)
-            .join(TeamPerf.class, Game.class)
-            .where(Condition.inSubquery("_match.coverage", new Query<>(Participator.class).join(new JoinQuery<>(Participator.class, Match.class).col("coverage")).where("_participator.team", leagueTeam.getTeam()).and("_match.coverage_group", lastLeague)));
-        final List<Object> data = Arrays.stream(
-            q.col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .col("?", leagueTeam.getTeam())
-                .single(List.of(leagueTeam.getTeam(), lastLeague))).toList();
-        objs.addAll(data);
-        objects.add(objs.toArray(Object[]::new));
-      }
+      final List<LeagueTableDTO> sorted = SortedList.sorted(new Query<>(LeagueTeam.class).where("league", lastLeague)
+          .ascending("current_place").entityList().stream().map(LeagueTableDTO::new));
+      final List<Object[]> objects = sorted.stream().map(leagueTableDTO -> leagueTableDTO.getData().toArray(Object[]::new)).toList();
       list.add(objects);
     }
     return list;

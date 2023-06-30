@@ -39,7 +39,8 @@ public class Analyser extends ScheduledTask {
     new Query<>(OrgaTeam.class).entityList().stream().map(OrgaTeam::getTeam).filter(Objects::nonNull)
         .flatMap(team -> team.getPlayers().stream()).forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
 
-    PlayerFactory.registeredPlayers().stream().filter(player -> player.getTeam() == null || player.getTeam().getOrgaTeam() == null)
+    PlayerFactory.registeredPlayers().stream()
+        .filter(player -> player.getTeam() == null || player.getTeam().getOrgaTeam() == null)
         .forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
     Database.connection().commit(true);
     handleNextMatches();
@@ -70,10 +71,10 @@ public class Analyser extends ScheduledTask {
       for (Participator participator : match.getParticipators()) {
         if (participator.getTeam() == null) continue;
 
-        final SortedList<Player> players = new SortedList<>(participator.getTeam().getPlayers());
+        final SortedList<Player> players = SortedList.of(participator.getTeam().getPlayers());
         players.addAll(participator.getTeamLineup().getLineup().stream().map(Lineup::getPlayer).toList());
 
-        players.forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
+        players.stream().filter(Objects::nonNull).forEach(player -> player.loadGames(LoaderGameType.MATCHMADE));
         Database.connection().commit();
       }
 

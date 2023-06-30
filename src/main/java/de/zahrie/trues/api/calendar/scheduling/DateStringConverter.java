@@ -39,7 +39,7 @@ public record DateStringConverter(String input) {
     if (startDate == null || endDate == null) return List.of();
 
     final long additionalDays = Duration.between(startDate.atStartOfDay(), endDate.atStartOfDay()).toDays();
-    return IntStream.iterate(1, i -> i < additionalDays + 1, i -> i + 1)
+    return IntStream.iterate(0, i -> i < additionalDays + 1, i -> i + 1)
         .mapToObj(i -> startDate.plus(i, ChronoUnit.DAYS)).toList();
   }
 

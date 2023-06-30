@@ -117,7 +117,7 @@ public class Round implements Entity<Round>, Comparable<Round> {
     bestTeam2.forEach(playerEntry -> new Query<>(RoundParticipator.class).col("team_index", 2)
         .where("event_round", id).and("player", playerEntry.player()).update(List.of()));
 
-    final NewsChannel channel = Nunu.getInstance().getGuild().getNewsChannelById(Const.TICKER_CHANNEL);
+    final NewsChannel channel = Nunu.getInstance().getGuild().getNewsChannelById(Const.Channels.TICKER_CHANNEL);
     if (channel == null) throw new NullPointerException("Der Tickerchannel wurde gelöscht.");
     channel.sendMessage("Die Runde wurde erstellt.").queue();
   }

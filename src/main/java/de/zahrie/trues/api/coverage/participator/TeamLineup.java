@@ -38,7 +38,7 @@ public class TeamLineup extends TeamLineupBase {
   public void updateLineups() {
     this.games = null;
     this.lineup = null;
-    if (participator.getMatch() == null) this.storedLineups = new SortedList<>();
+    if (participator.getMatch() == null) this.storedLineups = SortedList.of();
     if (participator.getMatch() == null || (participator.getMatch().getStatus().equals(EventStatus.PLAYED) && storedLineups != null)) return;
 
     this.storedLineups = new Query<>(Lineup.class).where("coverage_team", participator).entityList();
@@ -91,7 +91,7 @@ public class TeamLineup extends TeamLineupBase {
 
   private List<Lineup> handleLineup() {
     final Player[] players = determineLineup();
-    return new SortedList<>(Lane.ITERATE.stream().map(lane -> determineLineup(lane, players[lane.ordinal()-1])).toList());
+    return SortedList.of(Lane.ITERATE.stream().map(lane -> determineLineup(lane, players[lane.ordinal()-1])));
   }
 
   private Lineup determineLineup(Lane lane, Player player) {
@@ -136,7 +136,7 @@ public class TeamLineup extends TeamLineupBase {
   }
 
   public List<Player> getValidPlayers() {
-    final var players = new SortedList<>(participator.getTeamLineup().getStoredLineups().stream().map(Lineup::getPlayer));
+    final var players = SortedList.of(participator.getTeamLineup().getStoredLineups().stream().map(Lineup::getPlayer));
     if (players.size() < 5) {
       final Team team = participator.getTeam();
       if (team != null) players.addAll(team.getPlayers());
@@ -154,7 +154,7 @@ public class TeamLineup extends TeamLineupBase {
     if (storedLineup != null) return List.of(storedLineup.getPlayer());
 
     final List<Player> players = getStoredLineups().stream().filter(lineup1 -> lineup1.getLane() != Lane.UNKNOWN).map(Lineup::getPlayer).toList();
-    final List<Player> validPlayers = new SortedList<>(getValidPlayers());
+    final List<Player> validPlayers = SortedList.of(getValidPlayers());
     validPlayers.removeIf(players::contains);
     return validPlayers;
   }

@@ -7,9 +7,9 @@ import de.zahrie.trues.api.database.connector.DTO;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import org.jetbrains.annotations.NotNull;
 
-public record EventDTO(TimeRange range, String name, boolean playday) implements DTO, Comparable<EventDTO> {
+public record EventDTO(TimeRange range, String name, boolean playday) implements DTO<EventDTO> {
   @Override
-  public List<String> getData() {
+  public List<Object> getData() {
     return List.of(playday ? range.display() : range.displayRange(), name);
   }
 

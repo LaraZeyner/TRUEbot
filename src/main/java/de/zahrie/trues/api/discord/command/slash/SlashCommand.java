@@ -112,9 +112,7 @@ public abstract class SlashCommand extends Replyer {
     subCommands.stream().filter(subCommand -> subCommand.getName().equals(fullCommandName.split(" ")[1])).findFirst()
         .ifPresent(validSubCommand -> validSubCommand.handleCommand(fullCommandName.substring(fullCommandName.indexOf(" ")), event));
 
-    if (!end) {
-      reply("Internal Error");
-    }
+    if (!end) reply("Internal Error");
   }
 
   public SlashCommandData commandData() {

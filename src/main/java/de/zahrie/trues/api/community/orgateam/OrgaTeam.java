@@ -134,7 +134,7 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   }
 
   public Membership getMembership(TeamRole role, TeamPosition position) {
-    return new Query<>(Membership.class).where("orga_team", team).and("active", true).and("role", role).and("position", position).entity();
+    return new Query<>(Membership.class).where("orga_team", this).and("active", true).and("role", role).and("position", position).entity();
   }
 
   public String getName() {

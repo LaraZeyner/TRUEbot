@@ -47,7 +47,7 @@ public final class Nunu extends Willump {
 
   public static class DiscordChannel {
     public static TextChannel getAdminChannel() {
-      return Nunu.getInstance().getClient().getTextChannelById(Const.ADMIN_CHANNEL);
+      return Nunu.getInstance().getClient().getTextChannelById(Const.Channels.ADMIN_CHANNEL);
     }
 
     public static AudioChannel getVoiceChannel(Member member) {

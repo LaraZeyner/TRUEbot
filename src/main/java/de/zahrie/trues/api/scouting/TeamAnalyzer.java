@@ -46,7 +46,7 @@ public class TeamAnalyzer extends AnalyzeManager {
   }
 
   public TeamAnalyzer(Team team, ScoutingGameType gameType, int days) {
-    this(team, new SortedList<>(), gameType, days);
+    this(team, SortedList.of(), gameType, days);
   }
 
   private TeamAnalyzer(Team team, List<Player> players, ScoutingGameType gameType, int days) {
@@ -87,7 +87,7 @@ public class TeamAnalyzer extends AnalyzeManager {
         .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .join(new JoinQuery<>(Performance.class, Player.class))
         .where("_player.team", team).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
-    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
+    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString(true) + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
 
   @Override

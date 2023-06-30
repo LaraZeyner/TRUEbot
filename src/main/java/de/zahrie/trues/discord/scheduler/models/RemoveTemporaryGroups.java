@@ -18,12 +18,14 @@ public class RemoveTemporaryGroups extends ScheduledTask {
   public void execute() {
     for (DiscordUserGroup toRemove : new Query<>(DiscordUserGroup.class).where("active", true)
         .and(Condition.notNull("permission_end")).and("permission_end > now()").entityList()) {
-      toRemove.setActive(false);
       new RoleGranter(toRemove.getUser()).remove(toRemove.getDiscordGroup());
       MembershipFactory.getCurrentTeams(toRemove.getUser()).stream()
           .filter(om -> om.isActive() && om.getRole().equals(TeamRole.TRYOUT))
           .min(Comparator.comparing(Membership::getTimestamp))
           .ifPresent(om -> om.getOrgaTeam().getRoleManager().removeRole(toRemove.getUser()));
+      if (!toRemove.getUser().getActiveGroups().contains(toRemove.getDiscordGroup())) {
+        toRemove.setActive(false);
+      }
     }
   }
 

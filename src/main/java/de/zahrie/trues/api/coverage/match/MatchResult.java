@@ -1,6 +1,8 @@
 package de.zahrie.trues.api.coverage.match;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.match.model.Match;
@@ -82,6 +84,24 @@ public final class MatchResult implements Comparable<MatchResult> {
     return new MatchResult(match, guestScore, homeScore, played);
   }
 
+  public List<MatchResult> getPossibleOutcomes() {
+    final List<MatchResult> results = new ArrayList<>();
+    if (getMaxGames() % 2 == 0) {
+      if (homeScore + guestScore >= getMaxGames()) return List.of(this);
+      for (int i = homeScore; i <= getMaxGames() - homeScore; i++)
+        for (int j = guestScore; j <= getMaxGames() - guestScore; j++)
+          if (i + j == getMaxGames()) results.add(new MatchResult(match, i, j));
+      return results;
+    }
+
+    final int max = (int) Math.ceil(getMaxGames() / 2.);
+    if (Math.max(homeScore, guestScore) >= max) return List.of(this);
+    for (int i = homeScore; i <= max; i++)
+      for (int j = guestScore; j <= max; j++)
+        if (Math.max(i, j) < max) results.add(new MatchResult(match, i, j));
+    return results;
+  }
+
   public MatchResult determineExpectedResult() {
     final double gamePercentage = determineGamePercentage();
     if (gamePercentage == -1) return new MatchResult(match, 0, 0, true);
@@ -93,7 +113,7 @@ public final class MatchResult implements Comparable<MatchResult> {
       return add(new MatchResult(match, score1, score2));
     }
 
-    int endAt = (int) Math.ceil(getMaxGames() / 2.);
+    final int endAt = (int) Math.ceil(getMaxGames() / 2.);
     double score1 = homeScore;
     double score2 = guestScore;
     while (Math.round(Math.max(score1, score2)) < endAt) {

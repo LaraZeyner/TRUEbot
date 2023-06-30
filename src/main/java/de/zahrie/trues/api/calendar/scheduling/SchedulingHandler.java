@@ -15,12 +15,13 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 
 public record SchedulingHandler(DiscordUser user) {
   public static boolean isRepeat(String input) {
     return Arrays.stream(input.replace("\n", " ").split(" "))
-        .allMatch(section -> section.equals("repeat") || section.contains("@"));
+        .allMatch(section -> section.equals("repeat") || section.contains("@")) && input.contains("repeat");
   }
 
   public void repeat() {
@@ -33,7 +34,7 @@ public record SchedulingHandler(DiscordUser user) {
         .forEach(schedulingCalendar -> new SchedulingCalendar(schedulingCalendar.getRange().plusWeeks(1), null, user).create());
   }
 
-  public void add(List<TimeRange> ranges) {
+  public void add(SortedList<TimeRange> ranges) {
     if (ranges == null || ranges.isEmpty()) return;
 
     delete(ranges);

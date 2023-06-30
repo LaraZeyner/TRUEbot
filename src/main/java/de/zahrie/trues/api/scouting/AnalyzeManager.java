@@ -56,12 +56,12 @@ public abstract class AnalyzeManager {
   protected final int days;
 
   public AnalyzeManager(Team team, List<Player> players) {
-    this(team, new SortedList<>(players), ScoutingGameType.TEAM_GAMES, 180);
+    this(team, SortedList.of(players), ScoutingGameType.TEAM_GAMES, 180);
   }
 
   public AnalyzeManager(Team team, List<Player> players, ScoutingGameType gameType, int days) {
     this.team = team;
-    this.players = new SortedList<>(players);
+    this.players = SortedList.of(players);
     this.gameType = gameType;
     this.days = days;
   }

@@ -120,7 +120,7 @@ public class Event implements Entity<Event> {
   }
 
   public void sendMessage() {
-    final NewsChannel channel = Nunu.getInstance().getGuild().getNewsChannelById(Const.TICKER_CHANNEL);
+    final NewsChannel channel = Nunu.getInstance().getGuild().getNewsChannelById(Const.Channels.TICKER_CHANNEL);
     if (channel == null) throw new NullPointerException("Der Livechannel existiert nicht.");
 
     if (messageId == null) {
@@ -167,7 +167,7 @@ public class Event implements Entity<Event> {
   }
 
   public void createScheduledEvent() {
-    final GuildChannel eventChannel = Nunu.getInstance().getGuild().getGuildChannelById(Const.EVENT_CHANNEL);
+    final GuildChannel eventChannel = Nunu.getInstance().getGuild().getGuildChannelById(Const.Channels.EVENT_CHANNEL);
     if (eventChannel == null) throw new NullPointerException("Der Eventchannel existiert nicht.");
 
     final ScheduledEvent complete = Nunu.getInstance().getGuild().createScheduledEvent(gameMode.name() + " #" + index, eventChannel, getCalendar().getRange().getStartTime().atZone(ZoneId.systemDefault()).toOffsetDateTime())

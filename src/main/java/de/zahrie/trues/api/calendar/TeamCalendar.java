@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @Table(value = "calendar", department = "team")
 @ExtensionMethod(StringUtils.class)
-public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO {
+public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO<Calendar> {
   @Serial
   private static final long serialVersionUID = -8449986995823183145L;
 
@@ -80,13 +80,17 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
 
   @Nullable
   public Match getMatch() {
+    final String details = getDetails();
+    if (details == null) return null;
+
     final Integer matchId = getDetails().intValue();
     if (matchId == -1) return null;
+
     return new Query<>(Match.class).entity(matchId);
   }
 
   @Override
-  public List<String> getData() {
+  public List<Object> getData() {
     final Match match = getMatch();
     return List.of(
         getRange().display(),

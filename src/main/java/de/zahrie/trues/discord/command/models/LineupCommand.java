@@ -48,10 +48,10 @@ public class LineupCommand extends SlashCommand {
     if (team == null) return reply("Dieses Orgateam hat kein Team.");
 
     final Integer matchId = find("matchid").integer();
-    final Match mostRecentAMatch = (matchId == null) ? team.getMatches().getNextMatch(true) : new Query<>(Match.class).entity(matchId);
-    if (mostRecentAMatch == null) return reply("Es wurde kein Match gefunden.");
+    final Match match = (matchId == null) ? team.getMatches().getNextMatch(true) : new Query<>(Match.class).entity(matchId);
+    if (match == null) return reply("Es wurde kein Match gefunden.");
 
-    for (Participator participator : mostRecentAMatch.getParticipators()) {
+    for (Participator participator : match.getParticipators()) {
       if (team.equals(participator.getTeam())) continue;
       final boolean orderedLineup = determineOrderedLineup(participator);
       if (!orderedLineup) return reply("Das Lineup ist nicht vollständig.");

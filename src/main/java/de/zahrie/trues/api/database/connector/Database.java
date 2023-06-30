@@ -20,12 +20,11 @@ public final class Database {
   private static DatabaseConnection connection;
 
   public static DatabaseConnection connection() {
+    if (connection == null) {
+      connection = run();
+      new Query<>(DiscordUser.class).col("joined", null).update(List.of());
+    }
     return connection;
-  }
-
-  public static void connect() {
-    connection = run();
-    new Query<>(DiscordUser.class).col("joined", null).update(List.of());
   }
 
   private static DatabaseConnection run() {
@@ -60,15 +59,9 @@ public final class Database {
     connection = null;
   }
 
-  public static void reconnect() {
-    disconnect();
-    connect();
-  }
-
   @Data
   public static class DatabaseConnection {
     private final Connection connection;
-
     private Boolean commitable = true;
 
     public Boolean isCloseable() {

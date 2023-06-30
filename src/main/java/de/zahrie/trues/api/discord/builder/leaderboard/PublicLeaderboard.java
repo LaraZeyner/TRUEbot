@@ -2,6 +2,7 @@ package de.zahrie.trues.api.discord.builder.leaderboard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.discord.builder.EmbedWrapper;
@@ -62,10 +63,13 @@ public class PublicLeaderboard extends Leaderboard {
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
     final List<String> merge = data.merge();
     this.required = Math.max(1, merge.size());
-    if ((merge.isEmpty() || merge.get(0).isBlank()) && wrapperEmbeds.isEmpty())
+    if ((merge.isEmpty() || merge.stream().allMatch(String::isBlank)) && wrapperEmbeds.isEmpty())
       channel.sendMessage("keine Daten").queue(this::addMessage);
+
     for (int i = 0; i < merge.size(); i++) {
       final String content = merge.get(i);
+      if (content.isBlank()) continue;
+
       final MessageCreateAction msg = channel.sendMessage(content);
       if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty()) msg.addEmbeds(wrapperEmbeds);
       msg.queue(this::addMessage);
@@ -133,6 +137,6 @@ public class PublicLeaderboard extends Leaderboard {
     return new PublicLeaderboard(
         SimpleCustomQuery.params(NamedQuery.valueOf(entry.getString("key")), parameters.stream().map(string -> (Object) string).toList()),
         entry.getLong("channelId"),
-        IntStream.range(0, entry.getJSONArray("messageIds").length()).mapToObj(entry.getJSONArray("messageIds")::getLong).toList());
+        IntStream.range(0, entry.getJSONArray("messageIds").length()).mapToObj(entry.getJSONArray("messageIds")::getLong).collect(Collectors.toList()));
   }
 }

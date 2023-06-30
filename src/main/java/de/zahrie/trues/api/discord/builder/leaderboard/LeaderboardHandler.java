@@ -52,7 +52,7 @@ public class LeaderboardHandler {
       return "Das Leaderboard konnte erfolgreich gespeichert werden";
     }
 
-    if (iteration == 30*60) return "Das Leaderboard konnte nicht gespeichert werden und wird sich nicht aktualisieren.";
+    if (iteration == 30*55) return "Das Leaderboard konnte nicht gespeichert werden und wird sich nicht aktualisieren.";
 
     try {
       Thread.sleep(2000);

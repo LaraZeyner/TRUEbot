@@ -6,7 +6,7 @@ import de.zahrie.trues.api.datatypes.collections.SortedList;
 
 public record EventParticipators(PlayerLimit limit, List<RoundParticipator> players) {
   public EventParticipators(PlayerLimit limit) {
-    this(limit, new SortedList<>(false));
+    this(limit, SortedList.of());
   }
 
   public boolean add(RoundParticipator participator) {

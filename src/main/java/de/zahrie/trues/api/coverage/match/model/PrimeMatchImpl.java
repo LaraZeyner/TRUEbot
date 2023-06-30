@@ -29,6 +29,9 @@ public class PrimeMatchImpl {
 
     final Participator participator = LogFactory.handleUserWithTeam(match, userWithTeam);
     final var log = new MatchLog(timestamp, match, action, details, participator).create();
+    if (action.equals(MatchLogAction.REPORT)) {
+      match.updateResult();
+    }
     final Team team = participator == null ? null : participator.getTeam();
     final String lastMessage = (team == null ? "ADMIN" : team.getAbbreviation()) + " : " + details;
     match.setLastMessage(lastMessage);

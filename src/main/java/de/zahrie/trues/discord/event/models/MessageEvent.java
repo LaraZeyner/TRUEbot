@@ -20,6 +20,7 @@ import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.channel.DiscordChannel;
 import de.zahrie.trues.api.discord.ticket.Ticket;
 import de.zahrie.trues.api.discord.ticket.TicketMessage;
@@ -124,14 +125,21 @@ public class MessageEvent extends ListenerAdapter {
   }
 
   private void handleSchedulingEntry(Message message) {
-    List<User> users = message.getMentions().getUsers();
-    if (users.isEmpty()) users = List.of(message.getAuthor());
-    if (SchedulingHandler.isRepeat(message.getContentDisplay())) {
+    String content = message.getContentStripped().strip();
+    final List<User> users = SortedList.of(message.getMentions().getUsers());
+    if (users.isEmpty()) {
+      if (!content.startsWith(Const.SCHEDULING_PREFIX)) return;
+      users.add(message.getAuthor());
+      content = content.replace("<--", "").strip();
+    }
+
+
+    if (SchedulingHandler.isRepeat(content)) {
       users.forEach(user -> new SchedulingHandler(user.getMember().getDiscordUser()).repeat());
       return;
     }
 
-    final List<TimeRange> timeRanges = new DateTimeStringConverter(message.getContentStripped()).toRangeList();
+    final SortedList<TimeRange> timeRanges = new DateTimeStringConverter(content).toRangeList();
     if (timeRanges.isEmpty()) return;
 
     for (User user : users) {

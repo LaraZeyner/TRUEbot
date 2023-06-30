@@ -30,7 +30,7 @@ public final class PlayerFactory {
     Player player = findPlayer(puuid);
     if (player == null) {
       final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, puuid);
-      if (summoner != null) player = new PlayerImpl(summoner.getName(), puuid).create();
+      if (summoner != null) player = new PlayerImpl(summoner.getName(), summoner.getSummonerId(), puuid).create();
     }
     return player;
   }
@@ -46,7 +46,7 @@ public final class PlayerFactory {
       return null;
     }
 
-    return new PlayerImpl(summoner.getName(), summoner.getPUUID()).create();
+    return new PlayerImpl(summoner.getName(), summoner.getSummonerId(), summoner.getPUUID()).create();
   }
 
   private static Player lookForPlayer(String summonerName) {

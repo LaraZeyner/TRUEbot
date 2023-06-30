@@ -75,7 +75,7 @@ public abstract class SimpleAbstractQuery<T extends Id> {
     additionalParameters.addAll(joinSimpleQuery.getParams());
     final Query<E> innerQuery = joinSimpleQuery.getInnerQuery();
     if (innerQuery != null) {
-      final String selectString = joinSimpleQuery.getTargetClass() == null ? innerQuery.query : innerQuery.getSelectString();
+      final String selectString = joinSimpleQuery.getTargetClass() == null ? innerQuery.query : innerQuery.getSelectString(false);
       additionalParameters.addAll(innerQuery.getValues(selectString));
     }
     return (Query<T>) this;

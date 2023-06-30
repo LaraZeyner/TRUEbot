@@ -28,13 +28,4 @@ public final class StringQueryBuilder {
     }
     return creator;
   }
-
-  public StringCreator creator() {
-    return creator;
-  }
-
-  public SimpleCustomQuery query() {
-    return query;
-  }
-
 }

@@ -3,6 +3,7 @@ package de.zahrie.trues.discord.command.models;
 import java.time.LocalDateTime;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
+import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
@@ -40,7 +41,9 @@ public class TrainingCommand extends SlashCommand {
     final LocalDateTime end = start.plusMinutes(duration);
     final var timeRange = new TimeRange(start, end);
     final TeamCalendar.TeamCalendarType type = find("typ").toEnum(TeamCalendar.TeamCalendarType.class, TeamCalendar.TeamCalendarType.TRAINING);
-    final TextChannel textChannel = (TextChannel) getLocatedTeam().getChannels().get(TeamChannelType.SCOUTING);
+    final TeamChannel scoutingChannel = getLocatedTeam().getChannels().get(TeamChannelType.SCOUTING);
+    if (scoutingChannel == null) return reply("Der Scoutingchannel existiert nicht.");
+    final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
     if (textChannel == null) return sendMessage();
 
     final String typeString = find("typ").string();

@@ -1,6 +1,8 @@
 package de.zahrie.trues.api.calendar.scheduling;
 
+import java.time.DateTimeException;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.zahrie.trues.util.StringUtils;
@@ -19,7 +21,10 @@ public record TimeStringConverter(String input) {
     } else {
       startTime = input;
     }
-    return List.of(new TimeStringConverter(startTime).getTime(), new TimeStringConverter(endTime).getTime());
+    final ArrayList<LocalTime> objects = new ArrayList<>();
+    objects.add(new TimeStringConverter(startTime).getTime());
+    objects.add(new TimeStringConverter(endTime).getTime());
+    return objects;
   }
 
   public LocalTime getTime() {
@@ -29,6 +34,10 @@ public record TimeStringConverter(String input) {
     final int hour = StringUtils.intValue(timeString.split(":")[0]);
     final int minute = StringUtils.intValue(timeString.split(":")[1]);
     final int second = StringUtils.intValue(timeString.split(":")[2]);
-    return LocalTime.of(hour, minute, second);
+    try {
+      return LocalTime.of(hour, minute, second);
+    } catch (DateTimeException ignored) {
+      return null;
+    }
   }
 }

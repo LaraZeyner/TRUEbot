@@ -1,17 +1,18 @@
 package de.zahrie.trues.api.datatypes.calendar;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
@@ -33,14 +34,12 @@ public class TimeRange implements Comparable<TimeRange> {
   }
 
   public String display() {
-    final LocalDateTime now = LocalDateTime.now();
-    final TimeFormat format = startTime.isAfter(now.plusWeeks(3)) || startTime.isBefore(now.minusWeeks(3)) ? TimeFormat.DEFAULT_FULL : TimeFormat.DISCORD;
-    return format.of(startTime);
+    return TimeFormat.AUTO.of(startTime);
   }
 
   public String displayRange() {
-    if (startTime.isAfter(LocalDateTime.now())) return "Ende " + TimeFormat.DISCORD.of(endTime);
-    return "Beginn " + TimeFormat.DISCORD.of(startTime);
+    if (startTime.isBefore(LocalDateTime.now())) return "Ende " + TimeFormat.AUTO.of(endTime);
+    return "Beginn " + TimeFormat.AUTO.of(startTime);
   }
 
   public String duration() {
@@ -54,7 +53,7 @@ public class TimeRange implements Comparable<TimeRange> {
   }
 
   private boolean isReserved(OrgaTeam orgaTeam) {
-    for (final TeamCalendar calendarEntry : orgaTeam.getScheduler().getCalendarEntries()) {
+    for (TeamCalendar calendarEntry : orgaTeam.getScheduler().getCalendarEntries()) {
       final TimeRange range = calendarEntry.getRange();
       if (range.getStartTime().isAfterEqual(endTime)) continue;
       if (range.getEndTime().isBeforeEqual(startTime)) continue;
@@ -111,9 +110,9 @@ public class TimeRange implements Comparable<TimeRange> {
     return newTimeRanges;
   }
 
-  public static List<TimeRange> combine(List<TimeRange> timeRanges) {
-    List<TimeRange> rangesNew = new SortedList<>();
-    timeRanges.sort(TimeRange::compareTo);
+  public static SortedList<TimeRange> combine(SortedList<TimeRange> timeRanges) {
+    final SortedList<TimeRange> rangesNew = SortedList.sorted();
+    timeRanges.sort();
     if (timeRanges.size() < 2) return timeRanges;
     TimeRange rangeOld = timeRanges.get(0);
     for (TimeRange range : new ArrayList<>(timeRanges).subList(1, timeRanges.size())) {
@@ -129,7 +128,7 @@ public class TimeRange implements Comparable<TimeRange> {
   }
 
   public static List<TimeRange> intersect(List<TimeRange> ranges1, List<TimeRange> ranges2) {
-    return combine(ranges1.stream().flatMap(range1 -> range1.intersect(ranges2).stream()).collect(Collectors.toList()));
+    return combine(SortedList.sorted(ranges1.stream().flatMap(range1 -> range1.intersect(ranges2).stream())));
   }
 
   private List<TimeRange> intersect(List<TimeRange> ranges) {
@@ -151,13 +150,46 @@ public class TimeRange implements Comparable<TimeRange> {
 
   @Override
   public String toString() {
-    TimeFormat format = (startTime.getMinute() + endTime.getMinute() == 0) ? TimeFormat.HOUR_SHORT : TimeFormat.HOUR;
-    if (endTime.toLocalTime().equals(LocalTime.MAX)) {
-      if (startTime.toLocalTime().equals(LocalTime.MIN)) return "ganzer Tag";
-      format = (startTime.getMinute() == 0) ? TimeFormat.HOUR_SHORT : TimeFormat.HOUR;
-      return "ab " + format.of(startTime) + " Uhr";
+    LocalDateTime s = startTime;
+    final List<String> outputs = new ArrayList<>();
+    while (s.isBefore(endTime)) {
+      final LocalTime start = (s.toLocalDate().equals(startTime.toLocalDate())) ? startTime.toLocalTime() : LocalTime.MIN;
+      final LocalTime end = (s.toLocalDate().equals(endTime.toLocalDate())) ? endTime.toLocalTime() : LocalTime.MAX;
+      outputs.add(TimeFormat.DEFAULT_DAY.of(s) + " - " + new DayEntry(s.toLocalDate(), start, end));
+      s = s.plusDays(1);
     }
-    if (startTime.toLocalTime().equals(LocalTime.MIN)) return "bis " + format.of(endTime) + " Uhr";
-    return format.of(startTime) + "-" + format.of(endTime);
+    return String.join("\n", outputs);
   }
+
+  public String toDayString() {
+    LocalDateTime s = startTime;
+    final List<String> outputs = new ArrayList<>();
+    while (s.isBefore(endTime)) {
+      final LocalTime start = (s.toLocalDate().equals(startTime.toLocalDate())) ? startTime.toLocalTime() : LocalTime.MIN;
+      final LocalTime end = (s.toLocalDate().equals(endTime.toLocalDate())) ? endTime.toLocalTime() : LocalTime.MAX;
+      outputs.add(new DayEntry(s.toLocalDate(), start, end).toString());
+      s = s.plusDays(1);
+    }
+    return String.join("\n", outputs);
+  }
+
+  @AllArgsConstructor
+  public static class DayEntry {
+    private LocalDate date;
+    private LocalTime start;
+    private LocalTime end;
+
+    @Override
+    public String toString() {
+      if (start.equals(LocalTime.MIN)) {
+        if (end.equals(LocalTime.MAX)) return "ganzer Tag";
+        return "bis " + (end.getMinute() == 0 ? end.getHour() + " Uhr" : TimeFormat.HOUR.of(end) + "Uhr");
+      }
+      if (end.equals(LocalTime.MAX)) return "ab " + (start.getMinute() == 0 ? start.getHour() + " Uhr" : TimeFormat.HOUR.of(start) + "Uhr");
+      if (start.getMinute() == 0 && end.getMinute() == 0) return "von " + start.getHour() + " bis " + end.getHour() + " Uhr";
+      return "von " + TimeFormat.HOUR.of(start) + " bis " + TimeFormat.HOUR.of(end) + " Uhr";
+    }
+  }
+
+
 }

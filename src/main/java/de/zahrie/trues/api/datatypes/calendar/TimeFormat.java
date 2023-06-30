@@ -60,14 +60,19 @@ public enum TimeFormat {
   DEFAULT_FULL("E, d. MMM YYYY HH:mm", ""),
   DEFAULT_SHORT("E, HH:mm", ""),
   DEFAULT("E, d. MMM HH:mm", ""),
+  DEFAULT_DAY("E, d. MMM", ""),
   SYSTEM("YYYY-MM-dd HH:mm:ss", ""),
   WEEKLY("EE., HH", " Uhr");
 
   private final String format;
-
   private final String suffix;
+
   public String of(LocalDate date) {
     return of(LocalDateTime.of(date, LocalTime.MIN));
+  }
+
+  public String of(LocalTime time) {
+    return of(LocalDateTime.of(LocalDate.now(), time));
   }
 
   public String of(LocalDateTime time) {
@@ -87,13 +92,22 @@ public enum TimeFormat {
     return of(LocalDateTime.now());
   }
 
+  /**
+   * weniger als 45 Minuten -> DISCORD <br>
+   * heute -> <b>HH:MM Uhr</b> <br>
+   * weniger als 24 Stunden -> DISCORD <br>
+   * weniger als 7 Tage -> <b>Mo, HH:MM Uhr</b> <br>
+   * weniger als 25 Tage -> DISCORD <br>
+   * sonst -> <b>Mo, DD. MMM HH:MM Uhr</b>
+   */
   private String handleAuto(LocalDateTime time) {
     final Duration duration = Duration.between(time, LocalDateTime.now());
-    if (duration.getSeconds() < 45 * 60) return DISCORD.of(time);
-    else if (time.toLocalDate().equals(LocalDate.now())) return HOUR.of(time);
-    else if (duration.getSeconds() < 24 * 60 * 60) return DISCORD.of(time);
-    else if (duration.getSeconds() < 7 * 24 * 60 * 60) return DEFAULT_SHORT.of(time);
-    else if (duration.getSeconds() < 25 * 24 * 60 * 60) return DISCORD.of(time);
-    else return DEFAULT.of(time);
+    final long seconds = Math.abs(duration.getSeconds());
+    if (seconds < 45 * 60) return DISCORD.of(time);
+    else if (time.toLocalDate().equals(LocalDate.now())) return HOUR.of(time) + " Uhr";
+    else if (seconds < 24 * 60 * 60) return DISCORD.of(time);
+    else if (seconds < 7 * 24 * 60 * 60) return DEFAULT_SHORT.of(time) + " Uhr";
+    else if (seconds < 25 * 24 * 60 * 60) return DISCORD.of(time);
+    else return DEFAULT.of(time) + " Uhr";
   }
 }

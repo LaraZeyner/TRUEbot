@@ -3,31 +3,40 @@ package de.zahrie.trues.api.discord.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.util.Const;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 @Data
 public class EmbedWrapper {
-
   private final List<MessageEmbed> embeds = new ArrayList<>();
-
   private final List<List<String>> content = new ArrayList<>();
 
-  public static EmbedWrapper of() {
-    return new EmbedWrapper();
-  }
-
+  /**
+   * Füge {@link MessageEmbed} zur Gesamtnachricht hinzu
+   * @param embed Liste von Einbettungen innerhalb einer Nachricht
+   * @return instance für Chaining
+   */
   public EmbedWrapper embed(List<MessageEmbed> embed) {
     this.embeds.addAll(embed);
     return this;
   }
 
+  /**
+   * Füge {@link String} zur Gesamtnachricht hinzu
+   * @param content Liste von Texten innerhalb einer Nachricht
+   * @return instance für Chaining
+   */
   public EmbedWrapper content(List<String> content) {
     this.content.add(content);
     return this;
   }
 
+  /**
+   * Verlinke Contents miteinander
+   * @return Messages, die auszugeben sind
+   */
   public List<String> merge() {
     if (this.content.isEmpty()) return List.of("");
 
@@ -44,9 +53,7 @@ public class EmbedWrapper {
       }
       out.append("\n\n");
     }
-    data.add(out.toString());
-
+    data.add(out.append("```zuletzt aktualisiert ").append(TimeFormat.AUTO.now()).toString());
     return data;
   }
-
 }

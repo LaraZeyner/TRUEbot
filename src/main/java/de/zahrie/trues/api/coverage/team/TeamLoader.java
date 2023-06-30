@@ -61,8 +61,10 @@ public class TeamLoader extends GamesportsLoader {
     if (html == null || html.text() == null) return null;
 
     final String teamTitle = html.find("h1").text();
-    team.setName(teamTitle.before(" (", -1));
-    team.setAbbreviation(teamTitle.between("(", ")", -1));
+    if (teamTitle != null) {
+      team.setName(teamTitle.before(" (", -1));
+      team.setAbbreviation(teamTitle.between("(", ")", -1));
+    } else System.err.println(getId());
 
     return TeamHandler.builder()
         .html(html)

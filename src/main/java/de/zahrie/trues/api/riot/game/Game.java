@@ -2,6 +2,7 @@ package de.zahrie.trues.api.riot.game;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,6 +117,6 @@ public class Game implements Entity<Game>, Comparable<Game> {
 
   @Override
   public int compareTo(@NotNull Game o) {
-    return start.compareTo(o.getStart());
+    return Comparator.comparing(Game::getStart).reversed().compare(this, o);
   }
 }

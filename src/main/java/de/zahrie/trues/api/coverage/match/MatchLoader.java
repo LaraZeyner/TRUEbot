@@ -88,7 +88,9 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   private LocalDateTime getMatchtime() {
-    final int matchTimeEpoch = html.findId("div", HTML.MATCH_TIME_2).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
+    final String attribute = html.findId("div", HTML.MATCH_TIME_2).getAttribute(HTML.TIME_ATTRIBUTE);
+    System.out.println(getId() + " -> " + attribute);
+    final int matchTimeEpoch = attribute.intValue();
     return DateTimeUtils.fromEpoch(matchTimeEpoch);
   }
 

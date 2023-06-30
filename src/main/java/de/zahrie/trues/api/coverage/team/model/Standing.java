@@ -12,7 +12,7 @@ public record Standing(int wins, int losses) implements Serializable, Comparable
   private static final long serialVersionUID = -8830455150033695496L;
 
   public Winrate getWinrate() {
-    return new Winrate(new TrueNumber((double) this.wins).divide(this.losses));
+    return new Winrate(new TrueNumber((double) this.wins).divide(this.wins + this.losses));
   }
 
   public int getGames() {

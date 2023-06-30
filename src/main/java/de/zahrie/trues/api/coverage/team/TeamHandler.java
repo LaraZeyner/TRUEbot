@@ -20,6 +20,7 @@ import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.signup.SignupFactory;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
+import de.zahrie.trues.api.database.query.ModifyOutcome;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.request.HTML;
@@ -39,15 +40,22 @@ public class TeamHandler extends TeamModel implements Serializable {
     super(html, url, team, players);
   }
 
+  /**
+   *
+   * @param ignore wenn {@code true} lade keine Daten
+   */
   public void update(boolean ignore) {
     if (TeamLoader.loadedTeams.contains(team)) return;
 
     final List<HTML> stages = html.findAll("section", HTML.STAGE);
-    final boolean created = updateResult(stages);
+    final ModifyOutcome created = updateResult(stages);
     updateRecordAndSeasons();
     if (team.getCurrentLeague() != null && ((PRMLeague) team.getCurrentLeague().getLeague()).isStarter()) handleStarterMatches(stages);
 
-    if (created && !ignore) team.getPlayers().forEach(player -> player.loadGames(LoaderGameType.CLASH_PLUS));
+    if (!created.isNull() && !ignore) {
+      System.out.println("Lade " + team.getName());
+      team.getPlayers().forEach(player -> player.loadGames(LoaderGameType.CLASH_PLUS));
+    }
     final double averageMMR = team.getPlayers().stream().map(Player::getRanks).map(PlayerRankHandler::getLastRelevant).map(PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
     team.setLastMMR((int) Math.round(averageMMR));
     team.update();
@@ -91,8 +99,8 @@ public class TeamHandler extends TeamModel implements Serializable {
     }
   }
 
-  private boolean updateResult(List<HTML> stages) {
-    if (stages.isEmpty()) return false;
+  private ModifyOutcome updateResult(List<HTML> stages) {
+    if (stages.isEmpty()) return ModifyOutcome.NOTHING;
 
     final String result = stages.get(stages.size() - 1)
         .find("ul", HTML.ICON_INFO)

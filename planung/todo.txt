@@ -7,3 +7,5 @@ Ideen:
  - Winrates auslesen
  - Champion Mastery
  - Signup für Internes Turnier
+
+ - fill role?

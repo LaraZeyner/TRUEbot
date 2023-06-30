@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.performance;
 
 import java.io.Serial;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,12 +18,13 @@ import de.zahrie.trues.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Table("team_perf")
 @ExtensionMethod(SQLUtils.class)
-public class TeamPerf implements Entity<TeamPerf> {
+public class TeamPerf implements Entity<TeamPerf>, Comparable<TeamPerf> {
   @Serial
   private static final long serialVersionUID = 4138620147627390023L;
 
@@ -134,6 +136,11 @@ public class TeamPerf implements Entity<TeamPerf> {
 
   public String getWinString() {
     return win ? "Gewonnen" : "Verloren";
+  }
+
+  @Override
+  public int compareTo(@NotNull TeamPerf o) {
+    return Comparator.comparing(TeamPerf::getGame).thenComparing(TeamPerf::getSide).compare(this, o);
   }
 
   public record Objectives(byte turrets, byte drakes, byte inhibs, byte heralds, byte barons) {

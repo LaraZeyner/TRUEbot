@@ -18,6 +18,7 @@ import de.zahrie.trues.api.community.member.MembershipFactory;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.api.datatypes.calendar.TimeRanges;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.util.Util;
 
@@ -87,9 +88,9 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
         value = otherMembers.subList(0, Math.min(3, otherMembers.size())).stream().map(DiscordUser::getNickname).collect(Collectors.joining(", "));
       } else {
         key = membership.getUser().getNickname();
-        value = remainingAt.stream().map(TimeRange::toString).collect(Collectors.joining(", "));
+        value = remainingAt.stream().map(TimeRange::toDayString).collect(Collectors.joining(", "));
       }
-      times.add(List.of(key, value));
+      if (!value.isBlank()) times.add(List.of(key, value));
     }
     return times;
   }
@@ -101,7 +102,7 @@ public record TeamTrainingScheduleHandler(OrgaTeam team) {
 
 
   public List<TimeRange> getTeamAvailabilitySince(LocalDate date) {
-    List<TimeRange> remainingRanges = new ArrayList<>();
+    List<TimeRange> remainingRanges = SortedList.sorted();
     for (int i = 0; i < 5; i++) {
       final TeamPosition position = TeamPosition.values()[i];
       final Membership membership = team.getMembership(TeamRole.MAIN, position);

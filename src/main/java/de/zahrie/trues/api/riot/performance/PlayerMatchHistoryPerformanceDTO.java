@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.riot.performance;
 
+import java.util.Comparator;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
@@ -14,10 +15,10 @@ import de.zahrie.trues.api.riot.game.Game;
 import de.zahrie.trues.api.riot.game.GameType;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.util.Util;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record PlayerMatchHistoryPerformanceDTO(Performance performance) implements DTO {
-
+public record PlayerMatchHistoryPerformanceDTO(Performance performance) implements DTO<PlayerMatchHistoryPerformanceDTO> {
   public static Query<Performance> get(Player player, ScoutingGameType gameType, @Nullable Lane lane, @Nullable Champion champion) {
     final var query = new Query<>(Performance.class)
         .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf"))
@@ -49,7 +50,7 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
   }
 
   @Override
-  public List<String> getData() {
+  public List<Object> getData() {
     return List.of(
         performance.getTeamPerformance().getGame().getType().name().charAt(0) + ": " +
             TimeFormat.DISCORD.of(performance.getTeamPerformance().getGame().getStart()),
@@ -57,5 +58,10 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
             Util.avoidNull(performance.getMatchup().opponent(), "kein Gegner", Champion::getName),
         (performance.getTeamPerformance().isWin() ? "W" : "L") + ": " + performance.getKda().toString()
     );
+  }
+
+  @Override
+  public int compareTo(@NotNull PlayerMatchHistoryPerformanceDTO o) {
+    return Comparator.comparing(PlayerMatchHistoryPerformanceDTO::performance).compare(this, o);
   }
 }

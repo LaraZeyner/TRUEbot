@@ -38,8 +38,7 @@ public class RoleGranter extends RoleGranterBase {
   }
 
   public void removeTeamRole(Membership member, @NonNull OrgaTeam team) {
-    TeamLogFactory.create(invoker, target, target.getMention() + " verlässt " +
-        team.getTeam().getName(), TeamLog.TeamLogAction.LINEUP_LEAVE, team);
+    TeamLogFactory.create(invoker, target, target.getMention() + " verlässt " + team.getName(), TeamLog.TeamLogAction.LINEUP_LEAVE, team);
     removeTeam(team);
     target.getApplications().demote(member.getRole(), member.getPosition());
     updateBasedOnGivenRolesAndMembers();

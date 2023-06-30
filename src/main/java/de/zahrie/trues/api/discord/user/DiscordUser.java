@@ -170,7 +170,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   }
 
   public Set<DiscordGroup> getActiveGroups() {
-    return getMember().getRoles().stream().map(DiscordGroup::of).collect(Collectors.toSet());
+    return getMember().getRoles().stream().map(DiscordGroup::of).filter(Objects::nonNull).collect(Collectors.toSet());
   }
 
   public void addTempGroups() {

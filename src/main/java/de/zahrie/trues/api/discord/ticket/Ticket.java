@@ -86,14 +86,14 @@ public class Ticket implements Entity<Ticket> {
     final Integer o = (Integer) new Query<>(Ticket.class).get("count(*)", Integer.class).single()[0];
     this.id = o+1;
     final TextChannel textChannel = Nunu.getInstance().getGuild().createTextChannel(id + ": " + title,
-        Nunu.getInstance().getGuild().getCategoryById(Const.ADMIN_INTERN)).complete();
+        Nunu.getInstance().getGuild().getCategoryById(Const.Channels.ADMIN_INTERN)).complete();
     applyPermissions(textChannel);
     final var discordChannel = new DiscordChannel(textChannel.getIdLong(), textChannel.getName(),
         ChannelType.SUPPORT_TICKET, DiscordChannelType.TEXT).create();
     setChannel(discordChannel);
     textChannel.sendMessage("Dein Support Ticket wurde erstellt! Du kannst dein Anliegen mit 'end' schließen, was zur Löschung des Channels führt. Anfragen, die länger als eine Woche nicht beantwortet werden und beantwortet sind, werden wir manuell schließen. Alle Nachrichten werden aufgezeichnet, sodass du dir den Verlauf auch später noch anschauen kannst.").queue();
     return new Query<>(Ticket.class)
-        .col("ticket_id", id).col("topic", topic).col("title", title).col("discordchannel", channelId)
+        .col("topic", topic).col("title", title).col("discordchannel", channelId)
         .insert(this);
   }
 

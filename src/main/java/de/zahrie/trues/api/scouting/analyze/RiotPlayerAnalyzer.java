@@ -13,6 +13,7 @@ import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.riot.Zeri;
+import de.zahrie.trues.api.riot.champion.ChampionMastery;
 import de.zahrie.trues.api.riot.game.Game;
 import de.zahrie.trues.api.riot.game.GameType;
 import de.zahrie.trues.api.riot.match.MatchHistoryBuilder;
@@ -28,14 +29,16 @@ import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 
 public record RiotPlayerAnalyzer(Player player) {
-  private static final List<Integer> fullyAnalyzedPlayers = Collections.synchronizedList(new SortedList<>());
-  private static final List<Integer> currentPlayers = Collections.synchronizedList(new SortedList<>());
+  private static final List<Integer> todayAnalyzedPlayers = Collections.synchronizedList(SortedList.of());
+  private static final List<Integer> fullyAnalyzedPlayers = Collections.synchronizedList(SortedList.of());
+  private static final List<Integer> currentPlayers = Collections.synchronizedList(SortedList.of());
 
   public static void reset() {
     fullyAnalyzedPlayers.clear();
+    todayAnalyzedPlayers.clear();
   }
 
-  public void analyze(LoaderGameType gameType, boolean force) {
+  public void analyzeGames(LoaderGameType gameType, boolean force) {
     if (currentPlayers.contains(player.getId())) return;
     if (gameType.equals(LoaderGameType.MATCHMADE) && fullyAnalyzedPlayers.contains(player.getId()) && !force) return;
 
@@ -50,11 +53,11 @@ public record RiotPlayerAnalyzer(Player player) {
         "JOIN team_perf tp on performance.t_perf = tp.team_perf_id JOIN game g on tp.game = g.game_id " +
         "WHERE g.game_type <= ?").entity(List.of(GameType.CUSTOM)) == null) {
       final MatchHistoryBuilder historyBuilder = new MatchHistoryBuilder(summoner, LocalDateTime.MIN).with(GameQueueType.CUSTOM);
-      analyze(historyBuilder.get(), gameType);
+      analyzeGames(historyBuilder.get(), gameType);
     }
 
     final var historyBuilder = gameType.getMatchHistory(summoner, player);
-    if (analyze(historyBuilder, gameType)) new PlayerHandler(null, player).updateElo();
+    if (analyzeGames(historyBuilder, gameType)) new PlayerHandler(null, player).updateElo();
     else player.getRanks().createRank();
     AnalyzeManager.delete(player);
 
@@ -63,7 +66,7 @@ public record RiotPlayerAnalyzer(Player player) {
     Database.connection().commit(null);
   }
 
-  private boolean analyze(List<String> history, LoaderGameType gameType) {
+  private boolean analyzeGames(List<String> history, LoaderGameType gameType) {
     final long start = System.currentTimeMillis();
     boolean hasPlayedRanked = false;
     for (String matchId : new HashSet<>(history)) {
@@ -81,6 +84,18 @@ public record RiotPlayerAnalyzer(Player player) {
     if (gameType.equals(LoaderGameType.MATCHMADE) && history.size() > 20) {
       System.out.println(player.getSummonerName() + " (" + Util.avoidNull(player.getTeam(), "null", Team::getName) + ") -> " + (System.currentTimeMillis() - start) / 1000.0 + " für " + history.size());
     }
+
+    if (!history.isEmpty() && todayAnalyzedPlayers.contains(player.getId())) analyzeMastery();
     return hasPlayedRanked;
+  }
+
+  public void analyzeMastery() {
+    todayAnalyzedPlayers.add(player.getId());
+    final Summoner summonerByPUUID = Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, player.getPuuid());
+    final String summonerId = summonerByPUUID.getSummonerId();
+    for (final no.stelar7.api.r4j.pojo.lol.championmastery.ChampionMastery championMastery :
+        Zeri.get().getMasteryAPI().getChampionMasteries(LeagueShard.EUW1, summonerId)) {
+      new ChampionMastery(player, championMastery.getChampionId(), championMastery.getChampionPoints(), (byte) championMastery.getChampionLevel(), championMastery.getLastPlayTimeAsDate().toLocalDateTime()).create();
+    }
   }
 }

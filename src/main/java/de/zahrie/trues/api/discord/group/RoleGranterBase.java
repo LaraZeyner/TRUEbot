@@ -138,10 +138,10 @@ public class RoleGranterBase {
 
   private void updateRelatedRolesOnRemove(DiscordGroup group) {
     final var groups = new HashSet<>(target.getActiveGroups());
-    if (!groups.remove(group)) {
-      return;
-    }
-    if (group.getDepartment() != null && groups.stream().map(DiscordGroup::getDepartment).filter(Objects::nonNull).noneMatch(department -> department.equals(group.getDepartment()))) {
+    if (!groups.remove(group)) return;
+
+    if (group.getDepartment() != null && groups.stream().map(DiscordGroup::getDepartment).filter(Objects::nonNull)
+        .noneMatch(department -> department.equals(group.getDepartment()))) {
       final DiscordGroup departmentGroup = group.getDepartment().getGroup();
       if (departmentGroup != null && !departmentGroup.equals(group)) {
         removeRole(departmentGroup.getRole());

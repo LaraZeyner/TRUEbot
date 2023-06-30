@@ -71,18 +71,19 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
    * 7: <b>limit</b> - {@link Integer} <br>
    * ? auf <b>4</b>
    */
-  public String getSelectString() {
+  public String getSelectString(boolean includeLimit) {
     if (getDepartment() != null) where("department", getDepartment());
-    StringBuilder mainQuery = new StringBuilder(querySelectString());
+    StringBuilder mainQuery = new StringBuilder(querySelectString(includeLimit));
     if (unified.isEmpty()) return mainQuery.toString();
 
     mainQuery = new StringBuilder("(" + mainQuery + ")");
-    for (Union union : unified) mainQuery.append(union.type().toString()).append(" (").append(union.query().querySelectString()).append(")");
+    for (Union union : unified) mainQuery.append(union.type().toString()).append(" (").append(union.query().querySelectString(includeLimit)).append(")");
     return mainQuery.toString();
   }
 
-  String querySelectString() {
-    return "SELECT " + getFields("") + " FROM " + getFrom() + getJoins() + getConditions() + getGroup() + getOrder() + getOffset() + getLimit();
+  String querySelectString(boolean includeLimit) {
+    return "SELECT " + getFields("") + " FROM " + getFrom() + getJoins() + getConditions() + getGroup() + getOrder() + getOffset() +
+        (includeLimit ? getLimit() : "");
   }
 
   /**
@@ -100,7 +101,7 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
   }
 
   protected String getInnerSimpleQuery() {
-    return getSelectString();
+    return getSelectString(false);
   }
 
   protected List<Object> getValues(String query) {
@@ -108,7 +109,7 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
     joins.stream().map(JoinQuery::getParams).forEach(sqlFields::addAll);
     if (query.contains("WHERE")) sqlFields.addAll(conditionManager.getValues());
     for (final Union union : unified) {
-      sqlFields.addAll(union.query().getValues(union.query().getSelectString()));
+      sqlFields.addAll(union.query().getValues(union.query().getSelectString(true)));
     }
     return sqlFields;
   }

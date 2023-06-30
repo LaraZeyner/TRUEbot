@@ -99,7 +99,7 @@ public class MatchHandler extends MatchModel implements Serializable {
     if (!match.isRunning()) return EventStatus.PLAYED;
     EventStatus status = EventStatus.CREATED;
     boolean expired = false;
-    for (MatchLog log : new SortedList<>(match.getLogs()).reverse()) {
+    for (MatchLog log : SortedList.sorted(match.getLogs()).reverse()) {
       final EventStatus eventStatus = log.getAction().getStatus();
       if (eventStatus == null) continue;
 

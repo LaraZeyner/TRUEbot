@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
     @Option(name = "nutzer", description = "Anzahl Nutzer", required = false, type = OptionType.INTEGER)
 })
 public class LimitCommand extends SlashCommand {
-  public static List<Long> limitedChannels = new SortedList<>();
+  public static List<Long> limitedChannels = SortedList.of();
 
   @Override
   @Msg(value = "Der Channel wurde auf **{}** Nutzer limitiert.", error = "Der gib eine gültige Zahl ein.")

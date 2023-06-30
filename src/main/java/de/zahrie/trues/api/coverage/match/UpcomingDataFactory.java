@@ -3,7 +3,6 @@ package de.zahrie.trues.api.coverage.match;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
@@ -32,7 +31,7 @@ public final class UpcomingDataFactory {
   }
 
   public List<Team> getTeams() {
-    return new SortedList<>(nextMatches.stream().flatMap(match -> Arrays.stream(match.getParticipators())).map(Participator::getTeam).collect(Collectors.toSet()));
+    return SortedList.of(nextMatches.stream().flatMap(match -> Arrays.stream(match.getParticipators())).map(Participator::getTeam));
   }
 
   public List<Match> getMatches() {

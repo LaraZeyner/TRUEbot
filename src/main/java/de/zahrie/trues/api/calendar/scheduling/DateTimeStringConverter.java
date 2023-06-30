@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
 import de.zahrie.trues.util.io.log.Console;
@@ -45,10 +47,9 @@ public final class DateTimeStringConverter {
     return Util.avoidNull(timeRange, null, TimeRange::getStartTime);
   }
 
-  public List<TimeRange> toRangeList() {
-    final List<TimeRange> ranges = Arrays.stream(input.split("\n"))
-        .flatMap(line -> determineRangesPerLine(line).stream()).collect(Collectors.toList());
-    return TimeRange.combine(ranges);
+  public SortedList<TimeRange> toRangeList() {
+    final Stream<TimeRange> ranges = Arrays.stream(input.split("\n")).flatMap(line -> determineRangesPerLine(line).stream());
+    return TimeRange.combine(SortedList.sorted(ranges));
   }
 
   private List<TimeRange> determineRangesPerLine(String line) {

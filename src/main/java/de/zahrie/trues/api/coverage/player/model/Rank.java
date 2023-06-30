@@ -32,7 +32,8 @@ public record Rank(RankTier tier, Division division, short points) implements Co
   }
 
   public int getMMR() {
-    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 400 : tier.ordinal() * 400 + 300 - division.getPoints()) + points;
+    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 400 : tier.ordinal() * 400 + division.getPoints())
+        + points;
   }
 
   @Override

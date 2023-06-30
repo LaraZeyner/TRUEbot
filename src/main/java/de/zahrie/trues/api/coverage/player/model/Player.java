@@ -2,6 +2,7 @@ package de.zahrie.trues.api.coverage.player.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
@@ -9,6 +10,7 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.api.riot.Zeri;
 import de.zahrie.trues.api.riot.game.GameType;
 import de.zahrie.trues.api.riot.performance.PerformanceFactory;
 import de.zahrie.trues.api.scouting.PlayerAnalyzer;
@@ -16,13 +18,19 @@ import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.util.Util;
 import lombok.Getter;
+import lombok.Setter;
+import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
+import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Table(value = "player")
 public abstract class Player implements Comparable<Player>, Id, APlayer {
+  @Setter
   protected int id; // player_id
   protected String puuid; // lol_puuid
+  protected String summonerId; // lol_summoner
   protected String summonerName; // lol_name
   protected Integer discordUserId; // discord_user
   protected Integer teamId; // team
@@ -36,8 +44,8 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     return discordUser;
   }
 
-  public void setDiscordUser(DiscordUser discordUser) {
-    if (this.discordUser.equals(discordUser)) return;
+  public void setDiscordUser(@Nullable DiscordUser discordUser) {
+    if (Objects.equals(this.discordUser, discordUser)) return;
     this.discordUser = discordUser;
     this.discordUserId = Util.avoidNull(discordUser, DiscordUser::getId);
     new Query<>(Player.class).col("discord_user", discordUserId).update(id);
@@ -65,17 +73,27 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     if (team != null) {
       team.getPlayers().add(this);
       if (team instanceof PRMTeam prmTeam && prmTeam.getCurrentLeague() != null && prmTeam.getCurrentLeague().getLeague().isOrgaLeague()) {
-        System.out.println("NEUER SPIELER");
         loadGames(LoaderGameType.CLASH_PLUS);
       }
     }
     new Query<>(Player.class).col("team", team).update(id);
-
   }
 
-  public Player(String summonerName, String puuid) {
+  public String getSummonerId() {
+    if (summonerId == null) {
+      final String summonerId = Util.avoidNull(Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, puuid), Summoner::getSummonerId);
+      if (summonerId != null) {
+        this.summonerId = summonerId;
+        new Query<>(Player.class).col("lol_summoner", summonerId).update(id);
+      }
+    }
+    return summonerId;
+  }
+
+  public Player(String summonerName, String puuid, String summonerId) {
     this.summonerName = summonerName;
     this.puuid = puuid;
+    this.summonerId = summonerId;
     final Player playerFound = new Query<>(Player.class).where("lol_puuid", puuid).entity();
     if (playerFound != null) {
       this.updated = playerFound.getUpdated();
@@ -88,9 +106,10 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     }
   }
 
-  protected Player(int id, String puuid, String summonerName, Integer discordUserId, Integer teamId, LocalDateTime updated, boolean played) {
+  protected Player(int id, String puuid, String summonerId, String summonerName, Integer discordUserId, Integer teamId, LocalDateTime updated, boolean played) {
     this.id = id;
     this.puuid = puuid;
+    this.summonerId = summonerId;
     this.summonerName = summonerName;
     this.discordUserId = discordUserId;
     this.teamId = teamId;
@@ -98,14 +117,11 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     this.played = played;
   }
 
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public void setPuuidAndName(String puuid, String name) {
+  public void setPuuidAndName(String puuid, String summonerId, String name) {
     this.puuid = puuid;
+    this.summonerId = summonerId;
     this.summonerName = name;
-    new Query<>(Player.class).col("lol_puuid", puuid).col("lol_name", name).update(id);
+    new Query<>(Player.class).col("lol_puuid", puuid).col("lol_summoner", puuid).col("lol_name", name).update(id);
   }
 
   public void setSummonerName(String summonerName) {
@@ -136,11 +152,15 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
   }
 
   public void loadGames(LoaderGameType gameType) {
-    new RiotPlayerAnalyzer(this).analyze(gameType, false);
+    new RiotPlayerAnalyzer(this).analyzeGames(gameType, false);
+  }
+
+  public void loadChampionMastery() {
+    new RiotPlayerAnalyzer(this).analyzeMastery();
   }
 
   public void forceLoadMatchmade() {
-    new RiotPlayerAnalyzer(this).analyze(LoaderGameType.MATCHMADE, true);
+    new RiotPlayerAnalyzer(this).analyzeGames(LoaderGameType.MATCHMADE, true);
   }
 
   @Override

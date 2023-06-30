@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.calendar.Calendar;
+import de.zahrie.trues.api.calendar.MatchCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.ABetable;
 import de.zahrie.trues.api.coverage.match.MatchResult;
@@ -33,7 +33,7 @@ public interface AMatch extends ABetable {
   MatchResult getResult(); // result
   Participator[] getParticipators();
   List<MatchLog> getLogs();
-  Calendar getEvent();
+  MatchCalendar asEvent();
 
   default List<MatchLog> determineLog() {
     return new Query<>(MatchLog.class).where("coverage", this).descending("log_time").entityList();

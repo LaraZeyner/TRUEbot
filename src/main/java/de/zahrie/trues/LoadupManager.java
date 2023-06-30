@@ -15,6 +15,7 @@ import de.zahrie.trues.api.scouting.AnalyzeManager;
 import de.zahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.zahrie.trues.util.Connectable;
 import de.zahrie.trues.util.Const;
+import de.zahrie.trues.util.io.log.DevInfo;
 import lombok.extern.java.Log;
 
 @Log
@@ -45,11 +46,11 @@ public final class LoadupManager implements Connectable {
     final Handler consoleHandler = new ConsoleHandler();
     consoleHandler.setLevel(Level.FINE);
     Logger.getAnonymousLogger().addHandler(consoleHandler);
-
-    Database.connect();
-    log.info("Datenbank geladen");
-
     Nunu.getInstance().connect();
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+      e.printStackTrace();
+      new DevInfo().warn(e);
+    });
     log.info("System gestartet in " + (System.currentTimeMillis() - initMillis) + " Millisekunden.");
   }
 

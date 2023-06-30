@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 @NoArgsConstructor
 public class DevInfo extends AbstractLog<DevInfo> {
-  private static final TextChannel LOGGING_CHANNEL = Nunu.getInstance().getClient().getTextChannelById(Const.DEV_LOGGING_CHANNEL);
+  private static final TextChannel LOGGING_CHANNEL = Nunu.getInstance().getClient().getTextChannelById(Const.Channels.DEV_LOGGING_CHANNEL);
 
   public DevInfo(String message) {
     super(message);

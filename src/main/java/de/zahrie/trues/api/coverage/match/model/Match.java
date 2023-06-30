@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.calendar.Calendar;
+import de.zahrie.trues.api.calendar.Cast;
+import de.zahrie.trues.api.calendar.MatchCalendar;
 import de.zahrie.trues.api.community.betting.Bet;
 import de.zahrie.trues.api.community.betting.BetFactory;
 import de.zahrie.trues.api.coverage.match.MatchResult;
@@ -63,8 +64,15 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   public boolean addLog(@NonNull MatchLog matchLog) {
     if (matchLog.getId() == 0) this.logs = null;
-    else return logs.add(matchLog);
+    else return getLogs().add(matchLog);
     return false;
+  }
+
+  private Cast cast;
+
+  public Cast getCast() {
+    if (cast == null) this.cast = new Query<>(Cast.class).where("details", String.valueOf(id)).entity();
+    return cast;
   }
 
   protected MatchResult matchResult;
@@ -74,25 +82,8 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     return matchResult;
   }
 
-  protected Integer eventId;
-  protected Calendar event;
-
-  public Calendar getEvent() {
-    if (event == null) {
-      if (eventId == null) {
-      }
-    }
-    return event;
-  }
-
-  public void setEvent(Calendar event) {
-    Integer eId = event != null ? event.getId() : null;
-    if (!Objects.equals(eventId, eId)) {
-      this.event = event;
-      this.eventId = eId;
-      new Query<>(Match.class).col("event", eventId).update(id);
-    }
-
+  public MatchCalendar asEvent() {
+    return new MatchCalendar(getExpectedTimeRange(), String.valueOf(id));
   }
 
   public Match(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result) {
@@ -184,7 +175,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   @Override
   public int compareTo(@NotNull Match o) {
-    return getStart().compareTo(o.getStart());
+    return start.compareTo(o.getStart());
   }
 
   @Override

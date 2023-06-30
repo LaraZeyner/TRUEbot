@@ -12,48 +12,77 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.zahrie.trues.api.database.query.Id;
-import lombok.NonNull;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-public class SortedList<E> extends AbstractList<E> {
+public final class SortedList<E> extends AbstractList<E> {
+  private final Comparator<E> comparator;
   private Set<E> data;
-  private boolean sorted = false;
-  private final Comparator<? super E> comparator;
 
-  public SortedList() {
-    this(new LinkedHashSet<>(), null);
+  @NotNull
+  @Contract(" -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted() {
+    return new SortedList<>(new LinkedHashSet<E>(), Comparator.naturalOrder());
   }
 
-  public SortedList(boolean sorted) {
-    this(new LinkedHashSet<>(), null);
-    this.sorted = sorted;
+  @NotNull
+  @Contract("_ -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted(@NotNull Stream<? extends E> c) {
+    return new SortedList<>(c.toList(), Comparator.naturalOrder());
   }
 
-  public SortedList(Comparator<? super E> comparator) {
-    this(new LinkedHashSet<>(), comparator);
+  @NotNull
+  @Contract("_ -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted(@NotNull Collection<? extends E> c) {
+    return new SortedList<>(c, Comparator.naturalOrder());
   }
 
-  public SortedList(@NonNull Stream<? extends E> c) {
-    this(c.toList(), null);
+  @NotNull
+  @Contract("_ -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted(Comparator<E> comparator) {
+    return new SortedList<>(new LinkedHashSet<>(), comparator);
   }
 
-  public SortedList(Collection<? extends E> c) {
-    this(c, null);
+  @NotNull
+  @Contract("_, _ -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted(@NotNull Collection<? extends E> c, Comparator<E> comparator) {
+    return new SortedList<E>(c, comparator);
   }
 
-  public SortedList(Collection<? extends E> c, boolean sorted) {
-    this(c, null);
-    this.sorted = sorted;
+  @NotNull
+  @Contract("_, _ -> new")
+  public static <E extends Comparable<E>> SortedList<E> sorted(@NotNull Stream<? extends E> c, Comparator<E> comparator) {
+    return new SortedList<E>(c.toList(), comparator);
   }
 
-  public SortedList(Collection<? extends E> collection, Comparator<? super E> comparator) {
-    this.data = new LinkedHashSet<>(collection);
+  @NotNull
+  @Contract(" -> new")
+  public static <E> SortedList<E> of() {
+    return new SortedList<>(new LinkedHashSet<>(), null);
+  }
+
+  @NotNull
+  @Contract("_ -> new")
+  public static <E> SortedList<E> of(@NotNull Stream<? extends E> c) {
+    return new SortedList<>(c.toList(), null);
+  }
+
+  @NotNull
+  @Contract("_ -> new")
+  public static <E> SortedList<E> of(@NotNull Collection<? extends E> c) {
+    return new SortedList<>(c, null);
+  }
+
+  private SortedList(Collection<? extends E> collection, Comparator<E> comparator) {
+    this.data = collection == null ? new LinkedHashSet<>() : new LinkedHashSet<>(collection);
     this.comparator = comparator;
+    if (comparator != null) sort();
   }
 
   @Override
   public void add(int index, E element) {
     data.add(element);
-    if (sorted || comparator != null) sort();
+    if (comparator != null) sort();
   }
 
   @Override
@@ -71,7 +100,7 @@ public class SortedList<E> extends AbstractList<E> {
     return data.size();
   }
 
-  private void sort() {
+  public void sort() {
     if (size() == 0) return;
     if (comparator != null) this.data = data.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
     else if (get(0) instanceof Comparable) this.data = new LinkedHashSet<>(new TreeSet<>(data));

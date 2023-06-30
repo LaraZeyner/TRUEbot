@@ -3,9 +3,10 @@ package de.zahrie.trues.api.coverage;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.Request;
 import de.zahrie.trues.util.io.request.URLType;
+import lombok.Getter;
 
 public class GamesportsLoader {
-
+  @Getter
   protected final int id;
   protected final HTML html;
   protected final String url;

@@ -6,7 +6,6 @@ import lombok.extern.java.Log;
 public class Bot {
   public static void main(String[] args) {
     log.info("Starte Bot ...");
-
     LoadupManager.getInstance().connect();
   }
 }

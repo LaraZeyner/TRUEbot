@@ -1,10 +1,13 @@
 package de.zahrie.trues.api.coverage.team.model;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
+import de.zahrie.trues.api.coverage.league.model.League;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
@@ -14,6 +17,7 @@ import de.zahrie.trues.api.coverage.player.model.PlayerRankHandler;
 import de.zahrie.trues.api.coverage.player.model.Rank;
 import de.zahrie.trues.api.coverage.season.Season;
 import de.zahrie.trues.api.coverage.season.signup.SeasonSignup;
+import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.JoinQuery;
@@ -195,5 +199,12 @@ public abstract class Team implements ATeam, Id, Comparable<Team> {
 
   public TeamAnalyzer analyze(ScoutingGameType gameType, int days) {
     return new TeamAnalyzer(this, gameType, days);
+  }
+
+  private Map<League, LeagueTeam> storedLeagueEntries = new HashMap<>();
+
+  public LeagueTeam getLeagueEntry(League league) {
+    return storedLeagueEntries.computeIfAbsent(league, league1 ->
+        new Query<>(LeagueTeam.class).where("league", league1).and("team", id).entity());
   }
 }

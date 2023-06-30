@@ -107,13 +107,28 @@ public class StringUtils {
     return pos;
   }
 
-  public static Integer intValue(String value) {
+  /**
+   * @return -1 if not a number
+   */
+  public static int intValue(String value) {
     return intValue(value, -1);
   }
 
   public static Integer intValue(String value, Integer defaultValue) {
+    final Double aDouble = doubleValue(value, Util.avoidNull(defaultValue, null, Double::valueOf));
+    return Util.avoidNull(aDouble, Double::intValue);
+  }
+
+  /**
+   * @return -1 if not a number
+   */
+  public static double doubleValue(String value) {
+    return doubleValue(value, -1.);
+  }
+
+  public static Double doubleValue(String value, Double defaultValue) {
     try {
-      return Integer.parseInt(value);
+      return Double.parseDouble(value);
     } catch (NumberFormatException ignored) {  }
     return defaultValue;
   }

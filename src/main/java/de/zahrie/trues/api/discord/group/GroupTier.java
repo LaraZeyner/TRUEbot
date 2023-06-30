@@ -16,7 +16,7 @@ public enum GroupTier {
   REGISTERED(20),
   APPLICANT(30),
   TRYOUT(40),
-  SUBSTITUDE(50),
+  SUBSTITUTE(50),
   ORGA_MEMBER(60),
   LEADER(70),
   MANAGEMENT(80),
@@ -35,7 +35,7 @@ public enum GroupTier {
   }
 
   public boolean isOrga() {
-    return permissionId >= SUBSTITUDE.getPermissionId();
+    return permissionId >= SUBSTITUTE.getPermissionId();
   }
 
   public boolean isStaff() {

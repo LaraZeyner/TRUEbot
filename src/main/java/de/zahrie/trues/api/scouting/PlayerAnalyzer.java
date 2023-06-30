@@ -68,7 +68,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
         .join(new JoinQuery<>(TeamPerf.class, Game.class))
         .join(new JoinQuery<>(Performance.class, Player.class))
         .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart()));
-    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
+    return new Query<>(Selection.class).join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString(true) + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())));
   }
 
   @Override
@@ -94,7 +94,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
   }
 
   public List<MessageEmbed.Field> analyzeGamesWith(@Nullable Champion champion, @Nullable Lane lane) {
-    final List<List<String>> entries = PlayerMatchHistoryPerformanceDTO.get(player(), gameType, lane, champion).entityList(25).stream().map(performance -> new PlayerMatchHistoryPerformanceDTO(performance).getData()).toList();
+    final List<List<String>> entries = PlayerMatchHistoryPerformanceDTO.get(player(), gameType, lane, champion).entityList(25).stream().map(performance -> new PlayerMatchHistoryPerformanceDTO(performance).getStrings()).toList();
     final var data = new EmbedFieldBuilder<>(entries)
         .add("Zeitpunkt", entry -> entry.get(0))
         .add("Matchup", entry -> entry.get(1))
@@ -141,7 +141,7 @@ public class PlayerAnalyzer extends AnalyzeManager {
           .join(new JoinQuery<>(Performance.class, TeamPerf.class).col("t_perf")).join(new JoinQuery<>(TeamPerf.class, Game.class))
           .where("player", player()).and(Condition.Comparer.GREATER_EQUAL, "_game.start_time", getStart());
       presentPicks = new Query<>(Selection.class).get("champion", Champion.class).get("count(selection_id)", Integer.class)
-          .join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString() + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())))
+          .join(new JoinQuery<>(new Query<>(" inner join (" + performanceQuery.getSelectString(true) + ") as s1 on _selection.game = s1.game", performanceQuery.getParameters())))
           .groupBy("champion").descending("count(selection_id)").list();
     }
 

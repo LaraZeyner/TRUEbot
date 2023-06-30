@@ -20,8 +20,8 @@ public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
     for (int i = 0; i < entries.get(0).length; i++) {
       final String content = determineColumnEntry(entries, i);
       final Column column = query.getColumns().get(i);
-      final String n = index != null && index == i ? name : column.name();
-      creator.add(n, content, column.inline());
+      final String n = index != null && index == i ? name : column.getName();
+      creator.add(n, content, column.isInline());
     }
   }
 
@@ -34,8 +34,8 @@ public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
 
   private boolean handleNoData(SimpleCustomQuery query, @Nullable List<Object[]> list, Integer index, String name) {
     if (list != null && !list.isEmpty()) return false;
-    final String n = (index != null && index == 1) ? name : query.getColumns().get(0).name();
-    if (!query.getColumns().get(0).ignore()) creator.add(n, "keine Daten", false);
+    final String n = (index != null && index == 1) ? name : query.getColumns().get(0).getName();
+    if (!query.getColumns().get(0).isIgnore()) creator.add(n, "keine Daten", false);
     return true;
   }
 }

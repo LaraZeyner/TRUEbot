@@ -167,8 +167,8 @@ public class TeamInfo {
         .build();
 
     new EmbedFieldBuilder<>(currentSeason.getEvents())
-        .add("Zeitpunkt", eventDTO -> eventDTO.getData().get(0))
-        .add("Cup-Phase", eventDTO -> eventDTO.getData().get(1))
+        .add("Zeitpunkt", eventDTO -> eventDTO.getString(0))
+        .add("Cup-Phase", eventDTO -> eventDTO.getString(1))
         .build().forEach(builder::addField);
 
     if (lastSeason == null) return builder.build();
@@ -264,13 +264,13 @@ public class TeamInfo {
     new EmbedFieldBuilder<>(orgaTeam.getActiveMemberships().stream().sorted().toList())
         .add("Position", Membership::getPositionString)
         .add("Spieler (og.gg)", membership -> membership.getUser().getNickname())
-        .add("Elo (" + teamRank + ")", membership -> membership.getUser().getPlayer() != null ? membership.getUser().getPlayer().getRanks().getCurrent().toString() : "nicht registriert")
+        .add("Elo (" + teamRank + ")", membership -> membership.getUser().getPlayer() != null ? membership.getUser().getPlayer().getRanks().getCurrent().getRank().toString() : "nicht registriert")
         .build().forEach(builder::addField);
 
     new EmbedFieldBuilder<>(orgaTeam.getScheduler().getCalendarEntries())
-        .add("nächste Events", calendar -> calendar.getData().get(0))
-        .add("Art", calendar -> calendar.getData().get(1))
-        .add("Information", calendar -> calendar.getData().get(2))
+        .add("nächste Events", calendar -> calendar.getString(0))
+        .add("Art", calendar -> calendar.getString(1))
+        .add("Information", calendar -> calendar.getString(2))
         .build().forEach(builder::addField);
 
     new EmbedFieldBuilder<>(new TeamTrainingScheduleHandler(orgaTeam).getTeamAvailabilitySince(LocalDate.now()))
@@ -282,8 +282,8 @@ public class TeamInfo {
     final PRMSeason upcomingPRMSeason = SeasonFactory.getUpcomingPRMSeason();
     if (upcomingPRMSeason != null) {
       new EmbedFieldBuilder<>(upcomingPRMSeason.getEvents())
-          .add("Zeitpunkt", eventDTO -> eventDTO.getData().get(0))
-          .add("PRM-Phase", eventDTO -> eventDTO.getData().get(1))
+          .add("Zeitpunkt", eventDTO -> eventDTO.getString(0))
+          .add("PRM-Phase", eventDTO -> eventDTO.getString(1))
           .build().forEach(builder::addField);
     }
 
@@ -298,7 +298,7 @@ public class TeamInfo {
     return builder.build();
   }
 
-  private MessageEmbed getScheduling() {
+  public MessageEmbed getScheduling() {
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Terminplanung")
         .setDescription("Terminplanung für " + orgaTeam.getName())
@@ -306,8 +306,14 @@ public class TeamInfo {
 
     final DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
     for (int i = 0; i < 7; i++) {
-      new EmbedFieldBuilder<>(new TeamTrainingScheduleHandler(orgaTeam).ofDay(LocalDate.now().plusDays(i)))
-          .outline(dayOfWeek.plus(i).getDisplayName(TextStyle.FULL, Locale.GERMANY), "Terminfindung für diesen Tag")
+
+
+      final List<List<String>> lists = new TeamTrainingScheduleHandler(orgaTeam).ofDay(LocalDate.now().plusDays(i));
+      if (lists.isEmpty()) continue;
+
+      new EmbedFieldBuilder<>(lists)
+          .outline(dayOfWeek.plus(i).getDisplayName(TextStyle.FULL, Locale.GERMANY) + ", den " +
+              TimeFormat.DAY_LONG.of(LocalDate.now().plusDays(i)),  "coming soon")
           .add("Position", list -> list.get(0))
           .add("Zeiten oder Ersatz", list -> list.get(1))
           .build().forEach(builder::addField);
@@ -319,6 +325,7 @@ public class TeamInfo {
           .add("Zeiten oder Ersatz", list -> list.get(1))
           .build().forEach(builder::addField);
     }
+    if (builder.getFields().isEmpty()) builder.setDescription("keine Termine festgelegt.");
     return builder.build();
   }
 }

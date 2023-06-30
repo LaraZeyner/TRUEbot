@@ -3,7 +3,6 @@ package de.zahrie.trues.api.discord.builder.string;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
 import de.zahrie.trues.util.Const;
 import lombok.Getter;
@@ -32,30 +31,40 @@ public class StringCreator {
     data.add(row);
   }
 
+  public void clear() {
+    data.clear();
+    builders.clear();
+  }
+
   public List<String> build() {
-    StringBuilder builder = new StringBuilder("**" + title + "**");
-    if (description != null) builder.append("\n_").append(description).append("_");
-    builder.append("\n```");
-
+    this.lengthRemaining = Const.DISCORD_MESSAGE_MAX_CHARACTERS;
+    StringBuilder builder = new StringBuilder();
     if (data.isEmpty()) return List.of("`keine Daten`");
+    this.lengthRemaining -= data.get(0).length() + 2;
+    builder.append("```").append(data.get(0));
 
-    builder.append(data.get(0)).append("\n").append(data.get(1)).append("\n");
-
-    lengthRemaining -= builder.length();
-    for (int i = 0; i < (!enumeration.equals(Enumeration.NONE) ? data.size() / 5 : data.size()); i++) {
-      final int start = !enumeration.equals(Enumeration.NONE) ? i*5+2 : i+2;
-      final int end = Math.min(data.size(), start + (!enumeration.equals(Enumeration.NONE) ? 5 : 1));
-      final String stripped = String.join("\n", data.subList(start, end));
-      lengthRemaining -= stripped.length();
-      if (lengthRemaining >= 3) builder.append(stripped);
-      else {
-        builders.add(builder + "```");
-        builder = new StringBuilder("```" + stripped);
-      }
-      if (end == data.size()) break;
+    int entries = 0;
+    while (lengthRemaining >= 3 && entries + 1 < data.size()) {
+      final String stripped = data.get(entries + 1);
+      this.lengthRemaining -= (stripped.length() + 2);
+      entries++;
     }
-    builders.add(builder.append("```zuletzt aktualisiert ").append(TimeFormat.AUTO.now()).toString());
-    return builders;
+
+    if (!enumeration.equals(Enumeration.NONE)) entries = entries / 5 * 5;
+
+    for (int i = 0; i < data.size() / entries; i++) {
+      final int start = i * entries + 1;
+      final int end = Math.min(data.size(), start + entries);
+      final String stripped = String.join("\n", data.subList(start, end));
+
+      builders.add(builder + "```");
+      builder = new StringBuilder("```" + stripped);
+      if (end == data.size()) {
+        builders.add(builder + "```");
+        break;
+      }
+    }
+    return new ArrayList<>(builders);
   }
 
 }

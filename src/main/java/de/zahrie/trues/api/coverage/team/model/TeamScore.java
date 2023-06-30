@@ -2,13 +2,28 @@ package de.zahrie.trues.api.coverage.team.model;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Objects;
 
 import de.zahrie.trues.util.Format;
+import de.zahrie.trues.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 public record TeamScore(Short place, Short wins, Short losses) implements Serializable, Comparable<TeamScore> {
   public static TeamScore disqualified() {
     return new TeamScore(null, null, null);
+  }
+
+  public static TeamScore of(String input) {
+    if (input.equals("Disqualifiziert")) return TeamScore.disqualified();
+
+    String place = input.split("\\.")[0];
+    if (place.contains(":")) place = StringUtils.after(place, ":");
+    final short placeInteger = Short.parseShort(place.strip());
+    final String wins = input.split("\\(")[1].split("/")[0];
+    final short winsInteger = Short.parseShort(wins.strip());
+    final String losses = input.split("/")[1].split("\\)")[0];
+    final short lossesInteger = Short.parseShort(losses.strip());
+    return new TeamScore(placeInteger, winsInteger, lossesInteger);
   }
 
   public Standing getStanding() {
@@ -28,9 +43,21 @@ public record TeamScore(Short place, Short wins, Short losses) implements Serial
 
   @Override
   public int compareTo(@NotNull TeamScore o) {
-    return Comparator.comparing(TeamScore::place)
+    return Comparator.comparing(TeamScore::place, Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing((TeamScore o1) -> o1.getStanding().getWinrate().rate(), Comparator.reverseOrder())
         .compare(this, o);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final TeamScore teamScore)) return false;
+    return Objects.equals(place, teamScore.place) && Objects.equals(wins, teamScore.wins) && Objects.equals(losses, teamScore.losses);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(place, wins, losses);
   }
 
   public boolean isDisqualified() {

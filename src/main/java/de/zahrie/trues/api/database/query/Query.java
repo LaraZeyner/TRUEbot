@@ -199,7 +199,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
       return entity;
     } catch (SQLNonTransientConnectionException exception) {
       if (retry) throw new RuntimeException(exception);
-      Database.reconnect();
+      Database.disconnect();
       return executeUpdate(query, insert, entity, action, otherWise, parameters, true);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
@@ -238,7 +238,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     List<? extends Class<?>> clazzes = new ArrayList<>(fields.stream().filter(sqlField -> sqlField instanceof SQLReturnField).map(o -> (SQLReturnField) o)
         .map(SQLReturnField::getReturnType).toList());
 
-    final String selectQuery = (query == null || query.isBlank()) ? getSelectString() : query;
+    final String selectQuery = (query == null || query.isBlank()) ? getSelectString(true) : query;
     if (Const.SHOW_SQL) new Console(selectQuery).debug();
     try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(selectQuery)) {
       setValues(statement, parameters, selectQuery, force);
@@ -256,7 +256,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
       return out;
     } catch (SQLNonTransientConnectionException exception) {
       if (retry) throw new RuntimeException(exception);
-      Database.reconnect();
+      Database.disconnect();
       return list(parameters, force, true);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + selectQuery).severe(exception);
@@ -275,7 +275,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     final T stored = findEntityStoredById(id);
     if (stored != null) {
       savedCount++;
-      if (savedCount % 10_000 == 0) System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount + " - " + concurrentCount + "x errors");
+      if (savedCount % 50_000 == 0) System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount + " - " + concurrentCount + "x errors");
       return stored;
     }
 
@@ -327,7 +327,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   private List<T> determineEntityList(List<Object[]> objectList) {
     if (targetId == null) throw new NullPointerException("Entity kann nicht generiert werden");
 
-    final List<T> out = new SortedList<>();
+    final List<T> out = SortedList.of();
     try {
       if (Entity.class.isAssignableFrom(targetId)) {
         final Method getMethod = targetId.getMethod("get", List.class);
@@ -387,7 +387,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     getAll(targetId);
     final List<Object[]> objectsList = list(parameters);
     if (objectsList.isEmpty()) return List.of();
-    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetId).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
+    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetId).entity(objs[0])).collect(Collectors.toCollection(SortedList::of));
     else return new Query<>(targetId).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
   }
 
@@ -396,7 +396,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     getAll(targetClass);
     final List<Object[]> objectsList = list();
     if (objectsList.isEmpty()) return List.of();
-    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetClass).entity(objs[0])).collect(Collectors.toCollection(SortedList::new));
+    if (objectsList.get(0).length == 1) return objectsList.stream().map(objs -> new Query<>(targetClass).entity(objs[0])).collect(Collectors.toCollection(SortedList::of));
     else return new Query<>(targetClass).get("_" + getTableName() + ".*", Object.class).determineEntityList(objectsList);
   }
 

@@ -1,6 +1,7 @@
 package de.zahrie.trues.api.riot.performance;
 
 import java.io.Serial;
+import java.util.Comparator;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
@@ -108,6 +109,6 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
 
   @Override
   public int compareTo(@NotNull Performance o) {
-    return lane.compareTo(o.getLane());
+    return Comparator.comparing(Performance::getTeamPerformance).thenComparing(Performance::getLane).compare(this, o);
   }
 }

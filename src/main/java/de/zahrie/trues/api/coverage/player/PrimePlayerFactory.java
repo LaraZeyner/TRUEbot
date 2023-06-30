@@ -43,15 +43,17 @@ public final class PrimePlayerFactory {
   private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull String summonerName) {
     final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
     final String puuid = summoner == null ? player.getPuuid() : summoner.getPUUID();
+    final String summonerId = summoner == null ? player.getSummonerId() : summoner.getSummonerId();
+    final String name = summoner == null ? player.getSummonerName() : summoner.getName();
 
-    final Player lolPuuid = new Query<>(Player.class).where("lol_puuid", puuid)
+    final Player p = new Query<>(Player.class).where("lol_puuid", puuid)
         .and(Condition.Comparer.NOT_EQUAL, "player_id", player.getId()).entity();
-    if (lolPuuid != null) {
-      lolPuuid.setPuuidAndName(null, null);
+    if (p != null) {
+      p.setPuuidAndName(null, null, null);
     }
 
     if (!player.getPuuid().equals(puuid) && puuid != null) {
-      player.setPuuidAndName(puuid, summoner.getName());
+      player.setPuuidAndName(puuid, summonerId, name);
     }
   }
 
@@ -60,7 +62,8 @@ public final class PrimePlayerFactory {
     final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
     if (summoner != null) {
       final String puuid = summoner.getPUUID();
-      if (puuid != null) return new PRMPlayer(summonerName, puuid, primeId).create();
+      final String summonerId = summoner.getSummonerId();
+      if (puuid != null) return new PRMPlayer(summonerName, puuid, summonerId, primeId).create();
     }
 
     final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(summonerName);
