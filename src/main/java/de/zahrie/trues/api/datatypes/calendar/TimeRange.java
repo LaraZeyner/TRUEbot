@@ -1,23 +1,23 @@
 package de.zahrie.trues.api.datatypes.calendar;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import de.zahrie.trues.api.calendar.TeamCalendar;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
 
-@Data
+@Getter
 @ExtensionMethod(DateTimeUtils.class)
 public class TimeRange implements Comparable<TimeRange> {
   private final LocalDateTime startTime;
@@ -46,6 +46,10 @@ public class TimeRange implements Comparable<TimeRange> {
     final long minutes = Duration.between(startTime, endTime).get(ChronoUnit.MINUTES);
     final int realMinutes = (int) (minutes % 60);
     return minutes / 60 + ":" + (realMinutes < 10 ? "0" : "") + realMinutes + " Stunden";
+  }
+
+  public boolean contains(LocalDateTime time) {
+    return time.isBetween(startTime, endTime);
   }
 
   public String trainingReserved(OrgaTeam orgaTeam) {
@@ -149,13 +153,25 @@ public class TimeRange implements Comparable<TimeRange> {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof final TimeRange timeRange)) return false;
+    return startTime.equals(timeRange.getStartTime()) && endTime.equals(timeRange.getEndTime());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getStartTime(), getEndTime());
+  }
+
+  @Override
   public String toString() {
     LocalDateTime s = startTime;
     final List<String> outputs = new ArrayList<>();
     while (s.isBefore(endTime)) {
       final LocalTime start = (s.toLocalDate().equals(startTime.toLocalDate())) ? startTime.toLocalTime() : LocalTime.MIN;
       final LocalTime end = (s.toLocalDate().equals(endTime.toLocalDate())) ? endTime.toLocalTime() : LocalTime.MAX;
-      outputs.add(TimeFormat.DEFAULT_DAY.of(s) + " - " + new DayEntry(s.toLocalDate(), start, end));
+      outputs.add(TimeFormat.DEFAULT_DAY.of(s) + " - " + new DayEntry(start, end));
       s = s.plusDays(1);
     }
     return String.join("\n", outputs);
@@ -167,7 +183,7 @@ public class TimeRange implements Comparable<TimeRange> {
     while (s.isBefore(endTime)) {
       final LocalTime start = (s.toLocalDate().equals(startTime.toLocalDate())) ? startTime.toLocalTime() : LocalTime.MIN;
       final LocalTime end = (s.toLocalDate().equals(endTime.toLocalDate())) ? endTime.toLocalTime() : LocalTime.MAX;
-      outputs.add(new DayEntry(s.toLocalDate(), start, end).toString());
+      outputs.add(new DayEntry(start, end).toString());
       s = s.plusDays(1);
     }
     return String.join("\n", outputs);
@@ -175,7 +191,6 @@ public class TimeRange implements Comparable<TimeRange> {
 
   @AllArgsConstructor
   public static class DayEntry {
-    private LocalDate date;
     private LocalTime start;
     private LocalTime end;
 

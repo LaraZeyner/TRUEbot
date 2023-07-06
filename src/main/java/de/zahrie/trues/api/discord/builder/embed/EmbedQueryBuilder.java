@@ -10,9 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
-  public EmbedCreator build(Integer index, String name) {
+  public EmbedCreator build(Integer index, String name, Boolean ignoreIfEmpty) {
     final List<Object[]> entries = query.build();
-    if (!handleNoData(query, entries, index, name)) handleData(query, Util.nonNull(entries), index, name);
+    if (!handleNoData(query, entries, index, name, ignoreIfEmpty)) handleData(query, Util.nonNull(entries), index, name);
     return creator;
   }
 
@@ -32,10 +32,10 @@ public record EmbedQueryBuilder(EmbedCreator creator, SimpleCustomQuery query) {
         .collect(Collectors.joining("\n"));
   }
 
-  private boolean handleNoData(SimpleCustomQuery query, @Nullable List<Object[]> list, Integer index, String name) {
+  private boolean handleNoData(SimpleCustomQuery query, @Nullable List<Object[]> list, Integer index, String name, Boolean ignoreIfEmpty) {
     if (list != null && !list.isEmpty()) return false;
     final String n = (index != null && index == 1) ? name : query.getColumns().get(0).getName();
-    if (!query.getColumns().get(0).isIgnore()) creator.add(n, "keine Daten", false);
+    if (!query.getColumns().get(0).isIgnore() && !ignoreIfEmpty) creator.add(n, "keine Daten", false);
     return true;
   }
 }

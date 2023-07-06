@@ -20,19 +20,11 @@ public class PermissionRole {
   public static final int DEVELOPER = 7;
   public static final int SOCIAL_MEDIA = 8;
   public static final int PLAYER = 9;
-  public static final int MENTOR = 10;
-  public static final int ANALYST = 11;
-  public static final int LANE_COACH = 12;
-  public static final int MENTAL_COACH = 13;
-  public static final int STRATEGIC_COACH = 14;
-  public static final int EVENT_LEAD = 15;
-  public static final int SOCIAL_MEDIA_LEAD = 16;
-  public static final int TEAM_CAPTAIN = 17;
-  public static final int TEAM_BUILDING = 18;
-  public static final int EVENT_MANAGER = 19;
-  public static final int COMMUNITY_MANAGER = 20;
-  public static final int COACHING_MANAGER = 21;
-  public static final int ORGA_LEADER = 22;
+  public static final int MENTOR = 15;
+  public static final int TEAM_CAPTAIN = 18;
+  public static final int TEAM_BUILDING = 19;
+  public static final int EVENT_MANAGER = 20;
+  public static final int ORGA_LEADER = 23;
 
   public static final int ORGA_MEMBER = 105;
   public static final int LEADER = 106;

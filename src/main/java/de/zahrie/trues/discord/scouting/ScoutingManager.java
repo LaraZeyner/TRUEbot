@@ -8,7 +8,7 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.riot.champion.Champion;
 import de.zahrie.trues.api.riot.performance.Lane;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
@@ -41,15 +41,15 @@ public class ScoutingManager {
     scouting.update();
   }
 
-  public static void custom(Team team, IReplyCallback event, ScoutingType type) {
+  public static void custom(AbstractTeam team, IReplyCallback event, ScoutingType type) {
     custom(team, event, type, null, 365, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days) {
+  public static void custom(AbstractTeam team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days) {
     custom(team, event, type, gameType, days, 1);
   }
 
-  public static void custom(Team team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
+  public static void custom(AbstractTeam team, IReplyCallback event, ScoutingType type, ScoutingGameType gameType, Integer days, Integer page) {
     new CustomScouting(team).sendCustom(event, type, gameType, days, page);
   }
 

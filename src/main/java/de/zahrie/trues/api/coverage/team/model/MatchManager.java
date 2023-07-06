@@ -1,5 +1,6 @@
 package de.zahrie.trues.api.coverage.team.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.ATournament;
@@ -15,7 +16,7 @@ import de.zahrie.trues.api.database.query.Query;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public record MatchManager(Team team) {
+public record MatchManager(AbstractTeam team) {
   public List<Match> getUpcomingMatches() {
     return new Query<>(Participator.class)
         .join(new JoinQuery<>(Participator.class, Match.class, JoinQuery.JoinType.LEFT).col("coverage"))
@@ -41,7 +42,16 @@ public record MatchManager(Team team) {
             .descending("_match.coverage_start")
         ).convertList(Match.class);
     if (avoidCalibration) {
-      return nextMatches.stream().filter(match -> !(match instanceof ATournament tM && tM.getLeague().getStage() instanceof CalibrationStage)).toList();
+      List<Match> list = new ArrayList<>();
+      for (Match match : nextMatches) {
+        if (match instanceof ATournament tM && tM.getLeague() == null) {
+          System.err.println("PAUSE");
+        }
+        if (!(match instanceof ATournament tM && tM.getLeague().getStage() instanceof CalibrationStage)) {
+          list.add(match);
+        }
+      }
+      return list;
     }
     return nextMatches;
   }

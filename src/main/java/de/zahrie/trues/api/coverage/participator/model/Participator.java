@@ -5,11 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.TeamLineup;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.coverage.team.model.TeamImpl;
 import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -35,7 +35,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   private static final long serialVersionUID = -547972848562058467L;
 
   public static Participator ADMIN(Match match) {
-    return new Participator(match, false, new TeamImpl("Administration", "Admin"));
+    return new Participator(match, false, new Team("Administration", "Admin"));
   }
 
   @Setter
@@ -50,14 +50,14 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   private Integer mmr; // lineup_mmr
 
   public Integer getMmr() {
-    return mmr == null ? Util.avoidNull(getTeam(), 0, Team::getLastMMR) : mmr;
+    return mmr == null ? Util.avoidNull(getTeam(), 0, AbstractTeam::getLastMMR) : mmr;
   }
 
-  private Team team;
+  private AbstractTeam team;
 
   @Nullable
-  public Team getTeam() {
-    if (team == null) this.team = new Query<>(Team.class).entity(teamId);
+  public AbstractTeam getTeam() {
+    if (team == null) this.team = new Query<>(AbstractTeam.class).entity(teamId);
     return team;
   }
 
@@ -79,7 +79,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     this.route = route;
   }
 
-  public Participator(Match match, boolean home, @NonNull Team team) {
+  public Participator(Match match, boolean home, @NonNull AbstractTeam team) {
     this.match = match;
     this.matchId = match == null ? 0 : match.getId();
     this.home = home;
@@ -107,7 +107,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
         (boolean) objects.get(2),
         (Integer) objects.get(6),
         objects.get(7).shortValue(),
-        new ParticipatorRoute(new Query<>(League.class).entity(objects.get(3)), new SQLEnum<>(ParticipatorRoute.RouteType.class).of(objects.get(4)), objects.get(5).shortValue()),
+        new ParticipatorRoute(new Query<>(AbstractLeague.class).entity(objects.get(3)), new SQLEnum<>(ParticipatorRoute.RouteType.class).of(objects.get(4)), objects.get(5).shortValue()),
         (Long) objects.get(8),
         (Long) objects.get(9),
         (Integer) objects.get(10)
@@ -139,7 +139,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
 
   @Override
   public Participator create() {
-    final League league = route == null ? null : route.getLeague();
+    final AbstractLeague league = route == null ? null : route.getLeague();
     final ParticipatorRoute.RouteType routeType = route == null ? null : route.getType();
     final Short routeValue = route == null ? null : route.getValue();
     return new Query<>(Participator.class).key("coverage", matchId).key("first", home)
@@ -159,11 +159,11 @@ public class Participator implements Entity<Participator>, Comparable<Participat
     new Query<>(Participator.class).col("discord_message", messageId).update(id);
   }
 
-  public void setTeam(@Nullable Team team) {
+  public void setTeam(@Nullable AbstractTeam team) {
     if (getMatch().checkAddParticipatingTeam(this, team)) {
       new Query<>(Lineup.class).where("coverage_team", this).delete(List.of());
       this.team = team;
-      this.teamId = Util.avoidNull(team, Team::getId);
+      this.teamId = Util.avoidNull(team, AbstractTeam::getId);
       new Query<>(Participator.class).col("team", team).update(id);
       getMatch().updateResult();
     }
@@ -184,8 +184,7 @@ public class Participator implements Entity<Participator>, Comparable<Participat
   }
 
   public String getAbbreviation() {
-    if (teamId == null) return route == null ? "TBD" : route.toString();
-    return Objects.requireNonNull(getTeam()).getAbbreviation();
+    return Util.avoidNull(getTeam(), Util.avoidNull(route, "TBD", ParticipatorRoute::toString), AbstractTeam::getAbbreviation);
   }
 
   public String getName() {

@@ -12,7 +12,7 @@ import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.scouting.ScoutingGameType;
 import de.zahrie.trues.discord.scouting.teaminfo.TeamInfoManager;
@@ -40,7 +40,7 @@ public record Scouting(OrgaTeam orgaTeam, @NonNull Participator participator, Ma
     final TeamChannel scoutingChannel = orgaTeam.getChannels().get(TeamChannelType.SCOUTING);
     if (scoutingChannel == null) return null;
 
-    final Team team = participator.getTeam();
+    final AbstractTeam team = participator.getTeam();
     final TextChannel textChannel = (TextChannel) scoutingChannel.getChannel();
     if (participator.getMessageId() == null) {
       textChannel.sendMessageEmbeds(new MatchLogBuilder(match, orgaTeam.getTeam()).getLog())
@@ -59,7 +59,7 @@ public record Scouting(OrgaTeam orgaTeam, @NonNull Participator participator, Ma
   public void update() {
     forceUpdate();
     final Participator ourTeam = match.getParticipator(orgaTeam.getTeam());
-    final Team team = participator.getTeam();
+    final AbstractTeam team = participator.getTeam();
     if (team == null) return;
 
     if (participator.getTeam().getOrgaTeam() != null) {

@@ -2,6 +2,7 @@ package de.zahrie.trues.api.discord.group;
 
 import de.zahrie.trues.api.database.query.Query;
 import net.dv8tion.jda.api.entities.Role;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DiscordRoleFactory {
@@ -26,7 +27,7 @@ public class DiscordRoleFactory {
 
   private static CustomDiscordGroup createCustomGroup(Role role) {
     role.getManager().setMentionable(true).setPermissions().queue();
-    return new CustomDiscordGroup(role.getIdLong(), role.getName(), GroupType.PINGABLE, false, null).forceCreate();
+    return new CustomDiscordGroup(role.getIdLong(), role.getName(), GroupType.PINGABLE, false).forceCreate();
   }
 
   /**
@@ -35,5 +36,14 @@ public class DiscordRoleFactory {
   public static void removeCustomGroup(Role role) {
     final CustomDiscordGroup customGroup = determineCustomGroup(role);
     if (customGroup != null) customGroup.forceDelete();
+  }
+
+  public static String getRoleName(@NotNull String teamName) {
+    final String newName = teamName.replace("Technical Really Unique ", "")
+        .replace("Technical Really ", "")
+        .replace("TRUEsports ", "")
+        .replace("TRUE ", "");
+    return "TRUE " + newName;
+
   }
 }

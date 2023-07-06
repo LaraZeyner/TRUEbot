@@ -3,7 +3,7 @@ package de.zahrie.trues.api.scouting;
 import java.util.Arrays;
 import java.util.List;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -34,7 +34,7 @@ public enum ScoutingGameType {
         .setRequiredRange(0, 1).build());
   }
 
-  public TeamAnalyzer teamQuery(Team team, int days) {
+  public TeamAnalyzer teamQuery(AbstractTeam team, int days) {
     return team.analyze(this, days);
   }
 }

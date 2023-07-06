@@ -18,24 +18,28 @@ import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Table(value = "coverage", department = "prime")
 @ExtensionMethod(SQLUtils.class)
 public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
-  @Serial
-  private static final long serialVersionUID = -4791824102421564240L;
+  @Serial private static final long serialVersionUID = -4791824102421564240L;
 
-  public PRMMatch(Playday matchday, LocalDateTime start, PRMLeague league, SchedulingRange schedulingRange, Integer matchId) {
+  public PRMMatch(@Nullable Playday matchday, @NotNull LocalDateTime start, @NotNull PRMLeague league,
+                  @NotNull SchedulingRange schedulingRange, int matchId) {
     this(matchday, MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, "-:-", league, league.getMatches().size() + 1, matchId, schedulingRange);
   }
 
-  public PRMMatch(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result, PRMLeague league, int matchIndex, Integer matchId, TimeRange timeRange) {
+  public PRMMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
+                  @NotNull EventStatus status, @NotNull String lastMessage, boolean active, @NotNull String result,
+                  @NotNull PRMLeague league, int matchIndex, int matchId, @NotNull TimeRange timeRange) {
     super(playday, format, start, rateOffset, status, lastMessage, active, result, league, matchIndex, matchId, timeRange);
   }
 
-  private PRMMatch(int id, Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result, PRMLeague league, int matchIndex, Integer matchId, TimeRange timeRange) {
-    super(playday, format, start, rateOffset, status, lastMessage, active, result, league, matchIndex, matchId, timeRange);
-    this.id = id;
+  private PRMMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status,
+                   String lastMessage, boolean active, String result, int leagueId, int matchIndex, int matchId, TimeRange timeRange) {
+    super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result, leagueId, matchIndex, matchId, timeRange);
   }
 
   public PrimeMatchImpl get() {
@@ -43,21 +47,19 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
   }
 
   public static PRMMatch get(List<Object> objects) {
-    final MatchFormat format = new SQLEnum<>(MatchFormat.class).of(objects.get(3));
-    final int id = (int) objects.get(0);
     return new PRMMatch(
-        id,
-        new Query<>(Playday.class).entity(objects.get(2)),
-        format,
+        (int) objects.get(0),
+        objects.get(2).intValue(),
+        new SQLEnum<>(MatchFormat.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
         objects.get(5).shortValue(),
         new SQLEnum<>(EventStatus.class).of(objects.get(6)),
         (String) objects.get(7),
         (boolean) objects.get(8),
         (String) objects.get(9),
-        new Query<>(PRMLeague.class).entity(objects.get(10)),
+        (int) objects.get(10),
         (int) objects.get(11),
-        (Integer) objects.get(12),
+        (int) objects.get(12),
         new TimeRange((LocalDateTime) objects.get(13), (LocalDateTime) objects.get(14))
     );
   }
@@ -65,8 +67,8 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
   @Override
   public PRMMatch create() {
     final PRMMatch match = new Query<>(PRMMatch.class).key("match_id", matchId)
-        .col("matchday", playday).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
-        .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result).col("coverage_group", league)
+        .col("matchday", playdayId).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
+        .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result).col("coverage_group", leagueId)
         .col("coverage_index", matchIndex).col("scheduling_start", range.getStartTime()).col("scheduling_end", range.getEndTime())
         .insert(this);
     if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {

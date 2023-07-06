@@ -10,7 +10,7 @@ import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
@@ -44,7 +44,7 @@ public class LineupCommand extends SlashCommand {
     final OrgaTeam locatedTeam = getLocatedTeam();
     if (locatedTeam == null) return errorMessage();
 
-    final Team team = locatedTeam.getTeam();
+    final AbstractTeam team = locatedTeam.getTeam();
     if (team == null) return reply("Dieses Orgateam hat kein Team.");
 
     final Integer matchId = find("matchid").integer();

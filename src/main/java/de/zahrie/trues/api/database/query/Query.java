@@ -40,7 +40,7 @@ import org.reflections.scanners.Scanners;
 
 @Log
 public class Query<T extends Id> extends SimpleQueryFormer<T> {
-  private static final Map<Id, LocalDateTime> entities = Collections.synchronizedMap(new HashMap<>());
+  private static Map<Id, LocalDateTime> entities = Collections.synchronizedMap(new HashMap<>());
   private static int queryCount = 0, savedCount = 0, concurrentCount = 0;
 
   public static void remove(Id entity) {
@@ -48,7 +48,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   }
 
   public static void reset() {
-    entities.clear();
+    entities = entities.entrySet().stream().filter(idLocalDateTimeEntry -> idLocalDateTimeEntry.getValue().plusDays(1).isAfter(LocalDateTime.now())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   public Query(Class<T> clazz) {
@@ -275,7 +275,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
     final T stored = findEntityStoredById(id);
     if (stored != null) {
       savedCount++;
-      if (savedCount % 50_000 == 0) System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + queryCount + " - " + concurrentCount + "x errors");
+      if (savedCount % 50_000 == 0) System.out.println("saved " + Math.round(savedCount * 100.0 / (savedCount + queryCount)) + "% of " + Math.round(queryCount / 1000.) + "k - " + concurrentCount + "x errors - stored " + entities.size() + ")");
       return stored;
     }
 
@@ -350,7 +350,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
         }
       }
     } catch (InvocationTargetException e) {
-      throw new RuntimeException(e.getCause());
+      throw new RuntimeException(e);
     } catch (NoSuchMethodException | IllegalAccessException e) {
       new DevInfo("Funktion nicht verfügbar").error(e);
       throw new RuntimeException(e);

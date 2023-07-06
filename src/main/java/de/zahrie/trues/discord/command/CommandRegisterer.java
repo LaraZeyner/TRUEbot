@@ -8,6 +8,8 @@ import de.zahrie.trues.discord.command.models.BetCommand;
 import de.zahrie.trues.discord.command.models.BewerbenCommand;
 import de.zahrie.trues.discord.command.models.ChannelCreateCommand;
 import de.zahrie.trues.discord.command.models.ChannelEditCommand;
+import de.zahrie.trues.discord.command.models.ChatlogCommand;
+import de.zahrie.trues.discord.command.models.DeleteMessageCommand;
 import de.zahrie.trues.discord.command.models.EventCommand;
 import de.zahrie.trues.discord.command.models.FollowMeCommand;
 import de.zahrie.trues.discord.command.models.HelpCommand;
@@ -18,6 +20,7 @@ import de.zahrie.trues.discord.command.models.ScoutCommand;
 import de.zahrie.trues.discord.command.models.ScrimCommand;
 import de.zahrie.trues.discord.command.models.SettingsCommand;
 import de.zahrie.trues.discord.command.models.StatsCommand;
+import de.zahrie.trues.discord.command.models.StrikeCommand;
 import de.zahrie.trues.discord.command.models.TeamCreateCommand;
 import de.zahrie.trues.discord.command.models.TeamFollowCommand;
 import de.zahrie.trues.discord.command.models.TeamLinkCommand;
@@ -35,6 +38,8 @@ public class CommandRegisterer implements Registerer<List<SlashCommand>> {
         new BewerbenCommand(),
         new ChannelCreateCommand(),
         new ChannelEditCommand(),
+        new ChatlogCommand(),
+        new DeleteMessageCommand(),
         new EventCommand(),
         new FollowMeCommand(),
         new HelpCommand(),
@@ -45,6 +50,7 @@ public class CommandRegisterer implements Registerer<List<SlashCommand>> {
         new SettingsCommand(),
         new ScoutCommand(),
         new ScrimCommand(),
+        new StrikeCommand(),
         new TeamCreateCommand(),
         new TeamFollowCommand(),
         new TeamLinkCommand(),

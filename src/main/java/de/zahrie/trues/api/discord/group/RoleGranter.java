@@ -8,8 +8,8 @@ import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.logging.TeamLog;
 import de.zahrie.trues.api.logging.TeamLogFactory;
 import de.zahrie.trues.util.Util;
-import lombok.NonNull;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import org.jetbrains.annotations.NotNull;
 
 public class RoleGranter extends RoleGranterBase {
   public RoleGranter(DiscordUser target) {
@@ -20,7 +20,7 @@ public class RoleGranter extends RoleGranterBase {
     super(target, invoker);
   }
 
-  public void addTeamRole(TeamRole role, TeamPosition position, @NonNull OrgaTeam team) {
+  public void addTeamRole(TeamRole role, TeamPosition position, @NotNull OrgaTeam team) {
     TeamLogFactory.create(invoker, target, target.getMention() + " ist neuer " +
         Util.avoidNull(position.getEmoji(), position.getName(), Emoji::getFormatted) + " (" + role.getName() +
         ") bei **" + team.getName() + "**", TeamLog.TeamLogAction.LINEUP_JOIN, team);
@@ -37,7 +37,7 @@ public class RoleGranter extends RoleGranterBase {
     target.getApplications().updateApplicationStatus();
   }
 
-  public void removeTeamRole(Membership member, @NonNull OrgaTeam team) {
+  public void removeTeamRole(Membership member, @NotNull OrgaTeam team) {
     TeamLogFactory.create(invoker, target, target.getMention() + " verlässt " + team.getName(), TeamLog.TeamLogAction.LINEUP_LEAVE, team);
     removeTeam(team);
     target.getApplications().demote(member.getRole(), member.getPosition());

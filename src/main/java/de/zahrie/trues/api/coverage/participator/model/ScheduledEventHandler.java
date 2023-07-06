@@ -9,7 +9,7 @@ import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
 import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.zahrie.trues.api.coverage.match.log.MatchLogBuilder;
 import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
@@ -29,7 +29,7 @@ public record ScheduledEventHandler(Participator participator) {
     if (participator.getTeamId() == null) return;
     if (participator.getMatch().getStart().isBefore(LocalDateTime.now())) return;
 
-    final Team team = participator.getTeam();
+    final AbstractTeam team = participator.getTeam();
     assert team != null;
     final OrgaTeam orgaTeam = team.getOrgaTeam();
     if (orgaTeam == null) return;
@@ -58,9 +58,11 @@ public record ScheduledEventHandler(Participator participator) {
 
   @NotNull
   private String description() {
-    String description = new MatchLogBuilder(participator.getMatch(), participator.getTeam()).toString();
+    String description = "";
     if (participator.getMatch() instanceof LeagueMatch leagueMatch)
-      description += "https://www.primeleague.gg/leagues/matches/" + leagueMatch.getMatchId();
+      description += "https://www.primeleague.gg/leagues/matches/" + leagueMatch.getMatchId() + "\n";
+
+    description += new MatchLogBuilder(participator.getMatch(), participator.getTeam()).toString();
     return StringUtils.keep(description, 1000);
   }
 
@@ -83,7 +85,7 @@ public record ScheduledEventHandler(Participator participator) {
   }
 
   private GuildChannel practiceChannel() {
-    final Team team = participator.getTeam();
+    final AbstractTeam team = participator.getTeam();
     assert team != null;
     final TeamChannel teamChannel = team.getOrgaTeam().getChannels().get(TeamChannelType.PRACTICE);
     assert teamChannel != null;

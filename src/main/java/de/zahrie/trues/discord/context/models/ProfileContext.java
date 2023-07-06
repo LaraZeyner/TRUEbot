@@ -3,11 +3,12 @@ package de.zahrie.trues.discord.context.models;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.discord.builder.queryCustomizer.NamedQuery;
 import de.zahrie.trues.api.discord.command.context.Context;
 import de.zahrie.trues.api.discord.command.context.ContextCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
+import de.zahrie.trues.api.discord.group.DiscordGroup;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
 @Context("Profil ansehen")
@@ -24,10 +25,12 @@ public class ProfileContext extends ContextCommand {
       if (player.getTeam() != null) handleTeamData(player.getTeam());
       addEmbed(NamedQuery.PROFILE_PRM_GAMES, player.getPuuid());
     }
+
+    if (getInvoker().isEvenOrAbove(DiscordGroup.TEAM_CAPTAIN)) addEmbed(NamedQuery.STRIKES, getTarget().getId());
     return sendMessage(mention);
   }
 
-  private void handleTeamData(Team team) {
+  private void handleTeamData(AbstractTeam team) {
     String divisionName = "keine Daten";
     String score = "keine Daten";
     if (team instanceof PRMTeam prmTeam) {

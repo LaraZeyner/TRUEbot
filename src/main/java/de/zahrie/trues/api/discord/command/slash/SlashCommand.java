@@ -10,6 +10,8 @@ import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
 import de.zahrie.trues.api.discord.command.PermissionCheck;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Option;
+import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.api.discord.util.Replyer;
 import de.zahrie.trues.util.StringUtils;
@@ -181,11 +183,33 @@ public abstract class SlashCommand extends Replyer {
 
     public Integer integer(Integer defaultValue) {
       final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      if (option == null) return defaultValue;
       try {
-        return option == null ? defaultValue : option.getAsInt();
+        return option.getAsInt();
       } catch (NumberFormatException ignored) {
         return null;
       }
+    }
+
+    public Long bigInt() {
+      return bigInt(null);
+    }
+
+    public Long bigInt(Long defaultValue) {
+      final OptionMapping option = ((SlashCommandInteractionEvent) event).getOption(key);
+      try {
+        return option == null ? defaultValue : option.getAsLong();
+      } catch (NumberFormatException ignored) {
+        return null;
+      }
+    }
+
+    public DiscordUser discordUser() {
+      return Util.avoidNull(member(), DiscordUserFactory::getDiscordUser);
+    }
+
+    public DiscordUser discordUser(Member defaultValue) {
+      return Util.avoidNull(member(defaultValue), DiscordUserFactory::getDiscordUser);
     }
 
     public Member member() {

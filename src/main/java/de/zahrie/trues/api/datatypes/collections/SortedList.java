@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -63,6 +64,13 @@ public final class SortedList<E> extends AbstractList<E> {
 
   @NotNull
   @Contract("_ -> new")
+  @SafeVarargs
+  public static <E> SortedList<E> of(E... elements) {
+    return SortedList.of(List.of(elements));
+  }
+
+  @NotNull
+  @Contract("_ -> new")
   public static <E> SortedList<E> of(@NotNull Stream<? extends E> c) {
     return new SortedList<>(c.toList(), null);
   }
@@ -93,6 +101,10 @@ public final class SortedList<E> extends AbstractList<E> {
   @Override
   public E get(int index) {
     return data.stream().toList().get(index);
+  }
+
+  public E getOr(int index, E defaultValue) {
+    return index >= size() ? defaultValue : get(index);
   }
 
   @Override

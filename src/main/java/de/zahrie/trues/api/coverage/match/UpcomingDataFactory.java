@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
@@ -30,7 +30,7 @@ public final class UpcomingDataFactory {
         .and("result", "-:-").ascending("coverage_start").entityList();
   }
 
-  public List<Team> getTeams() {
+  public List<AbstractTeam> getTeams() {
     return SortedList.of(nextMatches.stream().flatMap(match -> Arrays.stream(match.getParticipators())).map(Participator::getTeam));
   }
 

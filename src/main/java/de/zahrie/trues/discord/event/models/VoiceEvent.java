@@ -9,7 +9,7 @@ import de.zahrie.trues.api.community.member.MembershipFactory;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
 import de.zahrie.trues.api.discord.util.Nunu;
@@ -61,7 +61,7 @@ public class VoiceEvent extends ListenerAdapter {
       case ALLE -> event.getChannelLeft().getMembers();
       case TEAM -> members;
       case MATCH -> {
-        final Team team = currentTeam.getOrgaTeam().getTeam();
+        final AbstractTeam team = currentTeam.getOrgaTeam().getTeam();
         final Match nextMatch = team.getMatches().getNextMatch(false);
         final List<Lineup> fixedLineups = nextMatch == null ? List.of() : nextMatch.getParticipator(team).getTeamLineup().getFixedLineups();
         yield fixedLineups.isEmpty() ? members : fixedLineups.stream().map(Lineup::getPlayer).map(Player::getDiscordUser).map(DiscordUser::getMember).toList();

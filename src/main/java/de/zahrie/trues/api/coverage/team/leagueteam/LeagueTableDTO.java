@@ -54,7 +54,7 @@ public final class LeagueTableDTO implements DTO<LeagueTableDTO> {
         .where(Condition.inSubquery("_game.coverage",
             new Query<>(Participator.class).get("_participator.coverage", Integer.class)
                 .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
-                .where("_participator.team", teamId).and("_match.coverage_group", leagueTeam.getLeague())));
+                .where("_participator.team", teamId).and("_match.coverage_group", leagueTeam.getLeague()).and(Condition.Comparer.NOT_EQUAL, "_match.result", "0:0")));
   }
 
   @Override

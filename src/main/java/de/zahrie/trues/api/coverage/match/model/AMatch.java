@@ -13,7 +13,7 @@ import de.zahrie.trues.api.coverage.match.log.EventStatus;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.playday.Playday;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
 import de.zahrie.trues.discord.notify.NotificationManager;
@@ -24,7 +24,7 @@ public interface AMatch extends ABetable {
   MatchFormat getFormat(); // coverage_format
   LocalDateTime getStart(); // coverage_start
   void setStart(LocalDateTime start);
-  short getRateOffset(); // rate_offset
+  Short getRateOffset(); // rate_offset
   EventStatus getStatus(); // status
   void setStatus(EventStatus status);
   String getLastMessage(); // last_message
@@ -77,12 +77,12 @@ public interface AMatch extends ABetable {
   MatchResult getExpectedResult();
   String getExpectedResultString();
 
-  default Participator getOpponent(Team team) {
+  default Participator getOpponent(AbstractTeam team) {
     final Participator participator = getParticipator(team);
     return participator == null ? null : getParticipator(!participator.isHome());
   }
 
-  default Participator getParticipator(@Nullable Team team) {
+  default Participator getParticipator(@Nullable AbstractTeam team) {
     if (team == null) return null;
     return Arrays.stream(getParticipators())
         .filter(participator -> participator.getTeam() != null)
@@ -90,14 +90,14 @@ public interface AMatch extends ABetable {
         .findFirst().orElse(null);
   }
 
-  default Team getOpponentOf(Team team) {
+  default AbstractTeam getOpponentOf(AbstractTeam team) {
     return getOpponent(team).getTeam();
   }
 
   default List<OrgaTeam> getOrgaTeams() {
     return Arrays.stream(getParticipators())
         .map(Participator::getTeam).filter(Objects::nonNull)
-        .map(Team::getOrgaTeam).filter(Objects::nonNull).toList();
+        .map(AbstractTeam::getOrgaTeam).filter(Objects::nonNull).toList();
   }
 
   default boolean isOrgagame() {
@@ -112,7 +112,7 @@ public interface AMatch extends ABetable {
    * Wenn bereits vorhanden aber nicht für dieses Team lösche
    * @return False, wenn bereits an dieser Stelle vorhanden
    */
-  default boolean checkAddParticipatingTeam(Participator participator, @Nullable Team team) {
+  default boolean checkAddParticipatingTeam(Participator participator, @Nullable AbstractTeam team) {
     final Participator currentParticipator = getParticipator(team);
     if (currentParticipator == null) return true;
     if (currentParticipator.isHome() == participator.isHome()) return false;
@@ -120,7 +120,7 @@ public interface AMatch extends ABetable {
     return true;
   }
 
-  default Participator addParticipator(Team team, boolean home, Team other) {
+  default Participator addParticipator(AbstractTeam team, boolean home, AbstractTeam other) {
     final Participator existing = getParticipator(team);
     if (existing != null) return getParticipator(team);
 

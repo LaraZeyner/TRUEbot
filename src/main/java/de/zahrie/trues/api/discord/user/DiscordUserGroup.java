@@ -10,38 +10,59 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.datatypes.calendar.TimeRange;
+import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.group.DiscordGroup;
 import de.zahrie.trues.api.discord.group.GroupAssignReason;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
 @Getter
-@Setter
 @Table("discord_user_group")
 public class DiscordUserGroup implements Entity<DiscordUserGroup> {
   @Serial
   private static final long serialVersionUID = 7171651659881865861L;
 
+  @Setter
   private int id; // discord_user_group_id
-  private final DiscordUser user; // discord_user
+  private final int userId; // discord_user
   private final DiscordGroup discordGroup; // discord_group
   private TimeRange range; // assign_time, permission_end
   private final GroupAssignReason reason; // reason
   private boolean active = false; // active
 
-  public DiscordUserGroup(DiscordUser user, DiscordGroup discordGroup, TimeRange range) {
+  public DiscordUserGroup merge(DiscordUserGroup other) {
+    final SortedList<TimeRange> timeRanges = TimeRange.combine(SortedList.of(range, other.getRange()));
+    final TimeRange newRange = timeRanges.size() < 2 ? timeRanges.getOr(timeRanges.size(), null) :
+        timeRanges.stream().filter(timeRange -> timeRange.contains(LocalDateTime.now())).findFirst().orElse(timeRanges.get(0));
+    if (!newRange.equals(range)) {
+      this.range = newRange;
+      new Query<>(DiscordUserGroup.class).col("assign_time", range.getStartTime()).col("permission_end", range.getEndTime()).update(id);
+    }
+    return this;
+  }
+
+  public DiscordUserGroup(@NotNull DiscordUser user, @NotNull DiscordGroup discordGroup, @NotNull TimeRange range) {
     this.user = user;
+    this.userId = user.getId();
     this.discordGroup = discordGroup;
     this.range = range;
     this.reason = GroupAssignReason.ADD;
   }
 
+  public DiscordUserGroup(int id, int userId, DiscordGroup discordGroup, TimeRange range, GroupAssignReason reason, boolean active) {
+    this.id = id;
+    this.userId = userId;
+    this.discordGroup = discordGroup;
+    this.range = range;
+    this.reason = reason;
+    this.active = active;
+  }
+
   public static DiscordUserGroup get(List<Object> objects) {
     return new DiscordUserGroup(
         (int) objects.get(0),
-        new Query<>(DiscordUser.class).entity(objects.get(1)),
+        (int) objects.get(1),
         new SQLEnum<>(DiscordGroup.class).of(objects.get(2)),
         new TimeRange((LocalDateTime) objects.get(3), (LocalDateTime) objects.get(4)),
         new SQLEnum<>(GroupAssignReason.class).of(objects.get(5)),
@@ -63,10 +84,6 @@ public class DiscordUserGroup implements Entity<DiscordUserGroup> {
         .update(id);
   }
 
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public void setActive(boolean active) {
     this.active = active;
     new Query<>(DiscordUserGroup.class).col("active", active).update(id);
@@ -79,5 +96,12 @@ public class DiscordUserGroup implements Entity<DiscordUserGroup> {
       this.range = timeRange;
       new Query<>(DiscordUserGroup.class).col("assign_time", range.getStartTime()).col("permission_end", range.getEndTime()).update(id);
     }
+  }
+
+  private DiscordUser user;
+
+  public DiscordUser getUser() {
+    if (user != null) this.user = new Query<>(DiscordUser.class).entity(userId);
+    return user;
   }
 }

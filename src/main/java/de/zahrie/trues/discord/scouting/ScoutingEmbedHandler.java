@@ -9,7 +9,7 @@ import de.zahrie.trues.api.coverage.participator.TeamLineup;
 import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.zahrie.trues.api.riot.performance.Lane;
@@ -19,9 +19,9 @@ import de.zahrie.trues.api.scouting.TeamAnalyzer;
 import de.zahrie.trues.util.Util;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int days, int page, List<Lineup> lineups, Map<Player, PlayerAnalyzer> analyzerMap) {
+public record ScoutingEmbedHandler(AbstractTeam team, ScoutingGameType gameType, int days, int page, List<Lineup> lineups, Map<Player, PlayerAnalyzer> analyzerMap) {
 
-  public ScoutingEmbedHandler(Team team, List<Lineup> lineups, ScoutingGameType gameType, int days, int page) {
+  public ScoutingEmbedHandler(AbstractTeam team, List<Lineup> lineups, ScoutingGameType gameType, int days, int page) {
     this(team, gameType, days, page, lineups, new HashMap<>());
   }
 
@@ -87,7 +87,7 @@ public record ScoutingEmbedHandler(Team team, ScoutingGameType gameType, int day
     final TeamAnalyzer analyze = team.analyze(gameType, days);
     return new EmbedFieldBuilder<>(analyze.getMatches())
         .add("Spielzeit", match -> TimeFormat.DISCORD.of(match.getStart()))
-        .add("Gegner", match -> Util.avoidNull(match.getOpponentOf(team), "keine Daten", Team::getName))
+        .add("Gegner", match -> Util.avoidNull(match.getOpponentOf(team), "keine Daten", AbstractTeam::getName))
         .add("Ergebnis", match -> match.getResult().toString()).build();
   }
 

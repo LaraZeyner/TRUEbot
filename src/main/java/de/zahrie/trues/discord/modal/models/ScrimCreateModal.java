@@ -7,8 +7,8 @@ import de.zahrie.trues.api.coverage.match.model.Scrimmage;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.team.TeamFactory;
 import de.zahrie.trues.api.coverage.team.TeamLoader;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.coverage.team.model.Team;
-import de.zahrie.trues.api.coverage.team.model.TeamImpl;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
@@ -36,18 +36,18 @@ public class ScrimCreateModal extends ModalImpl {
     final OrgaTeam orgaTeam = new Query<>(OrgaTeam.class).where("team_abbr_created", getString("1")).entity();
     if (orgaTeam == null) return reply("Dein Team konnte nicht gefunden werden.");
 
-    final Team team = orgaTeam.getTeam();
+    final AbstractTeam team = orgaTeam.getTeam();
     if (team == null) return reply("Dein Team konnte nicht gefunden werden.");
 
-    Team team2 = null;
+    AbstractTeam team2 = null;
     final Integer teamId = getInt("2");
     if (teamId != null) {
       final TeamLoader teamLoader = TeamFactory.getTeamLoader(teamId);
       if (teamLoader == null) return reply("Der Gegner konnte nicht gefunden werden.");
       team2 = teamLoader.load().getTeam();
     }
-    if (team2 == null) team2 = new Query<>(Team.class).where("team_name", getString("2")).entity();
-    if (team2 == null) team2 = new TeamImpl(getString("2"), getString("2")).create();
+    if (team2 == null) team2 = new Query<>(AbstractTeam.class).where("team_name", getString("2")).entity();
+    if (team2 == null) team2 = new Team(getString("2"), getString("2")).create();
 
     final LocalDateTime time = StringUtils.getDateTime(getString("3"));
     if (time == null) return reply("Das Datum ist fehlerhaft.");

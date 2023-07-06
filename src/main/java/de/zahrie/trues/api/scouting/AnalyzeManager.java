@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.riot.game.Selection;
@@ -50,16 +50,16 @@ public abstract class AnalyzeManager {
     return lookingFor;
   }
 
-  protected final Team team;
+  protected final AbstractTeam team;
   protected final List<Player> players;
   protected final ScoutingGameType gameType;
   protected final int days;
 
-  public AnalyzeManager(Team team, List<Player> players) {
+  public AnalyzeManager(AbstractTeam team, List<Player> players) {
     this(team, SortedList.of(players), ScoutingGameType.TEAM_GAMES, 180);
   }
 
-  public AnalyzeManager(Team team, List<Player> players, ScoutingGameType gameType, int days) {
+  public AnalyzeManager(AbstractTeam team, List<Player> players, ScoutingGameType gameType, int days) {
     this.team = team;
     this.players = SortedList.of(players);
     this.gameType = gameType;

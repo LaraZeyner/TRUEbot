@@ -62,8 +62,7 @@ public class MatchLoader extends GamesportsLoader {
     final Playday playday = getPlayday(league);
     final PlaydayScheduler playdayScheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
     final SchedulingRange scheduling = playdayScheduler.scheduling();
-    final LocalDateTime matchtime = getMatchtime();
-    this.match = new PRMMatch(playday, matchtime, league, scheduling, this.id).create();
+    this.match = new PRMMatch(playday, getMatchtime(), league, scheduling, this.id).create();
     return this;
   }
 
@@ -88,10 +87,8 @@ public class MatchLoader extends GamesportsLoader {
   }
 
   private LocalDateTime getMatchtime() {
-    final String attribute = html.findId("div", HTML.MATCH_TIME_2).getAttribute(HTML.TIME_ATTRIBUTE);
-    System.out.println(getId() + " -> " + attribute);
-    final int matchTimeEpoch = attribute.intValue();
-    return DateTimeUtils.fromEpoch(matchTimeEpoch);
+    final int epochSeconds = html.find("span", HTML.MATCH_TIME).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
+    return DateTimeUtils.fromEpoch(epochSeconds);
   }
 
   private List<PRMTeam> getTeams() {

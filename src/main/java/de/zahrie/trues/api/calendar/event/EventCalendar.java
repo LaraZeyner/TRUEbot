@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import de.zahrie.trues.api.calendar.UserCalendar;
+import de.zahrie.trues.api.calendar.AbstractUserCalendar;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "calendar", department = "event")
-public class EventCalendar extends UserCalendar implements Entity<EventCalendar> {
+public class EventCalendar extends AbstractUserCalendar implements Entity<EventCalendar> {
   @Serial
   private static final long serialVersionUID = -2357919003996341997L;
   private Long threadId;
@@ -34,8 +34,8 @@ public class EventCalendar extends UserCalendar implements Entity<EventCalendar>
     super(timeRange, details, creator);
   }
 
-  private EventCalendar(int id, TimeRange range, String details, DiscordUser creator, long threadId) {
-    super(id, range, details, creator);
+  private EventCalendar(int id, TimeRange range, String details, int creatorId, long threadId) {
+    super(id, range, details, creatorId);
     this.threadId = threadId;
   }
 
@@ -44,7 +44,7 @@ public class EventCalendar extends UserCalendar implements Entity<EventCalendar>
         (int) objects.get(0),
         new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
         (String) objects.get(4),
-        new Query<>(DiscordUser.class).entity(objects.get(7)),
+        (int) objects.get(7),
         (Long) objects.get(6)
     );
   }
@@ -63,6 +63,4 @@ public class EventCalendar extends UserCalendar implements Entity<EventCalendar>
     if (event == null) this.event = new Query<>(Event.class).where("calendar", id).entity();
     return event;
   }
-
-
 }

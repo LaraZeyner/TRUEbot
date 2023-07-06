@@ -8,13 +8,9 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Getter
 @Table("bet")
 public final class Bet implements Entity<Bet> {
@@ -23,11 +19,43 @@ public final class Bet implements Entity<Bet> {
 
   @Setter
   private int id;
-  private final Match match; // coverage
-  private final DiscordUser user; // discord_user
+  private final int matchId, userId;
+
   private final String outcome; // bet_outcome
   private final int amount; // bet_amount
   private Integer difference; // bet_difference
+
+  private Match match; // coverage
+
+  public Match getMatch() {
+    if (match == null) this.match = new Query<>(Match.class).entity(matchId);
+    return match;
+  }
+
+  private DiscordUser user; // discord_user
+
+  public DiscordUser getUser() {
+    if (user == null) this.user = new Query<>(DiscordUser.class).entity(userId);
+    return user;
+  }
+
+  public Bet(Match match, DiscordUser user, String outcome, int amount) {
+    this.match = match;
+    this.matchId = match.getId();
+    this.user = user;
+    this.userId = user.getId();
+    this.outcome = outcome;
+    this.amount = amount;
+  }
+
+  private Bet(int id, int matchId, int userId, String outcome, int amount, Integer difference) {
+    this.id = id;
+    this.matchId = matchId;
+    this.userId = userId;
+    this.outcome = outcome;
+    this.amount = amount;
+    this.difference = difference;
+  }
 
   public void setDifference(int difference) {
     if (this.difference != difference) new Query<>(Bet.class).col("bet_difference", difference).update(id);
@@ -37,8 +65,8 @@ public final class Bet implements Entity<Bet> {
   public static Bet get(List<Object> objects) {
     return new Bet(
         (int) objects.get(0),
-        new Query<>(Match.class).entity(objects.get(1)),
-        new Query<>(DiscordUser.class).entity(objects.get(2)),
+        (int) objects.get(1),
+        (int) objects.get(2),
         (String) objects.get(3),
         (int) objects.get(4),
         (int) objects.get(5)
@@ -47,7 +75,7 @@ public final class Bet implements Entity<Bet> {
 
   @Override
   public Bet create() {
-    return new Query<>(Bet.class).key("coverage", match).key("discord_user", user)
+    return new Query<>(Bet.class).key("coverage", matchId).key("discord_user", userId)
         .col("bet_outcome", outcome).col("bet_amount", amount).col("bet_difference", difference)
         .insert(this);
   }

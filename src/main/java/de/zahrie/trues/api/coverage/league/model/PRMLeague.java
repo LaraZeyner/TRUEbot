@@ -20,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "coverage_group", department = "prime")
-public class PRMLeague extends League implements Entity<PRMLeague> {
+public class PRMLeague extends AbstractLeague implements Entity<PRMLeague> {
   @Serial
   private static final long serialVersionUID = -6947551713641103275L;
 
@@ -31,15 +31,15 @@ public class PRMLeague extends League implements Entity<PRMLeague> {
     this.prmId = prmId;
   }
 
-  private PRMLeague(int id, Stage stage, String name, int prmId) {
-    super(id, stage, name);
+  private PRMLeague(int id, int stageId, String name, int prmId) {
+    super(id, stageId, name);
     this.prmId = prmId;
   }
 
   public static PRMLeague get(List<Object> objects) {
     return new PRMLeague(
         (int) objects.get(0),
-        new Query<>(Stage.class).entity(objects.get(2)),
+        (int) objects.get(2),
         (String) objects.get(3),
         (int) objects.get(4)
     );
@@ -47,7 +47,7 @@ public class PRMLeague extends League implements Entity<PRMLeague> {
 
   @Override
   public PRMLeague create() {
-    return new Query<>(PRMLeague.class).key("stage", stage).key("group_name", name)
+    return new Query<>(PRMLeague.class).key("stage", stageId).key("group_name", name)
         .col("prm_id", prmId)
         .insert(this);
   }

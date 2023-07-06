@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 import de.zahrie.trues.api.coverage.match.MatchResult;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-public record Prediction(Map<Team, Integer> teamPoints) {
-  public static Prediction generate(League league) {
+public record Prediction(Map<AbstractTeam, Integer> teamPoints) {
+  public static Prediction generate(AbstractLeague league) {
     return new Prediction(
         league.getLeagueTeams().stream().collect(Collectors.toMap(LeagueTeam::getTeam, leagueTeam -> leagueTeam.getScore().getStanding().wins()))
     );
@@ -23,14 +23,14 @@ public record Prediction(Map<Team, Integer> teamPoints) {
     return this;
   }
 
-  public Prediction add(Team team, Integer wins) {
+  public Prediction add(AbstractTeam team, Integer wins) {
     teamPoints.merge(team, wins, Integer::sum);
     return this;
   }
 
   @Nullable
   @Contract(pure = true)
-  public LeagueResult getResultOfTeam(Team team) {
+  public LeagueResult getResultOfTeam(AbstractTeam team) {
     final Integer points = teamPoints.get(team);
     if (points == null) return null;
 

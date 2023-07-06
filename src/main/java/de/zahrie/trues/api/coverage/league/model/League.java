@@ -1,61 +1,41 @@
 package de.zahrie.trues.api.coverage.league.model;
 
-import java.util.Comparator;
+import java.io.Serial;
 import java.util.List;
-import java.util.Objects;
 
-import de.zahrie.trues.api.coverage.match.model.LeagueMatch;
 import de.zahrie.trues.api.coverage.stage.model.Stage;
-import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.database.connector.Table;
-import de.zahrie.trues.api.database.query.Id;
+import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-@Table("coverage_group")
-public abstract class League implements ALeague, Id {
-  private int id; // coverage_id
-  protected final Stage stage; // stage
-  protected final String name; // group_name
+@Table(value = "coverage_group", department = "other")
+public class League extends AbstractLeague implements Entity<League> {
+  @Serial
+  private static final long serialVersionUID = -1878025702559463286L;
 
-  public boolean isOrgaLeague() {
-    return getLeagueTeams().stream().anyMatch(leagueTeam -> leagueTeam.getTeam().getOrgaTeam() != null);
+  public League(Stage stage, String name) {
+    super(stage, name);
   }
 
-  public List<LeagueMatch> getMatches() {
-    return new Query<>(LeagueMatch.class).where("coverage_group", this).entityList();
+  private League(int id, int stageId, String name) {
+    super(id, stageId, name);
   }
 
-  public List<LeagueTeam> getLeagueTeams() {
-    return new Query<>(LeagueTeam.class).where("league", this).entityList();
-  }
-
-  public List<LeagueTeam> getSignups() {
-    return new Query<>(LeagueTeam.class).where("league", this).entityList().stream().toList();
-  }
-
-  @Override
-  public int compareTo(@NotNull ALeague o) {
-    return Comparator.comparing(ALeague::getStage).compare(this, o);
+  public static League get(List<Object> objects) {
+    return new League(
+        (int) objects.get(0),
+        (int) objects.get(2),
+        (String) objects.get(3)
+    );
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof final League league)) return false;
-    return getId() == league.getId();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId());
+  public League create() {
+    return new Query<>(League.class).key("stage", stageId).key("group_name", name)
+        .insert(this);
   }
 }

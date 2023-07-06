@@ -2,7 +2,6 @@ package de.zahrie.trues.discord.command.models;
 
 import java.time.LocalDateTime;
 
-import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.api.discord.command.slash.SlashCommand;
 import de.zahrie.trues.api.discord.command.slash.annotations.Command;
 import de.zahrie.trues.api.discord.command.slash.annotations.Msg;
@@ -11,8 +10,8 @@ import de.zahrie.trues.api.discord.command.slash.annotations.Perm;
 import de.zahrie.trues.api.discord.group.PermissionRole;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
+import de.zahrie.trues.util.StringUtils;
 import lombok.experimental.ExtensionMethod;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
@@ -25,10 +24,12 @@ public class TryoutCustomCommand extends SlashCommand {
   @Override
   @Msg(value = "Der Termin wurde gespeichert.", error = "Der Nutzer wurde nicht gefunden.")
   public boolean execute(SlashCommandInteractionEvent event) {
-    final Member member = find("nutzer").member();
-    if (member == null) return errorMessage();
-    final DiscordUser discordUser = member.getDiscordUser();
+    final DiscordUser discordUser = find("nutzer").discordUser();
+    if (discordUser == null) return errorMessage();
+
     final LocalDateTime dateTime = find("zeitpunkt").time();
+    if (dateTime == null) return reply("Der Zeitpunkt konnte nicht umgewandelt werden.");
+
     discordUser.schedule(dateTime, getInvoker());
     return sendMessage();
   }

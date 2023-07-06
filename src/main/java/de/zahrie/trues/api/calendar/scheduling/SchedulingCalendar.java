@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import de.zahrie.trues.api.calendar.UserCalendar;
+import de.zahrie.trues.api.calendar.AbstractUserCalendar;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "calendar", department = "schedule")
-public class SchedulingCalendar extends UserCalendar implements Entity<SchedulingCalendar> {
+public class SchedulingCalendar extends AbstractUserCalendar implements Entity<SchedulingCalendar> {
   @Serial
   private static final long serialVersionUID = -3658276021282430693L;
 
@@ -24,8 +24,8 @@ public class SchedulingCalendar extends UserCalendar implements Entity<Schedulin
     super(timeRange, details, discordUser);
   }
 
-  private SchedulingCalendar(int id, TimeRange range, String details, DiscordUser discordUser) {
-    super(id, range, details, discordUser);
+  private SchedulingCalendar(int id, TimeRange range, String details, int userId) {
+    super(id, range, details, userId);
   }
 
   public static SchedulingCalendar get(List<Object> objects) {
@@ -33,7 +33,7 @@ public class SchedulingCalendar extends UserCalendar implements Entity<Schedulin
         (int) objects.get(0),
         new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
         (String) objects.get(4),
-        new Query<>(DiscordUser.class).entity( objects.get(7))
+        (int) objects.get(7)
     );
   }
 

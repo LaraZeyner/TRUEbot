@@ -20,26 +20,32 @@ public class Application implements Entity<Application> {
   private static final long serialVersionUID = 8214282036590463912L;
 
   private int id;
-  private final DiscordUser user;
+  private final int userId;
   private TeamRole role;
-
   private final TeamPosition position;
   private LocalDateTime appTimestamp = LocalDateTime.now();
   private boolean active;
-
   private String appNotes;
+
+  private DiscordUser user;
+
+  public DiscordUser getUser() {
+    if (user == null) this.user = new Query<>(DiscordUser.class).entity(userId);
+    return user;
+  }
 
   public Application(DiscordUser user, TeamRole role, TeamPosition position, boolean active, String appNotes) {
     this.user = user;
+    this.userId = user.getId();
     this.role = role;
     this.position = position;
     this.active = active;
     this.appNotes = appNotes;
   }
 
-  public Application(int id, DiscordUser user, TeamRole role, TeamPosition position, LocalDateTime appTimestamp, boolean active, String appNotes) {
+  private Application(int id, int userId, TeamRole role, TeamPosition position, LocalDateTime appTimestamp, boolean active, String appNotes) {
     this.id = id;
-    this.user = user;
+    this.userId = userId;
     this.role = role;
     this.position = position;
     this.appTimestamp = appTimestamp;
@@ -55,7 +61,7 @@ public class Application implements Entity<Application> {
   public static Application get(List<Object> objects) {
     return new Application(
         (int) objects.get(0),
-        new Query<>(DiscordUser.class).entity(objects.get(1)),
+        (int) objects.get(1),
         new SQLEnum<>(TeamRole.class).of(objects.get(2)),
         new SQLEnum<>(TeamPosition.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
@@ -67,7 +73,7 @@ public class Application implements Entity<Application> {
   @Override
   public Application create() {
     return new Query<>(Application.class)
-        .key("discord_user", user).key("position", position)
+        .key("discord_user", userId).key("position", position)
         .col("lineup_role", role).col("app_timestamp", appTimestamp).col("waiting", active).col("app_notes", appNotes)
         .insert(this);
   }

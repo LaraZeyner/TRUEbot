@@ -39,12 +39,11 @@ public class MatchHandler extends MatchModel implements Serializable {
     updateResult();
     updateMatchtime();
     updateTeams();
-    if (teams.stream().anyMatch(team -> team.getOrgaTeam() != null)) {
-      final boolean updated = updateLogs();
-      if (updated) {
-        match.setStatus(determineStatus());
-      }
-    }
+
+    final boolean hasOrgaTeam = teams.stream().anyMatch(team -> team.getOrgaTeam() != null);
+    final boolean updated = updateLogs(hasOrgaTeam);
+    if (updated) match.setStatus(determineStatus());
+
     match.update();
   }
 
@@ -69,14 +68,14 @@ public class MatchHandler extends MatchModel implements Serializable {
     }
   }
 
-  private boolean updateLogs() {
+  private boolean updateLogs(boolean hasOrgaTeam) {
     boolean updated = false;
-    Collections.reverse(logs);
+    Collections.reverse(logs); // älteste kommt nun immer zuerst
     boolean changeScore = false;
     boolean updatePlayers = false;
     for (HTML html : logs) {
       final List<HTML> cells = html.findAll("td");
-      if (cells.isEmpty()) continue;
+      if (cells.isEmpty()) continue; // entferne Head
 
       final int epochSeconds = html.find("span", HTML.TIME).getAttribute(HTML.TIME_ATTRIBUTE).intValue();
       final LocalDateTime dateTime = DateTimeUtils.fromEpoch(epochSeconds);
@@ -89,7 +88,7 @@ public class MatchHandler extends MatchModel implements Serializable {
       if (action.equals(MatchLogAction.CHANGE_SCORE)) changeScore = true;
     }
     if (changeScore) match.updateResult();
-    if (updatePlayers) Arrays.stream(match.getParticipators()).filter(participator -> participator.getTeam() != null)
+    if (updatePlayers && hasOrgaTeam) Arrays.stream(match.getParticipators()).filter(participator -> participator.getTeam() != null)
         .flatMap(participator -> participator.getTeamLineup().getSetPlayers().stream())
         .forEach(player -> player.loadGames(LoaderGameType.TOURNAMENT));
     return updated;

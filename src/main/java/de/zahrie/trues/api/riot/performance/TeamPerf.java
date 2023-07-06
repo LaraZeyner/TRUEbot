@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.connector.SQLUtils;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
@@ -48,17 +48,17 @@ public class TeamPerf implements Entity<TeamPerf>, Comparable<TeamPerf> {
     return game;
   }
 
-  private Team team;
+  private AbstractTeam team;
 
-  public void setTeam(Team team) {
+  public void setTeam(AbstractTeam team) {
     this.team = team;
-    this.teamId = Util.avoidNull(team, Team::getId);
+    this.teamId = Util.avoidNull(team, AbstractTeam::getId);
     new Query<>(TeamPerf.class).col("team", team).update(id);
   }
 
   @Nullable
-  public Team getTeam() {
-    if (team == null) this.team = new Query<>(Team.class).entity(teamId);
+  public AbstractTeam getTeam() {
+    if (team == null) this.team = new Query<>(AbstractTeam.class).entity(teamId);
     return team;
   }
 
@@ -130,7 +130,7 @@ public class TeamPerf implements Entity<TeamPerf>, Comparable<TeamPerf> {
         .filter(teamPerf -> teamPerf.getId() != id).findFirst().orElse(null);
   }
 
-  public Team getOpposingTeam() {
+  public AbstractTeam getOpposingTeam() {
     return Util.avoidNull(getOpponent(), null, TeamPerf::getTeam);
   }
 

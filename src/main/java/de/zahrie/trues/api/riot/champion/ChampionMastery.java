@@ -42,19 +42,19 @@ public class ChampionMastery implements Entity<ChampionMastery> {
     return champion;
   }
 
-  private ChampionMastery(int id, int playerId, int championId, int points, byte level, LocalDateTime lastPlayed) {
-    this.id = id;
-    this.playerId = playerId;
+  public ChampionMastery(@NotNull Player player, int championId, int points, byte level, LocalDateTime lastPlayed) {
+    this.player = player;
+    this.playerId = player.getId();
     this.championId = championId;
     this.points = points;
     this.level = level;
     this.lastPlayed = lastPlayed;
   }
 
-  public ChampionMastery(@NotNull Player player, int championId, int points, byte level, LocalDateTime lastPlayed) {
-    this.player = player;
-    this.playerId = player.getId();
-    this.championId = champion.getId();
+  private ChampionMastery(int id, int playerId, int championId, int points, byte level, LocalDateTime lastPlayed) {
+    this.id = id;
+    this.playerId = playerId;
+    this.championId = championId;
     this.points = points;
     this.level = level;
     this.lastPlayed = lastPlayed;

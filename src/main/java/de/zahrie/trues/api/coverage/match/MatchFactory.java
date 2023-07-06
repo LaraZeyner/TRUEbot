@@ -8,7 +8,7 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.match.model.PRMMatch;
 import de.zahrie.trues.api.coverage.match.model.Scrimmage;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
@@ -19,7 +19,7 @@ public final class MatchFactory {
     return new Query<>(Scrimmage.class).where("result", "-:-").ascending("coverage_start").entityList();
   }
 
-  public static List<Match> getMatchesOf(Team team, Team opponent) {
+  public static List<Match> getMatchesOf(AbstractTeam team, AbstractTeam opponent) {
     return new Query<>(Match.class, "SELECT c.* FROM coverage c WHERE ? in (SELECT team FROM coverage_team WHERE coverage = c.coverage_id) AND ? in (SELECT team FROM coverage_team WHERE coverage = c.coverage_id)").entityList(List.of(team, opponent));
   }
 
@@ -31,7 +31,7 @@ public final class MatchFactory {
     return new MatchLoader(matchId).create().getMatch();
   }
 
-  public static List<Team> getNextTeams() {
+  public static List<AbstractTeam> getNextTeams() {
     return new Query<>(Participator.class)
         .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
         .where(Condition.Comparer.GREATER_EQUAL, "_match.coverage_start", LocalDateTime.now()).or("result", "-:-")

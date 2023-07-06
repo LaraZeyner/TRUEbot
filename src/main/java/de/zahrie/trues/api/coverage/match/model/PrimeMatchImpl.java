@@ -8,7 +8,7 @@ import de.zahrie.trues.api.coverage.match.log.LogFactory;
 import de.zahrie.trues.api.coverage.match.log.MatchLog;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.zahrie.trues.discord.scouting.Scouting;
 import de.zahrie.trues.discord.scouting.ScoutingManager;
@@ -29,10 +29,9 @@ public class PrimeMatchImpl {
 
     final Participator participator = LogFactory.handleUserWithTeam(match, userWithTeam);
     final var log = new MatchLog(timestamp, match, action, details, participator).create();
-    if (action.equals(MatchLogAction.REPORT)) {
-      match.updateResult();
-    }
-    final Team team = participator == null ? null : participator.getTeam();
+    if (action.equals(MatchLogAction.REPORT)) match.updateResult();
+
+    final AbstractTeam team = participator == null ? null : participator.getTeam();
     final String lastMessage = (team == null ? "ADMIN" : team.getAbbreviation()) + " : " + details;
     match.setLastMessage(lastMessage);
 

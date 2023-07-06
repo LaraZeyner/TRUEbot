@@ -14,7 +14,7 @@ import de.zahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
@@ -152,7 +152,7 @@ public class MessageEvent extends ListenerAdapter {
 
   private static void handleEditMatchData(@NotNull MessageReceivedEvent event, ThreadChannel threadChannel) {
     final String between = threadChannel.getName().between("(", ")", -1);
-    final var team = new Query<>(Team.class).entity(between.intValue());
+    final var team = new Query<>(AbstractTeam.class).entity(between.intValue());
     final OrgaTeam orgaTeam = OrgaTeamFactory.getTeamFromChannel(threadChannel.getParentChannel());
     if (orgaTeam == null || orgaTeam.getTeam() == null) return;
     final Match match = MatchFactory.getMatchesOf(orgaTeam.getTeam(), team).stream().max(Comparator.naturalOrder()).orElse(null);

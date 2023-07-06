@@ -9,50 +9,66 @@ import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@AllArgsConstructor
 @Getter
 @Table("season_signup")
 public class SeasonSignup implements Entity<SeasonSignup>, Comparable<SeasonSignup> {
-  @Serial
-  private static final long serialVersionUID = 4493211805830610407L;
+  @Serial private static final long serialVersionUID = 4493211805830610407L;
 
-  private int id; // season_signup_id
-  private final Season season; // season
-  private final PRMTeam team; // team
+  @Setter private int id; // season_signup_id
+  private final int seasonId, teamId; // season, team
   private final String info; // signup_info
 
-  public SeasonSignup(Season season, PRMTeam team, String info) {
+  public SeasonSignup(@NotNull Season season, @NotNull PRMTeam team, @Nullable String info) {
     this.season = season;
+    this.seasonId = season.getId();
     this.team = team;
+    this.teamId = team.getId();
+    this.info = info;
+  }
+
+  public SeasonSignup(int id, int seasonId, int teamId, String info) {
+    this.id = id;
+    this.seasonId = seasonId;
+    this.teamId = teamId;
     this.info = info;
   }
 
   public static SeasonSignup get(List<Object> objects) {
     return new SeasonSignup(
         (int) objects.get(0),
-        new Query<>(Season.class).entity(objects.get(1)),
-        new Query<>(PRMTeam.class).entity(objects.get(2)),
+        (int) objects.get(1),
+        (int) objects.get(2),
         (String) objects.get(3)
     );
   }
 
   @Override
   public SeasonSignup create() {
-    return new Query<>(SeasonSignup.class).key("season", season).key("team", team)
+    return new Query<>(SeasonSignup.class).key("season", seasonId).key("team", teamId)
         .col("signup_info", info).insert(this);
-  }
-
-  @Override
-  public void setId(int id) {
-    this.id = id;
   }
 
   @Override
   public int compareTo(@NotNull SeasonSignup o) {
     return Comparator.comparing(SeasonSignup::getSeason).compare(this, o);
+  }
+
+  private Season season;
+
+  public Season getSeason() {
+    if (season == null) this.season = new Query<>(Season.class).entity(seasonId);
+    return season;
+  }
+
+  private PRMTeam team;
+
+  public PRMTeam getTeam() {
+    if (team == null) this.team = new Query<>(PRMTeam.class).entity(teamId);
+    return team;
   }
 }

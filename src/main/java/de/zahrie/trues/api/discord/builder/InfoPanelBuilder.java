@@ -20,6 +20,7 @@ public record InfoPanelBuilder(String title, String description, List<SimpleCust
 
     for (int i = 0; i < queries.size(); i++) {
       final int finalI = i;
+      final Boolean ignore = Util.avoidNull(alternative, null, Alternative::ignoreIfEmpty);
       final String altName = Util.avoidNull(alternative, a -> a.names().get(finalI));
       final SimpleCustomQuery query = queries.get(i);
 
@@ -39,7 +40,7 @@ public record InfoPanelBuilder(String title, String description, List<SimpleCust
           index = currentStringCreator.getIndex();
           currentStringCreator = null;
         }
-        currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, query).build(altIndex, altName);
+        currentEmbedCreator = new EmbedQueryBuilder(currentEmbedCreator, query).build(altIndex, altName, ignore);
       }
 
       if (currentStringCreator != null) {

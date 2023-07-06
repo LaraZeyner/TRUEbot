@@ -8,7 +8,7 @@ import java.util.List;
 import de.zahrie.trues.api.coverage.player.PlayerHandler;
 import de.zahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
@@ -82,10 +82,10 @@ public record RiotPlayerAnalyzer(Player player) {
     }
 
     if (gameType.equals(LoaderGameType.MATCHMADE) && history.size() > 20) {
-      System.out.println(player.getSummonerName() + " (" + Util.avoidNull(player.getTeam(), "null", Team::getName) + ") -> " + (System.currentTimeMillis() - start) / 1000.0 + " für " + history.size());
+      System.out.println(player.getSummonerName() + " (" + Util.avoidNull(player.getTeam(), "null", AbstractTeam::getName) + ") -> " + (System.currentTimeMillis() - start) / 1000.0 + " für " + history.size());
     }
 
-    if (!history.isEmpty() && todayAnalyzedPlayers.contains(player.getId())) analyzeMastery();
+    if (!history.isEmpty() && !todayAnalyzedPlayers.contains(player.getId())) analyzeMastery();
     return hasPlayedRanked;
   }
 

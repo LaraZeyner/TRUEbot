@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
@@ -57,19 +57,19 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     this.played = played;
   }
 
-  protected Team team;
+  protected AbstractTeam team;
 
-  public Team getTeam() {
-    if (team == null) this.team = new Query<>(Team.class).entity(teamId);
+  public AbstractTeam getTeam() {
+    if (team == null) this.team = new Query<>(AbstractTeam.class).entity(teamId);
     return team;
   }
 
-  public void setTeam(Team team) {
+  public void setTeam(AbstractTeam team) {
     if (getTeam() == team) return;
     if (teamId != null && teamId == team.getId()) return;
 
     this.team = team;
-    this.teamId = Util.avoidNull(team, Team::getId);
+    this.teamId = Util.avoidNull(team, AbstractTeam::getId);
     if (team != null) {
       team.getPlayers().add(this);
       if (team instanceof PRMTeam prmTeam && prmTeam.getCurrentLeague() != null && prmTeam.getCurrentLeague().getLeague().isOrgaLeague()) {

@@ -11,8 +11,6 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.riot.performance.Lane;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Lineup wird submitted ({@code ordered} = Command | {@code not ordered} = matchlog)
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @Table("coverage_lineup")
@@ -29,40 +26,49 @@ public class Lineup implements Entity<Lineup>, Comparable<Lineup> {
   private static final long serialVersionUID = 3196905801592447600L;
 
   private int id;
-  private final Participator participator; // coverage_team
-  private final Player player; // player
+  private final int participatorId, playerId; // coverage_team, player
   private Lane lane; // lineup_id
 
-  public void setLane(Lane lane) {
+  public void setLane(@NotNull Lane lane) {
+    if (this.lane == lane) return;
     this.lane = lane;
     new Query<>(Lineup.class).col("lineup_id", lane).update(id);
   }
 
-  public Lineup(Participator participator, Player player, Lane lane) {
+  public Lineup(@NotNull Participator participator, @NotNull Player player, @NotNull Lane lane) {
     this.participator = participator;
+    this.participatorId = participator.getId();
     this.player = player;
+    this.playerId = player.getId();
+    this.lane = lane;
+  }
+
+  private Lineup(int id, int participatorId, int playerId, Lane lane) {
+    this.id = id;
+    this.participatorId = participatorId;
+    this.playerId = playerId;
     this.lane = lane;
   }
 
   public static Lineup get(List<Object> objects) {
     return new Lineup(
         (int) objects.get(0),
-        new Query<>(Participator.class).entity(objects.get(1)),
-        new Query<>(Player.class).entity(objects.get(2)),
+        (int) objects.get(1),
+        (int) objects.get(2),
         new SQLEnum<>(Lane.class).of(objects.get(3))
     );
   }
 
   @Override
   public Lineup create() {
-    final Lineup lineup = new Query<>(Lineup.class).key("coverage_team", participator).key("player", player)
+    final Lineup lineup = new Query<>(Lineup.class).key("coverage_team", participatorId).key("player", playerId)
         .col("lineup_id", lane).insert(this);
-    return participator.getTeamLineup().add(lineup);
+    return getParticipator().getTeamLineup().add(lineup);
   }
 
   @Override
   public void delete() {
-    participator.getTeamLineup().remove(this);
+    getParticipator().getTeamLineup().remove(this);
     Entity.super.delete();
   }
 
@@ -83,5 +89,19 @@ public class Lineup implements Entity<Lineup>, Comparable<Lineup> {
   @Override
   public int hashCode() {
     return Objects.hash(getId(), getParticipator(), getLane(), getPlayer());
+  }
+
+  private Participator participator;
+
+  public Participator getParticipator() {
+    if (participator == null) this.participator = new Query<>(Participator.class).entity(participatorId);
+    return participator;
+  }
+
+  private Player player;
+
+  public Player getPlayer() {
+    if (player == null) this.player = new Query<>(Player.class).entity(playerId);
+    return player;
   }
 }

@@ -1,6 +1,6 @@
 package de.zahrie.trues.api.coverage.participator.model;
 
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 import de.zahrie.trues.api.database.connector.Listing;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ParticipatorRoute {
-  private League league; // route_group
+  private AbstractLeague league; // route_group
   private RouteType type; // route_type
   private Short value; // route_value
 

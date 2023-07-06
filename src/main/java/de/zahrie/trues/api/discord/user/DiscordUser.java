@@ -29,6 +29,7 @@ import de.zahrie.trues.discord.notify.NotificationManager;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -95,7 +96,7 @@ public class DiscordUser implements Entity<DiscordUser> {
     new Query<>(DiscordUser.class).col("points", points).update(id);
   }
 
-  public void setAcceptedBy(DiscordUser acceptedBy) {
+  public void setAcceptedBy(@NotNull DiscordUser acceptedBy) {
     this.acceptedBy = acceptedBy.getId();
     new Query<>(DiscordUser.class).col("accepted", acceptedBy).update(id);
     getApplications().updateApplicationStatus();
@@ -229,7 +230,7 @@ public class DiscordUser implements Entity<DiscordUser> {
         .queue();
   }
 
-  public void schedule(LocalDateTime dateTime, DiscordUser invoker) {
+  public void schedule(@NotNull LocalDateTime dateTime, @NotNull DiscordUser invoker) {
     setAcceptedBy(invoker);
     final var timeRange = new TimeRange(dateTime, Duration.ofMinutes(30));
     Nunu.DiscordChannel.getAdminChannel().sendMessage("Neuer Bewerbungstermin für " + invoker.getNickname())

@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.connector.DTO;
 import de.zahrie.trues.api.database.connector.Listing;
 import de.zahrie.trues.api.database.connector.Table;
@@ -20,30 +20,32 @@ import de.zahrie.trues.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
 @Table(value = "calendar", department = "team")
 @ExtensionMethod(StringUtils.class)
-public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalendar>, DTO<Calendar> {
-  @Serial
-  private static final long serialVersionUID = -8449986995823183145L;
+public class TeamCalendar extends AbstractEventCalendar implements Entity<TeamCalendar>, DTO<Calendar> {
+  @Serial private static final long serialVersionUID = -8449986995823183145L;
 
   private TeamCalendarType type; // calendar_type
-  private OrgaTeam orgaTeam; // orga_team
+  private int orgaTeamId; // orga_team
 
-  public TeamCalendar(TimeRange timeRange, String details, TeamCalendarType type, OrgaTeam orgaTeam, long threadId) {
+  public TeamCalendar(@NotNull TimeRange timeRange, @NotNull String details, @NotNull TeamCalendarType type, @NotNull OrgaTeam orgaTeam,
+                      long threadId) {
     super(timeRange, details, threadId);
     this.type = type;
     this.orgaTeam = orgaTeam;
+    this.orgaTeamId = orgaTeam.getId();
     this.threadId = threadId;
   }
 
-  public TeamCalendar(int id, TimeRange range, String details, Long threadId, TeamCalendarType type, OrgaTeam orgaTeam) {
+  private TeamCalendar(int id, TimeRange range, String details, Long threadId, TeamCalendarType type, int orgaTeamId) {
     super(id, range, details, threadId);
     this.type = type;
-    this.orgaTeam = orgaTeam;
+    this.orgaTeamId = orgaTeamId;
   }
 
   public static TeamCalendar get(List<Object> objects) {
@@ -53,7 +55,7 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
         (String) objects.get(4),
         (Long) objects.get(6),
         new SQLEnum<>(TeamCalendarType.class).of(objects.get(5)),
-        new Query<>(OrgaTeam.class).entity(objects.get(8))
+        (int) objects.get(8)
     );
   }
 
@@ -61,20 +63,16 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
   public TeamCalendar create() {
     final var calendar = new Query<>(TeamCalendar.class)
         .col("calendar_start", range.getStartTime()).col("calendar_end", range.getEndTime()).col("details", details)
-        .col("thread_id", threadId).col("calendar_type", type).col("orga_team", orgaTeam)
+        .col("thread_id", threadId).col("calendar_type", type).col("orga_team", orgaTeamId)
         .insert(this);
-    if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
-      NotificationManager.addNotifiersFor(calendar);
-    }
+    if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) NotificationManager.addNotifiersFor(calendar);
     return calendar;
   }
 
   @Override
   public void setRange(TimeRange range) {
     if (getRange().getStartTime().equals(range.getStartTime())) return;
-    if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) {
-      NotificationManager.addNotifiersFor(this);
-    }
+    if (range.getStartTime().isBefore(LocalDateTime.now().plusDays(1))) NotificationManager.addNotifiersFor(this);
     super.setRange(range);
   }
 
@@ -95,13 +93,20 @@ public class TeamCalendar extends EventCalendarBase implements Entity<TeamCalend
     return List.of(
         getRange().display(),
         match == null ? type.toString() : match.getTypeString(),
-        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(orgaTeam.getTeam()), "kein Gegner", Team::getName)
+        match == null ? Util.avoidNull(getDetails(), "no data") : Util.avoidNull(match.getOpponentOf(getOrgaTeam().getTeam()), "kein Gegner", AbstractTeam::getName)
     );
   }
 
   public String toString() {
     final Match match = getMatch();
     return match == null ? type.toString() : match.getTypeString();
+  }
+
+  private OrgaTeam orgaTeam;
+
+  public OrgaTeam getOrgaTeam() {
+    if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).entity(orgaTeamId);
+    return orgaTeam;
   }
 
   @ExtensionMethod(StringUtils.class)

@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.match.model.Match;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.zahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public record MatchLogBuilder(Match match, Team team, List<MatchLog> matchLogs) {
-  public MatchLogBuilder(Match match, Team team) {
+public record MatchLogBuilder(Match match, AbstractTeam team, List<MatchLog> matchLogs) {
+  public MatchLogBuilder(Match match, AbstractTeam team) {
     this(match, team, match.getLogs().stream().filter(matchLog -> matchLog.getAction().getOutput() != null).sorted(Comparator.reverseOrder()).toList());
   }
 
   public MessageEmbed getLog() {
-    final Team opponent = match.getOpponentOf(team);
+    final AbstractTeam opponent = match.getOpponentOf(team);
     final EmbedBuilder builder = new EmbedBuilder()
         .setTitle("Match " + match.getId() + " gegen " + opponent.getName() + " (" + opponent.getId() + ")")
         .setDescription(getDescription());

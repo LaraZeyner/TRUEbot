@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.zahrie.trues.api.coverage.league.LeagueLoader;
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.MatchFactory;
 import de.zahrie.trues.api.coverage.match.MatchHandler;
@@ -67,8 +67,8 @@ public class TeamHandler extends TeamModel implements Serializable {
     update(false);
   }
 
-  public League loadDivision() {
-    final League currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
+  public AbstractLeague loadDivision() {
+    final AbstractLeague currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
     if (currentLeague instanceof PRMLeague prmLeague) {
       final LeagueLoader leagueLoader = new LeagueLoader(prmLeague);
       leagueLoader.load().updateAll();

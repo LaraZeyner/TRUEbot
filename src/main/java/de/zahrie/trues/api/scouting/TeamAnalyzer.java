@@ -13,7 +13,7 @@ import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.team.model.Standing;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
@@ -37,19 +37,19 @@ public class TeamAnalyzer extends AnalyzeManager {
     this(participator.getTeam(), participator.getTeamLineup().getValidPlayers());
   }
 
-  public TeamAnalyzer(Team team) {
+  public TeamAnalyzer(AbstractTeam team) {
     this(team, team.getPlayers());
   }
 
-  private TeamAnalyzer(Team team, List<Player> players) {
+  private TeamAnalyzer(AbstractTeam team, List<Player> players) {
     super(team, players);
   }
 
-  public TeamAnalyzer(Team team, ScoutingGameType gameType, int days) {
+  public TeamAnalyzer(AbstractTeam team, ScoutingGameType gameType, int days) {
     this(team, SortedList.of(), gameType, days);
   }
 
-  private TeamAnalyzer(Team team, List<Player> players, ScoutingGameType gameType, int days) {
+  private TeamAnalyzer(AbstractTeam team, List<Player> players, ScoutingGameType gameType, int days) {
     super(team, players, gameType, days);
   }
 

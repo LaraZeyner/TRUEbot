@@ -54,8 +54,8 @@ public record PlayerMatchHistoryPerformanceDTO(Performance performance) implemen
     return List.of(
         performance.getTeamPerformance().getGame().getType().name().charAt(0) + ": " +
             TimeFormat.DISCORD.of(performance.getTeamPerformance().getGame().getStart()),
-        performance.getLane().toString().charAt(0) + ": " + performance.getMatchup().champion().getName() + " vs. " +
-            Util.avoidNull(performance.getMatchup().opponent(), "kein Gegner", Champion::getName),
+        performance.getLane().toString().charAt(0) + ": " + performance.getMatchup().getChampion().getName() + " vs. " +
+            Util.avoidNull(performance.getMatchup().getOpposingChampion(), "kein Gegner", Champion::getName),
         (performance.getTeamPerformance().isWin() ? "W" : "L") + ": " + performance.getKda().toString()
     );
   }

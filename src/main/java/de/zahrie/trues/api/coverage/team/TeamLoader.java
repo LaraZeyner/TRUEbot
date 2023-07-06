@@ -9,7 +9,7 @@ import de.zahrie.trues.api.coverage.player.PlayerLoader;
 import de.zahrie.trues.api.coverage.player.PrimePlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.io.request.HTML;
 import de.zahrie.trues.util.io.request.URLType;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @ExtensionMethod(StringUtils.class)
 public class TeamLoader extends GamesportsLoader {
-  protected static List<Team> loadedTeams = new ArrayList<>();
+  protected static List<AbstractTeam> loadedTeams = new ArrayList<>();
 
   public static void reset() {
     loadedTeams.clear();

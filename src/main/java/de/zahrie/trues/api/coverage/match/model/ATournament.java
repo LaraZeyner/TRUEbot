@@ -1,9 +1,9 @@
 package de.zahrie.trues.api.coverage.match.model;
 
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 
 public interface ATournament {
-  League getLeague(); // league
+  AbstractLeague getLeague(); // league
   int getMatchIndex(); // match_index
   int getMatchId(); // match_id
 }

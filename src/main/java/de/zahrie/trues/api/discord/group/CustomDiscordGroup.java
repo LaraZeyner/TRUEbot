@@ -9,7 +9,6 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.discord.util.Nunu;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Role;
@@ -27,31 +26,20 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
   private String name; // role_name
   private final GroupType type; // role_type
   private final boolean fixed; // fixed
-  private Integer orgaTeamId;
 
-  @Setter(AccessLevel.NONE)
-  private OrgaTeam orgaTeam;
-
-  public OrgaTeam getOrgaTeam() {
-    if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).where("team", this).entity();
-    return orgaTeam;
-  }
-
-  public CustomDiscordGroup(long discordId, String name, GroupType type, boolean fixed, OrgaTeam team) {
+  public CustomDiscordGroup(long discordId, String name, GroupType type, boolean fixed) {
     this.discordId = discordId;
     this.name = name;
     this.type = type;
     this.fixed = fixed;
-    this.orgaTeam = team;
   }
 
-  public CustomDiscordGroup(int id, long discordId, String name, GroupType type, boolean fixed, int orgaTeamId) {
+  private CustomDiscordGroup(int id, long discordId, String name, GroupType type, boolean fixed) {
     this.id = id;
     this.discordId = discordId;
     this.name = name;
     this.type = type;
     this.fixed = fixed;
-    this.orgaTeamId = orgaTeamId;
   }
 
   public static CustomDiscordGroup get(List<Object> objects) {
@@ -60,18 +48,15 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
         (long) objects.get(1),
         (String) objects.get(2),
         new SQLEnum<>(GroupType.class).of(objects.get(3)),
-        (boolean) objects.get(4),
-        new Query<>(OrgaTeam.class).where("team_role", objects.get(0)).id()
+        (boolean) objects.get(4)
     );
   }
 
   @Override
   public CustomDiscordGroup create() {
-    final CustomDiscordGroup discordGroup = new Query<>(CustomDiscordGroup.class).key("discord_id", discordId)
+    return new Query<>(CustomDiscordGroup.class).key("discord_id", discordId)
         .col("role_name", name).col("role_type", type).col("fixed", fixed)
         .insert(this);
-    if (orgaTeam != null) orgaTeam.setGroup(discordGroup);
-    return discordGroup;
   }
 
   public void setName(String name) {
@@ -91,5 +76,12 @@ public class CustomDiscordGroup implements Entity<CustomDiscordGroup> {
     if (determineRole() != null) {
       determineRole().getManager().setPermissions(type.getPattern().getAllowed()).queue();
     }
+  }
+
+  private OrgaTeam orgaTeam;
+
+  public OrgaTeam getOrgaTeam() {
+    if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).where("team_role", id).entity();
+    return orgaTeam;
   }
 }

@@ -2,7 +2,7 @@ package de.zahrie.trues.discord.modal.models.scouting;
 
 import java.util.Arrays;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.discord.builder.modal.ModalImpl;
 import de.zahrie.trues.api.discord.builder.modal.View;
 import de.zahrie.trues.api.discord.user.DiscordUserFactory;
@@ -28,7 +28,7 @@ public class ScoutHistoryModal extends ModalImpl {
 
   @Override
   public boolean execute(ModalInteractionEvent event) {
-    final Team team2 = determineTeam();
+    final AbstractTeam team2 = determineTeam();
     if (team2 == null) return reply("Der Gegner konnte nicht gefunden werden.");
     final ScoutingGameType gameType = getEnum(ScoutingGameType.class, "2");
     final Integer duration = getInt("3", 180);

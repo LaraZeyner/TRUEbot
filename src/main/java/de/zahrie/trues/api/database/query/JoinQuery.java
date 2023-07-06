@@ -34,9 +34,9 @@ public class JoinQuery<E extends Id, J extends Id> {
     this.joinType = joinType;
     this.targetClass = targetClass;
     this.joinedClass = joinedClass;
-    this.column = joinedClass.getSimpleName().toLowerCase();
+    this.column = joinedClass.getSimpleName().toLowerCase().replace("abstract", "");
     this.column2 = null;
-    this.alias = joinedClass.getSimpleName().toLowerCase();
+    this.alias = joinedClass.getSimpleName().toLowerCase().replace("abstract", "");
   }
 
   public JoinQuery<E, J> as(String alias) {
@@ -60,7 +60,7 @@ public class JoinQuery<E extends Id, J extends Id> {
     final String joinedTableName = joinedClass.getAnnotation(Table.class).value();
     String joinedTableAlias = "_" + (this.alias.startsWith("_") ? this.alias.substring(1) : this.alias);
     if (column.contains(".")) joinedTableAlias = "_" + column.after(".");
-    final String col = column.contains(".") ? column : "`_" + targetClass.getSimpleName().toLowerCase() + "`.`" + column + "`";
+    final String col = column.contains(".") ? column : "`_" + targetClass.getSimpleName().toLowerCase().replace("abstract", "") + "`.`" + column + "`";
     final String col2 = joinedTableAlias + "`.`" + (column2 != null ? column2 : joinedTableName + "_id") + "`";
     return joinType.toString() + joinedTableName + "` as `" + joinedTableAlias + "` ON " + col + " = `" + col2;
   }

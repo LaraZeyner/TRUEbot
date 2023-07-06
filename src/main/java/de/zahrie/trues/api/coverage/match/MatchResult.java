@@ -7,7 +7,7 @@ import java.util.List;
 import de.zahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.util.Const;
 import de.zahrie.trues.util.StringUtils;
 import de.zahrie.trues.util.Util;
@@ -78,7 +78,7 @@ public final class MatchResult implements Comparable<MatchResult> {
     return played ? match.getResult() : determineExpectedResult();
   }
 
-  public MatchResult ofTeam(@NonNull Team team) {
+  public MatchResult ofTeam(@NonNull AbstractTeam team) {
     if (match.getParticipator(team) == null) return null;
     if (team.equals(match.getHome().getTeam())) return this;
     return new MatchResult(match, guestScore, homeScore, played);

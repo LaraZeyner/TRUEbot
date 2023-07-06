@@ -56,7 +56,7 @@ public abstract class SimpleAbstractQuery<T extends Id> {
   public Query<T> get(@Nullable String delimiter, Formatter... columnNames) {
     final String joinDelimiter = delimiter == null ? ", " : ", '" + delimiter + "', ";
     final String columnName = Arrays.stream(columnNames)
-        .map(formatter -> formatter.toString("_" + targetId.getSimpleName().toLowerCase()))
+        .map(formatter -> formatter.toString("_" + targetId.getSimpleName().toLowerCase().replace("abstract", "")))
         .collect(Collectors.joining(joinDelimiter, "CONCAT(", ")"));
     return get(columnName, String.class);
   }

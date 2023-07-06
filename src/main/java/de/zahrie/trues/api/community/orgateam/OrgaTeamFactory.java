@@ -11,6 +11,7 @@ import de.zahrie.trues.api.coverage.team.model.PRMTeam;
 import de.zahrie.trues.api.database.connector.Database;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.group.CustomDiscordGroup;
+import de.zahrie.trues.api.discord.group.DiscordRoleFactory;
 import de.zahrie.trues.api.discord.group.GroupType;
 import de.zahrie.trues.api.discord.util.Nunu;
 import de.zahrie.trues.util.StringUtils;
@@ -53,6 +54,7 @@ public final class OrgaTeamFactory {
    * @param name Name des Teams (darf nicht Null sein)
    * @param abbreviation wenn {@code null} wird eine Abkürzung generiert
    * @param id wenn {@code not null} wird das {@link OrgaTeam} einem {@link PRMTeam} zugewiesen
+   * @return erstelltes {@link OrgaTeam} oder {@code null} wenn nicht erstellt
    */
   public static OrgaTeam create(@NonNull String name, @Nullable String abbreviation, @Nullable Integer id) {
     if (abbreviation == null) {
@@ -60,13 +62,14 @@ public final class OrgaTeamFactory {
     }
     if (fromAbbreviation(abbreviation) != null) return null;
 
-    final String teamName = "TRUE " + name;
-    final OrgaTeam orgaTeam = new OrgaTeam(teamName, abbreviation);
-
+    final String teamName = DiscordRoleFactory.getRoleName("TRUE " + name);
     final PRMTeam team = Util.avoidNull(id, null, TeamFactory::getTeam);
-    Nunu.getInstance().getGuild().createRole().setName(orgaTeam.getRoleManager().getRoleName())
-        .setPermissions().setMentionable(true).setHoisted(true)
-        .queue(role -> new CustomDiscordGroup(role.getIdLong(), orgaTeam.getRoleManager().getRoleName(), GroupType.PINGABLE, true, orgaTeam).create());
+    final String finalAbbreviation = abbreviation;
+    final Role role = Nunu.getInstance().getGuild().createRole().setName(teamName)
+        .setPermissions().setMentionable(true).setHoisted(true).complete();
+    final CustomDiscordGroup discordGroup = new CustomDiscordGroup(role.getIdLong(), teamName, GroupType.PINGABLE, true).create();
+    final var orgaTeam = new OrgaTeam(teamName, finalAbbreviation, discordGroup).create();
+    orgaTeam.setTeam(team);
     orgaTeam.getChannels().createChannels();
     Database.connection().commit();
     return orgaTeam;

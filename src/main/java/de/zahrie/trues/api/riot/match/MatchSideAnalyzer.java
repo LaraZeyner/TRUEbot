@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.coverage.player.PlayerFactory;
 import de.zahrie.trues.api.coverage.player.model.Player;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.KDA;
 import de.zahrie.trues.api.riot.TeamExtension;
@@ -23,6 +23,7 @@ import de.zahrie.trues.api.riot.performance.Matchup;
 import de.zahrie.trues.api.riot.performance.ParticipantUtils;
 import de.zahrie.trues.api.riot.performance.Performance;
 import de.zahrie.trues.api.riot.performance.TeamPerf;
+import de.zahrie.trues.util.Util;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
@@ -77,7 +78,7 @@ public class MatchSideAnalyzer {
       final Map.Entry<Integer, Long> maxEntry = Collections.max(teams.entrySet(), Map.Entry.comparingByValue());
       if (maxEntry.getValue() > 2) {
         final Integer teamId = maxEntry.getKey();
-        final Team t = new Query<>(Team.class).entity(teamId);
+        final AbstractTeam t = new Query<>(AbstractTeam.class).entity(teamId);
         if (t.getOrgaTeam() != null) {
           game.setOrgaGame(true);
           if (game.getType().equals(GameType.TOURNAMENT)) players.forEach(player -> player.setPlayed(true));
@@ -125,7 +126,7 @@ public class MatchSideAnalyzer {
       final Lane lane = ParticipantUtils.getPlayedLane(participant);
       final Champion selectedChampion = ParticipantUtils.getSelectedChampion(participant);
       final MatchParticipant opponent = ParticipantUtils.getOpponent(participant, match);
-      final Champion opposingChampion = opponent == null ? null : ParticipantUtils.getSelectedChampion(opponent);
+      final Champion opposingChampion = Util.avoidNull(opponent, ParticipantUtils::getSelectedChampion);
       final Matchup matchup = new Matchup(selectedChampion, opposingChampion);
       final KDA kda = KDA.fromParticipant(participant);
       return new Performance(teamPerformance, player, lane, matchup, kda, participant.getGoldEarned(), participant.getTotalDamageDealtToChampions(), participant.getVisionScore(), participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled()).create();

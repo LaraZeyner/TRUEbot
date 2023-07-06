@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(value = "calendar", department = "app")
-public class ApplicationCalendar extends UserCalendar implements Entity<ApplicationCalendar>, AThreadable {
+public class ApplicationCalendar extends AbstractUserCalendar implements Entity<ApplicationCalendar>, AThreadable {
   @Serial
   private static final long serialVersionUID = -3831437593024647108L;
 
@@ -26,8 +26,8 @@ public class ApplicationCalendar extends UserCalendar implements Entity<Applicat
     this.threadId = threadId;
   }
 
-  public ApplicationCalendar(int id, TimeRange range, String details, DiscordUser discordUser, Long threadId) {
-    super(id, range, details, discordUser);
+  public ApplicationCalendar(int id, TimeRange range, String details, int userId, Long threadId) {
+    super(id, range, details, userId);
     this.threadId = threadId;
   }
 
@@ -36,7 +36,7 @@ public class ApplicationCalendar extends UserCalendar implements Entity<Applicat
         (int) objects.get(0),
         new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
         (String) objects.get(4),
-        new Query<>(DiscordUser.class).entity(objects.get(7)),
+        (int) objects.get(7),
         (Long) objects.get(6)
     );
   }
@@ -47,7 +47,7 @@ public class ApplicationCalendar extends UserCalendar implements Entity<Applicat
         .col("calendar_start", range.getStartTime())
         .col("calendar_end", range.getEndTime())
         .col("details", details)
-        .col("discord_user", user)
+        .col("discord_user", userId)
         .col("thread_id", threadId).insert(this);
   }
 }

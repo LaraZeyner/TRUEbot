@@ -18,22 +18,22 @@ import de.zahrie.trues.api.database.connector.Table;
 import de.zahrie.trues.api.database.query.Id;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.riot.game.Game;
+import de.zahrie.trues.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
-@RequiredArgsConstructor
 @Table("coverage")
 public abstract class Match implements AMatch, Comparable<Match>, Id {
   @Setter
   protected int id;
-  protected final Playday playday;
+  protected final Integer playdayId;
   protected final MatchFormat format;
   protected LocalDateTime start;
-  protected final short rateOffset;
+  protected final Short rateOffset;
   protected EventStatus status;
   protected String lastMessage;
   protected boolean active;
@@ -45,6 +45,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
         .descending("first").entityList().toArray(Participator[]::new);
     return participators;
   }
+
   protected MatchResult expectedResult;
   protected List<MatchLog> logs;
 
@@ -86,8 +87,23 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     return new MatchCalendar(getExpectedTimeRange(), String.valueOf(id));
   }
 
-  public Match(Playday playday, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status, String lastMessage, boolean active, String result) {
+  public Match(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
+               @NotNull EventStatus status, String lastMessage, boolean active, @NotNull String result) {
     this.playday = playday;
+    this.playdayId = Util.avoidNull(playday, Playday::getId);
+    this.format = format;
+    this.start = start;
+    this.rateOffset = rateOffset;
+    this.status = status;
+    this.lastMessage = lastMessage;
+    this.active = active;
+    this.result = result;
+  }
+
+  protected Match(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset, EventStatus status,
+                  String lastMessage, boolean active, String result) {
+    this.id = id;
+    this.playdayId = playdayId;
     this.format = format;
     this.start = start;
     this.rateOffset = rateOffset;
@@ -140,13 +156,16 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     getGuest().setWins(result.getGuestScore());
     if (matchResult.getPlayed()) {
       setStatus(EventStatus.PLAYED);
-      analyseBets();
+      if (isBetable()) analyseBets();
     }
   }
 
   private void analyseBets() {
     final List<Bet> bets = new Query<>(Bet.class).where("coverage", this.getId()).entityList();
     for (final Bet bet : bets) {
+      if (bet.getDifference() != null)
+        bet.getUser().addPoints(bet.getDifference() * -1);
+
       int gain = bet.getAmount() * -1;
       if (!bet.getOutcome().equals(result)) {
         bet.getUser().dm("Falscher Tipp für _" + this + "_. Du hast **" + bet.getAmount() + "** TRUEs verloren.");
@@ -194,5 +213,17 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   @Override
   public int hashCode() {
     return Objects.hash(getId());
+  }
+
+  private Playday playday;
+
+  public Playday getPlayday() {
+    if (playday == null) this.playday = new Query<>(Playday.class).entity(playdayId);
+    return playday;
+  }
+
+  @Override
+  public boolean isBetable() {
+    return rateOffset != null;
   }
 }

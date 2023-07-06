@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 
 import de.zahrie.trues.api.community.application.Application;
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
-import de.zahrie.trues.api.coverage.league.model.League;
+import de.zahrie.trues.api.coverage.league.model.AbstractLeague;
 import de.zahrie.trues.api.coverage.league.model.PRMLeague;
 import de.zahrie.trues.api.coverage.match.model.Match;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
@@ -24,7 +24,7 @@ import de.zahrie.trues.api.coverage.stage.model.Stage;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTableDTO;
 import de.zahrie.trues.api.coverage.team.leagueteam.LeagueTeam;
 import de.zahrie.trues.api.coverage.team.model.PRMTeam;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Condition;
 import de.zahrie.trues.api.database.query.Formatter;
 import de.zahrie.trues.api.database.query.JoinQuery;
@@ -34,6 +34,7 @@ import de.zahrie.trues.api.datatypes.collections.SortedList;
 import de.zahrie.trues.api.discord.command.slash.Column;
 import de.zahrie.trues.api.discord.command.slash.DBQuery;
 import de.zahrie.trues.api.discord.user.DiscordUser;
+import de.zahrie.trues.api.logging.MessageLog;
 import de.zahrie.trues.api.riot.champion.Champion;
 import de.zahrie.trues.api.riot.game.Game;
 import de.zahrie.trues.api.riot.game.GameType;
@@ -81,7 +82,7 @@ public enum NamedQuery {
           Enumeration.CONTINUE), null),
   ORGA_ELOS(new Query<>("SELECT * FROM player WHERE 0"), new DBQuery("Elo-Leaderboard", "Das Elo-Leaderboard (imagine Emerald sein KEKW)", List.of(
       new Column("League-Account", 25), new Column("Teamname", 30), new Column("Punkte", 11)),
-      Enumeration.CONTINUE), new Alternative(2, List.of("Grandmaster", "Master", "Diamond", "Platinum", "Gold", "Silver", "Bronze", "Iron", "Challenger"))),
+      Enumeration.CONTINUE), new Alternative(2, List.of("Challenger", "Grandmaster", "Master", "Diamond", "Platinum", "Gold", "Silver", "Bronze", "Iron"), true)),
   ORGA_SCHEDULE(new Query<>("SELECT * FROM player WHERE 0"), new DBQuery("Orga-Zeitplan", "Spiele dieses Splits", List.of(
       new Column("Team 1", 30), new Column("Team 2", 30), new Column("Zeit/Ergebnis"))), null),
   ORGA_PRM(new Query<>(Performance.class, 100)
@@ -156,6 +157,14 @@ public enum NamedQuery {
       .descending("_game.start_time"),
       new DBQuery("Prime League Spiele", "letzte 10 Spiele in der Prime League", List.of(
           new Column("Spielzeit"), new Column("Matchup"), new Column("Stats")), Enumeration.CONTINUE), null),
+  STRIKES(new Query<>(MessageLog.class, 25)
+      .get(null, Formatter.of("log_time", Formatter.CellFormat.AUTO))
+      .get("reason")
+      .get("if(discord_channel is not null, 'Nachricht', 'Strike')")
+      .where("_target", "?")
+      .descending("_game.start_time"),
+      new DBQuery("Letzte Strikes", "letzte Strikes", List.of(
+          new Column("Datum"), new Column("Grund"), new Column("Typ")), Enumeration.CONTINUE), null),
   TABLE(new Query<>("SELECT * FROM league_team WHERE 0"), new DBQuery("Prime League Tabellen", "Da gibt es ein paar Tabellen", List.of(
       new Column("#", 1),
       new Column("Teamname", 20),
@@ -206,9 +215,9 @@ public enum NamedQuery {
         .get("_team.team_name", String.class)
         .get("CONCAT(_leagueteam.current_place, ': (', _leagueteam.current_wins, ':', _leagueteam.current_losses, ')')", String.class)
         .get("CONCAT(_team.total_wins, ' : ', _team.total_losses)", String.class)
-        .join(new JoinQuery<>(LeagueTeam.class, League.class))
-        .join(new JoinQuery<>(League.class, Stage.class))
-        .join(new JoinQuery<>(LeagueTeam.class, Team.class))
+        .join(new JoinQuery<>(LeagueTeam.class, AbstractLeague.class))
+        .join(new JoinQuery<>(AbstractLeague.class, Stage.class))
+        .join(new JoinQuery<>(LeagueTeam.class, AbstractTeam.class))
         .where("_stage.season", SeasonFactory.getLastPRMSeason()).and("_team.highlight", true)
         .and(Condition.Comparer.LIKE, "_league.group_name", start + "%")
         .ascending("`_leagueteam`.`current_place` * 100 - `_leagueteam`.`current_wins`")
@@ -251,13 +260,14 @@ public enum NamedQuery {
       final Rank.RankTier tier = current.getRank().tier();
       if (!tier.equals(Rank.RankTier.UNRANKED)) ranks[Rank.RankTier.CHALLENGER.ordinal() - tier.ordinal()].add(current);
     }
-    final List<List<Object[]>> out = SortedList.of();
+    final List<List<Object[]>> out =  new ArrayList<>();
     for (List<PlayerRank> rank : ranks) {
-      out.add(rank.stream().map(playerRank -> new Object[]{
+      final List<Object[]> list = rank.stream().map(playerRank -> new Object[]{
           playerRank.getPlayer().getSummonerName(),
-          Util.avoidNull(playerRank.getPlayer().getTeam(), "null", Team::getName).keep(25),
+          Util.avoidNull(playerRank.getPlayer().getTeam(), "null", AbstractTeam::getName).keep(25),
           "Tier " + playerRank.getRank().division().ordinal() + " " + playerRank.getRank().points() + " LP (" + playerRank.getWinrate().format(Format.MEDIUM) + ")"
-      }).toList());
+      }).toList();
+      out.add(list);
     }
     return out;
   }
@@ -265,7 +275,7 @@ public enum NamedQuery {
   private static List<List<Object[]>> getTables() {
     final List<List<Object[]>> list = SortedList.of();
     for (OrgaTeam orgaTeam : new Query<>(OrgaTeam.class).ascending("orga_place").entityList()) {
-      final Team team = orgaTeam.getTeam();
+      final AbstractTeam team = orgaTeam.getTeam();
       if (!(team instanceof PRMTeam prmTeam)) continue;
 
       final PRMLeague lastLeague = prmTeam.getLastLeague();

@@ -27,7 +27,9 @@ public class TryoutAddCommand extends SlashCommand {
     final String applicationString = find("bewerbung").string();
     final int applicationId = applicationString.before(".").intValue();
     final LocalDateTime dateTime = find("zeitpunkt").time();
-    final Application application = new Query<>(Application.class).forId(applicationId).entity();
+    if (dateTime == null) return reply("Der Zeitpunkt konnte nicht umgewandelt werden.");
+
+    final Application application = new Query<>(Application.class).entity(applicationId);
     application.getUser().schedule(dateTime, getInvoker());
     return sendMessage();
   }

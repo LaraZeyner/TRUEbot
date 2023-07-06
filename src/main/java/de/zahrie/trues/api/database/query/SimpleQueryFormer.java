@@ -189,12 +189,12 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
         .map(sqlField -> ((sqlField instanceof SQLReturnField returnField && returnField.isDistinct()) ? "DISTINCT " : "") +
             sqlField.getColumnName() + suffix)
         .collect(Collectors.joining(", "));
-    if (subEntity != null) out += "`_" + subEntity.getSimpleName().toLowerCase() + "`.*";
+    if (subEntity != null) out += "`_" + subEntity.getSimpleName().toLowerCase().replace("abstract", "") + "`.*";
     return out;
   }
 
   private String getFrom() {
-    return getTableName() + " as `_" + targetId.getSimpleName().toLowerCase() + "`";
+    return getTableName() + " as `_" + targetId.getSimpleName().toLowerCase().replace("abstract", "") + "`";
   }
 
   private String getJoins() {

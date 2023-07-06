@@ -11,7 +11,6 @@ import de.zahrie.trues.api.database.query.Entity;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.database.query.SQLEnum;
 import de.zahrie.trues.api.riot.KDA;
-import de.zahrie.trues.api.riot.champion.Champion;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -83,7 +82,7 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
         objects.get(1).intValue(),
         objects.get(2).intValue(),
         new SQLEnum<>(Lane.class).of(objects.get(3)),
-        new Matchup(new Query<>(Champion.class).entity(objects.get(4)), new Query<>(Champion.class).entity(objects.get(5))),
+        new Matchup((Integer) objects.get(4), (Integer) objects.get(5)),
         new KDA(objects.get(6).shortValue(), objects.get(7).shortValue(), objects.get(8).shortValue()),
         (int) objects.get(9),
         (Integer) objects.get(10),
@@ -94,7 +93,7 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
   @Override
   public Performance create() {
     return new Query<>(Performance.class).key("t_perf", teamPerformanceId).key("player", playerId).key("lane", lane)
-        .col("champion", matchup.champion()).col("enemy_champion", matchup.opponent()).col("kills", kda.kills()).col("deaths", kda.deaths())
+        .col("champion", matchup.getChampion()).col("enemy_champion", matchup.getOpposingChampion()).col("kills", kda.kills()).col("deaths", kda.deaths())
         .col("assists", kda.assists()).col("gold", gold).col("damage", gold).col("vision", vision).col("creeps", creeps)
         .insert(this, getTeamPerformance()::addPerformance);
   }

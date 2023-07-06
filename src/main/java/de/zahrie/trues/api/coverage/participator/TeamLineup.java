@@ -11,7 +11,7 @@ import de.zahrie.trues.api.coverage.participator.model.Lineup;
 import de.zahrie.trues.api.coverage.participator.model.Participator;
 import de.zahrie.trues.api.coverage.player.model.Player;
 import de.zahrie.trues.api.coverage.player.model.Rank;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.JoinQuery;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.datatypes.collections.SortedList;
@@ -23,7 +23,7 @@ import de.zahrie.trues.util.Util;
 import lombok.Getter;
 
 @Getter
-public class TeamLineup extends TeamLineupBase {
+public class TeamLineup extends AbstractTeamLineup {
   private final ScoutingGameType gameType;
   private final int days;
   private List<Lineup> lineup;
@@ -138,7 +138,7 @@ public class TeamLineup extends TeamLineupBase {
   public List<Player> getValidPlayers() {
     final var players = SortedList.of(participator.getTeamLineup().getStoredLineups().stream().map(Lineup::getPlayer));
     if (players.size() < 5) {
-      final Team team = participator.getTeam();
+      final AbstractTeam team = participator.getTeam();
       if (team != null) players.addAll(team.getPlayers());
     }
     return players;

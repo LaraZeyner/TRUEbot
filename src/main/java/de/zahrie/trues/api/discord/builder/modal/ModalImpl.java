@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import de.zahrie.trues.api.community.orgateam.OrgaTeam;
 import de.zahrie.trues.api.community.orgateam.OrgaTeamFactory;
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.database.query.Query;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 import de.zahrie.trues.discord.scouting.Scouting;
@@ -129,13 +129,13 @@ public abstract class ModalImpl extends ModalBase {
   }
   //</editor-fold>
 
-  protected Team determineTeam() {
-    Team team2 = null;
+  protected AbstractTeam determineTeam() {
+    AbstractTeam team2 = null;
     final Integer anInt = getInt("1");
-    if (anInt != null) team2 = new Query<>(Team.class).where("prm_id", anInt).entity();
+    if (anInt != null) team2 = new Query<>(AbstractTeam.class).where("prm_id", anInt).entity();
     if (getString("1") != null) {
-      if (team2 == null) team2 = new Query<>(Team.class).where("team_name", getString("1")).entity();
-      if (team2 == null) team2 = new Query<>(Team.class).where("team_abbr", getString("1")).entity();
+      if (team2 == null) team2 = new Query<>(AbstractTeam.class).where("team_name", getString("1")).entity();
+      if (team2 == null) team2 = new Query<>(AbstractTeam.class).where("team_abbr", getString("1")).entity();
     } else {
       GuildChannel gc = event.getGuildChannel();
       if (gc instanceof ThreadChannel thread) gc = thread.getParentChannel();

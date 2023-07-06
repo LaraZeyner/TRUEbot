@@ -2,7 +2,7 @@ package de.zahrie.trues.api.coverage.player.model;
 
 import java.time.LocalDateTime;
 
-import de.zahrie.trues.api.coverage.team.model.Team;
+import de.zahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.zahrie.trues.api.discord.user.DiscordUser;
 
 public interface APlayer {
@@ -11,8 +11,8 @@ public interface APlayer {
   void setSummonerName(String summonerName);
   DiscordUser getDiscordUser();
   void setDiscordUser(DiscordUser discordUser);
-  Team getTeam();
-  void setTeam(Team team);
+  AbstractTeam getTeam();
+  void setTeam(AbstractTeam team);
   LocalDateTime getUpdated();
   void setUpdated(LocalDateTime updated);
   boolean isPlayed();

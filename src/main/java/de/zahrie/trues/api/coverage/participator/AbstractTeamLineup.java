@@ -22,14 +22,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-public abstract class TeamLineupBase {
+public abstract class AbstractTeamLineup {
   @Getter(AccessLevel.NONE)
   protected final Participator participator;
   protected List<Lineup> storedLineups;
   @Getter(AccessLevel.NONE)
   protected TeamLineup expectedLineups;
 
-  public TeamLineupBase(Participator participator) {
+  public AbstractTeamLineup(Participator participator) {
     this.participator = participator;
     updateLineups();
   }

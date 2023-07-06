@@ -25,6 +25,10 @@ public class DateTimeUtils {
     return date.isAfter(start) && date.isBefore(end);
   }
 
+  public static boolean isBetween(LocalDateTime dateTime, LocalDateTime start, LocalDateTime end) {
+    return isAfterEqual(dateTime, start) && isBeforeEqual(dateTime, end);
+  }
+
   public static boolean isAfterEqual(LocalDateTime localDateTime, LocalDateTime other) {
     return localDateTime.isAfter(other) || localDateTime.isEqual(other);
   }

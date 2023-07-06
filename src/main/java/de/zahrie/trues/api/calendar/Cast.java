@@ -19,7 +19,7 @@ import lombok.experimental.ExtensionMethod;
 @Getter
 @Table(value = "calendar", department = "cast")
 @ExtensionMethod(StringUtils.class)
-public class Cast extends UserCalendar implements Entity<Cast> {
+public class Cast extends AbstractUserCalendar implements Entity<Cast> {
   @Serial
   private static final long serialVersionUID = 4761293199681163070L;
 
@@ -48,8 +48,8 @@ public class Cast extends UserCalendar implements Entity<Cast> {
     this.match = match;
   }
 
-  private Cast(int id, TimeRange range, String matchId, DiscordUser invoker) {
-    super(id, range, matchId, invoker);
+  private Cast(int id, TimeRange range, String matchId, int invokerId) {
+    super(id, range, matchId, invokerId);
   }
 
   public static Cast get(List<Object> objects) {
@@ -57,7 +57,7 @@ public class Cast extends UserCalendar implements Entity<Cast> {
         (int) objects.get(0),
         new TimeRange((LocalDateTime) objects.get(2), (LocalDateTime) objects.get(3)),
         (String) objects.get(4),
-        new Query<>(DiscordUser.class).entity(objects.get(7))
+        (int) objects.get(7)
     );
   }
 
@@ -68,7 +68,7 @@ public class Cast extends UserCalendar implements Entity<Cast> {
     return new Query<>(Cast.class).key("details", details)
         .col("calendar_start", range.getStartTime())
         .col("calendar_end", range.getEndTime())
-        .col("discord_user", user)
+        .col("discord_user", userId)
         .insert(this);
   }
 

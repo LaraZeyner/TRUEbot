@@ -39,7 +39,7 @@ public class OrgaTeamRoleHandler {
   public void removeRole(DiscordUser user) {
     final Membership membership = MembershipFactory.getMembershipOf(user, team);
     if (membership == null) return;
-    membership.removeFromTeam(team);
+    membership.removeFromTeam();
   }
 
   public Role getRole() {
@@ -48,16 +48,11 @@ public class OrgaTeamRoleHandler {
   }
 
   public String getRoleName() {
-    return "TRUE " + roleNameFromString(team.getName());
-  }
-
-  private String roleNameFromString(String name) {
-    return "TRUE " + name.replace("Technical Really Unique ", "")
+    return "TRUE " + team.getName().replace("Technical Really Unique ", "")
         .replace("Technical Really ", "")
         .replace("TRUEsports ", "")
         .replace("TRUE ", "");
   }
-
   public void updateRoleName(String newName) {
     final Role role = getRole();
     role.getManager().setName(newName).queue();
